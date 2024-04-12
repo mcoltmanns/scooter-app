@@ -14,7 +14,6 @@
 
 - **Product Owner:** Cedric Wiese | [E-Mail](mailto:cedric.wiese@uni-konstanz.de) | [Mattermost](https://hci2.uni-konstanz.de/mattermost/software-projekt-2024/messages/@cedricw)
 - **Kunde:** Sebastian Hubenschmid | [E-Mail](mailto:Sebastian.Hubenschmid@uni-konstanz.de) | [Mattermost](https://hci2.uni-konstanz.de/mattermost/software-projekt-2024/messages/@sebastian.hubenschmid)
-- **Kunde:** Sebastian Hubenschmid | [E-Mail](mailto:Sebastian.Hubenschmid@uni-konstanz.de)
 - Bei technischen Fragen / Problemen bitte Kai Leibold ([Mail](mailto:kai.leibold@uni-konstanz.de) / [Mattermost](https://hci2.uni-konstanz.de/mattermost/softwareprojekt-2024/messages/@kai.leibold)) kontaktieren
 
 ## Resourcen
