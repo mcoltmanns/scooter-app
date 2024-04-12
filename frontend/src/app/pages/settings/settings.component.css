@@ -1,0 +1,63 @@
+.scrollable-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.settings-entry {
+  width: 100%;
+  padding: 10px 20px 10px 20px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+
+  border-radius: 15px;
+  border: 1px solid var(--Textfeld-Stroke, #000);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.settings-entry .gear {
+  height: 40px;
+}
+
+.settings-entry .text {
+  width: 100%;
+}
+
+.settings-entry .text .name {
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.settings-entry .text .description {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 400;
+  width: 100%;
+}
+
+.bottom {
+  position: absolute;
+  bottom: 140px;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.logout-btn {
+  width: 50%;
+}
+
+.about {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}

@@ -1,0 +1,33 @@
+<div class="page-container">
+  <app-back-button></app-back-button>
+
+  <h1 class="title">Über uns</h1>
+
+  <div class="scrollable-container">
+    <p>
+      Auf dieser Seite finden Sie mehr Informationen zu der Webseite von
+      Island-Explorer.
+    </p>
+
+    <h2>Unser Team</h2>
+    <p>
+      Diese Beispielseite sollte alle Individualprojekte enthalten. Beispiel:
+    </p>
+    <!-- Hier können die Komponenten vom Individualprojekt hinzugefügt werden -->
+    <app-example></app-example>
+
+    <!-- Folgender Code kann gelöscht werden -->
+    <h2>Beispiel</h2>
+    <p>
+      Hier nochmals das Beispiel der Startseite, bei dem der Text über einen
+      Service gespeichert wird. Falls der Text auf einer der beiden Seiten
+      geändert wird, ändert er sich auch automatisch auf der jeweils anderen
+      Seite! Somit können Daten mithilfe von Services Komponenten-übergreifend
+      geteilt werden.
+    </p>
+    <app-user-input
+      label="Global synchronisierter Text"
+      [(text)]="sampleService.globalText"
+    ></app-user-input>
+  </div>
+</div>

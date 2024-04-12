@@ -1,0 +1,7 @@
+<div class="bottom-bar">
+  <div *ngFor="let entry of entries" class="entry" [routerLink]="entry.url">
+    <div class="active-indicator" *ngIf="entry.isActive"></div>
+    <span class="material-icons">{{ entry.icon }}</span>
+    <div class="label">{{ entry.name }}</div>
+  </div>
+</div>

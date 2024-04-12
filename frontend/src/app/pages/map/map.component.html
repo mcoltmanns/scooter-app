@@ -1,0 +1,28 @@
+<div class="map-container">
+  <div class="map-header">
+    <span class="switch-btn" (click)="toggleListView()">
+      <span class="material-icons icon-outlined">{{ view === "map" ? "view_kanban" : "map" }}</span>
+    </span>
+    <h1 class="title logo">SCOOTER</h1>
+
+    <input
+      type="text"
+      *ngIf="view === 'list'"
+      class="search-input"
+      placeholder="Suchen"
+    />
+  </div>
+
+  <!-- Diese Komponente wird durch das "leaflet" Attribut mit der "Leaflet" Bibliothek initialisiert -->
+  <!-- Bitte Dokumentation lesen: https://github.com/bluehalo/ngx-leaflet -->
+  <div
+    *ngIf="view === 'map'"
+    class="map"
+    leaflet
+    [leafletOptions]="options"
+    [leafletLayers]="layers"
+    (leafletClick)="onMapClick($event)"
+  ></div>
+
+  <app-todo *ngIf="view === 'list'"></app-todo>
+</div>

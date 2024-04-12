@@ -1,0 +1,19 @@
+.back-btn {
+  position: absolute;
+  top: 50px;
+  left: 20px;
+  width: 30px;
+  height: 30px;
+
+  color: var(--icon-color);
+  border-radius: 100px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-btn mat-icon {
+  font-size: 16px;
+  padding: 4px;
+}

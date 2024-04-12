@@ -1,0 +1,51 @@
+:host {
+  --header-height: 80px;
+}
+
+.logo.title {
+  /* "Lokale" Styles können "Globale" Styles überschreiben */
+  font-size: 38px;
+  margin: 0;
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
+  padding: 0;
+}
+
+.map-header {
+  position: relative;
+  padding: 20px;
+  padding-top: 40px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  min-height: var(--header-height);
+  width: 100%;
+}
+
+.map-header .switch-btn {
+  position: absolute;
+  top: 50px;
+  left: 30px;
+  transform: rotate(-90deg) scale(1.5);
+  color: var(--icon-color);
+}
+
+.map {
+  /* 
+    Wegen einigen Eigenheiten von Leaflet muss die Karte die volle Höhe einnehmen,
+    außer den Platz, der für den Header reserviert ist. "Calc" erlaubt es uns 
+    diese Größe automatisch zu errechnen. */
+  height: calc(100% - var(--header-height));
+  width: 100%;
+  padding: 0;
+}
+
+.search-input {
+  border-radius: 15px;
+  padding: 10px;
+  width: 100%;
+  margin-top: 10px;
+  font-size: 18px;
+  border: 1px solid black;
+}

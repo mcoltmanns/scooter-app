@@ -1,0 +1,4 @@
+<div class="container">
+  <p class="label" *ngIf="label">{{ label }}</p>
+  <input [type]="type" [(ngModel)]="text" (ngModelChange)="onTextChange()" />
+</div>

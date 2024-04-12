@@ -1,0 +1,43 @@
+{
+  "name": "softwareproject-frontend",
+  "version": "1.0.0",
+  "description": "Template for the softwareproject lecture at the University of Konstanz, Germany",
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build",
+    "lint": "eslint \"src/**/*.{js,ts}\""
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "17.1.3",
+    "@angular/common": "17.1.3",
+    "@angular/compiler": "17.1.3",
+    "@angular/core": "17.1.3",
+    "@angular/forms": "17.1.3",
+    "@angular/platform-browser": "17.1.3",
+    "@angular/platform-browser-dynamic": "17.1.3",
+    "@angular/router": "17.1.3",
+    "@asymmetrik/ngx-leaflet": "17.0.0",
+    "leaflet": "1.9.4",
+    "material-icons": "^1.13.12",
+    "primeicons": "^7.0.0",
+    "primeng": "^17.12.0",
+    "rxjs": "7.8.1",
+    "tslib": "2.6.2",
+    "zone.js": "0.14.3"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "17.1.3",
+    "@angular-eslint/eslint-plugin": "17.2.1",
+    "@angular/cli": "17.1.3",
+    "@angular/compiler-cli": "17.1.3",
+    "@schematics/angular": "17.1.3",
+    "@types/leaflet": "1.9.8",
+    "@typescript-eslint/eslint-plugin": "7.0.1",
+    "@typescript-eslint/parser": "7.0.1",
+    "eslint": "8.56.0",
+    "eslint-plugin-prefer-arrow": "1.2.3",
+    "eslint-plugin-sonarjs": "0.24.0",
+    "typescript": "5.3.3"
+  }
+}

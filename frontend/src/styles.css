@@ -1,0 +1,78 @@
+/* You can add global styles to this file, and also import other style files */
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-weight: 300 !important;
+
+  /* Mittels dem -- Prefix können wir in CSS auch Variablen definieren, wie z.B. die Hauptfarben der App */
+  /* Da die 'styles.css' global gültig ist, können die hier definierten Variablen in allen Komponenten verwendet werden */
+  --foreground: white;
+  --background: #26627c;
+  --highlight: #97fb64;
+
+  --primary-bg: #00363d;
+  --primary-fg: #9af0ff;
+  --accent-bg: #9af0ff;
+  --accent-fg: #2a1800;
+  --warn-bg: #C55136;
+  --warn-fg: white;
+
+  --icon-color: #00363d;
+
+  /* Die definierten Variablen können dann durch die "var()" Funktion eingesetzt werden */
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.page-container {
+  height: 100%;
+  margin-top: 50px;
+  word-break: normal;
+}
+
+.scrollable-container {
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+
+  /* Extra Padding für die Navigationsbar */
+  padding-bottom: 200px;
+}
+
+/* Das Design benutzt den 'outlined' Icon theme */
+.icon-outlined {
+  font-family: "Material Icons Outlined";
+}
+
+a {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+h1.title {
+  text-align: center;
+  font-size: 24px;
+  margin: 0;
+}
+
+h1.title.logo {
+  font-family: "Racing Sans One";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 60px;
+}
+
+.long-btn {
+  width: 50%;
+}
