@@ -3,10 +3,11 @@ import { BackButtonComponent } from 'src/app/components/back-button/back-button.
 import { ExampleComponent } from 'src/app/components/example/example.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { SampleService } from 'src/app/services/sample.service';
+import { MaxOComponent } from 'src/app/components/max-oltmanns/max-oltmanns.component';
 
 @Component({
   standalone: true,
-  imports: [ExampleComponent, UserInputComponent, BackButtonComponent],
+  imports: [ExampleComponent, UserInputComponent, BackButtonComponent, MaxOComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css'],
 })

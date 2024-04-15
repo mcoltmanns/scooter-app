@@ -31,4 +31,17 @@ export class ApiController {
     response.status(200);
     response.send('ok');
   }
+
+  // NEW STUFF
+  public getFirstNameLastNameInfo(request: Request, response: Response): void {
+    response.status(200);
+    response.send({firstName: 'Max', lastName: 'Oltmanns'});
+  }
+
+  public postFirstNameLastNameInfo(request: Request, response: Response): void {
+    console.log(request.params.id);
+    console.log(request.body.requestedName);
+    response.status(200);
+    response.send('ok');
+  }
 }

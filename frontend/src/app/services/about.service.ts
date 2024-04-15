@@ -43,7 +43,7 @@ export class AboutService {
   /**
    *  Bitte hier eure Methoden für das Individualprojekt hinzufügen!
    */
-  // public getFirstLastnameInfo(): Observable<NameInfo> {
-  //return this.http.get<NameInfo>('/api/firstname-lastname');
-  // }
+  public getFirstLastnameInfo(): Observable<NameInfo> {
+    return this.http.get<NameInfo>('/api/firstname-lastname');
+  }
 }
