@@ -84,6 +84,7 @@ export class JonasComponent implements OnInit {
         this.myName = {
           firstName: 'Error!',
           lastName: 'Error!',
+          optionalAttribut: 'Error',
         };
       },
     });
