@@ -37,6 +37,7 @@ export class ApiController {
     response.send({
       firstName: 'Jonas',
       lastName: 'Dickhöfer',
+      optionalAttribute: 'I study Informatics in the 4th semester, focusing on machine learning. In my free time, I like to do Karate.'
     });
   }
 }
