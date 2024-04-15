@@ -46,4 +46,8 @@ export class AboutService {
   // public getFirstLastnameInfo(): Observable<NameInfo> {
   //return this.http.get<NameInfo>('/api/firstname-lastname');
   // }
+
+  public getSilvanRongeInfo(): Observable<NameInfo> {
+    return this.http.get<NameInfo>('/api/silvan-ronge');
+  }
 }

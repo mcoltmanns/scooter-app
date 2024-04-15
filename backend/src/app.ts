@@ -63,6 +63,11 @@ app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
 
+/**
+ * Routen für das Individualprojekt
+ */
+app.get('/api/silvan-ronge', api.getSilvanRongeInfo);
+
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {
   app.use(errorHandler());
