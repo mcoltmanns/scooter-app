@@ -31,4 +31,13 @@ export class ApiController {
     response.status(200);
     response.send('ok');
   }
+
+  public getMaximilianJaegerInfo(request: Request, response: Response): void{
+    response.status(200);
+    response.send({
+      firstName: 'Maximilian',
+      lastName: 'Jaeger',
+    });
+  }
+
 }

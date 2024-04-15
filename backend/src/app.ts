@@ -8,7 +8,7 @@
  */
 
 import errorHandler from 'errorhandler';
-import express from 'express';
+import express, { Request, Response } from 'express';
 import path from 'path';
 import cors from 'cors';
 
@@ -62,6 +62,8 @@ const api = new ApiController();
 app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
+
+app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {

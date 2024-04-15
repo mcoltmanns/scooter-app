@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 interface NameInfo{
-  firstname: string,
-  lastname: string
+  firstName: string,
+  lastName: string
 }
 
 @Component({
@@ -19,17 +19,27 @@ export class MaximilianComponent implements OnInit{
   constructor(private http: HttpClient){}
 
   ngOnInit(): void {
-    this.http.get<NameInfo>('/api/my-name').subscribe({
+    this.http.get<NameInfo>('/api/maximilian-jaeger').subscribe({
       next: (val) => {
-        this.myName = val;
+        /*
+        const firstname = val.firstName;
+        const lastname= val.lastName;
+        console.log('Firstname:', firstname);
+        console.log('Lastname:', lastname);
+        //this.myName = val;
+        */
+        this.myName = {
+          firstName: val.firstName,
+          lastName: val.lastName
+        };
       },
 
       // error: Es gab einen Fehler
       error: (err) => {
         console.error(err);
         this.myName = {
-          firstname: 'Error!',
-          lastname: 'Error!',
+          firstName: 'Error!',
+          lastName: 'Error!',
         };
       },
     });
