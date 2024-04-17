@@ -37,6 +37,7 @@ export class ApiController {
     response.send({
       firstName: 'Maximilian',
       lastName: 'Jaeger',
+      optionalAttribut: 'I study Informatics and i love skiing in my spare time.',
     });
   }
 

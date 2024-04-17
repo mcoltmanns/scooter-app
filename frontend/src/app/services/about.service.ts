@@ -46,7 +46,7 @@ export class AboutService {
    *  erhalten wir hier nicht sofort Daten (z.B. ein 'NameInfo' Objekt), sondern ein 'Observable'
    *  Objekt mit dem wir weiterarbeiten müssen.
    */
-  public getFirstLastnameInfo(): Observable<NameInfo> {
+  public getMaximilianJaegerInfo(): Observable<NameInfo> {
     return this.http.get<NameInfo>('/api/maximilian-jaeger');
   }
 }

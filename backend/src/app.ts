@@ -8,7 +8,7 @@
  */
 
 import errorHandler from 'errorhandler';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import path from 'path';
 import cors from 'cors';
 
