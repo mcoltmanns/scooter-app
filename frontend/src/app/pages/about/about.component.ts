@@ -5,10 +5,11 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { SampleService } from 'src/app/services/sample.service';
 import {JonasComponent} from 'src/app/components/jonas-dickhoefer/jonas-dickhoefer.component';
 import { MaximilianJaegerComponent } from 'src/app/components/maximilian-jaeger/maximilian-jaeger.component';
+import { MaxOComponent } from 'src/app/components/max-oltmanns/max-oltmanns.component';
 
 @Component({
   standalone: true,
-  imports: [ExampleComponent, UserInputComponent, BackButtonComponent, JonasComponent, MaximilianJaegerComponent],
+  imports: [ExampleComponent, UserInputComponent, BackButtonComponent, JonasComponent, MaximilianJaegerComponent, MaxOComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css'],
 })

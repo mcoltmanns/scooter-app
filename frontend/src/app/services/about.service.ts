@@ -51,5 +51,8 @@ export class AboutService {
   }
   public getJonasInfo(): Observable<NameInfo> {
     return this.http.get<NameInfo>('/api/jonas-dickhoefer');
-    }
+  }
+  public getOltmannsInfo(): Observable<NameInfo> {
+    return this.http.get<NameInfo>('/api/max-oltmanns');
+  }
 }
