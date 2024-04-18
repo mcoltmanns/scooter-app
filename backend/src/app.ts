@@ -65,6 +65,8 @@ app.post('/api/name/:id', api.postNameInfo);
 
 app.get('/api/jonas-dickhoefer', api.getJonasInfo);
 
+app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
+
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {
   app.use(errorHandler());

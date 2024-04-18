@@ -40,4 +40,14 @@ export class ApiController {
       optionalAttribut: 'I study Informatics in the 4th semester, focusing on machine learning. In my free time, I like to do Karate.',
     });
   }
+
+  public getMaximilianJaegerInfo(request: Request, response: Response): void{
+    response.status(200);
+    response.send({
+      firstName: 'Maximilian',
+      lastName: 'Jaeger',
+      optionalAttribut: 'I study Informatics and i love skiing in my spare time.',
+    });
+  }
+
 }

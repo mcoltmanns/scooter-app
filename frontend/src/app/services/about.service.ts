@@ -41,11 +41,14 @@ export class AboutService {
   }
 
   /**
-   *  Bitte hier eure Methoden für das Individualprojekt hinzufügen!
+   * Hier senden wir einen HTTP 'GET' request an den '/api/maximilian-jaeger' Endpoint des Servers.
+   *  Da wir nicht wissen wie lange der Server brauchen wird um auf diesen Request zu antworten,
+   *  erhalten wir hier nicht sofort Daten (z.B. ein 'NameInfo' Objekt), sondern ein 'Observable'
+   *  Objekt mit dem wir weiterarbeiten müssen.
    */
-  // public getFirstLastnameInfo(): Observable<NameInfo> {
-  //return this.http.get<NameInfo>('/api/firstname-lastname');
-  // }
+  public getMaximilianJaegerInfo(): Observable<NameInfo> {
+    return this.http.get<NameInfo>('/api/maximilian-jaeger');
+  }
   public getJonasInfo(): Observable<NameInfo> {
     return this.http.get<NameInfo>('/api/jonas-dickhoefer');
     }
