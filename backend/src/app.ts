@@ -62,13 +62,18 @@ const api = new ApiController();
 app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
-// NEW STUFF
+
+/**
+ * Routen für das Individualprojekt
+ */
 app.get('/api/max-oltmanns', api.getNameInfoOltmanns);
 app.get('/api/max-oltmanns/:id', api.postNameInfoOltmanns);
 
 app.get('/api/jonas-dickhoefer', api.getJonasInfo);
 
 app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
+
+app.get('/api/silvan-ronge', api.getSilvanRongeInfo);
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {

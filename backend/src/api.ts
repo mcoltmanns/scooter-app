@@ -31,7 +31,9 @@ export class ApiController {
     response.status(200);
     response.send('ok');
   }
-
+  /**
+   * Methoden für das Individualprojekt
+   */
   public getJonasInfo(request: Request, response: Response): void{
     response.status(200);
     response.send({
@@ -60,5 +62,14 @@ export class ApiController {
     console.log(request.body.requestedName);
     response.status(200);
     response.send('ok');
+  }
+
+  public getSilvanRongeInfo(request: Request, response: Response): void {
+    response.status(200);
+    response.send({
+      firstName: 'Silvan',
+      lastName: 'Ronge',
+      optionalAttribut: 'Still believes that computer science is a creative art form.',
+    });
   }
 }
