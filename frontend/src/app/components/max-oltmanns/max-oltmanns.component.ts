@@ -72,7 +72,7 @@ export class MaxOComponent implements OnInit {
      *  - https://www.learnrxjs.io/
      *  - https://rxmarbles.com/
      */
-    this.aboutService.getFirstLastnameInfo().subscribe({
+    this.aboutService.getOltmannsInfo().subscribe({
       // next: Unser Wert kam erfolgreich an!
       next: (val) => {
         this.myName = val;

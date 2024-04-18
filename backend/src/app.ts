@@ -63,8 +63,8 @@ app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
 // NEW STUFF
-app.get('/api/firstname-lastname', api.getFirstNameLastNameInfo);
-app.get('/api/firstname-lastname/:id', api.postFirstNameLastNameInfo);
+app.get('/api/max-oltmanns', api.getNameInfoOltmanns);
+app.get('/api/max-oltmanns/:id', api.postNameInfoOltmanns);
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {
