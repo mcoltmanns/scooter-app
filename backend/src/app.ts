@@ -75,6 +75,8 @@ app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
 
 app.get('/api/silvan-ronge', api.getSilvanRongeInfo);
 
+app.get('/api/igor-ziesmann', api.getIgorZiesmannInfo);
+
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {
   app.use(errorHandler());
