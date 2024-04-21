@@ -7,10 +7,11 @@ import { SampleService } from 'src/app/services/sample.service';
 import {JonasComponent} from 'src/app/components/jonas-dickhoefer/jonas-dickhoefer.component';
 import { MaximilianJaegerComponent } from 'src/app/components/maximilian-jaeger/maximilian-jaeger.component';
 import { MaxOComponent } from 'src/app/components/max-oltmanns/max-oltmanns.component';
+import { IgorZiesmannComponent } from 'src/app/components/igor-ziesmann/igor-ziesmann.component';
 
 @Component({
   standalone: true,
-  imports: [ExampleComponent, UserInputComponent, BackButtonComponent, JonasComponent, MaximilianJaegerComponent, MaxOComponent, SilvanRongeComponent],
+  imports: [ExampleComponent, UserInputComponent, BackButtonComponent, JonasComponent, MaximilianJaegerComponent, MaxOComponent, SilvanRongeComponent, IgorZiesmannComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css'],
 })
