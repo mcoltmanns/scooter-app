@@ -14,7 +14,7 @@ export class IgorZiesmannComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.aboutService.getNameInfo().subscribe({
+    this.aboutService.getIgorZiesmannInfo().subscribe({
       // next: Unser Wert kam erfolgreich an!
       next: (val) => {
         this.myName = val;
