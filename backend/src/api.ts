@@ -72,4 +72,13 @@ export class ApiController {
       optionalAttribut: 'Still believes that computer science is a creative art form.',
     });
   }
+
+  public getIgorZiesmannInfo(request: Request, response: Response): void {
+    response.status(200);
+    response.send({
+      firstName: 'Igor',
+      lastName: 'Ziesmann',
+      optionalAttribut: 'Ich studiere Informatik mit dem Schwerpunkt Data Science an der Uni Konstanz.'
+    });
+  }
 }
