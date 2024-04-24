@@ -17,68 +17,15 @@ export class ApiController {
     response.send('ok');
   }
 
-  public getNameInfo(request: Request, response: Response): void {
-    response.status(200);
-    response.send({
-      firstName: 'Max',
-      lastName: 'Mustermann',
-    });
-  }
-
-  public postNameInfo(request: Request, response: Response): void {
-    console.log(request.params.id);
-    console.log(request.body.requestedName);
-    response.status(200);
-    response.send('ok');
-  }
-  /**
-   * Methoden für das Individualprojekt
-   */
-  public getJonasInfo(request: Request, response: Response): void{
-    response.status(200);
-    response.send({
-      firstName: 'Jonas',
-      lastName: 'Dickhöfer',
-      optionalAttribut: 'I study Informatics in the 4th semester, focusing on machine learning. In my free time, I like to do Karate.',
-    });
-  }
-
-  public getMaximilianJaegerInfo(request: Request, response: Response): void{
-    response.status(200);
-    response.send({
-      firstName: 'Maximilian',
-      lastName: 'Jaeger',
-      optionalAttribut: 'I study Informatics and i love skiing in my spare time.',
-    });
-  }
-
-  public getNameInfoOltmanns(request: Request, response: Response): void {
-    response.status(200);
-    response.send({firstName: 'Max', lastName: 'Oltmanns'});
-  }
-
-  public postNameInfoOltmanns(request: Request, response: Response): void {
-    console.log(request.params.id);
-    console.log(request.body.requestedName);
-    response.status(200);
-    response.send('ok');
-  }
-
-  public getSilvanRongeInfo(request: Request, response: Response): void {
-    response.status(200);
-    response.send({
-      firstName: 'Silvan',
-      lastName: 'Ronge',
-      optionalAttribut: 'Still believes that computer science is a creative art form.',
-    });
-  }
-
-  public getIgorZiesmannInfo(request: Request, response: Response): void {
-    response.status(200);
-    response.send({
-      firstName: 'Igor',
-      lastName: 'Ziesmann',
-      optionalAttribut: 'Ich studiere Informatik mit dem Schwerpunkt Data Science an der Uni Konstanz.'
-    });
-  }
+  // want all the information about all the employees
+  public getEmployeeInfo(req: Request, resp: Response): void {
+    resp.status(200);
+    resp.send([
+        { name: 'Igor Ziesmann', info: 'Ich studiere Informatik mit dem Schwerpunkt Data Science an der Uni Konstanz.', imgUrl: '/assets/about-us/igorz.jpg' },
+        { name: 'Jonas Dickhoefer', info: 'I study Informatics in the 4th semester, focusing on machine learning. In my free time, I like to do Karate.', imgUrl: '/assets/about-us/jonasd.png' },
+        { name: 'Max Oltmanns', info: 'I\'m studying computer science at the University of Konstanz, and I like to spend my free time in the mountains.', imgUrl: '/assets/about-us/maxo.png' },
+        { name: 'Maximilian Jaeger', info: 'I study Informatics and i love skiing in my spare time.', imgUrl: '/assets/about-us/maximilianj.png' },
+        { name: 'Silvan Ronge', info: 'Still believes that computer science is a creative art form.', imgUrl: '/assets/about-us/silvanr.png' }
+    ]);
+}
 }

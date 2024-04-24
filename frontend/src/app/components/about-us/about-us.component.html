@@ -1,0 +1,13 @@
+@for (emp of employees; track employees) { <!-- iterate over the employees array and display the information for each employee -->
+    <div class="about-me">
+        @if (emp.imgUrl) { <!--only display a picture if the employee has one-->
+            <div class="picture">
+                <img class="picture" [src]="emp.imgUrl">
+            </div>
+        }
+        <div class="text">
+            <div>{{emp.name}}</div>
+            @if (emp.info) {<div>{{emp.info}}</div>} <!--only display employee info if it exists-->
+        </div>
+    </div>
+}
