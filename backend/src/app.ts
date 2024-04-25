@@ -64,7 +64,7 @@ app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
 
 /**
- * Routen für das Individualprojekt
+ * Routen für das Individualprojekt.
  */
 app.get('/api/max-oltmanns', api.getNameInfoOltmanns);
 app.get('/api/max-oltmanns/:id', api.postNameInfoOltmanns);
