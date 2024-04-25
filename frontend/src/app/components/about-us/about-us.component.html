@@ -8,6 +8,7 @@
         <div class="text">
             <div>{{emp.name}}</div>
             @if (emp.info) {<div>{{emp.info}}</div>} <!--only display employee info if it exists-->
+            @if (emp.email) {<div><a href="mailto: {{emp.email}}">{{emp.email}}</a></div>}
         </div>
     </div>
 }
