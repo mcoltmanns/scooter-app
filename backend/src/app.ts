@@ -14,7 +14,6 @@ import cors from 'cors';
 
 import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
-import { DatabaseController } from './controllers/db';
 import { Validator } from './middlewares/validation';
 
 // Express server instanziieren
@@ -70,9 +69,6 @@ const api = new ApiController();
 app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
-
-const db = new DatabaseController();
-app.post('/api/database', db.status);
 
 /**
  * Routen für das Individualprojekt.
