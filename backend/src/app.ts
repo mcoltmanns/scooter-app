@@ -12,7 +12,8 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 
-import { ApiController } from './api';
+import { ApiController } from './controllers/api';
+import { AuthController } from './controllers/auth';
 
 // Express server instanziieren
 const app = express();
@@ -58,6 +59,10 @@ app.use(cors({ origin: '*' }));
  *
  *  Bitte schaut euch das Tutorial zur Backend-Entwicklung an für mehr Infos bzgl. REST
  */
+
+const auth = new AuthController();
+app.post('/api/register', auth.register);
+
 const api = new ApiController();
 app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
