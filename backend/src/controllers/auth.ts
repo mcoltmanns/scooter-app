@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
+import uid from 'uid-safe';
 import { User } from '../models/user';
 import { Session } from '../models/session';
-import bcrypt from 'bcrypt';
 
 export class AuthController {
   // User mit gehashten Passwörten (bcrypt)
@@ -45,6 +46,21 @@ export class AuthController {
     this.users.push(newUser);
 
     console.log(this.users);
+
+    /* Start a new session for the user (to automatically log in the user after registration) */
+    const sessionId = uid.sync(24);
+    const session: Session = { sessionId: sessionId, userId: newUser.id };
+    this.sessions.push(session);
+    /*
+     * Cookie Optionen:
+     * Für Cookies die nicht per JavaScript abgefragt werden können: "httpOnly: true"
+     * Für Cookies die nur über HTTPS gesendet werden dürfen: "secure: true"
+     * Für Basisschutz vor CSRF: "sameSite: 'lax'" oder "sameSite: 'strict'" (Bei lax sind gewisse Anfragen von anderen Webseiten noch erlaubt z.B. GET)
+     * Für ein Ablaufzeitpunkt des Cookies (z.B. in einer Stunde): "maxAge: 60 * 60 * 1000" oder "expires: new Date(Date.now() + 60 * 60 * 1000)"
+     */
+    response.cookie('sessionId', sessionId, { httpOnly: true });
+
+    console.log(this.sessions);
 
     /* Send a success message */
     response.status(201).json({ code: 201, message: 'Registration successful' });
