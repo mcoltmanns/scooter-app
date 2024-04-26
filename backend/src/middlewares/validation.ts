@@ -15,6 +15,7 @@ export class Validator {
       check('zipCode').trim().escape().notEmpty().withMessage('Please provide a zip code').bail().isNumeric().withMessage('Please provide a valid numeric zip code'),
       check('city').trim().escape().notEmpty().withMessage('Please provide a city'),
       check('email').trim().escape().notEmpty().withMessage('Please provide an email').bail().isEmail().withMessage('Please provide a valid email'),
+      // TO-DO: Checking if email already exists
       check('password').trim().escape().notEmpty().withMessage('Please provide a password').bail().isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
     ];
     await Promise.all(checks.map(check => check.run(request)));
