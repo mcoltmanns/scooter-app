@@ -11,14 +11,17 @@
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"tsc -w\" \"nodemon --watch dist/*\""
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "2.8.5",
     "errorhandler": "1.5.1",
     "express": "4.19.2",
+    "express-validator": "^7.0.1",
     "pg": "8.11.4",
     "sequelize": "6.37.2",
     "source-map-support": "0.5.21"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/cors": "2.8.17",
     "@types/errorhandler": "1.5.3",
     "@types/eslint": "8.56.7",

@@ -12,7 +12,9 @@ import express from 'express';
 import path from 'path';
 import cors from 'cors';
 
-import { ApiController } from './api';
+import { ApiController } from './controllers/api';
+import { AuthController } from './controllers/auth';
+import { Validator } from './middlewares/validation';
 
 // Express server instanziieren
 const app = express();
@@ -58,23 +60,25 @@ app.use(cors({ origin: '*' }));
  *
  *  Bitte schaut euch das Tutorial zur Backend-Entwicklung an für mehr Infos bzgl. REST
  */
+
+const validator = new Validator();
+const auth = new AuthController();
+app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
+
 const api = new ApiController();
 app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
 
 /**
- * Routen für das Individualprojekt
+ * Routen für das Individualprojekt.
+ * DEPRECATED BY about-us
  */
 app.get('/api/max-oltmanns', api.getNameInfoOltmanns);
 app.get('/api/max-oltmanns/:id', api.postNameInfoOltmanns);
-
 app.get('/api/jonas-dickhoefer', api.getJonasInfo);
-
 app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
-
 app.get('/api/silvan-ronge', api.getSilvanRongeInfo);
-
 app.get('/api/igor-ziesmann', api.getIgorZiesmannInfo);
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
