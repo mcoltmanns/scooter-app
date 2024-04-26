@@ -14,6 +14,7 @@ import cors from 'cors';
 
 import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
+import { Validator } from './middlewares/validation';
 
 // Express server instanziieren
 const app = express();
@@ -60,8 +61,9 @@ app.use(cors({ origin: '*' }));
  *  Bitte schaut euch das Tutorial zur Backend-Entwicklung an für mehr Infos bzgl. REST
  */
 
+const validator = new Validator();
 const auth = new AuthController();
-app.post('/api/register', auth.register);
+app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
 
 const api = new ApiController();
 app.get('/api', api.getInfo);
