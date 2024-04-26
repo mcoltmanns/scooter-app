@@ -14,6 +14,7 @@ import cors from 'cors';
 
 import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
+import { DatabaseController } from './controllers/db';
 import { Validator } from './middlewares/validation';
 
 // Express server instanziieren
@@ -70,18 +71,18 @@ app.get('/api', api.getInfo);
 app.get('/api/name', api.getNameInfo);
 app.post('/api/name/:id', api.postNameInfo);
 
+const db = new DatabaseController();
+app.post('/api/database', db.status);
+
 /**
  * Routen für das Individualprojekt.
+ * DEPRECATED BY about-us
  */
 app.get('/api/max-oltmanns', api.getNameInfoOltmanns);
 app.get('/api/max-oltmanns/:id', api.postNameInfoOltmanns);
-
 app.get('/api/jonas-dickhoefer', api.getJonasInfo);
-
 app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
-
 app.get('/api/silvan-ronge', api.getSilvanRongeInfo);
-
 app.get('/api/igor-ziesmann', api.getIgorZiesmannInfo);
 
 // Falls ein Fehler auftritt, gib den Stack trace aus

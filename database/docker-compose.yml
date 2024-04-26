@@ -6,7 +6,7 @@ services:
         restart: unless-stopped
         environment:
             - POSTGRES_USER=admin
-            - POSTGRES_PASSWORD=CHOOSE_A_PASSWORD
+            - POSTGRES_PASSWORD=spro-g6-db
             - POSTGRES_DB=swp
         ports:
             - 5432:5432

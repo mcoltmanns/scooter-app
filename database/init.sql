@@ -11,7 +11,7 @@ CREATE TABLE products (
 
 CREATE TABLE scooters (
     id serial NOT NULL PRIMARY KEY,
-    product character varying(255) NOT NULL REFERENCES public.products (name),
+    product_id character varying(255) NOT NULL REFERENCES public.products (name),
     battery real NOT NULL,
     coordinates_lat real NOT NULL,
     coordinates_lng real NOT NULL
