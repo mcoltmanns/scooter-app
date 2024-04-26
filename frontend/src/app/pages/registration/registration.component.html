@@ -1,0 +1,61 @@
+<div class="page-container">
+    <h1 class="title">Neues Kundenkonto</h1>
+    <div class="scrollable-container">
+        <app-user-input
+           label="Name"
+           [(text)]="name"
+        ></app-user-input>
+
+        <div class="address-row">
+            <app-user-input
+               label="Straße"
+               [(text)]="street"
+            ></app-user-input>
+
+            <app-user-input
+               label="Nummer"
+               [(text)]="houseNumber"
+            ></app-user-input>
+        </div>
+
+        <app-user-input
+           label="Postleitzahl"
+           [(text)]="zipCode"
+        ></app-user-input>
+
+        <app-user-input
+           label="Ort"
+           [(text)]="city"
+        ></app-user-input>
+
+        <app-user-input
+           label="Email"
+           [(text)]="email"
+        ></app-user-input>
+
+        <app-user-input
+           label="Passwort"
+           type="password"
+           [(text)]="password1"
+        ></app-user-input>
+        <div class="error">{{errorMessage}}</div>
+
+        <app-user-input
+           label="Passwort wiederholen"
+           type="password"
+           [(text)]="password2"
+        ></app-user-input>
+        <div class="error">{{errorMessage}}</div>
+
+
+        <div class="bottom">
+            <app-button color="primary" class="registration-btn" (click)="registration()">
+                Registrieren
+            </app-button>
+
+            <div class="info">
+                Konto vorhanden? <a routerLink="/login">Zum Login</a>
+            </div>            
+        </div>
+    </div>
+</div>

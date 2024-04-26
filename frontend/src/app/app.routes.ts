@@ -6,6 +6,7 @@ import { TodoComponent } from './pages/todo/todo.component';
 import { AboutComponent } from './pages/about/about.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { MapComponent } from './pages/map/map.component';
+import { RegistrationComponent } from './pages/registration/registration.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -39,7 +40,7 @@ export const routes: Routes = [
   // Die hier angegebenen Routen sind ein Beispiel; die "TodoComponent"
   // sollten über den Lauf des Projektes ausgetauscht werden
   { path: 'login', component: LoginComponent },
-  { path: 'register', component: TodoComponent },
+  { path: 'register', component: RegistrationComponent }, //registerComponent instead of TodoComponent
   { path: 'about', component: AboutComponent },
 
   // Durch 'canActive' können wir festlegen, ob eine Route aktiviert werden kann - z.B. können wir
