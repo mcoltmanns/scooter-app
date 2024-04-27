@@ -29,9 +29,14 @@ export class RegistrationComponent implements OnInit{
   public password2 = ''; // Content of the second password input field
   
   public errorMessage = ''; // Error Message
-  public errorEmailMessage = ''; // Error Message
   public errorEmptyFieldMessage = '';
   public emptyField = ''; //checks for empty field
+
+  //Backend Errors:
+  public errorHouseNumberMessage = '';
+  public errorZipCodeMessage = '';
+  public errorPasswordMessage = '';
+  public errorEmailMessage = '';
 
   // Constructor for the routes, registrationService
   constructor(private router: Router, private registrationService: RegistrationService) {}
@@ -107,6 +112,31 @@ export class RegistrationComponent implements OnInit{
       error: (err) => {
         this.errorMessage = err.error.message;
         console.error(err);
+        console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
+
+        if (err.status === 400 && err.error.validationErrors) {
+          const validationErrors = err.error.validationErrors;
+          if (validationErrors.houseNumber) {
+            this.errorHouseNumberMessage = validationErrors.houseNumber;
+          }
+          if (validationErrors.zipCode) {
+            this.errorZipCodeMessage = validationErrors.zipCode;
+          }
+          if (validationErrors.email) {
+            this.errorEmailMessage = validationErrors.email;
+          }
+          if (validationErrors.password) {
+            this.errorPasswordMessage = validationErrors.password;
+          }
+        } 
+        else {
+          this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+          console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
+        }
+        console.log(this.errorHouseNumberMessage);
+        console.log(this.errorZipCodeMessage);
+        console.log(this.errorEmailMessage);
+        console.log(this.errorPasswordMessage);
       }
     });
   }
