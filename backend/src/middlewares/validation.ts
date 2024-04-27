@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { check, FieldValidationError, validationResult } from 'express-validator';
 import { UsersAuth } from '../models/user';
+import { UsersSession } from '../models/session';
 
 interface ErrorsObject {
   [key: string]: string;
@@ -36,6 +37,7 @@ export class Validator {
     const validationErrors = validationResult(request);
 
     /* Handle the validation errors if they occurred */
+    // TODO: refactor into a universal error handler maybe?
     if (!validationErrors.isEmpty()) {
       const errors: ErrorsObject = {};
 
@@ -48,6 +50,51 @@ export class Validator {
     }
     
     /* Continue with the next middleware if no validation errors occurred */
+    return next();
+  }
+
+  /**
+   * validate a user's session
+   */
+  public async validateSession(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const test = check('sessionId').notEmpty().custom(
+      async (sessionId) => {
+        const session = UsersSession.findOne({ where: { id: sessionId }});
+        const expires: Date = (await session).getDataValue('expires');
+        if(!session) {
+          throw new Error('Session does not exist.');
+        }
+        else if (expires && expires > new Date) {
+          UsersSession.destroy({ where: { id: sessionId }}); // if a session is expired, we can drop it
+          throw new Error('Session is expired.');
+        }
+      }
+    ).withMessage('Invalid session ID');
+
+    try {
+      await test.run(request);
+    } catch (error) {
+      response.status(403).json({ code: 403, message: 'Access denied.' }); // 403 - access denied
+      return;
+    }
+
+    /* Catch the validation errors */
+    const validationErrors = validationResult(request);
+
+    /* Handle the validation errors if they occurred */
+    // TODO: refactor into a universal error handler maybe?
+    if (!validationErrors.isEmpty()) {
+      const errors: ErrorsObject = {};
+
+      validationErrors.array().forEach(
+        (valErr: FieldValidationError) => (errors[valErr.path] = valErr.msg)
+      );
+
+      response.status(403).json({ code: 403, validationErrors: errors });
+      return;
+    }
+
+    // continue if everything's ok
     return next();
   }
 }
