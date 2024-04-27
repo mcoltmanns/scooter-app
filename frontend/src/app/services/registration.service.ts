@@ -17,7 +17,7 @@ export class RegistrationService {
     }
 
     public register(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password: string):Observable<ResponseMessage>{
-        const registerObservable = this.http.post<ResponseMessage>('/api/register', { //Route to backend
+        const registerObservable = this.http.post<ResponseMessage>('/api/register', { //Route to register in the backend
             name: name,
             street: street,
             houseNumber: houseNumber,

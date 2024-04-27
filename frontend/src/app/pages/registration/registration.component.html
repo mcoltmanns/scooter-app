@@ -5,6 +5,7 @@
            label="Name"
            [(text)]="name"
         ></app-user-input>
+        <div class="error">{{errorNameMessage}}</div>
 
         <div class="address-row">
             <app-user-input
@@ -17,16 +18,20 @@
                [(text)]="houseNumber"
             ></app-user-input>
         </div>
+        <div class="error">{{errorStreetMessage}}</div>
+        <div class="error">{{errorHouseNumberMessage}}</div>
 
         <app-user-input
            label="Postleitzahl"
            [(text)]="zipCode"
         ></app-user-input>
+        <div class="error">{{errorZipCodeMessage}}</div>
 
         <app-user-input
            label="Ort"
            [(text)]="city"
         ></app-user-input>
+        <div class="error">{{errorCityMessage}}</div>
 
         <app-user-input
            label="Email"
@@ -39,14 +44,16 @@
            type="password"
            [(text)]="password1"
         ></app-user-input>
-        <div class="error">{{errorMessage}}</div>
+        <div class="error">{{checkpasswordsMessage }}</div>
+        <div class="error">{{errorPasswordMessage}}</div>
 
         <app-user-input
            label="Passwort wiederholen"
            type="password"
            [(text)]="password2"
         ></app-user-input>
-        <div class="error">{{errorMessage}}</div>
+        <div class="error">{{checkpasswordsMessage }}</div>
+        <div class="error">{{errorPasswordMessage}}</div>
 
         <div class="bottom">
             <app-button color="primary" class="registration-btn" (click)="registration()">

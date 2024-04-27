@@ -4,6 +4,7 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Router, RouterLink } from '@angular/router';
 import { RegistrationService } from 'src/app/services/registration.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-registration',
@@ -15,10 +16,13 @@ import { RegistrationService } from 'src/app/services/registration.service';
 
 export class RegistrationComponent implements OnInit{
 
+  constructor(private router: Router, private registrationService: RegistrationService) {}
+
   ngOnInit(): void {
     console.log('Registration Page intialized');
   }
   
+  /* All variables for the user-input Content: */
   public name = ''; // Content of the "Name" input field
   public street = ''; // Content of the "Straße" input field
   public houseNumber = ''; // Content of the "Nummer" input field
@@ -27,22 +31,23 @@ export class RegistrationComponent implements OnInit{
   public email = ''; // Content of the "Email" input field
   public password1 = ''; // Content of the first password input field
   public password2 = ''; // Content of the second password input field
-  
-  public errorMessage = ''; // Error Message
+
+  /* error variables only used for frontend */
   public errorEmptyFieldMessage = '';
   public emptyField = ''; //checks for empty field
-
-  //Backend Errors:
+  public checkpasswordsMessage = ''; //checks if passwords are the same
+  /* error variables: */
+  public errorNameMessage = '';
+  public errorStreetMessage = '';
   public errorHouseNumberMessage = '';
   public errorZipCodeMessage = '';
-  public errorPasswordMessage = '';
+  public errorCityMessage = '';
   public errorEmailMessage = '';
-
-  // Constructor for the routes, registrationService
-  constructor(private router: Router, private registrationService: RegistrationService) {}
+  public errorPasswordMessage = ''; // Message from backend
+  public errorMessage = ''; // general Error Message from the backend
 
   /**
-   * Checks if a input field is empty
+   * Checks if an input field is empty in frontend
    */
   checkEmptyField(): void {
     if (!this.name) {
@@ -65,13 +70,7 @@ export class RegistrationComponent implements OnInit{
       this.emptyField = '';
     }
   }
-  /**
-   * method that checks whether both passwords are the same
-   */
-  passwordsMatch(): boolean {
-    return this.password1 === this.password2;
-  }
-  
+
   /**
    * Checks if the email is valid
    */
@@ -81,17 +80,67 @@ export class RegistrationComponent implements OnInit{
   }
 
   /**
+   * method that checks whether both passwords are the same
+   */
+  passwordsMatch(): boolean {
+    return this.password1 === this.password2;
+  }
+
+  /**
+   * Reset all Error functions
+   */
+  resetErrorMessages(): void {
+    this.errorNameMessage = '';
+    this.errorStreetMessage = '';
+    this.errorHouseNumberMessage = '';
+    this.errorZipCodeMessage = '';
+    this.errorCityMessage = '';
+    this.errorEmailMessage = '';
+    this.errorPasswordMessage = '';
+    this.errorEmptyFieldMessage = '';
+    this.checkpasswordsMessage = '';
+  }
+
+  /**
+   * Handels all backend errors
+   */
+  handleBackendError(err: HttpErrorResponse): void {
+    this.errorMessage = err.error.message;
+    console.error(err);
+  
+    /* assigns all backend errors to the variables */
+    if (err.status === 400 && err.error.validationErrors) {
+      const validationErrors = err.error.validationErrors;
+      this.errorNameMessage = validationErrors?.name || '';
+      this.errorStreetMessage = validationErrors?.street || '';
+      this.errorHouseNumberMessage = validationErrors?.houseNumber || '';
+      this.errorZipCodeMessage = validationErrors?.zipCode || '';
+      this.errorCityMessage = validationErrors?.city || '';
+      this.errorEmailMessage = validationErrors?.email || '';
+      this.errorPasswordMessage = validationErrors?.password || '';
+    } else {
+      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
+    }
+  }
+
+  /*
    * Registration method
    */
   registration(): void {
     console.log('registration button pressed');
 
+    /* Reset all ErrorMessages */
+    this.resetErrorMessages();
+
+    /*
     this.checkEmptyField();
     if (this.emptyField) {
       this.errorEmptyFieldMessage = `Bitte füllen Sie das Feld '${this.emptyField}' aus.`;
       console.log(this.errorEmptyFieldMessage);
       return;// stops registration process
     }
+    */
 
     if (!this.validateEmail(this.email)) { // checks for correct E-Mail
       this.errorEmailMessage = 'Ungültige E-Mail-Adresse';
@@ -99,9 +148,9 @@ export class RegistrationComponent implements OnInit{
       return;// stops registration process
     }
 
-    if (!this.passwordsMatch()) { //checks for matching passwords
-      this.errorMessage = 'Passwörter stimmen nicht überein';
-      console.log(this.errorMessage);
+    if (!this.passwordsMatch()) { // checks for matching passwords
+      this.checkpasswordsMessage = 'Passwörter stimmen nicht überein';
+      console.log(this.checkpasswordsMessage);
       return;// stops registration process
     }
     this.registrationService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
@@ -110,33 +159,7 @@ export class RegistrationComponent implements OnInit{
         this.router.navigateByUrl('/login'); // after successfully registration return to login
       },
       error: (err) => {
-        this.errorMessage = err.error.message;
-        console.error(err);
-        console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
-
-        if (err.status === 400 && err.error.validationErrors) {
-          const validationErrors = err.error.validationErrors;
-          if (validationErrors.houseNumber) {
-            this.errorHouseNumberMessage = validationErrors.houseNumber;
-          }
-          if (validationErrors.zipCode) {
-            this.errorZipCodeMessage = validationErrors.zipCode;
-          }
-          if (validationErrors.email) {
-            this.errorEmailMessage = validationErrors.email;
-          }
-          if (validationErrors.password) {
-            this.errorPasswordMessage = validationErrors.password;
-          }
-        } 
-        else {
-          this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
-          console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
-        }
-        console.log(this.errorHouseNumberMessage);
-        console.log(this.errorZipCodeMessage);
-        console.log(this.errorEmailMessage);
-        console.log(this.errorPasswordMessage);
+        this.handleBackendError(err);
       }
     });
   }
