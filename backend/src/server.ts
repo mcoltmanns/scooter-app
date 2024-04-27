@@ -5,6 +5,8 @@ import Database from './database';
  *  Zeige TypeScript Zeile in Fehlernachrichten
  */
 import SourceMap from 'source-map-support';
+import { UsersSession } from './models/session';
+import { Op } from 'sequelize';
 SourceMap.install();
 
 class Server {
@@ -18,6 +20,11 @@ class Server {
     try {
       /* Connect to the database */
       await Database.connect();
+      /* Purge all expired sessions */
+      console.log('purging expired sessions...');
+      const purged = await UsersSession.destroy({ where: { expires: { [Op.lt]: new Date } } }); // TODO: put this on a scheduler
+      console.log(`purged ${purged} expired sessions.`);
+
 
       /* Start the server */
       app.listen(this.port, () => {

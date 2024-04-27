@@ -2,7 +2,7 @@ import { DataTypes } from 'sequelize';
 import Database from '../database';
 import { UsersAuth } from './user';
 
-export const SESSION_LIFETIME = 60 * 60 * 1000;
+export const SESSION_LIFETIME = 60 * 60 * 1000; // sessions expire after 1 hour
 
 /**
  * table of all active sessions - associate user ids and session tokens
