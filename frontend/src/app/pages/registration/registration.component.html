@@ -32,6 +32,7 @@
            label="Email"
            [(text)]="email"
         ></app-user-input>
+        <div class="error" *ngIf="errorEmailMessage">{{errorEmailMessage}}</div>
 
         <app-user-input
            label="Passwort"
@@ -46,7 +47,6 @@
            [(text)]="password2"
         ></app-user-input>
         <div class="error">{{errorMessage}}</div>
-
 
         <div class="bottom">
             <app-button color="primary" class="registration-btn" (click)="registration()">

@@ -14,6 +14,11 @@ import { RegistrationService } from 'src/app/services/registration.service';
 })
 
 export class RegistrationComponent implements OnInit{
+
+  ngOnInit(): void {
+    console.log('Registration Page intialized');
+  }
+  
   public name = ''; // Content of the "Name" input field
   public street = ''; // Content of the "Straße" input field
   public houseNumber = ''; // Content of the "Nummer" input field
@@ -22,16 +27,52 @@ export class RegistrationComponent implements OnInit{
   public email = ''; // Content of the "Email" input field
   public password1 = ''; // Content of the first password input field
   public password2 = ''; // Content of the second password input field
+  
   public errorMessage = ''; // Error Message
+  public errorEmailMessage = ''; // Error Message
+  public errorEmptyFieldMessage = '';
+  public emptyField = ''; //checks for empty field
 
   // Constructor for the routes, registrationService
   constructor(private router: Router, private registrationService: RegistrationService) {}
 
   /**
+   * Checks if a input field is empty
+   */
+  checkEmptyField(): void {
+    if (!this.name) {
+      this.emptyField = 'Name';
+    } else if (!this.street) {
+      this.emptyField = 'Straße';
+    } else if (!this.houseNumber) {
+      this.emptyField = 'Nummer';
+    } else if (!this.zipCode) {
+      this.emptyField = 'Postleitzahl';
+    } else if (!this.city) {
+      this.emptyField = 'Ort';
+    } else if (!this.email) {
+      this.emptyField = 'Email';
+    } else if (!this.password1) {
+      this.emptyField = 'Passwort';
+    } else if (!this.password2) {
+      this.emptyField = 'Passwort wiederholen';
+    } else {
+      this.emptyField = '';
+    }
+  }
+  /**
    * method that checks whether both passwords are the same
    */
   passwordsMatch(): boolean {
     return this.password1 === this.password2;
+  }
+  
+  /**
+   * Checks if the email is valid
+   */
+  validateEmail(email: string): boolean {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailPattern.test(email);
   }
 
   /**
@@ -39,7 +80,21 @@ export class RegistrationComponent implements OnInit{
    */
   registration(): void {
     console.log('registration button pressed');
-    if (!this.passwordsMatch()) {
+
+    this.checkEmptyField();
+    if (this.emptyField) {
+      this.errorEmptyFieldMessage = `Bitte füllen Sie das Feld '${this.emptyField}' aus.`;
+      console.log(this.errorEmptyFieldMessage);
+      return;// stops registration process
+    }
+
+    if (!this.validateEmail(this.email)) { // checks for correct E-Mail
+      this.errorEmailMessage = 'Ungültige E-Mail-Adresse';
+      console.log(this.errorEmailMessage);
+      return;// stops registration process
+    }
+
+    if (!this.passwordsMatch()) { //checks for matching passwords
       this.errorMessage = 'Passwörter stimmen nicht überein';
       console.log(this.errorMessage);
       return;// stops registration process
@@ -55,9 +110,4 @@ export class RegistrationComponent implements OnInit{
       }
     });
   }
-
-  ngOnInit(): void {
-    console.log('RegisterPage initialized!');
-  }
 }
-
