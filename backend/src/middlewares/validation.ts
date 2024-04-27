@@ -64,7 +64,7 @@ export class Validator {
         if(!session) {
           throw new Error('Session does not exist.');
         }
-        else if (expires && expires > new Date) {
+        else if (expires && expires < new Date) {
           UsersSession.destroy({ where: { id: sessionId }}); // if a session is expired, we can drop it
           throw new Error('Session is expired.');
         }
