@@ -43,7 +43,7 @@ export class Validator {
         (valErr: FieldValidationError) => (errors[valErr.path] = valErr.msg)
       );
 
-      response.status(400).json({ validationErrors: errors });
+      response.status(400).json({ code: 400, validationErrors: errors });
       return;
     }
     
