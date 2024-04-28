@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Employee } from 'src/models/employee';
 
 /**
  *  Via 'export' machen wir die Definition dieses Objektes anderen Klassen verfügbar
@@ -19,6 +20,9 @@ export type NameInfo = {
   providedIn: 'root',
   deps: [HttpClient],
 })
+/**
+ * Use this as a general-purpose app information service - things like employee/company infomation
+ */
 export class AboutService {
   /**
    *  Der Konstruktor des Services wird von Angular selbst aufgerufen.
@@ -30,6 +34,11 @@ export class AboutService {
    */
   constructor(private http: HttpClient) {}
 
+  public getEmployeeInfo(): Observable<Employee[]> {
+    return this.http.get<Employee[]>('/api/employees'); // get all the employee info from the server
+    // url convention: /api/... is for anything on the backend
+  }
+
   public getNameInfo(): Observable<NameInfo> {
     /**
      *  Hier senden wir einen HTTP 'GET' request an den '/api/name' Endpoint des Servers.
@@ -38,31 +47,5 @@ export class AboutService {
      *  Objekt mit dem wir weiterarbeiten müssen.
      */
     return this.http.get<NameInfo>('/api/name');
-  }
-
-  /**
-   *  Bitte hier eure Methoden für das Individualprojekt hinzufügen!
-   */
-  // public getFirstLastnameInfo(): Observable<NameInfo> {
-  //   return this.http.get<NameInfo>('/api/firstname-lastname');
-  // }
-  public getMaximilianJaegerInfo(): Observable<NameInfo> {
-    return this.http.get<NameInfo>('/api/maximilian-jaeger');
-  }
-  
-  public getJonasInfo(): Observable<NameInfo> {
-    return this.http.get<NameInfo>('/api/jonas-dickhoefer');
-  }
-
-  public getOltmannsInfo(): Observable<NameInfo> {
-    return this.http.get<NameInfo>('/api/max-oltmanns');
-  }
-
-  public getSilvanRongeInfo(): Observable<NameInfo> {
-    return this.http.get<NameInfo>('/api/silvan-ronge');
-  }
-
-  public getIgorZiesmannInfo(): Observable<NameInfo> {
-    return this.http.get<NameInfo>('/api/igor-ziesmann');
   }
 }

@@ -67,19 +67,7 @@ app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
 
 const api = new ApiController();
 app.get('/api', api.getInfo);
-app.get('/api/name', api.getNameInfo);
-app.post('/api/name/:id', api.postNameInfo);
-
-/**
- * Routen für das Individualprojekt.
- * DEPRECATED BY about-us
- */
-app.get('/api/max-oltmanns', api.getNameInfoOltmanns);
-app.get('/api/max-oltmanns/:id', api.postNameInfoOltmanns);
-app.get('/api/jonas-dickhoefer', api.getJonasInfo);
-app.get('/api/maximilian-jaeger', api.getMaximilianJaegerInfo);
-app.get('/api/silvan-ronge', api.getSilvanRongeInfo);
-app.get('/api/igor-ziesmann', api.getIgorZiesmannInfo);
+app.get('/api/employees', api.getEmployeeInfo); // map about/employees to the function for getting employee info
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {

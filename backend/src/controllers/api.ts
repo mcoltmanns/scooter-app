@@ -10,75 +10,18 @@
  *  oder response.end()
  */
 import { Request, Response } from 'express';
+import { ALL_EMPLOYEES } from './static-data/employees';
 
 export class ApiController {
+
   public getInfo(request: Request, response: Response): void {
     response.status(200);
     response.send('ok');
   }
 
-  public getNameInfo(request: Request, response: Response): void {
-    response.status(200);
-    response.send({
-      firstName: 'Max',
-      lastName: 'Mustermann',
-    });
-  }
-
-  public postNameInfo(request: Request, response: Response): void {
-    console.log(request.params.id);
-    console.log(request.body.requestedName);
-    response.status(200);
-    response.send('ok');
-  }
-  /**
-   * Methoden für das Individualprojekt
-   */
-  public getJonasInfo(request: Request, response: Response): void{
-    response.status(200);
-    response.send({
-      firstName: 'Jonas',
-      lastName: 'Dickhöfer',
-      optionalAttribut: 'I study Informatics in the 4th semester, focusing on machine learning. In my free time, I like to do Karate.',
-    });
-  }
-
-  public getMaximilianJaegerInfo(request: Request, response: Response): void{
-    response.status(200);
-    response.send({
-      firstName: 'Maximilian',
-      lastName: 'Jaeger',
-      optionalAttribut: 'I study Informatics and i love skiing in my spare time.',
-    });
-  }
-
-  public getNameInfoOltmanns(request: Request, response: Response): void {
-    response.status(200);
-    response.send({firstName: 'Max', lastName: 'Oltmanns'});
-  }
-
-  public postNameInfoOltmanns(request: Request, response: Response): void {
-    console.log(request.params.id);
-    console.log(request.body.requestedName);
-    response.status(200);
-    response.send('ok');
-  }
-
-  public getSilvanRongeInfo(request: Request, response: Response): void {
-    response.status(200);
-    response.send({
-      firstName: 'Silvan',
-      lastName: 'Ronge',
-      optionalAttribut: 'Still believes that computer science is a creative art form.',
-    });
-  }
-
-  public getIgorZiesmannInfo(request: Request, response: Response): void {
-    response.status(200);
-    response.send({
-      firstName: 'Igor',
-      lastName: 'Ziesmann',
-      optionalAttribut: 'Ich studiere Informatik mit dem Schwerpunkt Data Science an der Uni Konstanz.'
-    });
+  // want all the information about all the employees
+  public getEmployeeInfo(req: Request, resp: Response): void {
+    resp.status(200);
+    resp.send(ALL_EMPLOYEES);
   }
 }
