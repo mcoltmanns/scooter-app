@@ -87,3 +87,7 @@ app-user-input {
   vertical-align: middle;
   height: 50px;
 }
+
+.error {
+  color: rgb(226, 27, 27);
+}

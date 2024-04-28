@@ -17,6 +17,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 export class LoginComponent {
   public email = '';
   public password = '';
+  public errorMessage = '';
 
   constructor(
     private router: Router,
@@ -26,7 +27,15 @@ export class LoginComponent {
   login(): void {
     // Diese Funktion muss in Sprint 1 selbst implementiert werden!
     // Die jetztige implementierug ist nur ein Beispiel damit der Prototyp interaktiv funktioniert.
-    this.loginService.loggedIn = true;
-    this.router.navigateByUrl('/search');
+    this.loginService.login(this.email, this.password).subscribe({
+      next: () => {
+        this.errorMessage = '';
+        this.router.navigateByUrl('/search');
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
   }
 }

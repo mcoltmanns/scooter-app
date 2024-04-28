@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink} from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
+import { LoginService } from 'src/app/services/login.service';
 
 @Component({
   standalone: true,
@@ -9,7 +10,11 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
   styleUrls: ['./settings.component.css'],
 })
 export class SettingsComponent {
+
+  constructor(private router: Router, private loginService: LoginService) { }
+
   logout(): void {
-    // Bitte Logik einfügen
+    this.loginService.logout();
+    this.router.navigate(['login']);
   }
 }

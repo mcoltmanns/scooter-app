@@ -4,14 +4,15 @@
     <h1 class="title logo">SCOOTER</h1>
     <img src="/assets/logo.jpg" />
 
-    <app-user-input label="Email"></app-user-input>
-    <app-user-input label="Passwort" type="password"></app-user-input>
+    <app-user-input label="Email" [(text)]="email"></app-user-input>
+    <app-user-input label="Passwort" type="password" [(text)]="password"></app-user-input>
   </div>
 
   <div class="login-container">
     <app-button class="login-btn" color="primary" (click)="login()">
       Login
     </app-button>
+    <div class="error">{{errorMessage}}</div>
 
     <div class="info">
       Noch kein Konto?

@@ -7,6 +7,7 @@ import { AboutComponent } from './pages/about/about.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { MapComponent } from './pages/map/map.component';
 import { RegistrationComponent } from './pages/registration/registration.component';
+import { Observable, map, of } from 'rxjs';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -19,12 +20,19 @@ import { RegistrationComponent } from './pages/registration/registration.compone
  *
  *  (Siehe 'canActivate' Attribut bei den 'routes')
  */
-const loginGuard = (): boolean => {
-  if (!inject(LoginService).isLoggedIn()) {
-    inject(Router).navigate(['/login']);
-    return false;
-  }
-  return true;
+const loginGuard = (): Observable<boolean> => {
+    const loginService = inject(LoginService);
+    const router = inject(Router);
+    if(loginService.authChecked){
+        return of(loginService.isLoggedIn());
+    }
+    return loginService.checkAuth().pipe(map(isAuthenticated => {
+        if (!isAuthenticated){
+            router.navigate(['/login']);
+            return false;
+        }
+      return true;
+    }));
 };
 
 /**
