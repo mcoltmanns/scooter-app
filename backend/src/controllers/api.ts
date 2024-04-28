@@ -10,7 +10,7 @@
  *  oder response.end()
  */
 import { Request, Response } from 'express';
-import { ALL_EMPLOYEES } from './static-data/employees';
+import { ALL_EMPLOYEES } from '../static-data/employees';
 
 export class ApiController {
 
