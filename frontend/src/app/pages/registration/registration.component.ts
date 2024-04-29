@@ -23,15 +23,15 @@ export class RegistrationComponent implements OnInit{
     console.log('Registration Page intialized');
   }
   
-  /* All variables for the user-input Content */
-  public name = ''; // Content of the "Name" input field
-  public street = ''; // Content of the "Straße" input field
-  public houseNumber = ''; // Content of the "Nummer" input field
-  public zipCode = ''; // Content of the "Postleitzahl" input field
-  public city = ''; // Content of the "Ort" input field
-  public email = ''; // Content of the "Email" input field
-  public password1 = ''; // Content of the first password input field
-  public password2 = ''; // Content of the second password input field
+  /* Variables for the value of the input fields */
+  public name = '';
+  public street = '';
+  public houseNumber = '';
+  public zipCode = '';
+  public city = '';
+  public email = '';
+  public password1 = ''; // value of the first password input field
+  public password2 = ''; // value of the second password input field
 
   /* error variables */
   public errorNameMessage = '';
@@ -65,6 +65,9 @@ export class RegistrationComponent implements OnInit{
     this.errorPassword2Message = '';
   }
 
+  /**
+   * checks whether an input is a numeric number
+   */
   checkNumericInput(control: FormControl): { [key: string]: unknown } | null {
     const houseNumberPattern = /^[0-9]+$/; // regular expression that only accepts digits
   
