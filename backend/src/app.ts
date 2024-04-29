@@ -64,6 +64,7 @@ app.use(cors({ origin: '*' }));
 const validator = new Validator();
 const auth = new AuthController();
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
+app.post('/api/login', auth.login.bind(auth));
 
 const api = new ApiController();
 app.get('/api', api.getInfo);
