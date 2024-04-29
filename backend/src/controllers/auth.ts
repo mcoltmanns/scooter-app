@@ -95,41 +95,35 @@ export class AuthController {
     console.log(`Trying to login as ${email}, ${passwordHash}`);
     // find a user with the given email
     const user = await UsersAuth.findOne({ where: { email: email } }); // find the user with this email
-    if(user) { // user exists
-      const userId = user.getDataValue('id');
-      // check the password hash
-      if(user.getDataValue('password') === passwordHash) {
-        // user has provided correct password
-        console.log('Password ok');
-        let session = await SessionManager.hasValidSession(userId); // see if the user has a valid session
-        if(session !== null) { // if they do, log them in to that one
-          console.log('found an active session');
-          response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') });
-        }
-        else { // if they don't, generate a new session and log them in
-          console.log('no session found. making one');
-          const transaction = await Database.getSequelize().transaction(); // start a new transaction
-          session = await SessionManager.createSession(user.getDataValue('id'), transaction); // create a new session
-          try {
-            /* Commit the transaction */
-            await transaction.commit();
-            response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }); // set the cookie
-          } catch (error) {
-            await transaction.rollback(); // Rollback the transaction in case of an error
-            response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
-            return;
-          }
-        }
-        response.status(200).json('Login successful');
+    if(!user) { // user exists?
+      response.status(401).json(`Could not find a user with email ${email}. Please create an account.`);
+      return;
+    }
+    if(user.getDataValue('password') !== passwordHash) { // password ok?
+      response.status(403).json('Incorrect password');
+      return;
+    }
+    const userId = user.getDataValue('id');
+    let session = await(SessionManager.hasValidSession(userId)); // see if user has a session
+    if(session !== null) { // if they do, log them in to that one
+      console.log('found an active session');
+      response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }).status(200).json('Login successful.');
+      return;
+    }
+    else { // if they don't, generate a new session and log them in
+      console.log('no session found. making one');
+      const transaction = await Database.getSequelize().transaction(); // start a new transaction
+      session = await SessionManager.createSession(user.getDataValue('id'), transaction); // create a new session
+      try {
+        /* Commit the transaction */
+        await transaction.commit();
+        response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }).status(200).json('Login successful.');
+        return;
+      } catch (error) {
+        await transaction.rollback(); // Rollback the transaction in case of an error
+        response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
         return;
       }
-      else {
-        response.status(403).json('Incorrect password');
-      }
     }
-    else {
-      response.status(401).json(`Could not find a user with email ${email}. Please create an account.`);
-    }
-    return;
   }
 }
