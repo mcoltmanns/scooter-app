@@ -18,7 +18,8 @@ export const UsersSession = Database.getSequelize().define('usersSession', {
     }
 }, { updatedAt: false, createdAt: false });
 
-UsersAuth.hasOne(UsersSession, { // users have exactly one active session
+UsersSession.hasOne(UsersAuth);
+UsersAuth.hasMany(UsersSession, { // users may have many sessions
     foreignKey: {
         name: 'usersAuthId',
         allowNull: false, // every session must have a user
