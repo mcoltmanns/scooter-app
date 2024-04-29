@@ -115,6 +115,7 @@ export class AuthController {
           await UsersSession.create(sessionData, { transaction }); // save the new session
           /* Commit the transaction */
           await transaction.commit();
+          response.cookie('sessionId', sessionId, { httpOnly: true, expires: expiry }); // set the cookie
         } catch (error) {
           await transaction.rollback(); // Rollback the transaction in case of an error
           response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
