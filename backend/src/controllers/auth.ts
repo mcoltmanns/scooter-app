@@ -18,10 +18,7 @@ export class AuthController {
     const houseNumberInt = Number(houseNumber);
     const zipCodeInt = Number(zipCode);
 
-    //TODO: should probably check request contents (return error 400 if bad)
-
     /* Hash the provided password */
-    //TODO: this is dangerous! passwords should not arrive in plaintext
     let passwordHash;
     try {
       passwordHash = bcrypt.hashSync(password, 10); // Hash password
