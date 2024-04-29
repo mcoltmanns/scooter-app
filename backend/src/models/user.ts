@@ -54,12 +54,6 @@ export const UsersData = Database.getSequelize().define('usersDatas', {
   updatedAt: false
 });
 
-UsersAuth.hasOne(UsersData, {
-  foreignKey: {
-    name: 'usersAuthId',
-    allowNull: false,
-  },
-});
 UsersData.belongsTo(UsersAuth, {
   foreignKey: {
     name: 'usersAuthId',
