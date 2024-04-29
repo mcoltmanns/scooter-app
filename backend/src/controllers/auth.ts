@@ -4,6 +4,7 @@ import uid from 'uid-safe';
 import Database from '../database';
 import { UsersAuth, UsersData } from '../models/user';
 import { SESSION_LIFETIME, UsersSession } from '../models/session';
+import SessionManager from '../session-manager';
 
 /**
  * All authorization functions should go here - anything login or registration related
@@ -98,28 +99,29 @@ export class AuthController {
     // find a user with the given email
     const user = await UsersAuth.findOne({ where: { email: email } }); // find the user with this email
     if(user) { // user exists
+      const userId = user.getDataValue('id');
       // check the password hash
       if(user.getDataValue('password') === passwordHash) {
         // user has provided correct password
         console.log('Password ok');
-        const transaction = await Database.getSequelize().transaction(); // start a new transaction
-        try {
-          // generate a new session
-          const sessionId = uid.sync(24);
-          const expiry = new Date(Date.now() + SESSION_LIFETIME);
-          const sessionData = {
-            id: sessionId,
-            expires: expiry,
-            usersAuthId: user.getDataValue('id'),
-          };
-          await UsersSession.create(sessionData, { transaction }); // save the new session
-          /* Commit the transaction */
-          await transaction.commit();
-          response.cookie('sessionId', sessionId, { httpOnly: true, expires: expiry }); // set the cookie
-        } catch (error) {
-          await transaction.rollback(); // Rollback the transaction in case of an error
-          response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
-          return;
+        let session = await SessionManager.hasValidSession(userId); // see if the user has a valid session
+        if(session !== null) { // if they do, log them in to that one
+          console.log('found an active session');
+          response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') });
+        }
+        else { // if they don't, generate a new session and log them in
+          console.log('no session found. making one');
+          const transaction = await Database.getSequelize().transaction(); // start a new transaction
+          session = await SessionManager.createSession(user.getDataValue('id'), transaction); // create a new session
+          try {
+            /* Commit the transaction */
+            await transaction.commit();
+            response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }); // set the cookie
+          } catch (error) {
+            await transaction.rollback(); // Rollback the transaction in case of an error
+            response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
+            return;
+          }
         }
         response.status(200).json('Login successful');
         return;

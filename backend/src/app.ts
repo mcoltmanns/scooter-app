@@ -67,7 +67,7 @@ app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
 app.post('/api/login', auth.login.bind(auth));
 
 const api = new ApiController();
-app.get('/api', api.getInfo);
+app.get('/api', validator.validateSession, api.getInfo); // DEBUG testing session validator
 app.get('/api/employees', api.getEmployeeInfo); // map about/employees to the function for getting employee info
 
 // Falls ein Fehler auftritt, gib den Stack trace aus

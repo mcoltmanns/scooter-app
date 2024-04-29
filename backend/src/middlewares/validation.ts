@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { check, FieldValidationError, validationResult } from 'express-validator';
 import { UsersAuth } from '../models/user';
-import { UsersSession } from '../models/session';
+import SessionManager from '../session-manager';
 
 interface ErrorsObject {
   [key: string]: string;
@@ -59,22 +59,22 @@ export class Validator {
   public async validateSession(request: Request, response: Response, next: NextFunction): Promise<void> {
     const test = check('sessionId').notEmpty().custom(
       async (sessionId) => {
-        const session = await UsersSession.findOne({ where: { id: sessionId }});
-        const expires: Date = session.getDataValue('expires');
-        if(!session) {
+        console.log(`Validating session ${sessionId}...`);
+        const exp = await SessionManager.sessionExpired(sessionId); // have the session manager see if this session is still valid
+        if(exp === null) {
           throw new Error('Session does not exist.');
         }
-        else if (expires && expires < new Date) {
-          UsersSession.destroy({ where: { id: sessionId }}); // if a session is expired, we can drop it
+        else if (exp) {
           throw new Error('Session is expired.');
         }
+        else SessionManager.renewSession(sessionId); // if everything is ok, we can renew this session
       }
     ).withMessage('Invalid session ID');
 
     try {
       await test.run(request);
     } catch (error) {
-      response.status(403).json({ code: 403, message: 'Access denied.' });
+      response.status(403).json({ code: 403, message: `${error}` });
       return;
     }
 
