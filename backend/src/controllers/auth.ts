@@ -100,8 +100,8 @@ export class AuthController {
     if(user) { // user exists
       // check the password hash
       if(user.getDataValue('password') === passwordHash) {
-        console.log('Password ok');
         // user has provided correct password
+        console.log('Password ok');
         const transaction = await Database.getSequelize().transaction(); // start a new transaction
         try {
           // generate a new session
