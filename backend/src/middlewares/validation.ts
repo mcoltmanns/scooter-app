@@ -59,8 +59,8 @@ export class Validator {
   public async validateSession(request: Request, response: Response, next: NextFunction): Promise<void> {
     const test = check('sessionId').notEmpty().custom(
       async (sessionId) => {
-        const session = UsersSession.findOne({ where: { id: sessionId }});
-        const expires: Date = (await session).getDataValue('expires');
+        const session = await UsersSession.findOne({ where: { id: sessionId }});
+        const expires: Date = session.getDataValue('expires');
         if(!session) {
           throw new Error('Session does not exist.');
         }
@@ -74,7 +74,7 @@ export class Validator {
     try {
       await test.run(request);
     } catch (error) {
-      response.status(403).json({ code: 403, message: 'Access denied.' }); // 403 - access denied
+      response.status(403).json({ code: 403, message: 'Access denied.' });
       return;
     }
 

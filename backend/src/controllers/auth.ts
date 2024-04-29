@@ -5,6 +5,9 @@ import Database from '../database';
 import { UsersAuth, UsersData } from '../models/user';
 import { SESSION_LIFETIME, UsersSession } from '../models/session';
 
+/**
+ * All authorization functions should go here - anything login or registration related
+ */
 export class AuthController {
   public async register(request: Request, response: Response): Promise<void> {
     /* Extract the received client data from the request body */
@@ -13,6 +16,8 @@ export class AuthController {
     /* Convert numbers from type string to type number */
     const houseNumberInt = Number(houseNumber);
     const zipCodeInt = Number(zipCode);
+
+    //TODO: should probably check request contents (return error 400 if bad)
 
     /* Hash the provided password */
     //TODO: this is dangerous! passwords should not arrive in plaintext
@@ -61,7 +66,6 @@ export class AuthController {
       };
       // save the new session
       await UsersSession.create(sessionData, { transaction });
-      createdUserAuth.setDataValue('usersSessionId', sessionId); // set the new user's session id
       /*
        * Cookie Optionen:
        * Für Cookies die nicht per JavaScript abgefragt werden können: "httpOnly: true"
@@ -81,6 +85,51 @@ export class AuthController {
 
     /* Send a success message */
     response.status(201).json({ code: 201, message: 'Registration successful.' });
+    return;
+  }
+
+  public async login(request: Request, response: Response): Promise<void> {
+    const { email, passwordHash } = request.body; // get relevant info from the request
+    if(!email || !passwordHash) { // email or password is missing!
+      response.status(400).json('Malformed login request');
+      return;
+    }
+    console.log(`Trying to login as ${email}, ${passwordHash}`);
+    // find a user with the given email
+    const user = await UsersAuth.findOne({ where: { email: email } }); // find the user with this email
+    if(user) { // user exists
+      // check the password hash
+      if(user.getDataValue('password') === passwordHash) {
+        console.log('Password ok');
+        // user has provided correct password
+        const transaction = await Database.getSequelize().transaction(); // start a new transaction
+        try {
+          // generate a new session
+          const sessionId = uid.sync(24);
+          const expiry = new Date(Date.now() + SESSION_LIFETIME);
+          const sessionData = {
+            id: sessionId,
+            expires: expiry,
+            usersAuthId: user.getDataValue('id'),
+          };
+          await UsersSession.create(sessionData, { transaction }); // save the new session
+          /* Commit the transaction */
+          await transaction.commit();
+        } catch (error) {
+          await transaction.rollback(); // Rollback the transaction in case of an error
+          response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
+          return;
+        }
+        response.status(200).json('Login successful');
+        return;
+      }
+      else {
+        response.status(403).json('Incorrect password');
+      }
+    }
+    else {
+      response.status(401).json(`Could not find a user with email ${email}. Please create an account.`);
+    }
     return;
   }
 }
