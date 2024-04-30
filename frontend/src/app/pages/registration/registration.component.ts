@@ -107,7 +107,7 @@ export class RegistrationComponent implements OnInit{
       registrationIsValid = false;
     }
     if (houseNumberValidate.hasError('required')) { // input field is empty
-      this.errorHouseNumberMessage = 'Bitte geben Sie eine Hausnummer an ein.';
+      this.errorHouseNumberMessage = 'Bitte geben Sie eine Hausnummer ein.';
       registrationIsValid = false;
     }
     if (zipCodeValidate.hasError('invalidNumericInput')) { // zipCode is no numeric number
