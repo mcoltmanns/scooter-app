@@ -44,16 +44,14 @@
            type="password"
            [(text)]="password1"
         ></app-user-input>
-        <div class="error">{{checkpasswordsMessage }}</div>
-        <div class="error">{{errorPasswordMessage}}</div>
+        <div class="error">{{errorPassword1Message}}</div>
 
         <app-user-input
            label="Passwort wiederholen"
            type="password"
            [(text)]="password2"
         ></app-user-input>
-        <div class="error">{{checkpasswordsMessage }}</div>
-        <div class="error">{{errorPasswordMessage}}</div>
+        <div class="error">{{errorPassword2Message}}</div>
 
         <div class="bottom">
             <app-button color="primary" class="registration-btn" (click)="registration()">

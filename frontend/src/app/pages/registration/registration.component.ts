@@ -5,6 +5,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Router, RouterLink } from '@angular/router';
 import { RegistrationService } from 'src/app/services/registration.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import {FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-registration',
@@ -22,62 +23,26 @@ export class RegistrationComponent implements OnInit{
     console.log('Registration Page intialized');
   }
   
-  /* All variables for the user-input Content: */
-  public name = ''; // Content of the "Name" input field
-  public street = ''; // Content of the "Straße" input field
-  public houseNumber = ''; // Content of the "Nummer" input field
-  public zipCode = ''; // Content of the "Postleitzahl" input field
-  public city = ''; // Content of the "Ort" input field
-  public email = ''; // Content of the "Email" input field
-  public password1 = ''; // Content of the first password input field
-  public password2 = ''; // Content of the second password input field
+  /* Variables for the value of the input fields */
+  public name = '';
+  public street = '';
+  public houseNumber = '';
+  public zipCode = '';
+  public city = '';
+  public email = '';
+  public password1 = ''; // value of the first password input field
+  public password2 = ''; // value of the second password input field
 
-  /* error variables only used for frontend */
-  public errorEmptyFieldMessage = '';
-  public emptyField = ''; //checks for empty field
-  public checkpasswordsMessage = ''; //checks if passwords are the same
-  /* error variables: */
+  /* error variables */
   public errorNameMessage = '';
   public errorStreetMessage = '';
   public errorHouseNumberMessage = '';
   public errorZipCodeMessage = '';
   public errorCityMessage = '';
   public errorEmailMessage = '';
-  public errorPasswordMessage = ''; // Message from backend
+  public errorPassword1Message = '';// error for the first password input field
+  public errorPassword2Message = '';// error for the second password input field
   public errorMessage = ''; // general Error Message from the backend
-
-  /**
-   * Checks if an input field is empty in frontend
-   */
-  checkEmptyField(): void {
-    if (!this.name) {
-      this.emptyField = 'Name';
-    } else if (!this.street) {
-      this.emptyField = 'Straße';
-    } else if (!this.houseNumber) {
-      this.emptyField = 'Nummer';
-    } else if (!this.zipCode) {
-      this.emptyField = 'Postleitzahl';
-    } else if (!this.city) {
-      this.emptyField = 'Ort';
-    } else if (!this.email) {
-      this.emptyField = 'Email';
-    } else if (!this.password1) {
-      this.emptyField = 'Passwort';
-    } else if (!this.password2) {
-      this.emptyField = 'Passwort wiederholen';
-    } else {
-      this.emptyField = '';
-    }
-  }
-
-  /**
-   * Checks if the email is valid
-   */
-  validateEmail(email: string): boolean {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailPattern.test(email);
-  }
 
   /**
    * method that checks whether both passwords are the same
@@ -87,7 +52,7 @@ export class RegistrationComponent implements OnInit{
   }
 
   /**
-   * Reset all Error functions
+   * Reset all Error variables
    */
   resetErrorMessages(): void {
     this.errorNameMessage = '';
@@ -96,9 +61,97 @@ export class RegistrationComponent implements OnInit{
     this.errorZipCodeMessage = '';
     this.errorCityMessage = '';
     this.errorEmailMessage = '';
-    this.errorPasswordMessage = '';
-    this.errorEmptyFieldMessage = '';
-    this.checkpasswordsMessage = '';
+    this.errorPassword1Message = '';
+    this.errorPassword2Message = '';
+  }
+
+  /**
+   * checks whether an input is a numeric number
+   */
+  checkNumericInput(control: FormControl): { [key: string]: unknown } | null {
+    const houseNumberPattern = /^[0-9]+$/; // regular expression that only accepts digits
+  
+    if (!houseNumberPattern.test(control.value)) {
+      return { 'invalidNumericInput': true }; // error message if the input does not contain any digits
+    }
+  
+    return null; // return zero means that no errors were found
+  }
+
+  /**
+   * Checks if Arguments from the User Input Fields are valid
+   */
+  validateAttributes(): boolean {
+    let registrationIsValid = true;
+
+    /* Define FormControl instances for validating the input fields */
+    const nameValidate = new FormControl(this.name, [Validators.required]);
+    const streetValidate = new FormControl(this.street, [Validators.required]);
+    const houseNumberValidate = new FormControl(this.houseNumber, [Validators.required, this.checkNumericInput]);
+    const zipCodeValidate = new FormControl(this.zipCode, [Validators.required, this.checkNumericInput]);
+    const cityValidate = new FormControl(this.city, [Validators.required]);
+    const emailValidate = new FormControl(this.email, [Validators.required, Validators.email]);
+    const password1Validate = new FormControl(this.password1, [Validators.required, Validators.minLength(8)]);
+    const password2Validate = new FormControl(this.password2, [Validators.required, Validators.minLength(8)]);
+
+    if (nameValidate.hasError('required')) { // input field is empty
+      this.errorNameMessage = 'Bitte geben Sie einen Namen ein.';
+      registrationIsValid = false;
+    }
+    if (streetValidate.hasError('required')) { // input field is empty
+      this.errorStreetMessage = 'Bitte geben Sie eine Straße ein.';
+      registrationIsValid = false;
+    }
+    if (houseNumberValidate.hasError('invalidNumericInput')) { //houseNumber is no numeric number
+      this.errorHouseNumberMessage = 'Ungültige Hausnummer';
+      registrationIsValid = false;
+    }
+    if (houseNumberValidate.hasError('required')) { // input field is empty
+      this.errorHouseNumberMessage = 'Bitte geben Sie eine Hausnummer an ein.';
+      registrationIsValid = false;
+    }
+    if (zipCodeValidate.hasError('invalidNumericInput')) { // zipCode is no numeric number
+      this.errorZipCodeMessage = 'Ungültige Postleitzahl';
+      registrationIsValid = false;
+    }
+    if (zipCodeValidate.hasError('required')) { // input field is empty
+      this.errorZipCodeMessage = 'Bitte geben Sie eine Postleitzahl ein.';
+      registrationIsValid = false;
+    }
+    if (cityValidate.hasError('required')) { // input field is empty
+      this.errorCityMessage = 'Bitte geben Sie einen Ort ein.';
+      registrationIsValid = false;
+    }
+    if (emailValidate.hasError('required')) { // input field is empty
+      this.errorEmailMessage = 'Bitte geben Sie eine E-Mail-Adresse ein.';
+      registrationIsValid = false;
+    }
+    if (emailValidate.hasError('email')) { // email is not valid
+      this.errorEmailMessage = 'Ungültige E-Mail.';
+      registrationIsValid = false;
+    }
+    if (password1Validate.hasError('required')) { // input field is empty
+      this.errorPassword1Message = 'Bitte geben Sie ein Passwort ein.';
+      registrationIsValid = false;
+    }
+    if (password1Validate.hasError('minlength')) { //password length is less than 8
+      this.errorPassword1Message = 'Das Passwort muss mindestens 8 Stellen haben.';
+      registrationIsValid = false;
+    }
+    if (password2Validate.hasError('required')) { // input field is empty
+      this.errorPassword2Message = 'Bitte geben Sie ein Passwort ein.';
+      registrationIsValid = false;
+    }
+    if (password2Validate.hasError('minlength')) { //password length is less than 8
+      this.errorPassword2Message = 'Das Passwort muss mindestens 8 Stellen haben.';
+      registrationIsValid = false;
+    }
+    if(this.password1 !== this.password2){ // passwords do not match
+      this.errorPassword2Message = 'Die Passwörter stimmen nicht überein.';
+      this.errorPassword2Message = 'Die Passwörter stimmen nicht überein.';
+      registrationIsValid = false;
+    }
+    return registrationIsValid;
   }
 
   /**
@@ -107,7 +160,6 @@ export class RegistrationComponent implements OnInit{
   handleBackendError(err: HttpErrorResponse): void {
     this.errorMessage = err.error.message;
     console.error(err);
-  
     /* assigns all backend errors to the variables */
     if (err.status === 400 && err.error.validationErrors) {
       const validationErrors = err.error.validationErrors;
@@ -117,7 +169,8 @@ export class RegistrationComponent implements OnInit{
       this.errorZipCodeMessage = validationErrors?.zipCode || '';
       this.errorCityMessage = validationErrors?.city || '';
       this.errorEmailMessage = validationErrors?.email || '';
-      this.errorPasswordMessage = validationErrors?.password || '';
+      this.errorPassword1Message = validationErrors?.password || '';
+      this.errorPassword2Message = validationErrors?.password || '';
     } else {
       this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
       console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
@@ -125,7 +178,7 @@ export class RegistrationComponent implements OnInit{
   }
 
   /*
-   * Registration method
+   * The registration method is called up as soon as the registration button is pressed
    */
   registration(): void {
     console.log('registration button pressed');
@@ -133,26 +186,11 @@ export class RegistrationComponent implements OnInit{
     /* Reset all ErrorMessages */
     this.resetErrorMessages();
 
-    /*
-    this.checkEmptyField();
-    if (this.emptyField) {
-      this.errorEmptyFieldMessage = `Bitte füllen Sie das Feld '${this.emptyField}' aus.`;
-      console.log(this.errorEmptyFieldMessage);
-      return;// stops registration process
-    }
-    */
-
-    if (!this.validateEmail(this.email)) { // checks for correct E-Mail
-      this.errorEmailMessage = 'Ungültige E-Mail-Adresse';
-      console.log(this.errorEmailMessage);
-      return;// stops registration process
+    /* Checks for invalid input */
+    if(!this.validateAttributes()){
+      return; // registration canceled
     }
 
-    if (!this.passwordsMatch()) { // checks for matching passwords
-      this.checkpasswordsMessage = 'Passwörter stimmen nicht überein';
-      console.log(this.checkpasswordsMessage);
-      return;// stops registration process
-    }
     this.registrationService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
       next: () => {
         console.log('registration successfully');
