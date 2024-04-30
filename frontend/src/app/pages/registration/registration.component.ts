@@ -194,7 +194,7 @@ export class RegistrationComponent implements OnInit{
     this.registrationService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
       next: () => {
         console.log('registration successfully');
-        this.router.navigateByUrl('/login'); // after successfully registration return to login
+        this.router.navigateByUrl('/search'); // after successfully registration return to search (map) page since the server will automatically log in the user after registration
       },
       error: (err) => {
         this.handleBackendError(err);

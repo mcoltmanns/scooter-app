@@ -1,7 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, shareReplay, of } from 'rxjs';
+import { tap, catchError, map } from 'rxjs/operators';
 import { ResponseMessage } from '../models/response-message';
+
+interface AuthResponse {
+  code: number;
+  authenticated: boolean;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -17,19 +23,35 @@ export class LoginService{
   }
 
   //check if authenticated
+  // public checkAuth(): Observable<boolean> {
+  //   const authObservable : Observable<boolean> = this.http.get<boolean>('/api/authenticate').pipe(shareReplay());
+  //   authObservable.subscribe({
+  //     next: (value) => {
+  //       this.loggedIn = value;
+  //       this.authChecked = true;
+  //     },
+  //     error: (err) => {
+  //       this.loggedIn = false;
+  //       console.log(err);
+  //     }
+  //   });
+  //   return authObservable;
+  // }
   public checkAuth(): Observable<boolean> {
-    const authObservable : Observable<boolean> = this.http.get<boolean>('/api/authenticate').pipe(shareReplay());
-    authObservable.subscribe({
-      next: (value) => {
-        this.loggedIn = value;
+    return this.http.get<AuthResponse>('/api/authenticate').pipe(
+      tap(response => {
+        this.loggedIn = response.authenticated;
         this.authChecked = true;
-      },
-      error: (err) => {
-        this.loggedIn = false;
+      }),
+      map(response => response.authenticated),
+      catchError(err => {
         console.log(err);
-      }
-    });
-    return authObservable;
+        this.loggedIn = false;
+        this.authChecked = true;
+        return of(false);
+      }),
+      shareReplay()
+    );
   }
 
   //method to log in
