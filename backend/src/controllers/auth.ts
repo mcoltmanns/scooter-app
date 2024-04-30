@@ -1,15 +1,61 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import uid from 'uid-safe';
 import Database from '../database';
 import { UsersAuth, UsersData } from '../models/user';
-import { SESSION_LIFETIME, UsersSession } from '../models/session';
-import SessionManager from '../session-manager';
+import { SESSION_LIFETIME, UsersSession } from '../models/user';
+import SessionManager from '../services/session-manager';
 
 /**
  * All authorization functions should go here - anything login or registration related
  */
 export class AuthController {
+    public async authorize(request: Request, response: Response, next: NextFunction): Promise<void> {
+    /* Check if the client has sent a session cookie */
+    const sessionId = request.cookies.sessionId;
+    if (!sessionId) {
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'No session, please log in' } }); // 401: Unauthorized
+      return;
+    };
+
+    /* Check if the session exists */
+    const session = await UsersSession.findOne({ where: { id: sessionId } });
+    if (!session) {
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session does not exist, please log in' } }); // 401: Unauthorized
+      return;
+    }
+
+    /* Check if the session has expired */
+    if(await SessionManager.sessionExpired(session)) {
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session expired, please log in' } }); // 401: Unauthorized
+      return;
+    }
+
+    /* Extend the expiration date of the current session.
+     * NOTE: Automatically extending the session duration is a common practice to keep the user logged in,
+     * but is a security-related measure. Implementing this in production requires careful consideration and testing.
+     */
+    const newExpiry = new Date(Date.now() + SESSION_LIFETIME);
+    session.setDataValue('expires', newExpiry);
+    
+    /* Save the changes to the database */
+    try {
+      await session.save();
+    } catch (error) {
+      response.status(500).json({ code: 500, message: 'Something went wrong' }); // 500: Internal Server Error
+      return;
+    }
+
+    /* Update the session cookie */
+    response.cookie('sessionId', sessionId, { httpOnly: true, expires: newExpiry });
+    
+    /* Save the session in the response locals */
+    response.locals.session = session;
+
+    return next();
+  }
+
+
   public async register(request: Request, response: Response): Promise<void> {
     /* Extract the received client data from the request body */
     const { name, street, houseNumber, zipCode, city, email, password } = request.body;
@@ -104,11 +150,13 @@ export class AuthController {
     }
 
     /* Check if the user already has an active session */
-    const activeSession = await SessionManager.hasValidSession(request.cookies.sessionId, user.getDataValue('id'));
+    const activeSession = await SessionManager.isValidSession(request.cookies.sessionId, user.getDataValue('id'));
     if (activeSession) {
       response.status(200).json({ code: 200, message: 'Already logged in' });
       return;
     }
+
+    // TODO: Check if the user has an active session even if the session cookie is not set if we want stick to one session per user
 
     /* Create a new session for the user */
     const newSession = await SessionManager.createSession(user.getDataValue('id'));
@@ -133,7 +181,7 @@ export class AuthController {
     //   return;
     // }
     // const userId = user.getDataValue('id');
-    // let session = await(SessionManager.hasValidSession(userId)); // see if user has a session
+    // let session = await(SessionManager.isValidSession(userId)); // see if user has a session
     // if(session !== null) { // if they do, log them in to that one
     //   console.log('found an active session');
     //   response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }).status(200).json('Login successful.');
@@ -154,5 +202,37 @@ export class AuthController {
     //     return;
     //   }
     // }
+  }
+
+  public getAuth(request: Request, response: Response): void {
+    if (!response.locals.session) {
+      response.status(200).json({ code: 200, authenticated: false });
+      return;
+    }
+
+    response.status(200).json({ code: 200, authenticated: true });
+    return;
+  }
+
+  public async logout(request: Request, response: Response): Promise<void> {
+    /* Check if the user has an active session */
+    // const activeSession = await SessionManager.isValidSession(request.cookies.sessionId);
+    if (!response.locals.session) {
+      console.log('No active Session');
+      response.status(401).json({ code: 401, message: 'Not logged in' }); // 401: Unauthorized
+      return;
+    }
+
+    /* Destroy the session */
+    try {
+      await UsersSession.destroy({ where: { id: request.cookies.sessionId } });
+    } catch (error) {
+      response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
+      return;
+    }
+
+    /* Clear the session cookie and send a success message */
+    response.clearCookie('sessionId').status(200).json({ code: 200, message: 'Logout successful' });
+    return;
   }
 }

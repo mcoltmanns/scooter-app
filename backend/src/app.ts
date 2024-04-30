@@ -68,12 +68,20 @@ app.use(cookieParser());
 
 const validator = new Validator();
 const auth = new AuthController();
+const api = new ApiController();
+
+/* Routes without authentication */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
 app.post('/api/login', validator.validateLogin, auth.login.bind(auth));
-
-const api = new ApiController();
-app.get('/api', validator.validateSession, api.getInfo); // DEBUG testing session validator
 app.get('/api/employees', api.getEmployeeInfo); // map about/employees to the function for getting employee info
+
+/* Run authentication middleware for all api routes below */
+app.all('/api/*', validator.validateSessionCookie, auth.authorize.bind(auth));
+
+/* Routes with authentication */
+app.delete('/api/logout', auth.logout.bind(auth));
+app.get('/api/auth', auth.getAuth.bind(auth));
+app.get('/api', api.getInfo); // DEBUG testing session validator
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {

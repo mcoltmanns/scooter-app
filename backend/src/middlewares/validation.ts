@@ -1,14 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { check, FieldValidationError, validationResult, ValidationChain } from 'express-validator';
 import { UsersAuth } from '../models/user';
-import SessionManager from '../session-manager';
 
 interface ErrorsObject {
   [key: string]: string;
 }
 
 export class Validator {
-  private static async runAllChecks(checks: ValidationChain[], request: Request, response: Response, next: NextFunction): Promise<void> {
+  private static async runAllChecks(errorCode: number, checks: ValidationChain[], request: Request, response: Response, next: NextFunction): Promise<void> {
     /* Run all checks */
     try {
       await Promise.all(checks.map(check => check.run(request)));
@@ -29,7 +28,7 @@ export class Validator {
         (valErr: FieldValidationError) => (errors[valErr.path] = valErr.msg)
       );
 
-      response.status(400).json({ code: 400, validationErrors: errors });
+      response.status(errorCode).json({ code: errorCode, validationErrors: errors });
       return;
     }
     
@@ -55,62 +54,31 @@ export class Validator {
     ];
 
     /* Run all checks */
-    await Validator.runAllChecks(checks, request, response, next);
+    await Validator.runAllChecks(400, checks, request, response, next);
   }
 
   public async validateLogin(request: Request, response: Response, next: NextFunction): Promise<void> {  
     /* Check if all fields correspond to the expected request body */
     const checks = [
+      check('sessionId').trim().escape(),
       check('email').trim().escape().notEmpty().withMessage('Please provide an email').bail().isEmail().withMessage('Please provide a valid email').bail().normalizeEmail(),
       check('password').escape().notEmpty().withMessage('Please provide a password')
     ];
 
     /* Run all checks */
-    await Validator.runAllChecks(checks, request, response, next);
+    await Validator.runAllChecks(400, checks, request, response, next);
   }
 
   /**
    * validate a user's session
    */
-  public async validateSession(request: Request, response: Response, next: NextFunction): Promise<void> {
-    const test = check('sessionId').notEmpty().custom(
-      async (sessionId) => {
-        console.log(`Validating session ${sessionId}...`);
-        const exp = await SessionManager.sessionExpired(sessionId); // have the session manager see if this session is still valid
-        if(exp === null) {
-          throw new Error('Session does not exist');
-        }
-        else if (exp) {
-          throw new Error('Session is expired');
-        }
-        else SessionManager.renewSession(sessionId); // if everything is ok, we can renew this session
-      }
-    ).withMessage('Invalid session ID');
+  public async validateSessionCookie(request: Request, response: Response, next: NextFunction): Promise<void> {
+    /* Check if all fields correspond to the expected request body */
+    const checks = [
+      check('sessionId').trim().escape().notEmpty().withMessage('No session, please log in').bail().isLength({ min: 32, max: 32 }).withMessage('Session ID is not valid').matches(/^[a-zA-Z0-9_-]*$/).withMessage('Session ID is not valid')
+    ];
 
-    try {
-      await test.run(request);
-    } catch (error) {
-      response.status(403).json({ code: 403, message: `${error}` });
-      return;
-    }
-
-    /* Catch the validation errors */
-    const validationErrors = validationResult(request);
-
-    /* Handle the validation errors if they occurred */
-    // TODO: refactor into a universal error handler maybe?
-    if (!validationErrors.isEmpty()) {
-      const errors: ErrorsObject = {};
-
-      validationErrors.array().forEach(
-        (valErr: FieldValidationError) => (errors[valErr.path] = valErr.msg)
-      );
-
-      response.status(403).json({ code: 403, validationErrors: errors });
-      return;
-    }
-
-    // continue if everything's ok
-    return next();
+    /* Run all checks */
+    await Validator.runAllChecks(401, checks, request, response, next);
   }
 }

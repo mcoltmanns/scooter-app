@@ -1,6 +1,8 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 
+export const SESSION_LIFETIME = 60 * 60 * 1000; // sessions expire after 1 hour
+
 export const UsersAuth = Database.getSequelize().define('usersAuths', {
   id: {
     type: DataTypes.INTEGER,
@@ -54,6 +56,17 @@ export const UsersData = Database.getSequelize().define('usersDatas', {
   updatedAt: false
 });
 
+export const UsersSession = Database.getSequelize().define('usersSession', {
+  id: {
+      type: DataTypes.STRING,
+      primaryKey: true,
+  },
+  expires: {
+      type: DataTypes.DATE,
+      allowNull: false,
+  }
+}, { updatedAt: false, createdAt: false });
+
 UsersAuth.hasOne(UsersData, {
   foreignKey: {
     name: 'usersAuthId',
@@ -61,6 +74,19 @@ UsersAuth.hasOne(UsersData, {
   },
 });
 UsersData.belongsTo(UsersAuth, {
+  foreignKey: {
+    name: 'usersAuthId',
+    allowNull: false,
+  },
+});
+
+UsersAuth.hasMany(UsersSession, { // users may have many sessions
+  foreignKey: {
+      name: 'usersAuthId',
+      allowNull: false, // every session must have a user
+  }
+});
+UsersSession.belongsTo(UsersAuth, {
   foreignKey: {
     name: 'usersAuthId',
     allowNull: false,
