@@ -23,21 +23,44 @@ abstract class SessionManager {
 
     /**
      * Check if a user has a valid session
-     * @param userAuthId    userAuthId to find a valid session for
-     * @returns             the session if it exists, null otherwise
+     * @param cookieSessionId    session id to check against
+     * @param userAuthId         userAuthId to check against
+     * @returns             true if it exists, false otherwise
      */
-    public static async hasValidSession(userAuthId: string): Promise<Model> {
-        console.log('looking for a session...');
-        const session = await UsersSession.findOne({ where: { usersAuthId: userAuthId } });
-        if(session) {
-            const expires: Date = session.getDataValue('expires');
-            if(expires && expires < new Date) { // check if the session expired
-                session.destroy(); // did it? get rid of it
-                return null;
-            }
-            else return session;
+    public static async hasValidSession(cookieSessionId: string, userAuthId: string): Promise<boolean> {
+        /* Check if no session id or user id provided */
+        if (!cookieSessionId || !userAuthId) {
+            return false;
         }
-        else return null;
+
+        /* Search for a session with the given session id and user id */
+        let session;
+        try {
+            session = await UsersSession.findOne({ where: { id: cookieSessionId, usersAuthId: userAuthId } });
+        } catch (error) {
+            console.log(error);
+        }
+
+        /* Check if the session exists */
+        if(!session) {
+            return false;
+        }
+
+        /* Check if the session has expired */
+        const sessionExpires = new Date(session.getDataValue('expires'));
+        console.log(`Session expires at ${sessionExpires} and now is ${new Date()}`);
+        if(sessionExpires < new Date()) {
+            console.log('Session expired');
+            try {
+                await session.destroy(); // Destroy the session if it has expired
+            } catch (error) {
+                console.log(error);
+            }
+
+            return false;
+        }
+        
+        return true;
     }
 
     /**
@@ -54,8 +77,8 @@ abstract class SessionManager {
      * Generate a new session in the context of a database transaction
      * @param userAuthId    id of the user for this session
      */
-    public static async createSession(userAuthId: string, transaction: Transaction): Promise<Model> {
-        // generate a new session
+    public static async createSession(userAuthId: string): Promise<Model> {
+        /* Generate a new session */
         const sessionId = uid.sync(24);
         const expiry = new Date(Date.now() + SESSION_LIFETIME);
         const sessionData = {
@@ -63,7 +86,16 @@ abstract class SessionManager {
           expires: expiry,
           usersAuthId: userAuthId,
         };
-        return await UsersSession.create(sessionData, { transaction }); // save the new session
+
+        /* Save the new session to the database */
+        let newSession;
+        try {
+            newSession = await UsersSession.create(sessionData); // save the new session
+        } catch (error) {
+            console.log(error);
+        }
+
+        return newSession;
     }
 }
 

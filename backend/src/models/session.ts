@@ -18,10 +18,15 @@ export const UsersSession = Database.getSequelize().define('usersSession', {
     }
 }, { updatedAt: false, createdAt: false });
 
-UsersSession.hasOne(UsersAuth);
 UsersAuth.hasMany(UsersSession, { // users may have many sessions
     foreignKey: {
         name: 'usersAuthId',
         allowNull: false, // every session must have a user
     }
 });
+UsersSession.belongsTo(UsersAuth, {
+    foreignKey: {
+      name: 'usersAuthId',
+      allowNull: false,
+    },
+  });

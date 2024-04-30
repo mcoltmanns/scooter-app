@@ -11,6 +11,7 @@ import errorHandler from 'errorhandler';
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
@@ -35,6 +36,10 @@ app.use(express.urlencoded({ extended: true }));
 // Wir erlauben alle "Cross-Origin Requests". Normalerweise ist man hier etwas strikter, aber für den Softwareprojekt Kurs
 // erlauben wir alles um eventuelle Fehler zu vermeiden.
 app.use(cors({ origin: '*' }));
+
+// Parse Cookies in the request headers and make them available in the request object
+app.use(cookieParser());
+
 
 /**
  *  API Routen festlegen
@@ -64,7 +69,7 @@ app.use(cors({ origin: '*' }));
 const validator = new Validator();
 const auth = new AuthController();
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
-app.post('/api/login', auth.login.bind(auth));
+app.post('/api/login', validator.validateLogin, auth.login.bind(auth));
 
 const api = new ApiController();
 app.get('/api', validator.validateSession, api.getInfo); // DEBUG testing session validator
