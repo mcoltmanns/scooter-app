@@ -92,6 +92,9 @@ export class UserInputComponent {
    *  die "text" Variable weiter an die         Methode aufgerufen. Falls Methoden aufgerufen werden sollen,
    *  Input Komponente.                         markieren wir das mit den normalen Klammern: (ngModelChange)
    */
+
+  @Input() disabled = false; // disables interaction with user input field property
+
   onTextChange(): void {
     this.textChange.emit(this.text);
   }

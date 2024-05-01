@@ -1,0 +1,67 @@
+<div class="page-container">
+    <h1 class="title">Profil bearbeiten</h1>
+    <app-back-button></app-back-button>
+    <div class="scrollable-container">
+        <app-user-input
+           label="Name"
+           [(text)]="name"
+        ></app-user-input>
+        <div class="error">{{errorNameMessage}}</div>
+
+        <div class="address-row">
+            <app-user-input
+               label="Straße"
+               [(text)]="street"
+            ></app-user-input>
+
+            <app-user-input
+               label="Nummer"
+               [(text)]="houseNumber"
+            ></app-user-input>
+        </div>
+        <div class="error">{{errorStreetMessage}}</div>
+        <div class="error">{{errorHouseNumberMessage}}</div>
+
+        <app-user-input
+           label="Postleitzahl"
+           [(text)]="zipCode"
+        ></app-user-input>
+        <div class="error">{{errorZipCodeMessage}}</div>
+
+        <app-user-input
+           label="Ort"
+           [(text)]="city"
+        ></app-user-input>
+        <div class="error">{{errorCityMessage}}</div>
+
+        <app-user-input
+           label="Email"
+           [(text)]="email"
+           [disabled]="true"
+        ></app-user-input>
+        <div class="error">{{errorEmailMessage}}</div>
+
+        <app-user-input
+           label="Passwort"
+           type="password"
+           [(text)]="password1"
+        ></app-user-input>
+        <div class="error">{{errorPassword1Message}}</div>
+
+        <app-user-input
+           label="Passwort wiederholen"
+           type="password"
+           [(text)]="password2"
+        ></app-user-input>
+        <div class="error">{{errorPassword2Message}}</div>
+
+        <div class="bottom">
+            <app-button color="primary" class="registration-btn" (click)="editPersonalInformation()">
+                Änderungen speichern
+            </app-button>
+            <app-button color="accent" class="abort-btn" (click)="abortEdit()">
+                Abbrechen
+            </app-button>       
+        </div>
+    </div>
+</div>

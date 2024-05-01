@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" [class.disabled]="disabled">
   <p class="label" *ngIf="label">{{ label }}</p>
-  <input [type]="type" [(ngModel)]="text" (ngModelChange)="onTextChange()" />
+  <input [type]="type" [(ngModel)]="text" (ngModelChange)="onTextChange()" [disabled]="disabled"/> <!-- disables interaction with user input field -->
 </div>
