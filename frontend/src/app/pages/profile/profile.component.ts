@@ -5,26 +5,46 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { Router, RouterLink } from '@angular/router';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import {FormControl, Validators } from '@angular/forms';
+import { ProfileService } from 'src/app/services/profile.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { User } from 'src/app/models/user';
 
 @Component({
-    selector: 'app-edit-personal-information',
+    selector: 'app-profile',
     standalone: true,
-    templateUrl: './edit-personal-information.component.html',
-    styleUrl: './edit-personal-information.component.css',
+    templateUrl: './profile.component.html',
+    styleUrl: './profile.component.css',
     imports: [UserInputComponent, CommonModule, ButtonComponent, RouterLink, BackButtonComponent]
 })
-export class EditPersonalInformationComponent implements OnInit{
-  constructor(private router: Router) {}
+export class ProfileComponent implements OnInit{
+  constructor(private router: Router, private editProfilService: ProfileService) {}
+
+  public user?: User; // User model
+
+  ngOnInit(): void {
+    console.log('edit-personal-information Page intialized');
+
+    /* gets all the user information from backend */
+    this.editProfilService.getUser().subscribe({
+      next: (val) => {
+        this.user = val;
+      },
+      error: (err) => {
+        this.user = undefined;
+        console.log(err);
+      }
+    });
+  }
   
   /* Variables for the value of the input fields */
-  public name = '';
-  public street = '';
-  public houseNumber = '';
-  public zipCode = '';
-  public city = '';
-  public email = 'example@example.de';
-  public password1 = ''; // value of the first password input field
-  public password2 = ''; // value of the second password input field
+  public name = this.user?.name || '';
+  public street = this.user?.street || '';
+  public houseNumber = this.user?.houseNumber || '';
+  public zipCode = this.user?.zipCode || '';
+  public city = this.user?.city || '';
+  public email = this.user?.email || '';
+  public password1 = this.user?.password || ''; // value of the first password input field
+  public password2 = this.user?.password || ''; // value of the second password input field
 
   /* error variables */
   public errorNameMessage = '';
@@ -36,10 +56,6 @@ export class EditPersonalInformationComponent implements OnInit{
   public errorPassword1Message = '';// error for the first password input field
   public errorPassword2Message = '';// error for the second password input field
   public errorMessage = ''; // general Error Message from the backend
-
-  ngOnInit(): void {
-    console.log('edit-personal-information Page intialized');
-  }
 
   /**
    * method that checks whether both passwords are the same
@@ -57,6 +73,7 @@ export class EditPersonalInformationComponent implements OnInit{
     this.errorHouseNumberMessage = '';
     this.errorZipCodeMessage = '';
     this.errorCityMessage = '';
+    this.errorEmailMessage = '';
     this.errorPassword1Message = '';
     this.errorPassword2Message = '';
   }
@@ -86,6 +103,7 @@ export class EditPersonalInformationComponent implements OnInit{
     const houseNumberValidate = new FormControl(this.houseNumber, [Validators.required, this.checkNumericInput]);
     const zipCodeValidate = new FormControl(this.zipCode, [Validators.required, this.checkNumericInput]);
     const cityValidate = new FormControl(this.city, [Validators.required]);
+    const emailValidate = new FormControl(this.email, [Validators.required, Validators.email]);
     const password1Validate = new FormControl(this.password1, [Validators.required, Validators.minLength(8)]);
     const password2Validate = new FormControl(this.password2, [Validators.required, Validators.minLength(8)]);
 
@@ -117,6 +135,14 @@ export class EditPersonalInformationComponent implements OnInit{
       this.errorCityMessage = 'Bitte geben Sie einen Ort ein.';
       registrationIsValid = false;
     }
+    if (emailValidate.hasError('required')) { // input field is empty
+      this.errorEmailMessage = 'Bitte geben Sie eine E-Mail-Adresse ein.';
+      registrationIsValid = false;
+    }
+    if (emailValidate.hasError('email')) { // email is not valid
+      this.errorEmailMessage = 'Ungültige E-Mail.';
+      registrationIsValid = false;
+    }
     if (password1Validate.hasError('required')) { // input field is empty
       this.errorPassword1Message = 'Bitte geben Sie ein Passwort ein.';
       registrationIsValid = false;
@@ -142,6 +168,29 @@ export class EditPersonalInformationComponent implements OnInit{
   }
 
   /**
+   * Handels all backend errors
+   */
+  handleBackendError(err: HttpErrorResponse): void {
+    this.errorMessage = err.error.message;
+    console.error(err);
+    /* assigns all backend errors to the variables */
+    if (err.status === 400 && err.error.validationErrors) {
+      const validationErrors = err.error.validationErrors;
+      this.errorNameMessage = validationErrors?.name || '';
+      this.errorStreetMessage = validationErrors?.street || '';
+      this.errorHouseNumberMessage = validationErrors?.houseNumber || '';
+      this.errorZipCodeMessage = validationErrors?.zipCode || '';
+      this.errorCityMessage = validationErrors?.city || '';
+      this.errorEmailMessage = validationErrors?.email || '';
+      this.errorPassword1Message = validationErrors?.password || '';
+      this.errorPassword2Message = validationErrors?.password || '';
+    } else {
+      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
+    }
+  }
+
+  /**
    * abort method is called when registration button is pressed
    */
   abortEdit(): void{
@@ -163,5 +212,16 @@ export class EditPersonalInformationComponent implements OnInit{
     if(!this.validateAttributes()){
       return; // editing personal information canceled
     }
+
+    /* sends edited data to the backend */
+    this.editProfilService.editPersonalInformation(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
+      next: () => {
+        console.log('editing personal information successfully');
+        this.router.navigateByUrl('/settings'); // after successfully editing personal information return to settings page
+      },
+      error: (err) => {
+        this.handleBackendError(err);
+      }
+    });
   }
 }
