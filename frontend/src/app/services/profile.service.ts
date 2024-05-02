@@ -37,7 +37,7 @@ export class ProfileService{
        * sends the edited user information to the backend
        */
     public editPersonalInformation(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password: string):Observable<ResponseMessage>{
-        const editPersonalInformationObservable = this.http.post<ResponseMessage>('/api/user', { // rroute to change the perosnal information in the backend
+        const editPersonalInformationObservable = this.http.put<ResponseMessage>('/api/user', { // rroute to change the perosnal information in the backend
             name: name,
             street: street,
             houseNumber: houseNumber,
