@@ -12,12 +12,18 @@ export class ProfileService{
 
     public changedPersonalInformation = false;
 
+    /**
+     * checks whether the information has been changed
+     */
     public isChanged(): boolean{
         return this.changedPersonalInformation;
     }
 
+    /**
+     * Retrieves all user information from the backend for the profile page using the GetUsersRes interface.
+     */
     public getUser(): Observable<GetUserRes> {
-        const userObservable: Observable<GetUserRes> = this.http.get<GetUserRes>('/api/user').pipe(shareReplay());
+        const userObservable: Observable<GetUserRes> = this.http.get<GetUserRes>('/api/user').pipe(shareReplay()); // route to get the personal information from the backend
         userObservable.subscribe({
           error: (err) => {
             console.error(err);
@@ -27,8 +33,11 @@ export class ProfileService{
       }
     
 
+      /**
+       * sends the edited user information to the backend
+       */
     public editPersonalInformation(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password: string):Observable<ResponseMessage>{
-        const editPersonalInformationObservable = this.http.post<ResponseMessage>('/api/user', { //Route to personal information in the backend
+        const editPersonalInformationObservable = this.http.post<ResponseMessage>('/api/user', { // rroute to change the perosnal information in the backend
             name: name,
             street: street,
             houseNumber: houseNumber,

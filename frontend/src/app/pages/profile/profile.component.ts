@@ -36,7 +36,7 @@ export class ProfileComponent implements OnInit{
   public errorHouseNumberMessage = '';
   public errorZipCodeMessage = '';
   public errorCityMessage = '';
-  public errorEmailMessage = ''; // ----Diese kann man vielleicht noch entfernen falls das Backend das nicht braucht -----
+  public errorEmailMessage = ''; 
   public errorPassword1Message = '';// error for the first password input field
   public errorPassword2Message = '';// error for the second password input field
   public errorMessage = ''; // general Error Message from the backend
@@ -48,9 +48,13 @@ export class ProfileComponent implements OnInit{
     this.editProfilService.getUser().subscribe({
       next: (val) => {
         this.user = val.user;
-        console.log(val);
-        console.log(this.user);
-        console.log('Benutzername:', this.user.name);
+        /* Input fields are filled with the information from the backend */
+        this.name = this.user.name;
+        this.street = this.user.street;
+        this.houseNumber = this.user.houseNumber;
+        this.zipCode = this.user.zipCode;
+        this.city = this.user.city;
+        this.email = this.user.email;
       },
       error: (err) => {
         this.user = undefined;
@@ -58,16 +62,6 @@ export class ProfileComponent implements OnInit{
       }
     });
   }
-
-
-  /*
-        this.name = this.user?.name || '';
-        this.street = this.user?.street || '';
-        this.houseNumber = this.user?.houseNumber || '';
-        this.zipCode = this.user?.zipCode || '';
-        this.city = this.user?.city || '';
-        this.email = this.user?.email || '';
-        */
 
   /**
    * method that checks whether both passwords are the same
@@ -180,7 +174,7 @@ export class ProfileComponent implements OnInit{
   }
 
   /**
-   * Handels all backend errors
+   * handels all backend errors and assigns the errors to the variables
    */
   handleBackendError(err: HttpErrorResponse): void {
     this.errorMessage = err.error.message;
@@ -222,7 +216,7 @@ export class ProfileComponent implements OnInit{
 
     /* Checks for invalid input */
     if(!this.validateAttributes()){
-      //return; // editing personal information canceled
+      return; // editing personal information canceled
     }
 
     /* sends edited data to the backend */
