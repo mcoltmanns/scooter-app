@@ -1,12 +1,10 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AboutService } from 'src/app/services/about.service';
-import { Employee } from 'src/models/employee';
+import { Employee } from 'src/app/models/employee';
 
 @Component({
     selector: 'app-about-us',
     standalone: true,
-    imports: [CommonModule],
     templateUrl: './about-us.component.html',
     styleUrl: './about-us.component.css',
 })
