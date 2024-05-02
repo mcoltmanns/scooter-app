@@ -243,6 +243,8 @@ export class AuthController {
       return;
     }
 
+    // TODO: Update the user data in the database using the userId
+
     response.status(200).json({ code: 200, message: 'User data updated successfully'});
   }
 
