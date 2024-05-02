@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import uid from 'uid-safe';
-import { Model } from 'sequelize';
 import Database from '../database';
 import { UsersAuth, UsersData } from '../models/user';
 import { SESSION_LIFETIME, UsersSession } from '../models/user';
