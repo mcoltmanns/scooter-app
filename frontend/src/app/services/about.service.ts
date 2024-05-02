@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Employee } from 'src/models/employee';
+import { Employee } from 'src/app/models/employee';
 
 /**
  *  Via 'export' machen wir die Definition dieses Objektes anderen Klassen verfügbar
