@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import uid from 'uid-safe';
+import { Model } from 'sequelize';
 import Database from '../database';
 import { UsersAuth, UsersData } from '../models/user';
 import { SESSION_LIFETIME, UsersSession } from '../models/user';
@@ -50,7 +51,8 @@ export class AuthController {
     response.cookie('sessionId', sessionId, { httpOnly: true, expires: newExpiry });
     
     /* Save the session in the response locals */
-    response.locals.session = session;
+    response.locals.sessionId = session.getDataValue('id');
+    response.locals.userId = session.getDataValue('usersAuthId');
 
     return next();
   }
@@ -205,7 +207,7 @@ export class AuthController {
   }
 
   public getAuth(request: Request, response: Response): void {
-    if (!response.locals.session) {
+    if (!response.locals.sessionId) {
       response.status(200).json({ code: 200, authenticated: false });
       return;
     }
@@ -214,10 +216,41 @@ export class AuthController {
     return;
   }
 
+  public getUser(request: Request, response: Response): void {
+    const userId = response.locals.userId;
+    if (!userId) {
+      response.status(401).json({ code: 401, message: 'No user' }); // 401: Unauthorized
+      return;
+    }
+
+    // TODO: Fetch real user data from the database using the userId
+
+    const dummyUserObject = {
+      name: 'Dummy User',
+      street: 'Musterstr.',
+      houseNumber: '21',
+      city: 'Konstanz',
+      zipCode: '78464',
+      email: 'dummy@test.com',
+    };
+
+    response.status(200).json({ code: 200, user: dummyUserObject });
+  }
+
+  public updateUser(request: Request, response: Response): void {
+    const userId = response.locals.userId;
+    if (!userId) {
+      response.status(401).json({ code: 401, message: 'No user' }); // 401: Unauthorized
+      return;
+    }
+
+    response.status(200).json({ code: 200, message: 'User data updated successfully'});
+  }
+
   public async logout(request: Request, response: Response): Promise<void> {
     /* Check if the user has an active session */
     // const activeSession = await SessionManager.isValidSession(request.cookies.sessionId);
-    if (!response.locals.session) {
+    if (!response.locals.sessionId) {
       console.log('No active Session');
       response.status(401).json({ code: 401, message: 'Not logged in' }); // 401: Unauthorized
       return;

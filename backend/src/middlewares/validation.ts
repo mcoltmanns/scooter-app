@@ -69,6 +69,18 @@ export class Validator {
     await Validator.runAllChecks(400, checks, request, response, next);
   }
 
+  public async validateUpdateUser(request: Request, response: Response, next: NextFunction): Promise<void> {  
+    /* Check if all fields correspond to the expected request body */
+    const checks: ValidationChain[] = [
+
+    ];
+    
+    // TODO: add checks (see validateRegister for reference) 
+
+    /* Run all checks */
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+
   /**
    * validate a user's session
    */

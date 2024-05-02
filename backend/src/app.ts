@@ -81,6 +81,10 @@ app.all('/api/*', validator.validateSessionCookie, auth.authorize.bind(auth));
 /* Routes with authentication */
 app.delete('/api/logout', auth.logout.bind(auth));
 app.get('/api/authenticate', auth.getAuth.bind(auth));
+
+app.get('/api/user', auth.getUser.bind(auth));
+app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth));
+
 app.get('/api', api.getInfo); // DEBUG testing session validator
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
