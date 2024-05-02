@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -10,7 +9,7 @@ import {FormControl, Validators } from '@angular/forms';
 @Component({
   selector: 'app-registration',
   standalone: true,
-  imports: [UserInputComponent, CommonModule, ButtonComponent, RouterLink],
+  imports: [UserInputComponent, ButtonComponent, RouterLink],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.css'
 })
