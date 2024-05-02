@@ -1,3 +1,8 @@
+export type GetUserRes = {
+    code: number,
+    user: User
+};
+
 export type User = {
     name: string,
     street: string,
@@ -5,5 +10,4 @@ export type User = {
     zipCode: string,
     city: string,
     email: string,
-    password: string,
 }

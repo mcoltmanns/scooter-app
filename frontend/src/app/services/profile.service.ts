@@ -2,12 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
 import { ResponseMessage } from '../models/response-message';
-import { User } from '../models/user';
+import { GetUserRes} from '../models/user';
 
 @Injectable({
     providedIn: 'root',
 })
-
 export class ProfileService{
     constructor(private http: HttpClient) {}
 
@@ -17,8 +16,8 @@ export class ProfileService{
         return this.changedPersonalInformation;
     }
 
-    public getUser(): Observable<User> {
-        const userObservable: Observable<User> = this.http.get<User>('/api/user').pipe(shareReplay());
+    public getUser(): Observable<GetUserRes> {
+        const userObservable: Observable<GetUserRes> = this.http.get<GetUserRes>('/api/user').pipe(shareReplay());
         userObservable.subscribe({
           error: (err) => {
             console.error(err);
