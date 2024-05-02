@@ -14,7 +14,13 @@ export class SettingsComponent {
   constructor(private router: Router, private loginService: LoginService) { }
 
   logout(): void {
-    this.loginService.logout();
-    this.router.navigate(['login']);
+    this.loginService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['login']);
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    });
   }
 }

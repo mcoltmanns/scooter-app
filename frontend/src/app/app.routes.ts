@@ -35,6 +35,20 @@ const loginGuard = (): Observable<boolean> => {
       return true;
     }));
 };
+const notLoggedInGuard = (): Observable<boolean> => {
+  const loginService = inject(LoginService);
+  const router = inject(Router);
+  if(loginService.authChecked){
+      return of(!loginService.isLoggedIn());
+  }
+  return loginService.checkAuth().pipe(map(isAuthenticated => {
+      if (isAuthenticated){
+          router.navigate(['/search']);
+          return false;
+      }
+    return true;
+  }));
+};
 
 /**
  *  Hier können die verschiedenen Routen definiert werden.
@@ -48,8 +62,8 @@ export const routes: Routes = [
   // die beim Laden der Route instanziiert und angezeigt wird.
   // Die hier angegebenen Routen sind ein Beispiel; die "TodoComponent"
   // sollten über den Lauf des Projektes ausgetauscht werden
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegistrationComponent }, //registerComponent instead of TodoComponent
+  { path: 'login', component: LoginComponent, canActivate: [notLoggedInGuard] },
+  { path: 'register', component: RegistrationComponent, canActivate: [notLoggedInGuard] }, //registerComponent instead of TodoComponent
   { path: 'about', component: AboutComponent },
 
   // Durch 'canActive' können wir festlegen, ob eine Route aktiviert werden kann - z.B. können wir
