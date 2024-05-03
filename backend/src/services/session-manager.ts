@@ -76,6 +76,7 @@ abstract class SessionManager {
         /* Save the new session to the database */
         let newSession;
         try {
+            // FIXME: this should occur in a transaction - for rollback ability
             newSession = await UsersSession.create(sessionData); // save the new session
         } catch (error) {
             console.log(error);

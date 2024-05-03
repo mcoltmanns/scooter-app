@@ -239,7 +239,7 @@ export class AuthController {
     response.status(200).json({ code: 200, user: { name: userData.name, street: userData.street, houseNumber: userData.houseNumber, city: userData.city, zipCode: userData.zipCode, email: userAuth.email } }); // package the user up how the frontend expects it and send it off
   }
 
-  public updateUser(request: Request, response: Response): void {
+  public async updateUser(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
     if (!userId) {
       response.status(401).json({ code: 401, message: 'No user' }); // 401: Unauthorized
@@ -247,6 +247,54 @@ export class AuthController {
     }
 
     // TODO: Update the user data in the database using the userId
+    // grab the user data
+    let userData, userAuth;
+    try {
+      userData = await UsersData.findOne({ where: { id: userId}}); // need address info
+      userAuth = await UsersAuth.findOne({ where: {id : userId}}); // and email
+    } catch (error) { // handle database freakouts
+      response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
+      return;
+    }
+
+    if(!userData || !userAuth) { // make sure whatever user we just got actually exists
+      response.status(401).json({ code: 404, message: 'No user found' }); // this should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
+    }
+
+    // update the user's data
+    // TODO: assuming we want to change the password?
+    // don't have to check session info because this was done by the /api/* route guard (see app.ts)
+    /**
+     * name: name,
+        street: street,
+        houseNumber: houseNumber,
+        zipCode: zipCode,
+        city: city,
+        email: email,
+        password: password
+     */
+    /* Check if the provided password matches the hashed password in the database */
+    let hashedPw;
+    try {
+      hashedPw = bcrypt.hashSync(request.body.password, 10);
+    }  catch (error) {
+      response.status(500).json({ code: 500, message: 'Something went wrong' }); // 500: Internal Server Error
+      return;
+    }
+    // FIXME: this should occur in a transaction - for rollback ability
+    userData.set({
+      name: request.body.name,
+      street: request.body.street,
+      houseNumber: request.body.houseNumber,
+      zipCode: request.body.zipCode,
+      city: request.body.city
+    });
+    await userData.save(); // at the very least the save bits should happen in transactions
+    userAuth.set({
+      email: request.body.email,
+      password: hashedPw,
+    });
+    await userAuth.save();
 
     response.status(200).json({ code: 200, message: 'User data updated successfully'});
   }
