@@ -215,25 +215,28 @@ export class AuthController {
     return;
   }
 
-  public getUser(request: Request, response: Response): void {
+  public async getUser(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
     if (!userId) {
-      response.status(401).json({ code: 401, message: 'No user' }); // 401: Unauthorized
+      response.status(401).json({ code: 401, message: 'No user ID provided' }); // 401: Unauthorized
       return;
     }
 
-    // TODO: Fetch real user data from the database using the userId
+    // grab the user data
+    let userData, userAuth;
+    try {
+      userData = (await UsersData.findOne({ where: { id: userId}})).get(); // need address info
+      userAuth = (await UsersAuth.findOne({ where: {id : userId}})).get(); // and email
+    } catch (error) { // handle database freakouts
+      response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
+      return;
+    }
 
-    const dummyUserObject = {
-      name: 'Dummy User',
-      street: 'Musterstr.',
-      houseNumber: '21',
-      city: 'Konstanz',
-      zipCode: '78464',
-      email: 'dummy@test.com',
-    };
+    if(!userData || !userAuth) { // make sure whatever user we just got actually exists
+      response.status(401).json({ code: 404, message: 'No user found' });
+    }
 
-    response.status(200).json({ code: 200, user: dummyUserObject });
+    response.status(200).json({ code: 200, user: { name: userData.name, street: userData.street, houseNumber: userData.houseNumber, city: userData.city, zipCode: userData.zipCode, email: userAuth.email } }); // package the user up how the frontend expects it and send it off
   }
 
   public updateUser(request: Request, response: Response): void {
