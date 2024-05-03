@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Router, RouterLink } from '@angular/router';
-import { RegistrationService } from 'src/app/services/registration.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import {FormControl, Validators } from '@angular/forms';
 
@@ -16,7 +16,7 @@ import {FormControl, Validators } from '@angular/forms';
 
 export class RegistrationComponent implements OnInit{
 
-  constructor(private router: Router, private registrationService: RegistrationService) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     console.log('Registration Page intialized');
@@ -190,7 +190,7 @@ export class RegistrationComponent implements OnInit{
       return; // registration canceled
     }
 
-    this.registrationService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
+    this.authService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
       next: () => {
         console.log('registration successfully');
         this.router.navigateByUrl('/search'); // after successfully registration return to search (map) page since the server will automatically log in the user after registration

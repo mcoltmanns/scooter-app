@@ -12,7 +12,7 @@ interface AuthResponse {
 @Injectable({
   providedIn: 'root',
 })
-export class LoginService{
+export class AuthService{
   public loggedIn = false;
   public authChecked = false;
 
@@ -52,6 +52,28 @@ export class LoginService{
       }),
       shareReplay()
     );
+  }
+
+  public register(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password: string):Observable<ResponseMessage>{
+    const registerObservable = this.http.post<ResponseMessage>('/api/register', { //Route to register in the backend
+        name: name,
+        street: street,
+        houseNumber: houseNumber,
+        zipCode: zipCode,
+        city: city,
+        email: email,
+        password: password
+    }).pipe(shareReplay());
+    registerObservable.subscribe({
+        next: () => {
+            this.loggedIn = true;
+        },
+        error: (err) => {
+            this.loggedIn = false;
+            console.log(err);
+        }
+    });
+    return registerObservable;
   }
 
   //method to log in

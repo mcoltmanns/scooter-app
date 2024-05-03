@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NavigationBarComponent } from 'src/app/components/navigation-bar/navigation-bar.component';
-import { LoginService } from 'src/app/services/login.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { CommonModule } from '@angular/common';
 
 /**
@@ -18,5 +18,5 @@ import { CommonModule } from '@angular/common';
   selector: 'app-root',
 })
 export class RootComponent {
-  constructor(public loginService: LoginService) {}
+  constructor(public authService: AuthService) {}
 }

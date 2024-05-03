@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
-import { LoginService } from './services/login.service';
+import { AuthService } from './services/auth.service';
 import { LoginComponent } from './pages/login/login.component';
 import { TodoComponent } from './pages/todo/todo.component';
 import { AboutComponent } from './pages/about/about.component';
@@ -22,12 +22,12 @@ import { ProfileComponent } from './pages/profile/profile.component';
  *  (Siehe 'canActivate' Attribut bei den 'routes')
  */
 const loginGuard = (): Observable<boolean> => {
-    const loginService = inject(LoginService);
+    const authService = inject(AuthService);
     const router = inject(Router);
-    if(loginService.authChecked){
-        return of(loginService.isLoggedIn());
+    if(authService.authChecked){
+        return of(authService.isLoggedIn());
     }
-    return loginService.checkAuth().pipe(map(isAuthenticated => {
+    return authService.checkAuth().pipe(map(isAuthenticated => {
         if (!isAuthenticated){
             router.navigate(['/login']);
             return false;
@@ -36,12 +36,12 @@ const loginGuard = (): Observable<boolean> => {
     }));
 };
 const notLoggedInGuard = (): Observable<boolean> => {
-  const loginService = inject(LoginService);
+  const authService = inject(AuthService);
   const router = inject(Router);
-  if(loginService.authChecked){
-      return of(!loginService.isLoggedIn());
+  if(authService.authChecked){
+      return of(!authService.isLoggedIn());
   }
-  return loginService.checkAuth().pipe(map(isAuthenticated => {
+  return authService.checkAuth().pipe(map(isAuthenticated => {
       if (isAuthenticated){
           router.navigate(['/search']);
           return false;

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
-import { LoginService } from 'src/app/services/login.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 
 @Component({
@@ -21,13 +21,13 @@ export class LoginComponent {
 
   constructor(
     private router: Router,
-    private loginService: LoginService,
+    private authService: AuthService,
   ) {}
 
   login(): void {
     // Diese Funktion muss in Sprint 1 selbst implementiert werden!
     // Die jetztige implementierug ist nur ein Beispiel damit der Prototyp interaktiv funktioniert.
-    this.loginService.login(this.email, this.password).subscribe({
+    this.authService.login(this.email, this.password).subscribe({
       next: () => {
         this.errorMessage = '';
         this.router.navigateByUrl('/search');
