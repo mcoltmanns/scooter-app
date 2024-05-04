@@ -1,6 +1,7 @@
 import { Model } from 'sequelize';
 import uid from 'uid-safe';
 import { SESSION_LIFETIME, UsersSession } from '../models/user';
+import database from '../database';
 
 abstract class SessionManager {
     /**
@@ -75,11 +76,13 @@ abstract class SessionManager {
 
         /* Save the new session to the database */
         let newSession;
+        const transaction = await database.getSequelize().transaction();
         try {
-            // FIXME: this should occur in a transaction - for rollback ability
-            newSession = await UsersSession.create(sessionData); // save the new session
+            newSession = await UsersSession.create(sessionData, { transaction: transaction }); // save the new session
+            await transaction.commit();
         } catch (error) {
-            console.log(error);
+            console.log(`ERROR while creating session: ${error}`);
+            await transaction.rollback();
         }
 
         return newSession;
