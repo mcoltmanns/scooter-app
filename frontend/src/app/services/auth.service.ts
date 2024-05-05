@@ -54,8 +54,9 @@ export class AuthService{
     );
   }
 
+  // register method
   public register(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password: string):Observable<ResponseMessage>{
-    const registerObservable = this.http.post<ResponseMessage>('/api/register', { //Route to register in the backend
+    const registerObservable = this.http.post<ResponseMessage>('/api/register', { // Route to register in the backend
         name: name,
         street: street,
         houseNumber: houseNumber,
@@ -64,7 +65,7 @@ export class AuthService{
         email: email,
         password: password
     }).pipe(shareReplay());
-    registerObservable.subscribe({
+    registerObservable.subscribe({ // This line creates a pipe including the shareReplay observable operation, which shares the stream of data among all subscribers, caching a buffer of events and serving future subscribers with the last emitted values if available without re-executing the stream.
         next: () => {
             this.loggedIn = true;
         },
