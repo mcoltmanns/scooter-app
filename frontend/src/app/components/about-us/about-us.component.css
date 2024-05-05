@@ -12,6 +12,10 @@
   margin-top: auto;
   margin-bottom: auto;
   background-size: cover;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  outline: 1px solid black;
 }
 
 h3 {
