@@ -8,11 +8,12 @@ import { Scooter } from '../models/scooter';
   deps: [HttpClient],
 })
 export class MapService {
-  public globalText =
-    'Dieser Text wird in einem Service verwaltet und ist somit unabhängig von Komponenten.';
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Method to get the the information from all avialable scooters.
+   */
   public getScooterInfo(): Observable<Scooter[]> {
     return this.http.get<Scooter[]>('/api/map');
   }
