@@ -9,6 +9,8 @@ import { TodoComponent } from '../todo/todo.component';
  * aufgerufen werden, z.B. "Leaflet.LeafletMouseEvent" (siehe unten)
  */
 import * as Leaflet from 'leaflet';
+import { MapService } from 'src/app/services/map.service';
+import { Scooter } from 'src/app/models/scooter';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -26,6 +28,11 @@ const defaultIcon = Leaflet.icon({
   styleUrls: ['./map.component.css'],
 })
 export class MapComponent implements OnInit {
+
+  public scooters: Scooter[] = [];
+  public errorMessage = '';
+
+  public constructor(private mapService: MapService) {}
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
    */
@@ -58,7 +65,30 @@ export class MapComponent implements OnInit {
     console.log(`${e.latlng.lat}, ${e.latlng.lng}`);
   }
 
+  addScootersToMap(): void {
+    for(const scooter of this.scooters) {
+      const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
+        {icon: defaultIcon}
+      );
+      this.layers.push(marker);
+
+    }
+  }
+
   ngOnInit(): void {
+
+    this.mapService.getScooterInfo().subscribe({
+      next: (value) => {
+        this.scooters = value;
+        this.addScootersToMap();
+      },
+
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
+
     for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
       // auch direkt in Typescript hinzugefügt werden
