@@ -1,18 +1,10 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { Product } from './product';
-import { Rental } from './rental';
 
 /**
  * model of an actual instance of a scooter - these scooters really exist!
  */
-export type Scooter = {
-    id: number, // this scooter's unique id (think serial number or VIN)
-    product_id: number, // this scooter's product id (think model number or car make)
-    battery: number,
-    coordinates_lat: number,
-    coordinates_lng: number,
-}
 
 export const Scooter = Database.getSequelize().define('scooters', {
     id: { // scooter id
@@ -48,11 +40,11 @@ export const Scooter = Database.getSequelize().define('scooters', {
             max: 180,
         },
     }
-});
+}, { updatedAt: false, createdAt: false });
 
 Scooter.belongsTo(Product, { // establish foreign key relation - every real scooter is an instance of a product
     foreignKey: 'product_id', // and products and scooters are related via product ids
 });
-Scooter.belongsTo(Rental, {
-    foreignKey: 'rental_id',
+Product.hasMany(Scooter, { // each product has many scooters
+    foreignKey: 'product_id', // and products and scooters are related via product ids
 });

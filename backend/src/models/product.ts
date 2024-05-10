@@ -37,7 +37,3 @@ export const Product = Database.getSequelize().define('products', {
         }
     }
 });
-
-Product.hasMany(Scooter, { // each product has many scooters
-    foreignKey: 'product_id', // and products and scooters are related via product ids
-});
