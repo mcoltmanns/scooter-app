@@ -5,10 +5,11 @@ export class MapController {
     public async getAvailableScooters(request: Request, response: Response): Promise<void> {
         let scooters = [];
         try {
-            scooters = (await Scooter.findAll()).map((scooterModel) => scooterModel.get());
-            console.log(scooters);
+            scooters = (await Scooter.findAll({ where: { active_rental_id: null } })).map((scooterModel) => scooterModel.get());
         } catch (error) {
             console.log(error);
+            response.status(500).json('Database error').send();
+            return;
         }
         response.status(200).json(scooters).send();
         return;

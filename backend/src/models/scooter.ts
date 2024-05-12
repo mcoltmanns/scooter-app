@@ -1,6 +1,7 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { Product } from './product';
+import { Rental } from './rental';
 
 /**
  * model of an actual instance of a scooter - these scooters really exist!
@@ -47,4 +48,17 @@ Scooter.belongsTo(Product, { // establish foreign key relation - every real scoo
 });
 Product.hasMany(Scooter, { // each product has many scooters
     foreignKey: 'product_id', // and products and scooters are related via product ids
+});
+
+Scooter.hasOne(Rental, { // every scooter can have a rental 
+    foreignKey: {
+        name: 'scooter_id',
+        allowNull: false // rentals must have an associated scooter
+    },
+});
+Rental.hasOne(Scooter, { // every rental can have a scooter - if a scooter's active_rental_id is null, it isn't being rented out
+    foreignKey: {
+        name: 'active_rental_id',
+        allowNull: true // scooters don't need to always be rented
+    },
 });
