@@ -11,5 +11,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 })
 export class ButtonComponent {
   @Input() public text = 'Button';
+  @Input() public disabled = false;
+  @Input() public type: 'button' | 'submit' | 'reset' = 'button';
   @Input() public color: 'primary' | 'accent' | 'warn' = 'primary';
 }

@@ -228,8 +228,8 @@ export class AuthController {
     // grab the user data
     let userData, userAuth;
     try {
-      userData = (await UsersData.findOne({ where: { id: userId}})).get(); // need address info
-      userAuth = (await UsersAuth.findOne({ where: {id : userId}})).get(); // and email
+      userData = (await UsersData.findOne({ where: { id: userId }})).get(); // need address info
+      userAuth = (await UsersAuth.findOne({ where: { id: userId }})).get(); // and email
     } catch (error) { // handle database freakouts
       response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
       return;

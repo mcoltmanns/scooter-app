@@ -1,9 +1,12 @@
 <div class="page-container">
     <h1 class="title">Neues Kundenkonto</h1>
     <div class="scrollable-container">
+      <form [formGroup]="registerForm" class="my-form" (ngSubmit)="onSubmit()">
         <app-user-input
            label="Name"
            [(text)]="name"
+           formControlName="name"
+           (blurEvent)="updateErrorMessages()"
         ></app-user-input>
         <div class="error">{{errorNameMessage}}</div>
 
@@ -11,11 +14,15 @@
             <app-user-input
                label="Straße"
                [(text)]="street"
+               formControlName="street"
+               (blurEvent)="updateErrorMessages()"
             ></app-user-input>
 
             <app-user-input
                label="Nummer"
                [(text)]="houseNumber"
+               formControlName="houseNumber"
+               (blurEvent)="updateErrorMessages()"
             ></app-user-input>
         </div>
         <div class="error">{{errorStreetMessage}}</div>
@@ -24,18 +31,24 @@
         <app-user-input
            label="Postleitzahl"
            [(text)]="zipCode"
+           formControlName="zipCode"
+           (blurEvent)="updateErrorMessages()"
         ></app-user-input>
         <div class="error">{{errorZipCodeMessage}}</div>
 
         <app-user-input
            label="Ort"
            [(text)]="city"
+           formControlName="city"
+           (blurEvent)="updateErrorMessages()"
         ></app-user-input>
         <div class="error">{{errorCityMessage}}</div>
 
         <app-user-input
            label="Email"
            [(text)]="email"
+           formControlName="email"
+           (blurEvent)="updateErrorMessages()"
         ></app-user-input>
         <div class="error">{{errorEmailMessage}}</div>
 
@@ -43,6 +56,8 @@
            label="Passwort"
            type="password"
            [(text)]="password1"
+           formControlName="password1"
+           (blurEvent)="updateErrorMessages()"
         ></app-user-input>
         <div class="error">{{errorPassword1Message}}</div>
 
@@ -50,11 +65,15 @@
            label="Passwort wiederholen"
            type="password"
            [(text)]="password2"
+           formControlName="password2"
+           (blurEvent)="updateErrorMessages()"
         ></app-user-input>
         <div class="error">{{errorPassword2Message}}</div>
 
         <div class="bottom">
-            <app-button color="primary" class="registration-btn" (click)="registration()">
+            <div style="text-align: center;" class="error">{{errorMessage}}</div>
+
+            <app-button color="primary" type="submit" class="registration-btn" [disabled]="registerForm.invalid">
                 Registrieren
             </app-button>
 
@@ -62,5 +81,6 @@
                 Konto vorhanden? <a routerLink="/login">Zum Login</a>
             </div>            
         </div>
+      </form>
     </div>
 </div>

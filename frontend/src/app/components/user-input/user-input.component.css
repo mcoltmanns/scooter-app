@@ -21,4 +21,16 @@ input {
 /* Remove outline when input is selected */
 input:focus {
   outline: none;
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
+}
+
+input:disabled {
+  background-color: #ccc;
+  color: #888;
+  border-color: #888;
+}
+
+:host.ng-invalid.ng-touched input {
+  border: 3px solid var(--Error, #C55136);
+  background: linear-gradient(0deg, rgba(115, 0, 0, 0.30) 0%, rgba(115, 0, 0, 0.30) 100%), #FFF;
 }

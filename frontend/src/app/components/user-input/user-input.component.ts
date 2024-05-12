@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
+import { noop } from 'rxjs';
 
 @Component({
   selector: 'app-user-input',
@@ -8,8 +9,15 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './user-input.component.html',
   styleUrls: ['./user-input.component.css'],
+  providers: [
+    {
+      provide: NG_VALUE_ACCESSOR,
+      useExisting: forwardRef(() => UserInputComponent),
+      multi: true,
+    }
+  ]
 })
-export class UserInputComponent {
+export class UserInputComponent implements ControlValueAccessor {
   /**
    *  Wenn ein Attribut (z.B. "label") mit "@Input" markiert wird, kann dieses Attribut von anderen Komponenten
    *  via HTML gesetzt werden. In diesem Fall kann die Komponente so verwendet werden:
@@ -97,5 +105,35 @@ export class UserInputComponent {
 
   onTextChange(): void {
     this.textChange.emit(this.text);
+  }
+
+  @Output() blurEvent = new EventEmitter<void>();
+
+  onBlur(): void {
+    this.blurEvent.emit();
+  }
+
+  /* Necessary properties and callbacks for the ControlValueAccessor that is necessary for the form control of reactive forms */
+  onChange: (value: string) => void = noop;
+  onTouched: () => void = noop;
+
+  /* This will write the value to the view if the form control is updated from outside. */
+  writeValue(value: string): void {
+    this.text = value;
+  }
+
+  /* Register a callback function that is called when the control's value changes in the UI. */
+  registerOnChange(fn: (_: string) => void): void {
+    this.onChange = fn;
+  }
+
+  /* Register a callback function that is called by the forms API on initialization to update the form model on blur. */
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  /* This function is called when the control status changes to or from 'DISABLED'. */
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
   }
 }
