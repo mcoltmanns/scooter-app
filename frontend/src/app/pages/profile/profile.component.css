@@ -1,79 +1,78 @@
 .highlight {
-    font-weight: bold;
-  }
-  
-  .button-container {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-  }
-  
-  .button-container button {
-    margin: 20px;
-    width: 280px;
-    height: 140px;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    font-size: 22px;
-  }
-  
-  button .icon {
-    transform: scale(3);
-    width: 20px;
-    margin-right: 40px;
-  }
-  
-  .address-row {
-    display: flex; /* Verwende Flexbox */
-  }
-  
-  .app-user-input {
-    margin-bottom: 10px; /* Add a vertical space between the elements */
-    flex: 1; /* Let the app-user-input components grow flexibly */
-  }
-  
-  .address-row app-user-input {
-    flex: 1; /* Let the app-user-input components in the line grow flexibly */
-    margin-right: 10px; /* Add a horizontal space between the elements */
-  }
-  
-  .address-row app-user-input:first-child {
-    flex: 2; /* Change the flex property of the first app-user-input element */
-  }
-  
-  .address-row app-user-input:last-child {
-    flex: 1; /* Change the flex property of the last app-user-input element */
-    margin-right: 0;
-  }
+  font-weight: bold;
+}
 
-  .bottom {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 15px;
-    padding: 40px;
-    margin-top: 5px; /* Add an upper spacing */
-    margin-bottom: 40px;
-  }
+.button-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
 
-  .registration-btn {
-    width: 90%;
-  }
+.button-container button {
+  margin: 20px;
+  width: 280px;
+  height: 140px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
 
-  .abort-btn {
-    width: 90%;
-  }
+button .icon {
+  transform: scale(3);
+  width: 20px;
+  margin-right: 40px;
+}
 
-  .info {
-    font-size: 12pt;
-  }
-  
-  .error {
-    color: rgb(226, 27, 27);
-  }
-  
+.address-row {
+  display: flex; /* Verwende Flexbox */
+}
+
+.app-user-input {
+  margin-bottom: 10px; /* Add a vertical space between the elements */
+  flex: 1; /* Let the app-user-input components grow flexibly */
+}
+
+.address-row app-user-input {
+  flex: 1; /* Let the app-user-input components in the line grow flexibly */
+  margin-right: 10px; /* Add a horizontal space between the elements */
+}
+
+.address-row app-user-input:first-child {
+  flex: 2; /* Change the flex property of the first app-user-input element */
+}
+
+.address-row app-user-input:last-child {
+  flex: 1; /* Change the flex property of the last app-user-input element */
+  margin-right: 0;
+}
+
+.bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
+  padding: 40px;
+  margin-top: -20px; /* Add an upper spacing */
+  margin-bottom: 50px;
+}
+
+.profileSave-btn {
+  width: 90%;
+}
+
+.info {
+  font-size: 12pt;
+}
+
+.error {
+  color: rgb(226, 27, 27);
+}
+
+.abort-btn {
+  width: 90%;
+}
