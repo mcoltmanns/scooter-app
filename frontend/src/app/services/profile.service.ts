@@ -4,6 +4,15 @@ import { Observable, shareReplay } from 'rxjs';
 import { ResponseMessage } from '../models/response-message';
 import { GetUserRes} from '../models/user';
 
+type UserUpdated = {
+    name: string,
+    street: string,
+    houseNumber: string,
+    zipCode: string,
+    city: string,
+    password?: string
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -36,16 +45,22 @@ export class ProfileService{
       /**
        * sends the edited user information to the backend
        */
-    public editPersonalInformation(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password: string):Observable<ResponseMessage>{
-        const editPersonalInformationObservable = this.http.put<ResponseMessage>('/api/user', { // rroute to change the perosnal information in the backend
+    public editPersonalInformation(name: string, street: string, houseNumber: string, zipCode: string, city: string, email: string, password?: string):Observable<ResponseMessage>{
+        const userDataObject: UserUpdated = {
             name: name,
             street: street,
             houseNumber: houseNumber,
             zipCode: zipCode,
             city: city,
-            email: email,
-            password: password
-        }).pipe(shareReplay());
+            // email: email
+        };
+
+        // if password is not empty, also add it to the userDataObject
+        if (password) {
+            userDataObject.password = password;
+        }
+        
+        const editPersonalInformationObservable = this.http.put<ResponseMessage>('/api/user', userDataObject).pipe(shareReplay());
         editPersonalInformationObservable.subscribe({
             next: () => {
                 this.changedPersonalInformation = true;

@@ -93,12 +93,6 @@ export class ProfileComponent implements OnInit, OnDestroy{
           password1: '', // Do not pre-fill passwords, as this is security-critical data
           password2: ''  // Do not pre-fill passwords, as this is security-critical data
         });
-        this.name = this.profileForm.get('name')?.value; 
-        this.street = this.profileForm.get('street')?.value;
-        this.houseNumber = this.profileForm.get('houseNumber')?.value; 
-        this.zipCode = this.profileForm.get('zipCode')?.value; 
-        this.city = this.profileForm.get('city')?.value; 
-        this.email = this.profileForm.get('email')?.value; 
       },
       error: (err) => {
         this.user = undefined;
@@ -275,11 +269,26 @@ export class ProfileComponent implements OnInit, OnDestroy{
       return; // registration canceled
     }
 
+    /* Grab the latest values from the input fields */
+    this.name = this.profileForm.get('name')?.value;
+    this.street = this.profileForm.get('street')?.value;
+    this.houseNumber = this.profileForm.get('houseNumber')?.value;
+    this.zipCode = this.profileForm.get('zipCode')?.value;
+    this.city = this.profileForm.get('city')?.value;
+    this.email = this.profileForm.get('email')?.value;
+    this.password1 = this.profileForm.get('password1')?.value;
+
+    if (!this.profileForm.dirty) {
+      console.log('No changes were made');
+      this.router.navigateByUrl('/settings'); // Return to setting page if no changes were made
+      return;
+    }
+
     /* sends edited data to the backend */
-    this.editProfilService.editPersonalInformation(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
+    this.editProfilService.editPersonalInformation(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, (this.password1 ? this.password1 : undefined)).subscribe({
       next: () => {
         console.log('editing personal information successfully');
-        this.router.navigateByUrl('/settings'); // after successfully editing personal information return to settings page
+        this.router.navigateByUrl('/settings'); // After successfully editing personal information return to settings page
       },
       error: (err) => {
         this.handleBackendError(err);

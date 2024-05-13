@@ -25,6 +25,7 @@
 
   color: var(--background);
   text-decoration: none;
+  cursor: pointer;
 
   display: flex;
   flex-direction: column;

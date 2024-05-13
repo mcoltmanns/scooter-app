@@ -225,7 +225,7 @@ export class AuthController {
       return;
     }
 
-    // grab the user data
+    /* Grab the user data from the database */
     let userData, userAuth;
     try {
       userData = (await UsersData.findOne({ where: { id: userId }})).get(); // need address info
@@ -243,25 +243,35 @@ export class AuthController {
   }
 
   public async updateUser(request: Request, response: Response): Promise<void> {
-    // make sure we actually have a user to update
+    /* Make sure we actually have a user to update */
     const userId = response.locals.userId;
     if (!userId) {
       response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
       return;
     }
-    // update the user
+
+    /* Get the user data objects form the database */
     let userData, userAuth;
     try {
-      userData = await UsersData.findOne({ where: { id: userId}}); // need address info
-      userAuth = await UsersAuth.findOne({ where: {id : userId}}); // and email
-      if(!userData || !userAuth) { // make sure whatever user we just got actually exists
-        response.status(401).json({ code: 404, message: 'Kein Benutzer gefunden.' }); // this should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
+      /* Since the password is optional, we only need to get the userAuth object if the password is provided */
+      if(request.body.password) {
+        userAuth = await UsersAuth.findOne({ where: { id: userId }});
+        if(!userAuth) { // Make sure whatever user we just got actually exists
+          response.status(401).json({ code: 404, message: 'Kein Benutzer gefunden.' }); // This should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
+        }
+      }
+
+      /* Get the userData object */
+      userData = await UsersData.findOne({ where: { id: userId }});
+      if(!userData) { // Make sure whatever user we just got actually exists
+        response.status(401).json({ code: 404, message: 'Kein Benutzer gefunden.' }); // This should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
       }
     } catch (error) {
       response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: error });
       return;
     }
-    const hashedPw = bcrypt.hashSync(request.body.password, 10); // hash the password
+
+    /* Update the user data object */
     userData.set({ // set the data in the model instances - this does not write to the database!
       name: request.body.name,
       street: request.body.street,
@@ -269,18 +279,26 @@ export class AuthController {
       zipCode: request.body.zipCode,
       city: request.body.city
     });
-    userAuth.set({
-      email: request.body.email,
-      password: hashedPw,
-    });
-    const transaction = await Database.getSequelize().transaction(); // start a transaction so we can roll back if we have to
+
+    /* Update the user auth object if a new password was provided */
+    if(request.body.password) {
+      const hashedPw = bcrypt.hashSync(request.body.password, 10); // Hash the password
+      userAuth.set({
+        password: hashedPw,
+      });
+    }
+
+    /* Save the changes to the database */
+    const transaction = await Database.getSequelize().transaction(); // Start a transaction so we can roll back if one of the saves fails
     try{
-      await userData.save({transaction: transaction}); // write the changes to the database
-      await userAuth.save({transaction: transaction});
+      if(request.body.password) { // Only save the userAuth object if a new password was provided
+        await userAuth.save({ transaction: transaction });
+      }
+      await userData.save({ transaction: transaction }); // write the changes to the database
       await transaction.commit();
     } catch (error) {
+      await transaction.rollback(); // If something broke, rollback the transaction
       response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: error });
-      await transaction.rollback(); // if something broke, rollback the transaction
       return;
     }
     response.status(200).json({ code: 200, message: 'Benutzerdaten erfolgreich aktualisiert.'});
