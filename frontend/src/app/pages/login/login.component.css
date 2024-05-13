@@ -16,13 +16,18 @@
   display: flex;
   flex-direction: column;
 
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  justify-content: center;
   height: 100%;
+}
+
+.scrollable-container {
+  padding-bottom: 50px;
 }
 
 .logo-container {
   position: relative;
-  margin: 40px;
+  /* margin: 40px 40px 0 40px; */
 
   display: flex;
   flex-direction: column;
@@ -55,8 +60,27 @@
   justify-content: flex-start;
   align-items: center;
   gap: 15px;
-  padding: 40px;
+  /* padding: 5px 40px 40px 40px; */
   margin-bottom: 80px;
+}
+
+.login-container form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
+  padding: 40px;
+  margin-top: 20px; /* Add an upper spacing */
+  margin-bottom: 40px;
 }
 
 app-user-input {
@@ -65,10 +89,12 @@ app-user-input {
 
 .login-btn {
   width: 80%;
+  min-width: min-content;
 }
 
 .info {
   font-size: 12pt;
+  text-align: center;
 }
 
 .about {
@@ -89,5 +115,6 @@ app-user-input {
 }
 
 .error {
+  width: 100%;
   color: rgb(226, 27, 27);
 }

@@ -1,27 +1,37 @@
 <!-- Einige (globale) Klassen, wie 'page-container', sind schon in der 'src/styles.css' Datei vorgegeben -->
 <div class="page-container">
-  <div class="logo-container">
-    <h1 class="title logo">SCOOTER</h1>
-    <img src="/assets/logo.jpg" />
-
-    <app-user-input label="Email" [(text)]="email"></app-user-input>
-    <app-user-input label="Passwort" type="password" [(text)]="password"></app-user-input>
-  </div>
-
-  <div class="login-container">
-    <app-button class="login-btn" color="primary" (click)="login()">
-      Login
-    </app-button>
-    <div class="error">{{errorMessage}}</div>
-
-    <div class="info">
-      Noch kein Konto?
-      <a routerLink="/register">Hier registrieren</a>
+  <div class="scrollable-container">
+    <div class="logo-container">
+      <h1 class="title logo">SCOOTER</h1>
+      <img src="/assets/logo.jpg" />
     </div>
+  
+    <div class="login-container">
+      <form [formGroup]="loginForm" class="my-form" (ngSubmit)="onSubmit()">
+        <app-user-input label="Email" [(text)]="email" formControlName="email" (blurEvent)="updateErrorMessages()"></app-user-input>
+        <div class="error">{{emailErrorMessage}}</div>
 
-    <div class="info about" routerLink="/about">
-      <span class="material-icons icon-outlined">waving_hand</span>
-      <a> Über uns </a>
+        <app-user-input label="Passwort" type="password" [(text)]="password" formControlName="password" (blurEvent)="updateErrorMessages()"></app-user-input>
+        <div class="error">{{passwordErrorMessage}}</div>
+
+        <div class="bottom">
+          <div style="text-align: center;" class="error">{{errorMessage}}</div>
+  
+          <app-button class="login-btn" color="primary" type="submit">
+            Login
+          </app-button>
+  
+          <div class="info">
+            Noch kein Konto?
+            <a routerLink="/register">Hier registrieren</a>
+          </div>
+      
+          <div class="info about" routerLink="/about">
+            <span class="material-icons icon-outlined">waving_hand</span>
+            <a> Über uns </a>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>
