@@ -1,22 +1,28 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { Router, RouterLink } from '@angular/router';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
-import {FormControl, Validators } from '@angular/forms';
 import { ProfileService } from 'src/app/services/profile.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import {User} from 'src/app/models/user';
+import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators, ReactiveFormsModule} from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.css',
-    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent]
+    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule]
 })
-export class ProfileComponent implements OnInit{
-  constructor(private router: Router, private editProfilService: ProfileService) {}
+export class ProfileComponent implements OnInit, OnDestroy{
+  /* Initialize subscriptions for the form value changes */
+  private registerFormValueChangesSubscription?: Subscription;
+  private password1ValueChangesSubscription?: Subscription;
+
+  /* Initialize the FormGroup instance that manages all input fields and their validators */
+  public profileForm!: FormGroup;
 
   public user?: User; // User model
 
@@ -41,7 +47,35 @@ export class ProfileComponent implements OnInit{
   public errorPassword2Message = '';// error for the second password input field
   public errorMessage = ''; // general Error Message from the backend
 
+  constructor(private router: Router, private editProfilService: ProfileService, private fb: FormBuilder) {
+    /* Create a FormGroup instance with all input fields and their validators */
+    this.profileForm = this.fb.group({
+      name: ['', Validators.required],
+      street: ['', Validators.required],
+      houseNumber: ['', [Validators.required, this.checkNumericInput]],
+      zipCode: ['', [Validators.required, this.checkNumericInput]],
+      city: ['', Validators.required],
+      email: [{value: '', disabled: true}, [Validators.required, Validators.email]],
+      password1: ['', [Validators.minLength(8)]],
+      password2: ['', [Validators.minLength(8)]]
+    });
+    
+    /* Set up the custom validator that checks if both passwords are equal */
+    this.profileForm.setValidators(this.passwordsMatch.bind(this));
+  }
+
   ngOnInit(): void {
+
+    /* Subscribe to the value changes of the form to dynamically update the error messages */
+    this.registerFormValueChangesSubscription = this.profileForm.valueChanges.subscribe(() => {
+      this.updateErrorMessages();
+    });
+
+    /* Subscribe to the value changes of the first password input field to dynamically update the error messages under the second password input field */
+    this.password1ValueChangesSubscription = this.profileForm.get('password1')?.valueChanges.subscribe(() => {
+      this.profileForm.get('password2')?.updateValueAndValidity();
+    });
+
     console.log('edit-personal-information Page intialized');
 
     /* get all the user information from backend */
@@ -49,12 +83,22 @@ export class ProfileComponent implements OnInit{
       next: (val) => {
         this.user = val.user;
         /* Input fields are filled with the information from the backend */
-        this.name = this.user.name;
-        this.street = this.user.street;
-        this.houseNumber = this.user.houseNumber;
-        this.zipCode = this.user.zipCode;
-        this.city = this.user.city;
-        this.email = this.user.email;
+        this.profileForm.patchValue({
+          name: this.user.name,
+          street: this.user.street,
+          houseNumber: this.user.houseNumber,
+          zipCode: this.user.zipCode,
+          city: this.user.city,
+          email: this.user.email,
+          password1: '', // Do not pre-fill passwords, as this is security-critical data
+          password2: ''  // Do not pre-fill passwords, as this is security-critical data
+        });
+        this.name = this.profileForm.get('name')?.value; 
+        this.street = this.profileForm.get('street')?.value;
+        this.houseNumber = this.profileForm.get('houseNumber')?.value; 
+        this.zipCode = this.profileForm.get('zipCode')?.value; 
+        this.city = this.profileForm.get('city')?.value; 
+        this.email = this.profileForm.get('email')?.value; 
       },
       error: (err) => {
         this.user = undefined;
@@ -63,16 +107,84 @@ export class ProfileComponent implements OnInit{
     });
   }
 
-  /**
-   * method that checks whether both passwords are the same
-   */
-  passwordsMatch(): boolean {
-    return this.password1 === this.password2;
+  ngOnDestroy(): void {
+    /* Unsubscribe from all subscriptions to avoid memory leaks */
+    this.password1ValueChangesSubscription?.unsubscribe();
+    this.registerFormValueChangesSubscription?.unsubscribe();
   }
 
-  /**
-   * Reset all Error variables
-   */
+  /* Method to update the error message of a single form control if it is invalid and has been touched */
+  updateErrorMessage(formControlName: string, errorMessage: string): string {
+    return (!this.profileForm.get(formControlName)?.valid && this.profileForm.get(formControlName)?.touched) ? errorMessage : '';
+  }
+
+  updateErrorMessages(): void {
+    /* Define default error messages if required input fields are empty */
+    const nameErrMsg = 'Bitte geben Sie einen Namen ein.';
+    const streetErrMsg = 'Bitte geben Sie eine Straße ein.';
+    let houseNumberErrMsg = 'Bitte geben Sie eine Hausnummer ein.';
+    let zipCodeErrMsg = 'Bitte geben Sie eine Postleitzahl ein.';
+    const cityErrMsg = 'Bitte geben Sie einen Ort ein.';
+    let emailErrMsg = 'Bitte geben Sie eine E-Mail-Adresse ein.';
+    let password1ErrMsg = 'Bitte geben Sie ein Passwort ein.';
+    let password2ErrMsg = 'Bitte geben Sie ein Passwort ein.';
+
+    /* Change the default error messages if the user has entered something but it is invalid. */
+    if (!this.profileForm.get('houseNumber')?.hasError('required') && this.profileForm.get('houseNumber')?.hasError('invalidNumericInput')) {
+      houseNumberErrMsg = 'Ungültige Hausnummer.';
+    }
+    if (!this.profileForm.get('zipCode')?.hasError('required') && this.profileForm.get('zipCode')?.hasError('invalidNumericInput')) {
+      zipCodeErrMsg = 'Ungültige Postleitzahl.';
+    }
+    if (!this.profileForm.get('email')?.hasError('required') && this.profileForm.get('email')?.hasError('email')) {
+      emailErrMsg = 'Ungültige E-Mail.';
+    }
+    if (!this.profileForm.get('password1')?.hasError('required') && this.profileForm.get('password1')?.hasError('minlength')) {
+      password1ErrMsg = 'Das Passwort muss mindestens 8 Stellen haben.';
+    }
+    if (!this.profileForm.get('password2')?.hasError('required') && this.profileForm.get('password2')?.hasError('minlength')) {
+      password2ErrMsg = 'Das Passwort muss mindestens 8 Stellen haben.';
+    }
+    if (this.profileForm.get('password1')?.touched && this.profileForm.hasError('passwordsUnequal')) {
+      /* If the passwords are not equal, display the error message in the second password input field */
+      this.profileForm.get('password2')?.setErrors({ 'passwordsUnequal': true });
+      password2ErrMsg = 'Die Passwörter stimmen nicht überein.';
+    }
+
+    /* Update the error messages for all input fields */
+    this.errorNameMessage = this.updateErrorMessage('name', nameErrMsg);
+    this.errorStreetMessage = this.updateErrorMessage('street', streetErrMsg);
+    this.errorHouseNumberMessage = this.updateErrorMessage('houseNumber', houseNumberErrMsg);
+    this.errorZipCodeMessage = this.updateErrorMessage('zipCode', zipCodeErrMsg);
+    this.errorCityMessage = this.updateErrorMessage('city', cityErrMsg);
+    this.errorEmailMessage = this.updateErrorMessage('email', emailErrMsg);
+    this.errorPassword1Message = this.updateErrorMessage('password1', password1ErrMsg);
+    this.errorPassword2Message = this.updateErrorMessage('password2', password2ErrMsg);
+  }
+
+  /* Custom Validator to ensure that both entered passwords are equal */
+  passwordsMatch(control: AbstractControl): {[s: string]: boolean} | null {
+    const password1 = control.get('password1')?.value;
+    const password2 = control.get('password2')?.value;
+  
+    if (password1 !== password2) {
+      return { 'passwordsUnequal': true };
+    }
+    return null;  // If the validation is successful you have to pass nothing or null
+  }
+
+  /* Custom Validator to check whether an input is a numeric number */
+  checkNumericInput(control: FormControl): { [key: string]: unknown } | null {
+    const houseNumberPattern = /^[0-9]+$/; // regular expression that only accepts digits
+  
+    if (!houseNumberPattern.test(control.value)) {
+      return { 'invalidNumericInput': true }; // error message if the input does not contain any digits
+    }
+  
+    return null; // return null means no validation errors
+  }
+
+  /* Reset all error variables to empty strings */
   resetErrorMessages(): void {
     this.errorNameMessage = '';
     this.errorStreetMessage = '';
@@ -84,118 +196,62 @@ export class ProfileComponent implements OnInit{
     this.errorPassword2Message = '';
   }
 
-  /**
-   * checks whether an input is a numeric number
-   */
-  checkNumericInput(control: FormControl): { [key: string]: unknown } | null {
-    const houseNumberPattern = /^[0-9]+$/; // regular expression that only accepts digits
-  
-    if (!houseNumberPattern.test(control.value)) {
-      return { 'invalidNumericInput': true }; // error message if the input does not contain any digits
+  /* Set an error in the respective input form control of the registerForm if the backend
+  * returns a validation error for that input field to visually mark the input field as invalid.
+  * Additionally assign the error messages to the respective error message variables. */
+  assignErrorMessage(validationErrors: ValidationErrors): void {
+    if (validationErrors['name']) {
+      this.profileForm.get('name')?.setErrors({ 'required': true });
+      this.errorNameMessage = validationErrors['name'];
     }
-  
-    return null; // return zero means that no errors were found
+    if (validationErrors['street']) {
+      this.profileForm.get('street')?.setErrors({ 'required': true });
+      this.errorStreetMessage = validationErrors['street'];
+    }
+    if (validationErrors['houseNumber']) {
+      this.profileForm.get('houseNumber')?.setErrors({ 'required': true });
+      this.errorHouseNumberMessage = validationErrors['houseNumber'];
+    }
+    if (validationErrors['zipCode']) {
+      this.profileForm.get('zipCode')?.setErrors({ 'required': true });
+      this.errorZipCodeMessage = validationErrors['zipCode'];
+    }
+    if (validationErrors['city']) {
+      this.profileForm.get('city')?.setErrors({ 'required': true });
+      this.errorCityMessage = validationErrors['city'];
+    }
+    if (validationErrors['email']) {
+      this.profileForm.get('email')?.setErrors({ 'email': true });
+      this.errorEmailMessage = validationErrors['email'];
+    }
+    if (validationErrors['password']) {
+      this.profileForm.get('password1')?.setErrors({ 'required': true });
+      this.profileForm.get('password2')?.setErrors({ 'required': true });
+      this.errorPassword1Message = validationErrors['password'];
+      this.errorPassword2Message = validationErrors['password'];
+    }
   }
 
-  /**
-   * Checks if Arguments from the User Input Fields are valid
-   */
-  validateAttributes(): boolean {
-    let registrationIsValid = true;
-
-    /* Define FormControl instances for validating the input fields */
-    const nameValidate = new FormControl(this.name, [Validators.required]);
-    const streetValidate = new FormControl(this.street, [Validators.required]);
-    const houseNumberValidate = new FormControl(this.houseNumber, [Validators.required, this.checkNumericInput]);
-    const zipCodeValidate = new FormControl(this.zipCode, [Validators.required, this.checkNumericInput]);
-    const cityValidate = new FormControl(this.city, [Validators.required]);
-    const emailValidate = new FormControl(this.email, [Validators.required, Validators.email]);
-    const password1Validate = new FormControl(this.password1, [Validators.required, Validators.minLength(8)]);
-    const password2Validate = new FormControl(this.password2, [Validators.required, Validators.minLength(8)]);
-
-    if (nameValidate.hasError('required')) { // input field is empty
-      this.errorNameMessage = 'Bitte geben Sie einen Namen ein.';
-      registrationIsValid = false;
-    }
-    if (streetValidate.hasError('required')) { // input field is empty
-      this.errorStreetMessage = 'Bitte geben Sie eine Straße ein.';
-      registrationIsValid = false;
-    }
-    if (houseNumberValidate.hasError('invalidNumericInput')) { //houseNumber is no numeric number
-      this.errorHouseNumberMessage = 'Ungültige Hausnummer';
-      registrationIsValid = false;
-    }
-    if (houseNumberValidate.hasError('required')) { // input field is empty
-      this.errorHouseNumberMessage = 'Bitte geben Sie eine Hausnummer ein.';
-      registrationIsValid = false;
-    }
-    if (zipCodeValidate.hasError('invalidNumericInput')) { // zipCode is no numeric number
-      this.errorZipCodeMessage = 'Ungültige Postleitzahl';
-      registrationIsValid = false;
-    }
-    if (zipCodeValidate.hasError('required')) { // input field is empty
-      this.errorZipCodeMessage = 'Bitte geben Sie eine Postleitzahl ein.';
-      registrationIsValid = false;
-    }
-    if (cityValidate.hasError('required')) { // input field is empty
-      this.errorCityMessage = 'Bitte geben Sie einen Ort ein.';
-      registrationIsValid = false;
-    }
-    if (emailValidate.hasError('required')) { // input field is empty
-      this.errorEmailMessage = 'Bitte geben Sie eine E-Mail-Adresse ein.';
-      registrationIsValid = false;
-    }
-    if (emailValidate.hasError('email')) { // email is not valid
-      this.errorEmailMessage = 'Ungültige E-Mail.';
-      registrationIsValid = false;
-    }
-    if (password1Validate.hasError('required')) { // input field is empty
-      this.errorPassword1Message = 'Bitte geben Sie ein Passwort ein.';
-      registrationIsValid = false;
-    }
-    if (password1Validate.hasError('minlength')) { //password length is less than 8
-      this.errorPassword1Message = 'Das Passwort muss mindestens 8 Stellen haben.';
-      registrationIsValid = false;
-    }
-    if (password2Validate.hasError('required')) { // input field is empty
-      this.errorPassword2Message = 'Bitte geben Sie ein Passwort ein.';
-      registrationIsValid = false;
-    }
-    if (password2Validate.hasError('minlength')) { //password length is less than 8
-      this.errorPassword2Message = 'Das Passwort muss mindestens 8 Stellen haben.';
-      registrationIsValid = false;
-    }
-    if(this.password1 !== this.password2){ // passwords do not match
-      this.errorPassword2Message = 'Die Passwörter stimmen nicht überein.';
-      this.errorPassword2Message = 'Die Passwörter stimmen nicht überein.';
-      registrationIsValid = false;
-    }
-    return registrationIsValid;
-  }
-
-  /**
-   * handels all backend errors and assigns the errors to the variables
-   */
+  /* Method to handle possible backend errors, especially validation errors that the frontend validation does not catch */
   handleBackendError(err: HttpErrorResponse): void {
     this.errorMessage = err.error.message;
     console.error(err);
-    /* assigns all backend errors to the variables */
+
+    /* Assigns all backend errors to the respective variables */
     if (err.status === 400 && err.error.validationErrors) {
       const validationErrors = err.error.validationErrors;
-      this.errorNameMessage = validationErrors?.name || '';
-      this.errorStreetMessage = validationErrors?.street || '';
-      this.errorHouseNumberMessage = validationErrors?.houseNumber || '';
-      this.errorZipCodeMessage = validationErrors?.zipCode || '';
-      this.errorCityMessage = validationErrors?.city || '';
-      this.errorEmailMessage = validationErrors?.email || '';
-      this.errorPassword1Message = validationErrors?.password || '';
-      this.errorPassword2Message = validationErrors?.password || '';
+
+      /* Reset all error messages before assigning the new ones that came from the backend */
+      this.resetErrorMessages();
+
+      /* Assign the error messages to the respective invalid input fields */
+      this.assignErrorMessage(validationErrors);
     } else {
       this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
       console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
     }
   }
-
+  
   /**
    * abort method is called when registration button is pressed
    */
@@ -208,15 +264,15 @@ export class ProfileComponent implements OnInit{
    * is called up when the "Änderungen Speichern" button is pressed
    * gets called when button is pressed
    */
-  editPersonalInformation(): void {
+  onSubmit(): void {
     console.log('Button Änderungen speichern pressed');
 
-    /* Reset all ErrorMessages */
-    this.resetErrorMessages();
-
-    /* Checks for invalid input */
-    if(!this.validateAttributes()){
-      return; // editing personal information canceled
+    /* Check if the overall form is valid */
+    if (!this.profileForm.valid) {
+      /* Mark all form fields as touched to display the error messages */
+      this.profileForm.markAllAsTouched();
+      this.updateErrorMessages();
+      return; // registration canceled
     }
 
     /* sends edited data to the backend */
