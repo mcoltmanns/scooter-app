@@ -10,7 +10,16 @@ import SessionManager from '../services/session-manager';
  * All authorization functions should go here - anything login or registration related
  */
 export class AuthController {
-    public async authorize(request: Request, response: Response, next: NextFunction): Promise<void> {
+  /**
+   * check if a user's sessionId is valid - should be executed at the beginning of any protected execution chain
+   * if it's vaild, extend their session and continue
+   * if not, break the execution chain
+   * @param request   request.cookies = {sessionId}
+   * @param response 
+   * @param next 
+   * @returns         sets response locals to sessionId and userId
+   */
+  public async authorize(request: Request, response: Response, next: NextFunction): Promise<void> {
     /* Check if the client has sent a session cookie */
     const sessionId = request.cookies.sessionId;
     if (!sessionId) {
@@ -59,7 +68,12 @@ export class AuthController {
     return next();
   }
 
-
+  /**
+   * register a user and log them in immediately
+   * @param request   request.body = {name, street, houseNumber, zipCode, city, email, password}
+   * @param response  response.cookie = {sessionId}
+   * @returns         null
+   */
   public async register(request: Request, response: Response): Promise<void> {
     /* Extract the received client data from the request body */
     const { name, street, houseNumber, zipCode, city, email, password } = request.body;
@@ -136,6 +150,14 @@ export class AuthController {
     return;
   }
 
+  /**
+   * log a user in
+   * if they have a session, renew it and log them in there
+   * if not, make a new session for them
+   * @param request   request.body = {email, password}
+   * @param response  response.cookie = {sessionId}
+   * @returns         null
+   */
   public async login(request: Request, response: Response): Promise<void> {
     /* Extract the received client data from the request body */
     const { email, password } = request.body;
@@ -208,6 +230,12 @@ export class AuthController {
     // }
   }
 
+  /**
+   * check if a user is authenticated
+   * @param request 
+   * @param response response.locals = {sessionId}
+   * @returns null
+   */
   public getAuth(request: Request, response: Response): void {
     if (!response.locals.sessionId) {
       response.status(200).json({ code: 200, authenticated: false });
@@ -218,6 +246,12 @@ export class AuthController {
     return;
   }
 
+  /**
+   * get a user's profile info
+   * @param request
+   * @param response response.locals = {userId}
+   * @returns null
+   */
   public async getUser(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
     if (!userId) {
@@ -236,12 +270,18 @@ export class AuthController {
     }
 
     if(!userData || !userAuth) { // make sure whatever user we just got actually exists
-      response.status(401).json({ code: 404, message: 'No user found' });
+      response.status(404).json({ code: 404, message: 'No user found' });
     }
 
     response.status(200).json({ code: 200, user: { name: userData.name, street: userData.street, houseNumber: userData.houseNumber, city: userData.city, zipCode: userData.zipCode, email: userAuth.email } }); // package the user up how the frontend expects it and send it off
   }
 
+  /**
+   * update a user's profile info
+   * @param request   request.body = {name, street, houseNumber, zipCode, city, email, password}
+   * @param response  200 if ok, 401 if no user provided, 404 if user doesn't exist, 500 if db error 
+   * @returns         null
+   */
   public async updateUser(request: Request, response: Response): Promise<void> {
     // make sure we actually have a user to update
     const userId = response.locals.userId;
@@ -255,7 +295,7 @@ export class AuthController {
       userData = await UsersData.findOne({ where: { id: userId}}); // need address info
       userAuth = await UsersAuth.findOne({ where: {id : userId}}); // and email
       if(!userData || !userAuth) { // make sure whatever user we just got actually exists
-        response.status(401).json({ code: 404, message: 'No user found' }); // this should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
+        response.status(404).json({ code: 404, message: 'No user found' }); // this should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
       }
     } catch (error) {
       response.status(500).json({ code: 500, message: 'Something went wrong', body: error });
@@ -286,6 +326,12 @@ export class AuthController {
     response.status(200).json({ code: 200, message: 'User data updated successfully'});
   }
 
+  /**
+   * log a user out
+   * @param request   request.cookies = {sessionId}
+   * @param response  200 if ok, 401 if not logged in, 500 if db error
+   * @returns         null
+   */
   public async logout(request: Request, response: Response): Promise<void> {
     /* Check if the user has an active session */
     // const activeSession = await SessionManager.isValidSession(request.cookies.sessionId);
