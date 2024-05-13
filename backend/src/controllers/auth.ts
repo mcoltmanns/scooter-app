@@ -190,44 +190,6 @@ export class AuthController {
     /* Set the session cookie and send a success message */
     response.cookie('sessionId', newSession.getDataValue('id'), { httpOnly: true, expires: newSession.getDataValue('expires') }).status(201).json({ code: 201, message: 'Login erfolgreich.' });
     return;
-
-    // if(!email || !passwordHash) { // email or password is missing!
-    //   response.status(400).json('Malformed login request');
-    //   return;
-    // }
-    // console.log(`Trying to login as ${email}, ${passwordHash}`);
-    // // find a user with the given email
-    // const user = await UsersAuth.findOne({ where: { email: email } }); // find the user with this email
-    // if(!user) { // user exists?
-    //   response.status(401).json(`Could not find a user with email ${email}. Please create an account.`);
-    //   return;
-    // }
-    // if(user.getDataValue('password') !== passwordHash) { // password ok?
-    //   response.status(403).json('Incorrect password');
-    //   return;
-    // }
-    // const userId = user.getDataValue('id');
-    // let session = await(SessionManager.isValidSession(userId)); // see if user has a session
-    // if(session !== null) { // if they do, log them in to that one
-    //   console.log('found an active session');
-    //   response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }).status(200).json('Login successful.');
-    //   return;
-    // }
-    // else { // if they don't, generate a new session and log them in
-    //   console.log('no session found. making one');
-    //   const transaction = await Database.getSequelize().transaction(); // start a new transaction
-    //   session = await SessionManager.createSession(user.getDataValue('id'), transaction); // create a new session
-    //   try {
-    //     /* Commit the transaction */
-    //     await transaction.commit();
-    //     response.cookie('sessionId', session.getDataValue('id'), { httpOnly: true, expires: session.getDataValue('expires') }).status(200).json('Login successful.');
-    //     return;
-    //   } catch (error) {
-    //     await transaction.rollback(); // Rollback the transaction in case of an error
-    //     response.status(500).json({ code: 500, message: 'Something went wrong.', body: `${error}` }); // 500: Internal Server Error
-    //     return;
-    //   }
-    // }
   }
 
   /**
@@ -297,7 +259,7 @@ export class AuthController {
       if(request.body.password) {
         userAuth = await UsersAuth.findOne({ where: { id: userId }});
         if(!userAuth) { // Make sure whatever user we just got actually exists
-          response.status(401).json({ code: 404, message: 'Kein Benutzer gefunden.' }); // This should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
+          response.status(404).json({ code: 404, message: 'Kein Benutzer gefunden.' }); // This should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
         }
       }
 
