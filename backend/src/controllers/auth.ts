@@ -14,20 +14,20 @@ export class AuthController {
     /* Check if the client has sent a session cookie */
     const sessionId = request.cookies.sessionId;
     if (!sessionId) {
-      response.status(401).json({ code: 401, validationErrors: { sessionId: 'No session, please log in' } }); // 401: Unauthorized
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Keine Session, bitte melden Sie sich an.' } }); // 401: Unauthorized
       return;
     };
 
     /* Check if the session exists */
     const session = await UsersSession.findOne({ where: { id: sessionId } });
     if (!session) {
-      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session does not exist, please log in' } }); // 401: Unauthorized
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session existiert nicht, bitte melden Sie sich an.' } }); // 401: Unauthorized
       return;
     }
 
     /* Check if the session has expired */
     if(await SessionManager.sessionExpired(session)) {
-      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session expired, please log in' } }); // 401: Unauthorized
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session abgelaufen, bitte melden Sie sich an.' } }); // 401: Unauthorized
       return;
     }
 
@@ -44,7 +44,7 @@ export class AuthController {
       await session.save({transaction: transaction});
       await transaction.commit();
     } catch (error) {
-      response.status(500).json({ code: 500, message: 'Something went wrong' }); // 500: Internal Server Error
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.' }); // 500: Internal Server Error
       transaction.rollback();
       return;
     }
@@ -73,7 +73,7 @@ export class AuthController {
     try {
       passwordHash = bcrypt.hashSync(password, 10); // Hash password
     } catch (error) {
-      response.status(500).json({ code: 500, message: 'Something went wrong' }); // 500: Internal Server Error
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.' }); // 500: Internal Server Error
       return;
     }
 
@@ -127,12 +127,12 @@ export class AuthController {
       await transaction.commit();
     } catch (error) {
       await transaction.rollback(); // Rollback the transaction in case of an error
-      response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: `${error}` }); // 500: Internal Server Error
       return;
     }
 
     /* Send a success message */
-    response.status(201).json({ code: 201, message: 'Registration successful' });
+    response.status(201).json({ code: 201, message: 'Registrierung erfolgreich.' });
     return;
   }
 
@@ -143,20 +143,20 @@ export class AuthController {
     /* Search for the user in the database */
     const user = await UsersAuth.findOne({ where: { email: email } });
     if (!user) {
-      response.status(401).json({ code: 401, validationErrors: { email: 'Email address was not found' } }); // 401: Unauthorized
+      response.status(401).json({ code: 401, validationErrors: { email: 'E-Mail-Adresse nicht gefunden.' } }); // 401: Unauthorized
       return;
     }
 
     /* Check if the provided password matches the hashed password in the database */
     if (!bcrypt.compareSync(password, user.getDataValue('password'))) {
-      response.status(401).json({ code: 401, validationErrors: { password: 'Wrong password' } }); // 401: Unauthorized
+      response.status(401).json({ code: 401, validationErrors: { password: 'Falsches Passwort.' } }); // 401: Unauthorized
       return;
     }
 
     /* Check if the user already has an active session */
     const activeSession = await SessionManager.isValidSession(request.cookies.sessionId, user.getDataValue('id'));
     if (activeSession) {
-      response.status(200).json({ code: 200, message: 'Already logged in' });
+      response.status(200).json({ code: 200, message: 'Bereits eingeloggt.' });
       return;
     }
 
@@ -166,7 +166,7 @@ export class AuthController {
     const newSession = await SessionManager.createSession(user.getDataValue('id'));
     
     /* Set the session cookie and send a success message */
-    response.cookie('sessionId', newSession.getDataValue('id'), { httpOnly: true, expires: newSession.getDataValue('expires') }).status(201).json({ code: 201, message: 'Login successful' });
+    response.cookie('sessionId', newSession.getDataValue('id'), { httpOnly: true, expires: newSession.getDataValue('expires') }).status(201).json({ code: 201, message: 'Login erfolgreich.' });
     return;
 
     // if(!email || !passwordHash) { // email or password is missing!
@@ -221,7 +221,7 @@ export class AuthController {
   public async getUser(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
     if (!userId) {
-      response.status(401).json({ code: 401, message: 'No user ID provided' }); // 401: Unauthorized
+      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
       return;
     }
 
@@ -231,12 +231,12 @@ export class AuthController {
       userData = (await UsersData.findOne({ where: { id: userId }})).get(); // need address info
       userAuth = (await UsersAuth.findOne({ where: { id: userId }})).get(); // and email
     } catch (error) { // handle database freakouts
-      response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: `${error}` }); // 500: Internal Server Error
       return;
     }
 
     if(!userData || !userAuth) { // make sure whatever user we just got actually exists
-      response.status(401).json({ code: 404, message: 'No user found' });
+      response.status(401).json({ code: 404, message: 'Kein Benutzer gefunden.' });
     }
 
     response.status(200).json({ code: 200, user: { name: userData.name, street: userData.street, houseNumber: userData.houseNumber, city: userData.city, zipCode: userData.zipCode, email: userAuth.email } }); // package the user up how the frontend expects it and send it off
@@ -246,7 +246,7 @@ export class AuthController {
     // make sure we actually have a user to update
     const userId = response.locals.userId;
     if (!userId) {
-      response.status(401).json({ code: 401, message: 'No user' }); // 401: Unauthorized
+      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
       return;
     }
     // update the user
@@ -255,10 +255,10 @@ export class AuthController {
       userData = await UsersData.findOne({ where: { id: userId}}); // need address info
       userAuth = await UsersAuth.findOne({ where: {id : userId}}); // and email
       if(!userData || !userAuth) { // make sure whatever user we just got actually exists
-        response.status(401).json({ code: 404, message: 'No user found' }); // this should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
+        response.status(401).json({ code: 404, message: 'Kein Benutzer gefunden.' }); // this should never actually happen (user must be validated to even make it to this page) but it can't hurt to check
       }
     } catch (error) {
-      response.status(500).json({ code: 500, message: 'Something went wrong', body: error });
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: error });
       return;
     }
     const hashedPw = bcrypt.hashSync(request.body.password, 10); // hash the password
@@ -279,11 +279,11 @@ export class AuthController {
       await userAuth.save({transaction: transaction});
       await transaction.commit();
     } catch (error) {
-      response.status(500).json({ code: 500, message: 'Something went wrong', body: error });
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: error });
       await transaction.rollback(); // if something broke, rollback the transaction
       return;
     }
-    response.status(200).json({ code: 200, message: 'User data updated successfully'});
+    response.status(200).json({ code: 200, message: 'Benutzerdaten erfolgreich aktualisiert.'});
   }
 
   public async logout(request: Request, response: Response): Promise<void> {
@@ -291,7 +291,7 @@ export class AuthController {
     // const activeSession = await SessionManager.isValidSession(request.cookies.sessionId);
     if (!response.locals.sessionId) {
       console.log('No active Session');
-      response.status(401).json({ code: 401, message: 'Not logged in' }); // 401: Unauthorized
+      response.status(401).json({ code: 401, message: 'Nicht eingeloggt.' }); // 401: Unauthorized
       return;
     }
 
@@ -299,12 +299,12 @@ export class AuthController {
     try {
       await UsersSession.destroy({ where: { id: request.cookies.sessionId } });
     } catch (error) {
-      response.status(500).json({ code: 500, message: 'Something went wrong', body: `${error}` }); // 500: Internal Server Error
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: `${error}` }); // 500: Internal Server Error
       return;
     }
 
     /* Clear the session cookie and send a success message */
-    response.clearCookie('sessionId').status(200).json({ code: 200, message: 'Logout successful' });
+    response.clearCookie('sessionId').status(200).json({ code: 200, message: 'Logout erfolgreich.' });
     return;
   }
 }

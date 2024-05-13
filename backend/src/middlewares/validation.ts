@@ -12,7 +12,7 @@ export class Validator {
     try {
       await Promise.all(checks.map(check => check.run(request)));
     } catch (error) {
-      response.status(500).json({ code: 500, message: 'Something went wrong' }); // 500: Internal Server Error
+      response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.' }); // 500: Internal Server Error
       return;
     }
 
@@ -39,18 +39,18 @@ export class Validator {
   public async validateRegister(request: Request, response: Response, next: NextFunction): Promise<void> {   
     /* Check if all fields correspond to the expected request body */
     const checks = [
-      check('name').trim().escape().notEmpty().withMessage('Please provide a name'),
-      check('street').trim().escape().notEmpty().withMessage('Please provide a street'),
-      check('houseNumber').trim().escape().notEmpty().withMessage('Please provide a house number').bail().isNumeric().withMessage('Please provide a valid numeric house number'),
-      check('zipCode').trim().escape().notEmpty().withMessage('Please provide a zip code').bail().isNumeric().withMessage('Please provide a valid numeric zip code'),
-      check('city').trim().escape().notEmpty().withMessage('Please provide a city'),
-      check('email').trim().escape().notEmpty().withMessage('Please provide an email').bail().isEmail().withMessage('Please provide a valid email').bail().normalizeEmail().custom(async (email) => {
+      check('name').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Namen ein.'),
+      check('street').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Straße ein.'),
+      check('houseNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Hausnummer ein.').bail().isNumeric().withMessage('Bitte geben Sie eine gültige numerische Hausnummer ein.'),
+      check('zipCode').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Postleitzahl ein.').bail().isNumeric().withMessage('Bitte geben Sie eine gültige numerische Postleitzahl ein.'),
+      check('city').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Ort ein.'),
+      check('email').trim().escape().notEmpty().withMessage('Bitte geben Sie eine E-Mail-Adresse ein.').bail().isEmail().withMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.').bail().normalizeEmail().custom(async (email) => {
         const user = await UsersAuth.findOne({ where: { email: email } });
         if (user) {
-          throw new Error('Email already in use');
+          throw new Error('E-Mail wird bereits verwendet.');
         }
       }),
-      check('password').escape().notEmpty().withMessage('Please provide a password').bail().isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+      check('password').escape().notEmpty().withMessage('Bitte geben Sie ein Passwort ein.').bail().isLength({ min: 8 }).withMessage('Das Passwort muss mindestens 8 Stellen haben.')
     ];
 
     /* Run all checks */
@@ -61,8 +61,8 @@ export class Validator {
     /* Check if all fields correspond to the expected request body */
     const checks = [
       check('sessionId').trim().escape(),
-      check('email').trim().escape().notEmpty().withMessage('Please provide an email').bail().isEmail().withMessage('Please provide a valid email').bail().normalizeEmail(),
-      check('password').escape().notEmpty().withMessage('Please provide a password')
+      check('email').trim().escape().notEmpty().withMessage('Bitte geben Sie eine E-Mail-Adresse ein.').bail().isEmail().withMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.').bail().normalizeEmail(),
+      check('password').escape().notEmpty().withMessage('Bitte geben Sie ein Passwort ein.')
     ];
 
     /* Run all checks */
@@ -87,7 +87,7 @@ export class Validator {
   public async validateSessionCookie(request: Request, response: Response, next: NextFunction): Promise<void> {
     /* Check if all fields correspond to the expected request body */
     const checks = [
-      check('sessionId').trim().escape().notEmpty().withMessage('No session, please log in').bail().isLength({ min: 32, max: 32 }).withMessage('Session ID is not valid').matches(/^[a-zA-Z0-9_-]*$/).withMessage('Session ID is not valid')
+      check('sessionId').trim().escape().notEmpty().withMessage('Keine Session, bitte melden Sie sich an.').bail().isLength({ min: 32, max: 32 }).withMessage('Die Session-ID ist ungültig.').matches(/^[a-zA-Z0-9_-]*$/).withMessage('Die Session-ID ist ungültig.')
     ];
 
     /* Run all checks */
