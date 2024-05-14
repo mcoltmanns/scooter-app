@@ -1,5 +1,6 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
+import { Rental } from './rental';
 
 export const SESSION_LIFETIME = 60 * 60 * 1000; // sessions expire after 1 hour
 
@@ -92,3 +93,11 @@ UsersSession.belongsTo(UsersAuth, {
     allowNull: false,
   },
 });
+
+UsersAuth.hasOne(Rental, {
+  foreignKey: {
+    name: 'user_id',
+    allowNull: false // rentals must have an associated user
+  },
+});
+// users table doesn't need to track rentals - rentals table does this for us

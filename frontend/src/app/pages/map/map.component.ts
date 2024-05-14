@@ -9,6 +9,8 @@ import { TodoComponent } from '../todo/todo.component';
  * aufgerufen werden, z.B. "Leaflet.LeafletMouseEvent" (siehe unten)
  */
 import * as Leaflet from 'leaflet';
+import { MapService } from 'src/app/services/map.service';
+import { Scooter } from 'src/app/models/scooter';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -26,6 +28,11 @@ const defaultIcon = Leaflet.icon({
   styleUrls: ['./map.component.css'],
 })
 export class MapComponent implements OnInit {
+
+  public scooters: Scooter[] = [];
+  public errorMessage = '';
+
+  public constructor(private mapService: MapService) {}
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
    */
@@ -48,7 +55,9 @@ export class MapComponent implements OnInit {
    * dann an Leaflet weitergegeben.
    * Dokumentation: https://github.com/bluehalo/ngx-leaflet#add-custom-layers-base-layers-markers-shapes-etc
    */
-  layers = [Leaflet.marker([47.663557, 9.175365], { icon: defaultIcon })];
+   
+  // layers = [Leaflet.marker([47.663557, 9.175365], { icon: defaultIcon })];
+   layers: Leaflet.Layer[] = [];
 
   /**
    * Diese Methode wird im "map.component.html" Code bei Leaflet registriert
@@ -58,7 +67,34 @@ export class MapComponent implements OnInit {
     console.log(`${e.latlng.lat}, ${e.latlng.lng}`);
   }
 
+  /**
+   * This method adds a marker on the map for every scooter in this.scooters
+   */
+  addScootersToMap(): void {
+    for(const scooter of this.scooters) {
+      const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
+        {icon: defaultIcon}
+      );
+      this.layers.push(marker);
+    }
+  }
+
   ngOnInit(): void {
+
+    // Using mapService to get the data about scooters from backend
+    // and add markers on the map using addScootersToMap()-method
+    this.mapService.getScooterInfo().subscribe({
+      next: (value) => {
+        this.scooters = value;
+        this.addScootersToMap();
+      },
+
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
+
     for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
       // auch direkt in Typescript hinzugefügt werden

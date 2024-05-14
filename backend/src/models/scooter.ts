@@ -1,18 +1,11 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { Product } from './product';
+import { Rental } from './rental';
 
 /**
  * model of an actual instance of a scooter - these scooters really exist!
  */
-export type Scooter = {
-    id: number, // this scooter's unique id (think serial number or VIN)
-    product_id: number, // this scooter's product id (think model number or car make)
-    battery: number,
-    coordinates_lat: number,
-    coordinates_lng: number,
-    available: boolean // is this scooter available to rent?
-}
 
 export const Scooter = Database.getSequelize().define('scooters', {
     id: { // scooter id
@@ -47,14 +40,25 @@ export const Scooter = Database.getSequelize().define('scooters', {
             min: -180,
             max: 180,
         },
-    },
-    available: { // is this scooter available? TODO: this is a placeholder and will have to be reimplemented when rental functionality is added
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: true,
     }
-});
+}, { updatedAt: false, createdAt: false });
 
 Scooter.belongsTo(Product, { // establish foreign key relation - every real scooter is an instance of a product
     foreignKey: 'product_id', // and products and scooters are related via product ids
+});
+Product.hasMany(Scooter, { // each product has many scooters
+    foreignKey: 'product_id', // and products and scooters are related via product ids
+});
+
+Scooter.hasOne(Rental, { // every scooter can have a rental 
+    foreignKey: {
+        name: 'scooter_id',
+        allowNull: false // rentals must have an associated scooter
+    },
+});
+Rental.hasOne(Scooter, { // every rental can have a scooter - if a scooter's active_rental_id is null, it isn't being rented out
+    foreignKey: {
+        name: 'active_rental_id',
+        allowNull: true // scooters don't need to always be rented
+    },
 });
