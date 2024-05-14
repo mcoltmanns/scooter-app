@@ -11,7 +11,7 @@ export class MapController {
             response.status(500).json('Database error').send();
             return;
         }
-        response.status(200).json(scooters).send();
+        response.status(200).json(scooters);
         return;
     }
 }
