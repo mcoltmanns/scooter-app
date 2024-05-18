@@ -54,4 +54,9 @@ export class ScooterListComponent implements OnInit{
     Math.ceil(battery);
     return 46;
   }
+
+  /* gets the image url for the scooters from the backend */
+  getImageUrl(fileName: string): string {
+    return `http://localhost:8000/img/products/${fileName}.jpg`;
+  }
 }

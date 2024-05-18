@@ -8,7 +8,7 @@
           </div>
         </div>
         <div class="scooter-box">
-          <img class="picture" src="/assets/ZippyZap 2022.jpg" />   <!-- DUMMMY BILD -->
+          <img class="picture" [src]="getImageUrl(scooter.product_id)" />
           <div class="dividing-line"></div>
           <div class="secondary-text">
             <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p> <p class="secondary-text-font">Batteriestand</p>
