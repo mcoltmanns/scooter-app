@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-import { TodoComponent } from '../todo/todo.component';
+
 
 /**
  * Typescript erlaub es uns, auch einen ganzen Namespace zu importieren statt einzelne Komponenten.
@@ -11,6 +11,7 @@ import { TodoComponent } from '../todo/todo.component';
 import * as Leaflet from 'leaflet';
 import { MapService } from 'src/app/services/map.service';
 import { Scooter } from 'src/app/models/scooter';
+import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -23,16 +24,16 @@ const defaultIcon = Leaflet.icon({
 
 @Component({
   standalone: true,
-  imports: [LeafletModule, CommonModule, TodoComponent],
+  imports: [LeafletModule, CommonModule, ScooterListComponent],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
 export class MapComponent implements OnInit {
-
   public scooters: Scooter[] = [];
   public errorMessage = '';
 
   public constructor(private mapService: MapService) {}
+
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
    */
@@ -80,7 +81,6 @@ export class MapComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     // Using mapService to get the data about scooters from backend
     // and add markers on the map using addScootersToMap()-method
     this.mapService.getScooterInfo().subscribe({

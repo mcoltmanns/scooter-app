@@ -1,0 +1,138 @@
+.scrollable-container {
+    max-height: 80vh; /* 80% of the screen height */
+    overflow-y: auto; /* Activate vertical scrolling */
+}
+
+.scooter-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.scooter-item {
+    margin-bottom: 25px; /* Changes the spacing of the scooter boxes */
+}
+
+.top-box {
+    display: flex; /* Ensure alignment works */
+    align-items: center;
+    width: 100%;
+    height: 90px;
+    background-color: #00363D;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin: 0 auto; /* Adjust margin to center the box and cover borders */
+    padding: 10px;
+}
+
+.scooter-name {
+    text-align: center; /* Centers the text horizontally */
+    padding: 10px 20px;
+    color: #9AF0FF;
+    font-size: 24px;
+    font-family: Roboto;
+    font-weight: 500;
+    line-height: 21px;
+    word-wrap: break-word;
+}
+
+.scooter-box {
+    padding: 0px 0 30px;
+    border: none; /* Remove all borders */
+    border-radius: 15px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    background-color: #f9f9f9;
+    height: 350px; /* Adjust the height to accommodate the rounded-top-box */
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.scooter-box h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    color: black; 
+}
+
+.scooter-box p {
+    margin: 0;
+    font-size: 1em;
+    color: black;
+}
+
+.dividing-line {
+    width: 100%; 
+    height: 2px; 
+    background-color: #7FFF00; 
+    margin-top: -10px; 
+}
+
+.picture {
+    width: 60%;
+    height: auto;
+    max-width: 80%;
+    margin: 10px auto;
+    display: block; /* Ensures that the image is treated as a block element */
+}
+
+.secondary-text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px; /* Distance upwards */
+    margin-left: 15px; /* Distance to the left edge of the screen */
+    margin-right: 50px; /* Distance to the right edge of the screen */
+}
+
+.info-box {
+    padding: 6px 9px 4px 9px;
+    align-items: flex-start;
+    gap: 1px;
+    border-radius: 4px;
+    background: var(--Surface-overlay, rgba(33, 33, 33, 0.08));
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+
+.secondary-text .secondary-text-font {
+    font-size: 14px;
+    color: #808080; 
+    margin-left: 1px;
+    margin-right: 1px;
+}
+
+.scooter-details {
+    display: flex;
+    justify-content: space-between; /* Placement of green-button on the right */
+    align-items: center; /* Centering content for green-button */
+    padding: 2px;
+    margin-top: auto;
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-bottom: -15px;
+}
+
+.price {
+    font-weight: bold;
+    font-family: Roboto;
+}
+
+.green-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    background-color: #7FFF00;
+    padding: 2px;
+    border-radius: 50%;
+    cursor: pointer; /* Mouse pointer change when moving over  */
+    margin-left: -10px;
+}

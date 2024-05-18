@@ -24,5 +24,6 @@
     (leafletClick)="onMapClick($event)"
   ></div>
 
-  <app-todo *ngIf="view === 'list'"></app-todo>
+  <!-- If the switch button is pressed, the scooterList page should be loaded. -->
+  <app-scooter-list *ngIf="view === 'list'"></app-scooter-list>
 </div>
