@@ -12,6 +12,7 @@ import * as Leaflet from 'leaflet';
 import { MapService } from 'src/app/services/map.service';
 import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
+import { FormsModule } from '@angular/forms';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -24,13 +25,14 @@ const defaultIcon = Leaflet.icon({
 
 @Component({
   standalone: true,
-  imports: [LeafletModule, CommonModule, ScooterListComponent],
+  imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
 export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
   public errorMessage = '';
+  public searchTerm  = ''; // value for the input field of "search scooter"
 
   public constructor(private mapService: MapService) {}
 

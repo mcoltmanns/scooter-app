@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { Scooter } from 'src/app/models/scooter';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -12,10 +12,12 @@ import { Router } from '@angular/router';
   templateUrl: './scooter-list.component.html',
   styleUrls: ['./scooter-list.component.css']
 })
-export class ScooterListComponent implements OnInit{
+export class ScooterListComponent implements OnInit, OnChanges {
   public constructor(private mapService: MapService, private router: Router) {}
 
+  @Input() searchTerm = ''; // Input property to receive the search term
   public scooters: Scooter[] = [];
+  public filteredScooters: Scooter[] = [];
   public errorMessage = '';
   
   ngOnInit(): void {
@@ -23,7 +25,7 @@ export class ScooterListComponent implements OnInit{
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
-        console.log('All scooters:', this.scooters);
+        this.filterScooters();
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -32,10 +34,20 @@ export class ScooterListComponent implements OnInit{
     });
   }
 
+  ngOnChanges(): void {
+    this.filterScooters(); // Call filter method whenever searchTerm changes
+  }
+
+  /* filters the scooters for the "search scooter" input field */
+  filterScooters(): void {
+    this.filteredScooters = this.scooters.filter(scooter =>
+      scooter.product_id.toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+  }
+
   // DUMMY METHODE - MUSS AUSIMPLEMENTIERT WERDEN FALLS NÖTIG
   buttonToScooter(scooterId: string): void {
     console.log('Button Pressed for scooter ID:', scooterId);
-
     // SIEHE USER STORY ZUM ENWICKLUNGSHINWEIS MIT INNER HTML UND URL
   }
 
@@ -50,9 +62,8 @@ export class ScooterListComponent implements OnInit{
   }
 
   /* METHODE MUSS NOCH IMPLEMENTIERT WERDEN */
-  calculateRange(battery: number): number{
-    Math.ceil(battery);
-    return 46;
+  calculateRange(battery: number): number {
+    return Math.ceil(battery);
   }
 
   /* gets the image url for the scooters from the backend */
