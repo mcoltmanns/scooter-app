@@ -9,6 +9,7 @@ import { MapComponent } from './pages/map/map.component';
 import { RegistrationComponent } from './pages/registration/registration.component';
 import { Observable, map, of } from 'rxjs';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { PaymentComponent } from './pages/payment/payment.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -87,6 +88,7 @@ export const routes: Routes = [
       // "/settings/profil" geladen.
       { path: 'profil', component: ProfileComponent }, //edit-personal-information instead of TodoComponent
       // Alternativ können die Seiten (Komponenten) auch wiederverwendet werden auf mehreren Routen
+      {path: 'payment', component: PaymentComponent}, //edit-payment-information component
       { path: 'about', component: AboutComponent },
     ],
   },
