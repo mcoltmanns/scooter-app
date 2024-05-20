@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Scooter } from '../models/scooter';
+import { Product } from '../models/product';
 
 export class MapController {
     public async getAvailableScooters(request: Request, response: Response): Promise<void> {
@@ -13,5 +14,16 @@ export class MapController {
         }
         response.status(200).json(scooters);
         return;
+    }
+
+    /* method that gets all product information from the database */
+    public async getAllProducts(request: Request, response: Response): Promise<void> {
+        try {
+            const products = await Product.findAll();
+            response.status(200).json(products);
+        } catch (error) {
+            console.error(error);
+            response.status(500).send('products table error');
+        }
     }
 }

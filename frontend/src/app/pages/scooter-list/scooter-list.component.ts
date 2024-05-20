@@ -4,6 +4,7 @@ import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Router } from '@angular/router';
+import { Product } from 'src/app/models/product';
 
 @Component({
   selector: 'app-scooter-list',
@@ -17,6 +18,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
 
   @Input() searchTerm = ''; // Input property to receive the search term
   public scooters: Scooter[] = [];
+  public products: Product[] = [];
   public filteredScooters: Scooter[] = [];
   public errorMessage = '';
   
@@ -26,6 +28,24 @@ export class ScooterListComponent implements OnInit, OnChanges {
       next: (value) => {
         this.scooters = value;
         this.filterScooters();
+        console.log(this.scooters);
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
+
+    /* get all scooters from backend */
+    this.mapService.getProductInfo().subscribe({
+      next: (value) => {
+        this.products = value;
+        console.log(this.products);
+        /*
+        this.products.forEach(product => {
+          console.log(`Product ID: ${product.id}, Price per hour: ${product.price_per_hour}`);
+        });
+        */
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -61,13 +81,29 @@ export class ScooterListComponent implements OnInit, OnChanges {
     return productId.toUpperCase();
   }
 
-  /* METHODE MUSS NOCH IMPLEMENTIERT WERDEN */
-  calculateRange(battery: number): number {
-    return Math.ceil(battery);
-  }
-
   /* gets the image url for the scooters from the backend */
   getImageUrl(fileName: string): string {
     return `http://localhost:8000/img/products/${fileName}.jpg`;
+  }
+
+  /* gets the price for each scooter */
+  getPriceByProductId(productId: number): number | undefined {
+    const product = this.products.find(p => p.id === productId);
+    return product ? product.price_per_hour : undefined;
+  }
+
+  // method to calculate the range of the scooter
+  calcRange(battery: number, max_reach: number): number {
+    return Math.ceil(battery / 100 * max_reach);
+  }
+
+  /* gets the range for each scooter */
+  getRangeByProductId(productId: number, battery: number): number | undefined {
+    const product = this.products.find(p => p.id === productId);
+    if (product) {
+      return this.calcRange(battery, product.max_reach);
+    } else {
+      return undefined;
+    }
   }
 }
