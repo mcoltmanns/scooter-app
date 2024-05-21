@@ -13,7 +13,7 @@ export class PaymentController {
         }
         try {
             const paymentMethods = await PaymentMethod.findAll({ where: {usersDataId: userId } });
-            response.json({ paymentMethods }).status(200).send();
+            response.json({ paymentMethods }).status(200);
             return;
         } catch (error) {
             response.status(500).send();

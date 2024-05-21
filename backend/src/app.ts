@@ -17,6 +17,7 @@ import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
 import { Validator } from './middlewares/validation';
 import { MapController } from './controllers/map';
+import { PaymentController } from './controllers/payment';
 
 // Express server instanziieren
 const app = express();
@@ -71,6 +72,7 @@ const validator = new Validator();
 const auth = new AuthController();
 const api = new ApiController();
 const map = new MapController();
+const payment = new PaymentController();
 
 /* Routes without authentication */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
@@ -86,6 +88,8 @@ app.get('/api/authenticate', auth.getAuth.bind(auth)); // get the user's authent
 app.get('/api/user', auth.getUser.bind(auth)); // get a user's information
 app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth)); // set a user's information
 app.get('/api/map', map.getAvailableScooters.bind(auth));
+
+app.post('/api/payment', payment.getAllPaymentMethods.bind(auth));
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 
