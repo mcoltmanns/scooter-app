@@ -9,7 +9,7 @@ export class MapController {
             scooters = (await Scooter.findAll({ where: { active_rental_id: null } })).map((scooterModel) => scooterModel.get());
         } catch (error) {
             console.log(error);
-            response.status(500).json('Database error').send();
+            response.status(500).json('Database error');
             return;
         }
         response.status(200).json(scooters);
@@ -23,7 +23,7 @@ export class MapController {
             response.status(200).json(products);
         } catch (error) {
             console.error(error);
-            response.status(500).send('products table error');
+            response.status(500).send('Fehler in der Produkt Tabelle');
         }
     }
 }
