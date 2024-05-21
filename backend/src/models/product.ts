@@ -36,7 +36,6 @@ export const Product = Database.getSequelize().define('products', {
         }
     },
     description_html: {
-        type: DataTypes.STRING,
-        allowNull: true //Sollte eigentlich false - sonst aber error!
+        type: DataTypes.TEXT,
     }
 }, { createdAt: false, updatedAt: false });
