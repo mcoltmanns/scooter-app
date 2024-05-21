@@ -41,11 +41,9 @@ export class ScooterListComponent implements OnInit, OnChanges {
       next: (value) => {
         this.products = value;
         console.log(this.products);
-        /*
         this.products.forEach(product => {
-          console.log(`Product ID: ${product.id}, Price per hour: ${product.price_per_hour}`);
+          console.log(`Product ID: ${product.id}, HTML Discription ${product.description_html}`);
         });
-        */
       },
       error: (err) => {
         this.errorMessage = err.error.message;

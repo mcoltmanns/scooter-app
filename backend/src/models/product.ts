@@ -34,5 +34,9 @@ export const Product = Database.getSequelize().define('products', {
         validate: {
             min: 0,
         }
+    },
+    description_html: {
+        type: DataTypes.STRING,
+        allowNull: true //Sollte eigentlich false - sonst aber error!
     }
 }, { createdAt: false, updatedAt: false });

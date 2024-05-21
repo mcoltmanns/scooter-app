@@ -6,5 +6,5 @@ export interface Product {
     max_reach: number;
     max_speed: number;
     price_per_hour: number;
-    //description_html: string;
+    description_html: string;
 }
