@@ -41,9 +41,11 @@ export class ScooterListComponent implements OnInit, OnChanges {
       next: (value) => {
         this.products = value;
         console.log(this.products);
+        /*
         this.products.forEach(product => {
           console.log(`Product ID: ${product.id}, HTML Discription ${product.description_html}`);
         });
+        */
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -65,6 +67,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
 
   // DUMMY METHODE - MUSS AUSIMPLEMENTIERT WERDEN FALLS NÖTIG
   buttonToScooter(scooterId: string): void {
+    this.bookScooter(scooterId);
     console.log('Button Pressed for scooter ID:', scooterId);
     // SIEHE USER STORY ZUM ENWICKLUNGSHINWEIS MIT INNER HTML UND URL
   }
@@ -103,5 +106,26 @@ export class ScooterListComponent implements OnInit, OnChanges {
     } else {
       return undefined;
     }
+  }
+
+  /* removes a scooter from the list */
+  removeScooter(scooterId: string): void {
+    this.scooters = this.scooters.filter(scooter => scooter.product_id !== scooterId);
+    this.filteredScooters = this.filteredScooters.filter(scooter => scooter.product_id !== scooterId);
+  }
+
+  /* sends rrequest to the backend to book a scooter*/
+  bookScooter(scooterId: string): void {
+    this.mapService.bookScooter(scooterId).subscribe({
+      next: (response) => {
+        console.log('Scooter booked successfully:', response);
+        this.removeScooter(scooterId);
+        // Hier kannst du weitere Aktionen durchführen, z.B. UI-Updates
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
   }
 }

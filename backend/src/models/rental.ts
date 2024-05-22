@@ -6,6 +6,7 @@ export const Rental = Database.getSequelize().define('rentals', {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
+        autoIncrement: true, //increment the Rental id
     },
     endedAt: { // rentals are only over if endedAt contains a value
         type: DataTypes.DATE,
