@@ -4,6 +4,7 @@ import SwpSafe from '../services/payment/swpsafe';
 
 export class PaymentController {
     public async getAllPaymentMethods(request: Request, response: Response): Promise<void> {
+        /*
         const codeInfo = await SwpSafe.getCountryCode('y^t@y7#uMYu@');
         console.log(codeInfo);
         const userId = response.locals.userId;
@@ -13,10 +14,35 @@ export class PaymentController {
         }
         try {
             const paymentMethods = await PaymentMethod.findAll({ where: {usersDataId: userId } });
-            response.json({ paymentMethods }).status(200);
+            response.status(200).json({ paymentMethods });
             return;
         } catch (error) {
             response.status(500).send();
         }
+        */
+       response.status(200).json([
+        {
+            type: 'swpsafe',
+            info: {
+                swpCode: '%255R7bbmTZQ%26VAfTAunJpCDhFaQ9iFVwt%21a4%24%5EUdGf%24Xey3%5EW'
+            }
+        },
+        {
+            type: 'hcipal',
+            info: {
+                accountName: 'paul@milgram.de',
+                accountPassword: 'zJac6Em^q7JrG@w!FMf4@'
+            }
+        },
+        {
+            type: 'bachelorcard',
+            info: {
+                name: 'Paul Milgramm',
+                cardNumber: '4485-5420-1334-7098',
+                securityCode: '000',
+                expirationDate: '4/44'
+            }
+        }
+       ]);
     }
 }
