@@ -89,7 +89,7 @@ app.get('/api/user', auth.getUser.bind(auth)); // get a user's information
 app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth)); // set a user's information
 app.get('/api/map', map.getAvailableScooters.bind(auth));
 
-app.post('/api/payment', payment.getAllPaymentMethods.bind(auth));
+app.get('/api/payment', payment.getAllPaymentMethods.bind(auth));
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 
