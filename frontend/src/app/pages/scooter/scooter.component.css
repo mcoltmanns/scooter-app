@@ -1,0 +1,19 @@
+.bottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+    padding: 40px;
+    margin-top: 50px; /* Add an upper spacing */
+    margin-bottom: 40px;
+}
+
+  .error {
+    color: rgb(226, 27, 27);
+}
+
+.scooterBook-btn {
+    width: 80%;
+    min-width: min-content;
+}

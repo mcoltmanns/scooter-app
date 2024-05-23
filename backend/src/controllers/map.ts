@@ -28,7 +28,7 @@ export class MapController {
         }
     }
 
-    /* method that books a scooter*/
+    /* method that books a scooter */
     public async bookScooter(request: Request, response: Response): Promise<void> {
         const { scooterId, userId } = request.body;
 

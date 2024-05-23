@@ -66,8 +66,9 @@ export class ScooterListComponent implements OnInit, OnChanges {
   }
 
   // DUMMY METHODE - MUSS AUSIMPLEMENTIERT WERDEN FALLS NÖTIG
-  buttonToScooter(scooterId: string): void {
-    this.bookScooter(scooterId);
+  buttonToScooter(scooterId: number): void {
+    //this.bookScooter(scooterId);
+    this.router.navigate(['/scooter', scooterId]);
     console.log('Button Pressed for scooter ID:', scooterId);
     // SIEHE USER STORY ZUM ENWICKLUNGSHINWEIS MIT INNER HTML UND URL
   }
