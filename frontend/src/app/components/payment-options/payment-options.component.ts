@@ -23,7 +23,7 @@ export class PaymentOptionsComponent implements OnInit{
 
             error: (err) => {
                 console.error(err);
-                this.paymentOptions = [ { type: 'ERR', info: {name:'ERR'} }]; //only name always exists, thus this is set to ERR
+                this.paymentOptions = [ { type: 'ERR', info: {name:'ERR'} }]; 
             }
         });
     }

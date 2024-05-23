@@ -1,31 +1,35 @@
 @for (pm of paymentOptions; track paymentOptions){
-        <div class="payment-entry">
+    <div class="payment-entry">
+        @if (pm.type === 'swpsafe') {
+            <div class="payment-icon">
+                <img class="payment-icon" src='src/assets/payment/swpsafe,png'>
+            </div>
+        } 
+        @else if (pm.type === 'hcipal') {
+            <div class="payment-icon">
+                <img class="payment-icon" src='src/assets/payment/hciPal.png'>
+            </div>
+        } 
+        @else if (pm.type === 'bachelorcard'){
+            <div class="payment-icon">
+                <img class="payment-icon" src='src/assets/payment/bachelorcard.png'>
+            </div>
+        }
+        <div class="text">
+            <div class="name"> 
+                {{pm.info.name}}
+            </div>
+            <div class="description">
             @if (pm.type === 'swpsafe') {
-                <div class="payment-icon">
-                    <img class="payment-icon" src='src/assets/payment/swpsafe,png'>
-                </div>
-            } @else if (pm.type === 'hcipal') {
-                <div class="payment-icon">
-                    <img class="payment-icon" src='src/assets/payment/hciPal.png'>
-                </div>
-            } @else if (pm.type === 'bachelorcard'){
-                <div class="payment-icon">
-                    <img class="payment-icon" src='src/assets/payment/bachelorcard.png'>
-                </div>
-            }
-            <div class="text">
-                <div class="name"> 
-                    {{pm.info.name}}
-                </div>
-                <div class="description">
-                    @if (pm.type === 'swpsafe') {
-                        {{pm.info.swpCode}}
-                    } @else if (pm.type === 'hcipal') {
-                        {{pm.info.accountName}}
-                    } @else if (pm.type === 'bachelorcard'){
-                        {{pm.info.cardNumber}}
-                    }
-                </div>
+                            {{pm.info.swpCode}}
+                } 
+                @else if (pm.type === 'hcipal') {
+                            {{pm.info.accountName}}
+                } 
+                @else if (pm.type === 'bachelorcard'){
+                            {{pm.info.cardNumber}}
+                }
             </div>
         </div>
+    </div>
 }               
