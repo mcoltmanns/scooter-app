@@ -24,12 +24,14 @@ export class PaymentController {
         {
             type: 'swpsafe',
             info: {
+                name: 'Paul Milgram',
                 swpCode: '%255R7bbmTZQ%26VAfTAunJpCDhFaQ9iFVwt%21a4%24%5EUdGf%24Xey3%5EW'
             }
         },
         {
             type: 'hcipal',
             info: {
+                name: 'Paul Milgram',
                 accountName: 'paul@milgram.de',
                 accountPassword: 'zJac6Em^q7JrG@w!FMf4@'
             }
@@ -37,7 +39,7 @@ export class PaymentController {
         {
             type: 'bachelorcard',
             info: {
-                name: 'Paul Milgramm',
+                name: 'Paul Milgram',
                 cardNumber: '4485-5420-1334-7098',
                 securityCode: '000',
                 expirationDate: '4/44'
