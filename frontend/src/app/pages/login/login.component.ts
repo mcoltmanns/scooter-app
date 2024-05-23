@@ -74,7 +74,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       emailErrMsg = 'Ungültige E-Mail.';
     }
     if (!this.loginForm.get('password')?.hasError('required') && this.loginForm.get('password')?.hasError('minlength')) {
-      passwordErrMsg = 'Das Passwort muss mindestens 8 Stellen haben.';
+      // passwordErrMsg = 'Das Passwort muss mindestens 8 Stellen haben.';
+      passwordErrMsg = 'Das Passwort ist falsch.';
     }
 
     /* Update the error messages for all input fields */
