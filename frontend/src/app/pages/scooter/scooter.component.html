@@ -1,8 +1,19 @@
-<p>scooter works!</p>
-<div class="bottom">
-    <div style="text-align: center;" class="error">{{errorMessage}}</div>
+<div class="scrollable-container">
+    <div *ngIf="products.length > 0; else noScooters">
+        <div *ngFor="let product of products">
+            <h2>{{ product.name }}</h2>
+            <p>{{ product.price_per_hour }} €</p>
+        </div>
+    </div>
+    <ng-template #noScooters>
+        <p>Keine Scooter gefunden!</p>
+    </ng-template>
 
-    <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onSubmit()" >
-        Scooter buchen
-    </app-button>        
+    <div class="bottom">
+        <div style="text-align: center;" class="error">{{errorMessage}}</div>
+    
+        <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onSubmit()">
+            Scooter buchen
+        </app-button>        
+    </div>
 </div>

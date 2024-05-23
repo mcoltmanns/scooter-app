@@ -103,4 +103,15 @@ export class Validator {
     /* Run all checks */
     await Validator.runAllChecks(401, checks, request, response, next);
   }
+
+  public async validateBookScooter(request: Request, response: Response, next: NextFunction): Promise<void> {
+    /* Check if all fields correspond to the expected request body */
+    const checks = [
+      check('scooterId').trim().escape().notEmpty().withMessage('Keine Scooter ID.').bail().isNumeric().withMessage('Ungültige Scooter ID.')
+    ];
+
+    /* Run all checks */
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+  
 }

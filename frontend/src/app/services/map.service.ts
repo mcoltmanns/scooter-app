@@ -22,7 +22,12 @@ export class MapService {
     return this.http.get<Product []>('/api/product');
   }
 
-  // DUMMY ROUTE DIE NOCH ANGEPASST WERDEN MUSS
+  /* Method to get the information of a specific product by scooter ID */
+  public getSingleProductInfo(scooterId: number): Observable<Product[]> {
+    return this.http.get<Product[]>(`/api/productInfo/${scooterId}`);
+  }
+
+  // DUMMY ROUTE (hier fehlt noch das Argument -> wie lange der Scooter gebucht werden soll)
   bookScooter(scooterId: string): Observable<unknown> {
     return this.http.post('/api/bookScooter', { scooterId });
   }
