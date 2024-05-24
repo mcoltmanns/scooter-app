@@ -1,16 +1,29 @@
+.centered {
+    width: 100%;
+    min-width: min-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
 .add {
     display: flex;
-    padding: 8px;
-    align-items: flex-start;
-    align-self: stretch;
+    flex-direction: column;
+    padding: 15px;
+    align-items: center;
     justify-content: center;
     
-    gap: 20px;
-  
+    gap: 5px;
+    width: 100%;
+    min-width: 210px;
+    max-width: 500px;
+
+    cursor: pointer;
     border-radius: 4px;
     border: 1px solid var(--Primary-Stroke, #9AF0FF);
     background: rgba(255, 255, 255, 0.20);
-  }
+}
 
 .add .text {
     font-size: 14px;
@@ -22,23 +35,13 @@
 } 
 
 .plus {
-  position: relative;
-  width: 27px; /* size of the largest svg */
-  height: 27px; /* size of the largest svg */
-  margin-top: 10px;
+  display: inline-grid;
+  justify-items: center;
   align-items: center;
-  justify-content: center;
-  vertical-align: center;
-  text-align: center;
-  align-self: center;
 }
 
 .plus svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin-left: 174px; /*hardcoded weil ich es anders nicht hinbekommen habe*/
-  transform: translate(-50%, -50%);
+  grid-area: 1 / 1 / 2 / 2;
 }
 
 .plus .svg1 {

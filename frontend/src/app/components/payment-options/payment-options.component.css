@@ -1,47 +1,57 @@
 .payment-entry {
-    margin-bottom: 20px;
-    width: 100%;
-    padding: 10px 20px 10px 20px;
-    cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    background-color: white;
-  
-    border-radius: 4px;
-    border: 1px solid var(--Textfeld-Stroke, #000);
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  margin-bottom: 20px;
+  width: 100%;
+  min-width: 210px;
+  padding: 5px 15px 5px 15px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 25px;
+  background-color: white;
+
+  border-radius: 6px;
+  border: 1px solid var(--Textfeld-Stroke, #000);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   }
 
 .payment-icon {
-    max-width: 80px;
-    margin-right: 20px;
-    margin-top: auto;
-    margin-bottom: auto;
-    background-size: cover;
-    width: 80px;
-    height: 80px;
-  }
+  display: flex;
+}
+
+.payment-icon img {
+  width: 100%; /* Makes the image width equal to its container's width */
+  max-width: 80px; /* Limits the image's width */
+  min-width: 40px;
+  height: auto; /* Maintains the image's aspect ratio */
+}
+
+.payment-entry .text {
+  flex-grow: 1; /* Makes the text element fill the remaining space */
+  word-wrap: break-word; /* Breaks the text at the end of the line */
+  overflow-wrap: break-word; /* Breaks long words to prevent overflow */
+  hyphens: auto; /* Adds hyphen where the word breaks */
+  min-width: 60px; /* Allows the text to wrap */
+}
 
 .payment-entry .text .name {
-    font-size: 20px;
-    font-style: normal;
-    color:#000;
-  }
+  font-size: 18px;
+  font-style: normal;
+  color:#000;
+  width: 100%;
+}
 
 .payment-entry .text .description {
-    color: black;
-    font-size: 14px;
-    width: 100%;
-  }
+  color:#000;
+  font-size: 13px;
+  width: 100%;
+}
+
 .delete-icon {
-    position: absolute;
-    max-width: 60px;
-    margin-left: 150px;
-    margin-top: auto;
-    margin-bottom: auto;
-    background-size: cover;
-    width: 60px;
-    height: 60px;
+  display: flex;
+  width: 24px;
+  height: 28px;
+  min-width: 24px;
+  min-height: 28px;
+  margin-right: 10px;
 }
