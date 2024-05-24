@@ -13,7 +13,7 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
     styleUrl: './add-bachelorcard.component.css',
     imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule]
 })
-export class AddPaymentComponent{
+export class AddbachelorcardComponent{
 
   constructor(private router: Router) { }
 

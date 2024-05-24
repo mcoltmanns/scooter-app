@@ -1,5 +1,4 @@
 <div class="page-container">
-    <app-back-button></app-back-button>
     <h1 class="title">Zahlungsmethode hinzufügen</h1>
     <div class="scrollable-container">
     
@@ -8,14 +7,24 @@
     </div>
     
     <div class="options">
-        <div class="icon-active" routerLink="addbachelorcard"> <img class="opticon" src='../../../assets/payment/bachelorcard.png'></div>
-        <div class="icon" routerLink="addhcipal"> <img class="opticon" src='../../../assets/payment/hciPal.png'></div>
-        <div class="icon" routerLink="addswpsafe"> <img class="opticon" src='../../../assets/payment/swpsafe.png'></div>
+        <div class="icon-active" > <img class="opticon" src='../../../assets/payment/bachelorcard.png'></div>
+        <div class="icon" routerLink="../addhcipal"> <img class="opticon" src='../../../assets/payment/hciPal.png'></div>
+        <div class="icon" routerLink="../addswpsafe"> <img class="opticon" src='../../../assets/payment/swpsafe.png'></div>
     </div>
-    
-    <div class="bottom">
-        <app-button color="accent" class="logout-btn" (click)="cancel()">
-          Abbrechen
-        </app-button>
-      </div>
+    <div class="login-container">
+
+      <app-user-input label="Name"></app-user-input>
+      <app-user-input label="Kartennummer"></app-user-input>
+      <app-user-input label="Prüfziffer"></app-user-input>
+      <app-user-input label="Gültig bis"></app-user-input>
+
+  </div>
+  <div class="bottom">
+    <app-button class="logout-btn" (click)="confirm()">
+      Zahlungsmethode hinzufügen
+    </app-button>
+      <app-button color="accent" class="logout-btn" (click)="cancel()">
+        Abbrechen
+      </app-button>
+  </div>
  </div>
