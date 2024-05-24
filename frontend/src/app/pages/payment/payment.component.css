@@ -1,11 +1,16 @@
+body, html {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .add {
-    margin-top: 20px;
-    width: 100%;
-    padding: 10px 20px 10px 20px;
-    cursor: pointer;
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    padding: 8px;
+    align-items: flex-start;
+    align-self: stretch;
+    justify-content: center;
+    
     gap: 20px;
   
     border-radius: 4px;
@@ -21,6 +26,44 @@
     text-align: center;
     vertical-align: center;
 } 
+
+.plus {
+  position: relative;
+  width: 27px; /* size of the largest svg */
+  height: 27px; /* size of the largest svg */
+  margin-top: 10px;
+  align-items: center;
+  justify-content: center;
+  vertical-align: center;
+  text-align: center;
+  align-self: center;
+}
+
+.plus svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: 174px; /*hardcoded weil ich es anders nicht hinbekommen habe*/
+  transform: translate(-50%, -50%);
+}
+
+.plus .svg1 {
+  width: 23px;
+  height: 23px;
+  z-index: 2;
+}
+
+.plus .svg2 {
+  width: 21px;
+  height: 21px;
+  z-index: 3;
+}
+
+.plus .svg3 {
+  width: 27px;
+  height: 27px;
+  z-index: 1;
+}
 
 .back-btn {
   position: absolute;
