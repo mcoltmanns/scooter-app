@@ -53,3 +53,25 @@
 .logout-btn {
   width: 65%;
 }
+
+.options .icon-active{
+  position: relative;
+  width: 100%;
+  align-items: center;
+  background-color: rgb(141, 244, 172);
+
+  border-radius: 4px;
+  border: 1px solid var(--Textfeld-Stroke, #000);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.options .icon-active img {
+max-width: 100%;
+height: auto;
+}
+
+.options .icon-active svg {
+position: absolute;
+top: 100;
+left: 0;
+}
