@@ -42,13 +42,28 @@ export class ScooterComponent implements OnInit {
   onSubmit(): void {
     console.log('scooterBook button pressed');
 
-    // Pass the booking Function the the scooterID
-    const scooterId = this.product?.id;
-    const navigationExtras: NavigationExtras = { // ZU EINEM SPÄTERN ZEITPUNKT KÖNNTE MAN SICH ÜBERLEGEN DAS KOMPLETTE SCOOTER OBJECT ZU SCHICKEN
+    const id = this.product?.id;
+    const name = this.product?.name;
+    const brand = this.product?.brand;
+    const image = this.product?.image;
+    const max_reach = this.product?.max_reach;
+    const max_speed = this.product?.max_speed;
+    const price_per_hour = this.product?.price_per_hour;
+    const description_html = this.product?.description_html;
+
+    // Pass the booking Function the parametes
+    const navigationExtras: NavigationExtras = { // IN DER TODO COMPONENT IN NgOnInit wird das ganze beispielhaft erhalten
       queryParams: {
-        scooterId: scooterId
+        id: id,
+        name: name,
+        brand: brand,
+        image: image,
+        max_reach: max_reach,
+        max_speed: max_speed,
+        price_per_hour: price_per_hour,
+        description_html: description_html
       }
     };
-    this.router.navigate(['/booking'], navigationExtras);
+    this.router.navigate(['/booking'], navigationExtras); // Route to booking page
   }
 }

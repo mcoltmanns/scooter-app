@@ -60,10 +60,16 @@ export class TodoComponent implements OnInit {
    *  Weiterführende Infos gibt es hier: https://angular.io/guide/lifecycle-hooks
    */
   ngOnInit(): void {
-    // TESTEN OB DIE ÜBERGABE MIT SCOOTERID KLAPPT
+    // TESTEN OB DIE ÜBERGABE MIT DEN PARAMETERN KLAPPT
     this.route.queryParams.subscribe(params => {
-      const scooterId = params['scooterId'];
+      const scooterId = params['id'];
+      const name = params['name'];
+      const description_html = params['description_html'];
+      const image = params['image'];
       console.log('Received scooterId:', scooterId);
+      console.log(name);
+      console.log(description_html);
+      console.log(image);
     });
   }
 }
