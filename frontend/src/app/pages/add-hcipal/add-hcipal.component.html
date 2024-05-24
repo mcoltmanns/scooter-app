@@ -1,0 +1,30 @@
+<div class="page-container">
+    <h1 class="title">Zahlungsmethode hinzufügen</h1>
+    <div class="scrollable-container">
+    
+    <div class="text">
+        Zahlungsanbieter wählen:
+    </div>
+    
+    <div class="options">
+        <div class="icon" routerLink="../addbachelorcard"> <img class="opticon" src='../../../assets/payment/bachelorcard.png'></div>
+        <div class="icon-active" > <img class="opticon" src='../../../assets/payment/hciPal.png'></div>
+        <div class="icon" routerLink="../addswpsafe"> <img class="opticon" src='../../../assets/payment/swpsafe.png'></div>
+    </div>
+    <div class="login-container">
+      <form [formGroup]="loginForm" class="my-form" (ngSubmit)="onSubmit()">
+        <app-user-input label="Email" [(text)]="email" formControlName="email" (blurEvent)="updateErrorMessages()"></app-user-input>
+        <div class="error">{{emailErrorMessage}}</div>
+
+        <app-user-input label="Passwort"></app-user-input>
+      </form>
+    </div>
+    <div class="bottom">
+      <app-button class="logout-btn" (click)="onSubmit()">
+        Zahlungsmethode hinzufügen
+      </app-button>
+        <app-button color="accent" class="logout-btn" (click)="cancel()">
+          Abbrechen
+        </app-button>
+    </div>
+ </div>

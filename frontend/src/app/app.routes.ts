@@ -11,6 +11,8 @@ import { Observable, map, of } from 'rxjs';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { PaymentComponent } from './pages/payment/payment.component';
 import { AddPaymentComponent } from './pages/add-payment/add-payment.component';
+import { AddswpsafeComponent } from './pages/add-swpsafe/add-swpsafe.component';
+import { AddhcipalComponent } from './pages/add-hcipal/add-hcipal.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -93,8 +95,8 @@ export const routes: Routes = [
         {path: '', component:PaymentComponent},
         {path: 'addPayment', children:[ //all add payment routes
           {path: '', component: AddPaymentComponent},
-          {path: 'addswpsafe', component: AboutComponent},
-          {path: 'addhcipal', component: AboutComponent},
+          {path: 'addswpsafe', component: AddswpsafeComponent},
+          {path: 'addhcipal', component: AddhcipalComponent},
           {path: 'addbachelorcard', component: AboutComponent},
         ]},
       ]}, //edit-payment-information component

@@ -1,0 +1,21 @@
+<div class="page-container">
+    <app-back-button></app-back-button>
+    <h1 class="title">Zahlungsmethode hinzufügen</h1>
+    <div class="scrollable-container">
+    
+    <div class="text">
+        Zahlungsanbieter wählen:
+    </div>
+    
+    <div class="options">
+        <div class="icon-active" routerLink="addbachelorcard"> <img class="opticon" src='../../../assets/payment/bachelorcard.png'></div>
+        <div class="icon" routerLink="addhcipal"> <img class="opticon" src='../../../assets/payment/hciPal.png'></div>
+        <div class="icon" routerLink="addswpsafe"> <img class="opticon" src='../../../assets/payment/swpsafe.png'></div>
+    </div>
+    
+    <div class="bottom">
+        <app-button color="accent" class="logout-btn" (click)="cancel()">
+          Abbrechen
+        </app-button>
+      </div>
+ </div>
