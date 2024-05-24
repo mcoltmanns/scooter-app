@@ -10,6 +10,7 @@ import { RegistrationComponent } from './pages/registration/registration.compone
 import { Observable, map, of } from 'rxjs';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ScooterComponent } from './pages/scooter/scooter.component';
+import { OptionsComponent } from './pages/options/options.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -90,6 +91,8 @@ export const routes: Routes = [
       { path: 'profil', component: ProfileComponent }, //edit-personal-information instead of TodoComponent
       // Alternativ können die Seiten (Komponenten) auch wiederverwendet werden auf mehreren Routen
       { path: 'about', component: AboutComponent },
+      // Path for the options to change metrics
+      { path: 'option', component: OptionsComponent }, //edit-personal-information instead of TodoComponent
     ],
   },
 
