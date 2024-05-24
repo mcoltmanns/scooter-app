@@ -35,3 +35,13 @@
     font-size: 14px;
     width: 100%;
   }
+.delete-icon {
+    position: absolute;
+    max-width: 60px;
+    margin-left: 150px;
+    margin-top: auto;
+    margin-bottom: auto;
+    background-size: cover;
+    width: 60px;
+    height: 60px;
+}

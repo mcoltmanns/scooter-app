@@ -2,17 +2,17 @@
     <div class="payment-entry">
         @if (pm.type === 'swpsafe') {
             <div class="payment-icon">
-                <img class="payment-icon" src='../../assets/payment/swpsafe.png'>
+                <img class="payment-icon" src='../../../assets/payment/swpsafe.png'>
             </div>
         } 
         @else if (pm.type === 'hcipal') {
             <div class="payment-icon">
-                <img class="payment-icon" src='../../assets/payment/hciPal.png'>
+                <img class="payment-icon" src='../../../assets/payment/hciPal.png'>
             </div>
         } 
         @else if (pm.type === 'bachelorcard'){
             <div class="payment-icon">
-                <img class="payment-icon" src='../../assets/payment/bachelorcard.png'>
+                <img class="payment-icon" src='../../../assets/payment/bachelorcard.png'>
             </div>
         }
         <div class="text">
@@ -30,6 +30,9 @@
                             {{pm.info.cardNumber}}
                 }
             </div>
+        </div>
+        <div class="delete-icon">
+            <img class="delete-icon" src='../../../assets/payment/deleteIcon.png'>
         </div>
     </div>
 }               
