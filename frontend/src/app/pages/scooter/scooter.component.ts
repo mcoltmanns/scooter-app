@@ -16,7 +16,7 @@ export class ScooterComponent implements OnInit {
   public constructor(private mapService: MapService, private router: Router) {}
 
   public errorMessage = '';
-  public products: Product[] = [];
+  public product: Product | null = null;
 
   ngOnInit(): void {
     // read the last number from the url:
@@ -28,8 +28,8 @@ export class ScooterComponent implements OnInit {
     /* get the product information for the */
     this.mapService.getSingleProductInfo(scooterId).subscribe({
       next: (value) => {
-        this.products = value;
-        console.log('Product information:', this.products);
+        this.product = value;
+        console.log('Product information:', this.product);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -43,7 +43,7 @@ export class ScooterComponent implements OnInit {
     console.log('scooterBook button pressed');
 
     // Pass the booking Function the the scooterID
-    const scooterId = this.products[0].id;
+    const scooterId = this.product?.id;
     const navigationExtras: NavigationExtras = { // ZU EINEM SPÄTERN ZEITPUNKT KÖNNTE MAN SICH ÜBERLEGEN DAS KOMPLETTE SCOOTER OBJECT ZU SCHICKEN
       queryParams: {
         scooterId: scooterId

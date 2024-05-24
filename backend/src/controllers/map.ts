@@ -34,7 +34,7 @@ export class MapController {
         const { scooterId } = request.params;
     
         try {
-            const product = await Product.findAll({ where: { id: scooterId } }); // find the product with matching Scooterid
+            const product = await Product.findOne({ where: { id: scooterId } }); // find the product with matching Scooterid
     
             if (!product) {
                 response.status(404).json({ code: 404, message: 'Produkt nicht gefunden.' });

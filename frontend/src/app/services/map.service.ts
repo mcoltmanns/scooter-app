@@ -23,8 +23,8 @@ export class MapService {
   }
 
   /* Method to get the information of a specific product by scooter ID */
-  public getSingleProductInfo(scooterId: number): Observable<Product[]> {
-    return this.http.get<Product[]>(`/api/productInfo/${scooterId}`);
+  public getSingleProductInfo(scooterId: number): Observable<Product> {
+    return this.http.get<Product>(`/api/productInfo/${scooterId}`);
   }
 
   // DUMMY ROUTE (hier fehlt noch das Argument -> wie lange der Scooter gebucht werden soll)
