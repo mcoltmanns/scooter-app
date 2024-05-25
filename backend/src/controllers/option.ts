@@ -34,7 +34,7 @@ export class OptionController{
 
     /* change user preferences */
     public async updateUserPreferences(request: Request, response: Response): Promise<void> {
-        const { speed, distance, currency } = request.body;
+        const {speed, distance, currency } = request.body;
 
         // Check whether all required fields are present in the request body
         if (!speed || !distance || !currency) {
@@ -55,10 +55,10 @@ export class OptionController{
             // Updating the user settings
             await existingPreferences.update({ speed, distance, currency });
 
-            response.status(200).json({ code: 200, message: 'User preferences erfolgreich aktualisiert.' });
         } catch (error) {
             console.error(error);
             response.status(500).json({  code: 500, message: 'Die Benutzereinstellungen konnten nicht aktualisiert werden.' });
         }
+        response.status(200).json({ code: 200, message: 'User preferences erfolgreich aktualisiert.' });
     }
 }
