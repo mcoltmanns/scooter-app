@@ -7,12 +7,19 @@
     </div>
     
     <div class="options">
-        <div class="icon" routerLink="addbachelorcard"> <img class="opticon" src='../../../assets/payment/bachelorcard.png'></div>
-        <div class="icon" routerLink="addhcipal"> <img class="opticon" src='../../../assets/payment/hciPal.png'></div>
-        <div class="icon" routerLink="addswpsafe"> <img class="opticon" src='../../../assets/payment/swpsafe.png'></div>
+        <div class="icon" routerLink="addbachelorcard">
+          <img src='../../../assets/payment/bachelorcard.png'>
+        </div>
+        <div class="icon" routerLink="addhcipal">
+          <img src='../../../assets/payment/hciPal.png'>
+        </div>
+        <div class="icon" routerLink="addswpsafe">
+          <img src='../../../assets/payment/swpsafe.png'>
+        </div>
     </div>
+
     <div class="bottom">
-        <app-button color="accent" class="logout-btn" (click)="cancel()">
+        <app-button color="accent" class="btn" (click)="onCancel()">
           Abbrechen
         </app-button>
       </div>

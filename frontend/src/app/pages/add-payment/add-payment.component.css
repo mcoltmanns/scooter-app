@@ -1,44 +1,56 @@
-.options {
-    margin-top: 20px;
-    column-count: 3;
-    font-size: 14px;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    vertical-align: center;
+.scrollable-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 }
 
-.opticon {
-    max-width: 80px;
-    margin-right: auto;
-    margin-top: auto;
-    margin-bottom: auto;
-    background-size: cover;
-    width: 80px;
-    height: 80px;
-  }
+.options {
+  margin-top: 20px;
+  font-size: 14px;
+  width: 100%;
+  min-width: 150px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
 
 .options .icon {
-    width: 100%;
-    align-items: center;
-    background-color: white;
+  position: relative;
+  width: 100%;
+  min-width: 50px;
+  background-color: white;
+  cursor: pointer;
 
-    border-radius: 4px;
-    border: 1px solid var(--Textfeld-Stroke, #000);
-    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  border: 1px solid var(--Textfeld-Stroke, #000);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.options .icon img {
+  max-width: 80px;
+  width: 100%;
+  height: auto;
 }
 
 .bottom {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 15px;
-    padding: 40px;
-    margin-top: 20px;
-  }
+  margin-top: 60px;
+  width: 100%;
+  min-width: min-content;
 
-.logout-btn {
-    width: 65%;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* justify-content: flex-end; */
+  gap: 15px;
+  margin-bottom:20px;
+}
+
+.btn {
+  width: 100%;
+  max-width: 225px;
+}

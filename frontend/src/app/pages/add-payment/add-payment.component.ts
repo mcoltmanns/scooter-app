@@ -17,7 +17,7 @@ export class AddPaymentComponent{
 
   constructor(private router: Router) { }
 
-  cancel(): void {
+  onCancel(): void {
         this.router.navigate(['settings/payment']);
   }
 }
