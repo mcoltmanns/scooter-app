@@ -101,3 +101,27 @@ UsersAuth.hasOne(Rental, {
   },
 });
 // users table doesn't need to track rentals - rentals table does this for us
+
+export const UserPreferences = Database.getSequelize().define('userPreferences', {
+  id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+  },
+  speed: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  distance: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  currency: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+}, {
+  createdAt: false,
+  updatedAt: false
+});

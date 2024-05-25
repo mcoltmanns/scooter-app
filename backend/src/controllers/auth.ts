@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import uid from 'uid-safe';
 import Database from '../database';
-import { UsersAuth, UsersData } from '../models/user';
+import { UserPreferences, UsersAuth, UsersData } from '../models/user';
 import { SESSION_LIFETIME, UsersSession } from '../models/user';
 import SessionManager from '../services/session-manager';
 
@@ -117,6 +117,18 @@ export class AuthController {
 
       /* Save the new user data object in the database */ 
       await UsersData.create(newUserData, { transaction });
+
+      /* Create a new user preferences object */
+      const newUserPreferences = {
+        speed: 'km/h',
+        distance: 'km',
+        currency: '€',
+        usersAuthId: createdUserAuth.getDataValue('id')
+      };
+
+      /* Save the new user preferences object in the database */
+      await UserPreferences.create(newUserPreferences);
+
 
       // create a new session for this new user
       const sessionId = uid.sync(24);
