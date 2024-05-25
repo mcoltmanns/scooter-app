@@ -1,4 +1,94 @@
 <div class="page-container">
     <app-back-button></app-back-button>
     <h1 class="title">Optionen</h1>
+
+    <div class="toggle-section">
+        <div class="text">
+            Geschwindigkeit:
+        </div>
+        
+        <div class="options">
+            <button class="toggle-button text-label" [ngClass]="{'active': selectedSpeed === 'kmh'}" (click)="selectSpeed('kmh')">
+                km/h
+                <div class="description-label">metrisch</div>
+                <span *ngIf="selectedSpeed === 'kmh'" class="checkmark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+                    </svg>
+                </span>
+            </button>
+            <button class="toggle-button text-label" [ngClass]="{'active': selectedSpeed === 'mph'}" (click)="selectSpeed('mph')">
+                mp/h
+                <div class="description-label">imperial</div>
+                <span *ngIf="selectedSpeed === 'mph'" class="checkmark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div class="toggle-section">
+        <div class="text">
+            Distanzen:
+        </div>
+        
+        <div class="options">
+            <button class="toggle-button text-label" [ngClass]="{'active': selectedDistance === 'km'}" (click)="selectDistance('km')">
+                km
+                <div class="description-label">metrisch</div>
+                <span *ngIf="selectedDistance === 'km'" class="checkmark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+                    </svg>
+                </span>
+            </button>
+            <button class="toggle-button text-label" [ngClass]="{'active': selectedDistance === 'miles'}" (click)="selectDistance('miles')">
+                mi
+                <div class="description-label">imperial</div>
+                <span *ngIf="selectedDistance === 'miles'" class="checkmark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div class="toggle-section">
+        <div class="text">
+            Währung:
+        </div>
+        
+        <div class="options">
+            <button class="toggle-button text-label" [ngClass]="{'active': selectedCurrency === 'euro'}" (click)="selectCurrency('euro')">
+                €
+                <div class="description-label">Euro</div>
+                <span *ngIf="selectedCurrency === 'euro'" class="checkmark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+                    </svg>
+                </span>
+            </button>
+            <button class="toggle-button text-label" [ngClass]="{'active': selectedCurrency === 'dollar'}" (click)="selectCurrency('dollar')">
+                $
+                <div class="description-label">US Dollar</div>
+                <span *ngIf="selectedCurrency === 'dollar'" class="checkmark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div class="bottom">
+        <app-button color="primary" class="logout-btn" (click)="submit()">
+            Änderungen speichern
+        </app-button>
+        <app-button color="accent" class="logout-btn" (click)="cancel()">
+            Abbrechen
+        </app-button>
+    </div>
 </div>
