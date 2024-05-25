@@ -1,12 +1,22 @@
 .scrollable-container {
   display: flex;
   flex-direction: column;
+  width: 100%;
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 30px;
+
+  width: 100%;
+  min-width: min-content;
 }
 
 .settings-entry {
   width: 100%;
+  min-width: 210px;
   padding: 10px 20px 10px 20px;
   cursor: pointer;
   display: flex;
@@ -31,7 +41,11 @@
 }
 
 .settings-entry .text {
-  width: 100%;
+  flex-grow: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-all; /* Break words even without spaces */
+  hyphens: auto;
 }
 
 .settings-entry .text .name {
@@ -48,18 +62,22 @@
 }
 
 .bottom {
-  position: absolute;
-  bottom: 140px;
+  margin-top: 30px;
   width: 100%;
+  min-width: min-content;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
   gap: 30px;
+  margin-bottom:20px;
 }
 
 .logout-btn {
-  width: 50%;
+  width: 100%;
+  max-width: 250px;
 }
 
 .about {
