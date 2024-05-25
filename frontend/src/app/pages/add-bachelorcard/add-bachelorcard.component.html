@@ -23,7 +23,7 @@
 
       <div class="form-container">
         <form [formGroup]="bachelorcardForm" (ngSubmit)="onSubmit()">
-          <app-user-input label="Code" [(text)]="name" formControlName="name" (blurEvent)="updateErrorMessages()"></app-user-input>
+          <app-user-input label="Name" [(text)]="name" formControlName="name" (blurEvent)="updateErrorMessages()"></app-user-input>
           <div class="error">{{nameErrorMessage}}</div>
   
           <app-user-input label="Kartennummer" [(text)]="cardNumber" formControlName="cardNumber" (blurEvent)="updateErrorMessages()"></app-user-input>

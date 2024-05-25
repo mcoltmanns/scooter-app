@@ -37,7 +37,7 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private renderer: Renderer2,
-    private el: ElementRef // Inject ElementRef here
+    private el: ElementRef
   ) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.bachelorcardForm = this.fb.group({
