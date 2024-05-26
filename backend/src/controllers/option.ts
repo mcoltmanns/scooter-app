@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserPreferences} from '../models/user';
+import Database from '../database';
 
 export class OptionController{
     /* Method that returns all entries from the UserPreferences table */
@@ -42,18 +43,28 @@ export class OptionController{
             return;
         }
 
+        const transaction = await Database.getSequelize().transaction();
+
         try {
             const userId = response.locals.userId;
 
             // Check whether the user exists
+            if (!userId) {
+                response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
+                await transaction.rollback();
+                return;
+            }
+
             const existingPreferences = await UserPreferences.findOne({ where: { id: userId } });
             if (!existingPreferences) {
                 response.status(404).json({ code: 404, message: 'User preferences nicht gefunden.' });
+                await transaction.rollback();
                 return;
             }
 
             // Updating the user settings
-            await existingPreferences.update({ speed, distance, currency });
+            await existingPreferences.update({ speed, distance, currency }, { transaction });
+            await transaction.commit();
 
         } catch (error) {
             console.error(error);
