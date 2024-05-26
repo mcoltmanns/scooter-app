@@ -10,7 +10,7 @@ export class MapController {
             scooters = (await Scooter.findAll({ where: { active_rental_id: null } })).map((scooterModel) => scooterModel.get());
         } catch (error) {
             console.log(error);
-            response.status(500).json('Database error');
+            response.status(500).json('Datenbank Fehler');
             return;
         }
         response.status(200).json(scooters);
