@@ -4,11 +4,13 @@ import { NavigationExtras, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Product } from 'src/app/models/product';
 import { MapService } from 'src/app/services/map.service';
+import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
+
 
 @Component({
   selector: 'app-scooter',
   standalone: true,
-  imports: [ButtonComponent, CommonModule],
+  imports: [ButtonComponent, BackButtonComponent, CommonModule],
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })

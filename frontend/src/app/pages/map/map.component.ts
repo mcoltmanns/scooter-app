@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
+ 
 
 
 /**
@@ -13,6 +14,7 @@ import { MapService } from 'src/app/services/map.service';
 import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -29,12 +31,13 @@ const defaultIcon = Leaflet.icon({
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
+
 export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
 
-  public constructor(private mapService: MapService) {}
+  public constructor(private mapService: MapService, private router: Router) {}
 
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
@@ -70,6 +73,11 @@ export class MapComponent implements OnInit {
     console.log(`${e.latlng.lat}, ${e.latlng.lng}`);
   }
 
+  buttonToScooter(scooterId: number): void {
+    this.router.navigate(['/scooter', scooterId]);
+    
+  }
+
   /**
    * This method adds a marker on the map for every scooter in this.scooters
    */
@@ -77,7 +85,10 @@ export class MapComponent implements OnInit {
     for(const scooter of this.scooters) {
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
         {icon: defaultIcon}
-      );
+      ).on('click', ()=> {
+        console.log(`${scooter.id} wurde angeklickt!`);
+        this.buttonToScooter(scooter.id);
+      }); //this.router.navigate(['/scooter', scooter.id]);
       this.layers.push(marker);
     }
   }
