@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PaymentMethod } from '../models/payment';
+import BachelorCard from '../services/payment/bachelorcard';
 import SwpSafe from '../services/payment/swpsafe';
 
 export class PaymentController {
@@ -20,12 +20,18 @@ export class PaymentController {
             response.status(500).send();
         }
         */
+       // Testing methods
+       /*console.log(await BachelorCard.getCountryCode('test-merchant', '4485-5420-1334-7098'));
+       console.log(await SwpSafe.getCountryCode('y^t@y7#uMYu@'));
+       const transaction = await SwpSafe.getTransaction('y^t@y7#uMYu@', 10);
+       console.log(transaction);
+       SwpSafe.commitTransaction(transaction.message);*/
        response.status(200).json([
         {
             type: 'swpsafe',
             info: {
                 name: 'Paul Milgram',
-                swpCode: '%255R7bbmTZQ%26VAfTAunJpCDhFaQ9iFVwt%21a4%24%5EUdGf%24Xey3%5EW'
+                swpCode: 'y^t@y7#uMYu@'
             }
         },
         {

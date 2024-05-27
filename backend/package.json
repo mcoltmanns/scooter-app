@@ -11,9 +11,11 @@
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"cyan.bold,green.bold\" \"tsc -w\" \"nodemon --watch dist/*\""
   },
   "dependencies": {
+    "axios": "^1.7.2",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "2.8.5",
+    "csv-parse": "5.5.6",
     "errorhandler": "1.5.1",
     "express": "4.19.2",
     "express-validator": "^7.0.1",
@@ -21,7 +23,7 @@
     "sequelize": "6.37.2",
     "source-map-support": "0.5.21",
     "uid-safe": "^2.1.5",
-    "csv-parse": "5.5.6"
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -34,6 +36,7 @@
     "@types/source-map-support": "0.5.10",
     "@types/supertest": "6.0.2",
     "@types/uid-safe": "^2.1.5",
+    "@types/xml2js": "^0.4.14",
     "@typescript-eslint/eslint-plugin": "7.5.0",
     "@typescript-eslint/parser": "7.5.0",
     "concurrently": "8.2.2",
