@@ -18,6 +18,25 @@ export class MapController {
         return;
     }
 
+    /* Method to get scooter information by scooter ID */
+    public async getScooterById(request: Request, response: Response): Promise<void> {
+        const { scooterId } = request.params;
+
+        try {
+            const scooter = await Scooter.findByPk(scooterId); // find the scooter with the matching ID
+
+            if (!scooter) {
+                response.status(404).json({ code: 404, message: 'Scooter nicht gefunden.' });
+                return;
+            }
+
+            response.status(200).json(scooter); // return the scooter information
+        } catch (error) {
+            console.error(error);
+            response.status(500).json({ code: 500, message: 'Fehler beim Abrufen des Scooters.' });
+        }
+    }
+
     /* method that gets all product information from the database */
     public async getAllProducts(request: Request, response: Response): Promise<void> {
         try {

@@ -17,6 +17,11 @@ export class MapService {
     return this.http.get<Scooter[]>('/api/map');
   }
 
+  /*  Method to the backend that retrieves information for a single scooter */
+  public getSingleScooterInfo(scooterId: number): Observable<Scooter> {
+    return this.http.get<Scooter>(`/api/singleScooter/${scooterId}`);
+  }
+
   /*  Method to the backend that retrieves all product information */
   public getProductInfo(): Observable<Product []> {
     return this.http.get<Product []>('/api/product');
@@ -25,10 +30,5 @@ export class MapService {
   /* Method to get the information of a specific product by scooter ID */
   public getSingleProductInfo(scooterId: number): Observable<Product> {
     return this.http.get<Product>(`/api/productInfo/${scooterId}`);
-  }
-
-  // DUMMY ROUTE (hier fehlt noch das Argument -> wie lange der Scooter gebucht werden soll)
-  bookScooter(scooterId: string): Observable<unknown> {
-    return this.http.post('/api/bookScooter', { scooterId });
   }
 }

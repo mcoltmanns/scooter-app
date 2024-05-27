@@ -5,6 +5,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Product } from 'src/app/models/product';
 import { MapService } from 'src/app/services/map.service';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
+import { Scooter } from 'src/app/models/scooter';
 
 
 @Component({
@@ -19,6 +20,7 @@ export class ScooterComponent implements OnInit {
 
   public errorMessage = '';
   public product: Product | null = null;
+  public scooter: Scooter | null = null;
 
   ngOnInit(): void {
     // read the last number from the url:
@@ -27,11 +29,25 @@ export class ScooterComponent implements OnInit {
     const lastPart = parts[parts.length - 1];
     const scooterId = parseInt(lastPart); // save the last number of URL in scooterId
 
-    /* get the product information for the */
+    /* get the scooter information by scooterId*/
+    this.mapService.getSingleScooterInfo(scooterId).subscribe({
+      next: (value) => {
+        this.scooter = value;
+        console.log('Scooter information:', this.scooter);
+        //console.log(this.scooter.battery);
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
+
+    /* get the product information for the scooter */
     this.mapService.getSingleProductInfo(scooterId).subscribe({
       next: (value) => {
         this.product = value;
         console.log('Product information:', this.product);
+        console.log('HTML Discription:', this.product.description_html);
       },
       error: (err) => {
         this.errorMessage = err.error.message;

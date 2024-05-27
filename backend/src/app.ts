@@ -86,6 +86,7 @@ app.get('/api/authenticate', auth.getAuth.bind(auth)); // get the user's authent
 app.get('/api/user', auth.getUser.bind(auth)); // get a user's information
 app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth)); // set a user's information
 app.get('/api/map', map.getAvailableScooters.bind(auth));
+app.get('/api/singleScooter/:scooterId', map.getScooterById); // get scooter information by scooterId
 app.get('/api/product', map.getAllProducts.bind(auth)); // get all product information
 app.post('/api/bookScooter', validator.validateBookScooter, map.bookScooter); // get all product information
 app.get('/api/productInfo/:scooterId', map.getProductByScooterId); //get for a specific scooter the products info
