@@ -5,11 +5,12 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Router } from '@angular/router';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
+import { UnitConverter } from 'src/app/utils/unit-converter';
 
 @Component({
   selector: 'app-options',
   standalone: true,
-  imports: [BackButtonComponent, ButtonComponent, CommonModule ],
+  imports: [BackButtonComponent, ButtonComponent, CommonModule],
   templateUrl: './options.component.html',
   styleUrl: './options.component.css'
 })
@@ -31,7 +32,10 @@ export class OptionsComponent implements OnInit{
         this.selectedSpeed = this.option.speed;
         this.selectedDistance = this.option.distance;
         this.selectedCurrency = this.option.currency; 
-        console.log(this.option);
+        // Testing:
+        this.convertSpeedUnits(2, this.selectedSpeed);
+        this.convertDistanceUnits(2, this.selectedDistance);
+        this.convertCurrencyUnits(2, this.selectedCurrency);
       },
       error: (err) => {
         this.errorMessage = err.message;
@@ -78,5 +82,49 @@ export class OptionsComponent implements OnInit{
   /* Abbbrechen Button is clicked */ 
   cancel(): void {
     this.router.navigate(['/settings']);
+  }
+
+  // Diese Methoden sind nur zum Test geschrieben -> Kann in alle Methoden copy pasted werden wo man etwas umrechnen muss
+
+  /* converts the speeds */
+  convertSpeedUnits(value: number, unit: string): string {
+    let str = '';
+    if(unit === 'mp/h'){
+      value = UnitConverter.convertSpeed(value, 'km/h', unit);
+      str = value.toFixed(1) + ' mp/h'; // toFixed(1) only shows the last decimal place
+    }
+    else{
+      str = value.toString() + ' km/h';
+    }
+    console.log(str);
+    return str;
+  }
+
+  /* Converts the distances */
+  convertDistanceUnits(value: number, unit: string): string {
+    let str = '';
+    if(unit === 'mi'){
+      value = UnitConverter.convertDistance(value, 'km', unit);
+      str = value.toFixed(1) + ' mi'; // toFixed(1) only shows the last decimal place
+    } 
+    else{
+      str = value.toString() + ' km';
+    }
+    console.log(str);
+    return str;
+  }
+
+  /* Convert the currencies */
+  convertCurrencyUnits(value: number, unit: string): string {
+    let str = '';
+    if(unit === '$'){
+      value = UnitConverter.convertCurrency(value, unit, '$');
+      str = value.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
+    }
+    else{
+      str = value.toString() + ' €';
+    }
+    console.log(str);
+    return str;
   }
 }
