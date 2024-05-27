@@ -1,5 +1,5 @@
 // Data structure for scooter information.
-export type Scooter = {
+export interface Scooter {
     id: number, 
     product_id: string,
     battery: number,

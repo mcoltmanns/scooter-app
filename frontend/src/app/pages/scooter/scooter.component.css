@@ -38,6 +38,9 @@ hr.solid {
     font-weight: 300;
     line-height: 21px; /* 131.25% */
     letter-spacing: -0.32px;
+    margin: 10px;
+    margin-bottom: 180px;
+    margin-top: 40px;
 }
 
 .box {

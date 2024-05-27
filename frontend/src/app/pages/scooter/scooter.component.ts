@@ -84,4 +84,14 @@ export class ScooterComponent implements OnInit {
     };
     this.router.navigate(['/booking'], navigationExtras); // Route to booking page
   }
+
+  // Method to calculate the range of the scooter
+  calcRange(battery: number, max_reach: number): number {
+    return Math.ceil(battery / 100 * max_reach);
+  }
+
+  /* Function that rounds up Battery */
+  roundUpBattery(battery: number): number {
+    return Math.ceil(battery);
+  }
 }
