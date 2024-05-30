@@ -90,6 +90,8 @@ app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth)); 
 app.get('/api/map', map.getAvailableScooters.bind(auth));
 
 app.get('/api/payment', payment.getAllPaymentMethods.bind(auth));
+// validate payment information for all payment requests below
+app.put('/api/payment', validator.validatePaymentMethod, payment.addPaymentMethod.bind(auth));
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import BachelorCard from '../services/payment/bachelorcard';
 import SwpSafe from '../services/payment/swpsafe';
+import HciPal from '../services/payment/hcipal';
 
 export class PaymentController {
     public async getAllPaymentMethods(request: Request, response: Response): Promise<void> {
@@ -21,12 +22,22 @@ export class PaymentController {
         }
         */
        // Testing methods
-       /*console.log(await BachelorCard.getCountryCode('test-merchant', '4485-5420-1334-7098'));
-       console.log(await SwpSafe.getCountryCode('y^t@y7#uMYu@'));
-       const transaction = await SwpSafe.getTransaction('y^t@y7#uMYu@', 10);
-       console.log(transaction);
-       SwpSafe.commitTransaction(transaction.message);*/
-       response.status(200).json([
+        /*console.log('country');
+        console.log(await SwpSafe.getCountryCode(request.body.swpsafe));
+        console.log(await BachelorCard.getCountryCode(request.body.merchant, request.body.cardNumber));
+        console.log(await HciPal.getCountryCode(request.body.accountName));
+        console.log('transaction');
+        const ss = await SwpSafe.initTransaction(request.body.swpsafe, request.body.amount);
+        const bc = await BachelorCard.initTransaction(request.body.merchant, request.body.cardNumber, request.body.cardName, request.body.securityCode, request.body.expirationDate, request.body.amount);
+        const hp = await HciPal.initTransaction(request.body.accountName, request.body.accountPassword, request.body.amount);
+        console.log(ss);
+        console.log(bc);
+        console.log(hp);
+        console.log('commit');
+        console.log(await SwpSafe.commitTransaction(ss.message));
+        console.log(await BachelorCard.rollbackTransaction(request.body.merchant, bc.message));
+        console.log(await HciPal.commitTransaction(hp.message));*/
+        response.status(200).json([
         {
             type: 'swpsafe',
             info: {
@@ -52,5 +63,29 @@ export class PaymentController {
             }
         }
        ]);
+    }
+
+    /**
+     * add a payment method, and associate it with the current user's login information in the database
+     * expects: { type: 'swpsafe|hcipal|bachelorcard', credentials: {name, swpCode | (accountName, accountPassword) | (cardNumber, securityCode, expirationDate) } }
+     */
+    public async addPaymentMethod(request: Request, response: Response): Promise<void> {
+        switch (request.body.type) {
+            case 'swpsafe':
+                response.status(200).json('swpsafe');
+                break;
+            
+            case 'hcipal':
+                response.status(200).json('hcipal');
+                break;
+
+            case 'bachelorcard':
+                response.status(200).json('bachelorcard');
+                break;
+            
+            default:
+                response.status(400).json({status: 400, message: 'Unknown payment type'});
+                return;
+        }
     }
 }
