@@ -6,6 +6,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Router } from '@angular/router';
 import { Product } from 'src/app/models/product';
 
+
 @Component({
   selector: 'app-scooter-list',
   standalone: true,
@@ -20,6 +21,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
   public scooters: Scooter[] = [];
   public products: Product[] = [];
   public filteredScooters: Scooter[] = [];
+  public levenshteinFilteredScooters: Scooter[] = [];
   public errorMessage = '';
   
   ngOnInit(): void {
@@ -56,13 +58,22 @@ export class ScooterListComponent implements OnInit, OnChanges {
 
   ngOnChanges(): void {
     this.filterScooters(); // Call filter method whenever searchTerm changes
+    this.levenshteinFilterScooters();
   }
 
-  /* filters the scooters for the "search scooter" input field */
   filterScooters(): void {
-    this.filteredScooters = this.scooters.filter(scooter =>
+    this.filteredScooters = this.scooters.filter(scooter => 
       scooter.product_id.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
+  }
+
+  levenshteinFilterScooters(): void {
+    const threshold = 2; // threshold for simularity
+    const len = this.searchTerm.length;
+    this.levenshteinFilteredScooters= this.scooters.filter(scooter => 
+      this.levenshtein(scooter.product_id.substring(0, len).toLowerCase(), this.searchTerm.toLowerCase()) <= threshold
+    );
+    console.log(this.filterScooters.length);
   }
 
   // DUMMY METHODE - MUSS AUSIMPLEMENTIERT WERDEN FALLS NÖTIG
@@ -109,24 +120,30 @@ export class ScooterListComponent implements OnInit, OnChanges {
     }
   }
 
-  /* removes a scooter from the list */
-  removeScooter(scooterId: string): void {
-    this.scooters = this.scooters.filter(scooter => scooter.product_id !== scooterId);
-    this.filteredScooters = this.filteredScooters.filter(scooter => scooter.product_id !== scooterId);
-  }
-
-  /* sends rrequest to the backend to book a scooter*/
-  bookScooter(scooterId: string): void {
-    this.mapService.bookScooter(scooterId).subscribe({
-      next: (response) => {
-        console.log('Scooter booked successfully:', response);
-        this.removeScooter(scooterId);
-        // Hier kannst du weitere Aktionen durchführen, z.B. UI-Updates
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        console.log(err);
+  /* */
+  levenshtein(a: string, b: string): number{
+    const an = a ? a.length : 0;
+    const bn = b ? b.length : 0;
+    if (an === 0) {
+      return bn;
+    }
+    if (bn === 0) {
+      return an;
+    }
+    const matrix = new Array(an + 1);
+    for (let i = 0; i <= an; i++) {
+      matrix[i] = new Array(bn + 1);
+      matrix[i][0] = i;
+    }
+    for (let j = 0; j <= bn; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= an; i++) {
+      for (let j = 1; j <= bn; j++) {
+        const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        matrix[i][j] = Math.min(matrix[i - 1][j] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j - 1] + cost);
       }
-    });
+    }
+    return matrix[an][bn];
   }
 }
