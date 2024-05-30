@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { SampleService } from 'src/app/services/sample.service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -50,7 +51,7 @@ export class TodoComponent implements OnInit {
    *  D.h. wir können hier verschiedene Services spezifizieren, auf die wir Zugriff haben möchten, welche
    *  automatisch durch "Dependency injection" hier instanziiert werden.
    */
-  constructor(public sampleService: SampleService) {}
+  constructor(public sampleService: SampleService, private route: ActivatedRoute) {}
 
   /**
    *  Da unsere Komponente das "OnInit" Interface implementiert müssen wir eine "ngOnInit" Methhode implementieren.
@@ -59,6 +60,16 @@ export class TodoComponent implements OnInit {
    *  Weiterführende Infos gibt es hier: https://angular.io/guide/lifecycle-hooks
    */
   ngOnInit(): void {
-    console.log('LandingPage initialized!');
+    // TESTEN OB DIE ÜBERGABE MIT DEN PARAMETERN KLAPPT
+    this.route.queryParams.subscribe(params => {
+      const scooterId = params['id'];
+      const name = params['name'];
+      const description_html = params['description_html'];
+      const image = params['image'];
+      console.log('Received scooterId:', scooterId);
+      console.log(name);
+      console.log(description_html);
+      console.log(image);
+    });
   }
 }

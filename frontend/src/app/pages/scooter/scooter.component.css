@@ -4,8 +4,8 @@
     justify-content: flex-start;
     align-items: center;
     gap: 15px;
-    padding: 40px;
-    margin-top: 50px; /* Add an upper spacing */
+    padding: 0px;
+    margin-top: 20px; /* Add an upper spacing */
     margin-bottom: 40px;
 }
 
@@ -16,4 +16,99 @@
 .scooterBook-btn {
     width: 80%;
     min-width: min-content;
+}
+
+.picture {
+    width: auto;
+    height: auto;
+    margin-top: 35px;
+    max-width: 70%;
+    max-height: 70%;
+    display: block; /* Ensures that the image is treated as a block element */
+}
+
+hr.solid {
+    border-top: 2px solid #97FB64;
+  }
+
+.description {
+    font-family: Roboto;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: 21px; /* 131.25% */
+    letter-spacing: -0.32px;
+    margin: 10px;
+    margin-bottom: 180px;
+    margin-top: 40px;
+}
+
+.box {
+    display: "flex";
+    height: 290px;
+    margin-left: 0;
+    background: var(--Textfeld-Fill, #FFF);
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.content-block {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+    margin-left: 8px;
+}
+
+.secondary-text {
+    color: var(--Textfeld-Stroke, #000);
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: italic;
+    font-weight: 100;
+    line-height: 20px; /* 142.857% */
+    letter-spacing: 0.25px;
+}
+
+.primary-text {
+    color: #000;
+    font-family: "Racing Sans One";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px; /* 116.667% */
+    letter-spacing: -0.32px;
+    text-align: center;
+}
+
+.information-block {
+    margin-right: 19px;
+    margin-top: 32px;
+}
+
+.price {
+    width: 110px;
+    height: 26px;
+    border-radius: 15px;
+    border: 1px solid var(--Highlights-Stroke, #123800);
+    background: var(--Highlights-Stroke, #123800);
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-bottom: 10px;
+    margin-right: 20px;
+    margin-top: auto;
+    margin-left: auto;
+}
+
+.price-text {
+    color: var(--Highlights, #97FB64);
+    font-family: "Racing Sans One";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px; /* 116.667% */
+    letter-spacing: -0.32px;
+    text-align: center;
+    margin-right: 0%;
+    margin-left: auto;
 }

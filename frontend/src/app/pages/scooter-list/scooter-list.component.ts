@@ -23,12 +23,11 @@ export class ScooterListComponent implements OnInit, OnChanges {
   public errorMessage = '';
   
   ngOnInit(): void {
-    /* get all scooters from backend */
+    /* Get all scooters from backend */
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
         this.filterScooters();
-        console.log(this.scooters);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -36,11 +35,10 @@ export class ScooterListComponent implements OnInit, OnChanges {
       }
     });
 
-    /* get all scooters from backend */
+    /* Get all scooters from backend */
     this.mapService.getProductInfo().subscribe({
       next: (value) => {
         this.products = value;
-        console.log(this.products);
         /*
         this.products.forEach(product => {
           console.log(`Product ID: ${product.id}, HTML Discription ${product.description_html}`);
@@ -58,19 +56,16 @@ export class ScooterListComponent implements OnInit, OnChanges {
     this.filterScooters(); // Call filter method whenever searchTerm changes
   }
 
-  /* filters the scooters for the "search scooter" input field */
+  /* Filters the scooters for the "search scooter" input field */
   filterScooters(): void {
     this.filteredScooters = this.scooters.filter(scooter =>
       scooter.product_id.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
 
-  // DUMMY METHODE - MUSS AUSIMPLEMENTIERT WERDEN FALLS NÖTIG
+  /* Function for the green button */
   buttonToScooter(scooterId: number): void {
-    //this.bookScooter(scooterId);
     this.router.navigate(['/scooter', scooterId]);
-    console.log('Button Pressed for scooter ID:', scooterId);
-    // SIEHE USER STORY ZUM ENWICKLUNGSHINWEIS MIT INNER HTML UND URL
   }
 
   /* Function that rounds up Battery */
@@ -83,23 +78,23 @@ export class ScooterListComponent implements OnInit, OnChanges {
     return productId.toUpperCase();
   }
 
-  /* gets the image url for the scooters from the backend */
+  /* Gets the image url for the scooters from the backend */
   getImageUrl(fileName: string): string {
     return `http://localhost:8000/img/products/${fileName}.jpg`;
   }
 
-  /* gets the price for each scooter */
+  /* Get the price for each scooter */
   getPriceByProductId(productId: number): number | undefined {
     const product = this.products.find(p => p.id === productId);
     return product ? product.price_per_hour : undefined;
   }
 
-  // method to calculate the range of the scooter
+  // Method to calculate the range of the scooter
   calcRange(battery: number, max_reach: number): number {
     return Math.ceil(battery / 100 * max_reach);
   }
 
-  /* gets the range for each scooter */
+  /* Get the range for each scooter */
   getRangeByProductId(productId: number, battery: number): number | undefined {
     const product = this.products.find(p => p.id === productId);
     if (product) {
@@ -110,18 +105,20 @@ export class ScooterListComponent implements OnInit, OnChanges {
   }
 
   /* removes a scooter from the list */
+  /*
   removeScooter(scooterId: string): void {
     this.scooters = this.scooters.filter(scooter => scooter.product_id !== scooterId);
     this.filteredScooters = this.filteredScooters.filter(scooter => scooter.product_id !== scooterId);
   }
+  */
 
   /* sends rrequest to the backend to book a scooter*/
+  /*
   bookScooter(scooterId: string): void {
     this.mapService.bookScooter(scooterId).subscribe({
       next: (response) => {
         console.log('Scooter booked successfully:', response);
         this.removeScooter(scooterId);
-        // Hier kannst du weitere Aktionen durchführen, z.B. UI-Updates
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -129,4 +126,5 @@ export class ScooterListComponent implements OnInit, OnChanges {
       }
     });
   }
+  */
 }
