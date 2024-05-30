@@ -10,6 +10,7 @@ import { RegistrationComponent } from './pages/registration/registration.compone
 import { Observable, map, of } from 'rxjs';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ScooterComponent } from './pages/scooter/scooter.component';
+import { RentalsComponent } from './pages/rentals/rentals.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -71,7 +72,7 @@ export const routes: Routes = [
   // die Route sperren, falls der Benutzer nicht eingeloggt ist.
   { path: 'search', component: MapComponent, canActivate: [loginGuard] },
   { path: 'scooter/:id', component: ScooterComponent, canActivate: [loginGuard] },
-  { path: 'booking', component: TodoComponent, canActivate: [loginGuard] },
+  { path: 'booking', component: RentalsComponent, canActivate: [loginGuard] },
 
   // Routen können auch geschachtelt werden, indem der "Child" Eigenschaft der
   // Route nochmals ein paar Routen übergeben werden.

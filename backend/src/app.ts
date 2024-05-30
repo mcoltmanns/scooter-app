@@ -17,6 +17,7 @@ import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
 import { Validator } from './middlewares/validation';
 import { MapController } from './controllers/map';
+import { BookingOverviewController } from './controllers/bookingOverview';
 
 // Express server instanziieren
 const app = express();
@@ -71,6 +72,7 @@ const validator = new Validator();
 const auth = new AuthController();
 const api = new ApiController();
 const map = new MapController();
+const bookingOverview = new BookingOverviewController();
 
 /* Routes without authentication */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
@@ -90,6 +92,7 @@ app.get('/api/singleScooter/:scooterId', map.getScooterById); // get scooter inf
 app.get('/api/product', map.getAllProducts.bind(auth)); // get all product information
 app.post('/api/bookScooter', validator.validateBookScooter, map.bookScooter); // get all product information
 app.get('/api/productInfo/:scooterId', map.getProductByScooterId); //get for a specific scooter the products info
+app.get('/api/bookScooterHistory', bookingOverview.getUserRentals); // get all the rentals for a specific user
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 
