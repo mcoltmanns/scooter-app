@@ -147,4 +147,13 @@ export class Validator {
 
     await Validator.runAllChecks(400, checks, request, response, next);
   }
+
+  public async validateHcipal(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('accountName').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Kontonamen ein.').bail().isEmail().withMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.').bail().normalizeEmail(),
+      check('accountPassword').trim().escape().notEmpty().withMessage('Bitte geben Sie ein Kontopasswort ein.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
 }
