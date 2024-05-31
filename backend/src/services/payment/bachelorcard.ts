@@ -4,15 +4,16 @@ import post from 'axios';
 abstract class BachelorCard {
     private static processResponse(data: string, fieldWanted: string): Promise<{status: number, message: string}> {
         return new Promise((resolve) => {
-            parseString(data, (err, result) => {
-                if(err) resolve({ status: 500, message: `xml parse error: ${err}`});
-                const interesting = result.transactionResponse.response[0]; // get the interesting bit of the data
-                const status = (interesting.status[0]).replace(/\D/g, ''); // get a numerical-only status string
-                let message = '';
-                if(interesting.hasOwnProperty('transaction-data')) message = interesting['transaction-data'][0][fieldWanted][0]; // is there transaction data? if so, set the message to the field in there that we want
-                else if(interesting.hasOwnProperty('error'))  message = interesting['error'][0][fieldWanted][0]; // is there an error? if so, set the message to that
-                resolve({status: parseInt(status), message: message});
-            });
+          parseString(data, (err, result) => {
+            if(err) resolve({ status: 500, message: `xml parse error: ${err}`});
+            const interesting = result?.transactionResponse?.response?.[0]; // get the interesting bit of the data
+            if (!interesting) resolve({ status: 500, message: 'Unexpected response structure' });
+            const status = interesting.status?.[0]?.replace(/\D/g, ''); // get a numerical-only status string
+            let message = '';
+            if(interesting.hasOwnProperty('transaction-data') && interesting['transaction-data'][0]?.hasOwnProperty(fieldWanted)) message = interesting['transaction-data'][0][fieldWanted][0]; // is there transaction data? if so, set the message to the field in there that we want
+            else if(interesting.hasOwnProperty('error') && interesting['error'][0]?.hasOwnProperty(fieldWanted))  message = interesting['error'][0][fieldWanted][0]; // is there an error? if so, set the message to that
+            resolve({status: parseInt(status), message: message});
+          });
         });
     }
 

@@ -1,22 +1,42 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
-import { UsersData } from './user';
+import { UsersAuth } from './user';
 
-/**
- * store payment methods
- */
-export const PaymentMethod = Database.getSequelize().define('paymentMethod', {
+export const PaymentMethod = Database.getSequelize().define('usersPaymentMethods', {
     id: {
-        primaryKey: true,
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        unique: true
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      allowNull: false,
+      primaryKey: true,
     },
-    info: {
-        type: DataTypes.JSONB, // payment methods are stored as json blobs
-        allowNull: false,
+    type: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isIn: {
+          args: [['bachelorcard', 'swpsafe', 'hcipal']],
+          msg: 'The payment type must be either \'bachelorcard\', \'swpsafe\', or \'hcipal\'.'
+        }
+      }
+    },
+    data: {
+      type: DataTypes.JSONB, // payment methods are stored as json blobs
+      allowNull: false,
     }
+}, {
+  createdAt: false,
+  updatedAt: false
 });
 
-PaymentMethod.belongsTo(UsersData);
-UsersData.hasMany(PaymentMethod);
+UsersAuth.hasMany(PaymentMethod, {
+  foreignKey: {
+      name: 'usersAuthId',
+      allowNull: false,
+  }
+});
+PaymentMethod.belongsTo(UsersAuth, {
+  foreignKey: {
+    name: 'usersAuthId',
+    allowNull: false,
+  }
+});

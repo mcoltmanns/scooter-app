@@ -156,4 +156,12 @@ export class Validator {
 
     await Validator.runAllChecks(400, checks, request, response, next);
   }
+
+  public async validateSwpsafe(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('swpCode').trim().escape().notEmpty().withMessage('Bitte geben Sie einen SWP-Code ein.').bail().isLength({ min: 12, max: 12 }).withMessage('Der SWP-Code muss aus 12 Stellen bestehen.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
 }
