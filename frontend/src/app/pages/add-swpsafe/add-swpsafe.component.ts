@@ -30,7 +30,7 @@ export class AddswpsafeComponent implements OnInit, OnDestroy {
   constructor(private router: Router, private fb: FormBuilder, private renderer: Renderer2, private el: ElementRef) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.swpsafeForm = this.fb.group({
-      code: ['', [Validators.required, ]]
+      code: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(12)]]
     });
   }
 
@@ -77,7 +77,12 @@ export class AddswpsafeComponent implements OnInit, OnDestroy {
 
   updateErrorMessages(): void {
     /* Define default error messages if required input fields are empty */
-    const codeErrMsg = 'Bitte geben Sie einen Code ein.';
+    let codeErrMsg = 'Bitte geben Sie einen Code ein.';
+
+    /* Change the default error messages if the user has entered something but it is invalid. */
+    if (!this.swpsafeForm.get('code')?.hasError('required') && (this.swpsafeForm.get('code')?.hasError('minlength') || this.swpsafeForm.get('code')?.hasError('maxlength'))) {
+      codeErrMsg = 'Der Code muss aus 12 Stellen bestehen.';
+    }
 
     /* Update the error messages for all input fields */
     this.codeErrorMessage = this.updateErrorMessage('code', codeErrMsg);
