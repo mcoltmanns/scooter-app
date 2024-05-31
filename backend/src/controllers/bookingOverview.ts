@@ -1,8 +1,5 @@
 import { Request, Response } from 'express';
-//import { Scooter } from '../models/scooter';
-//import { Product } from '../models/product';
 import { Rental } from '../models/rental';
-//import Database from '../database';
 
 export class BookingOverviewController{
     /* Method that returns all entries from the Rentals table for a specific User_Id */

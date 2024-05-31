@@ -1,0 +1,115 @@
+.page-container {
+    padding: 5px;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #fff;
+}
+
+.scrollable-container {
+    overflow-y: auto;
+}
+
+.rentals-container ul {
+    list-style-type: none; /* Removes the bullet points */
+    padding: 0;
+    margin: 0;
+}
+
+.rentals-container li {
+    margin-bottom: 20px;
+}
+
+.scooter-container {
+    padding: 20px 20px 10px 20px; /* Anpassen des Paddings */
+    border: 2px solid #4a4242;
+    border-radius: 10px;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.picture {
+    width: 90px;
+    height: auto;
+    display: block;
+}
+
+.scooter-details {
+    flex-grow: 1;
+}
+
+.scooter-details p {
+    margin: 5px 0;
+    color: #4a4242;
+}
+
+.scooter-details .scooter-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: -15px; /* Adjust this to move the name further up */
+    margin-bottom: 10px; /* Adjust the spacing below the name */
+    margin-left: 10px;
+}
+
+.scooter-details .date-text {
+    font-size: 14px; /* Adjust the font size as needed */
+    font-family: Roboto;
+    font-style: normal;
+    margin-top: -10px;
+    margin-left: 10px;
+    padding: 0;
+}
+
+.green-boxes {
+    display: flex;
+    gap: 20px; /* Adjust the gap between the green boxes */
+    margin-left: 20px;
+}
+
+.green-box {
+    width: 95px; /* Anpassen der Breite der grünen Box */
+    height: 30px; /* Anpassen der Höhe der grünen Box */
+    border-radius: 15px;
+    border: 1.5px solid var(--Highlights-Stroke, #123800);
+    background: var(--Highlights, #97FB64);
+    margin-top: 10px; /* Abstand nach unten anpassen */
+}
+
+.green-box svg {
+    margin-left: 5px; /* Anpassen des Abstands zwischen dem Icon und dem linken Rand der grünen Box */
+    margin-top: 2px;
+}
+
+.green-box p{
+    font-size: 1em;
+    font-family: Roboto;
+    margin-left: 30px;
+    margin-top: -32px;
+}
+.error-message {
+    color: red;
+    margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.extra-space {
+    padding-left: 27px; /* Hier können Sie die Breite des zusätzlichen Abstands anpassen */
+}
+
+.no-scooter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.noScooterpicture {
+    width: 100%;
+}
