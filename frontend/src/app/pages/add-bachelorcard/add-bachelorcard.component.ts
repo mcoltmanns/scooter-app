@@ -42,9 +42,9 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
     /* Create a FormGroup instance with all input fields and their validators */
     this.bachelorcardForm = this.fb.group({
       name: ['', [Validators.required]],
-      cardNumber: ['', [Validators.required]],
-      checkDigit: ['', [Validators.required]],
-      expiry: ['', [Validators.required]]
+      cardNumber: ['', [Validators.required, Validators.pattern('\\d{4}-\\d{4}-\\d{4}-\\d{4}')]],  // credit card number, e.g. 1234-5678-9012-3456
+      checkDigit: ['', [Validators.required, Validators.pattern('\\d{3}')]],  // 3 digits, e.g. 000, 123, 101
+      expiry: ['', [Validators.required, Validators.pattern('(0?[1-9]|1[0-2])/\\d{2}')]]  // MM/YY, e.g. 12/23, 01/25, 1/25
     });
   }
 
@@ -92,9 +92,20 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
   updateErrorMessages(): void {
     /* Define default error messages if required input fields are empty */
     const nameErrMsg = 'Bitte geben Sie einen Namen ein.';
-    const cardNumberErrMsg = 'Bitte geben Sie eine Kartennummer ein.';
-    const checkDigitErrMsg = 'Bitte geben Sie eine Prüfziffer ein.';
-    const expiryErrMsg = 'Bitte geben Sie an, bis wann die Bachelorcard gültig ist.';
+    let cardNumberErrMsg = 'Bitte geben Sie eine Kartennummer ein.';
+    let checkDigitErrMsg = 'Bitte geben Sie eine Prüfziffer ein.';
+    let expiryErrMsg = 'Bitte geben Sie ein Ablaufdatum ein.';
+
+    /* Change the default error messages if the user has entered something but it is invalid. */
+    if (!this.bachelorcardForm.get('cardNumber')?.hasError('required') && this.bachelorcardForm.get('cardNumber')?.hasError('pattern')) {
+      cardNumberErrMsg = 'Ungültige Kartennummer.';
+    }
+    if (!this.bachelorcardForm.get('checkDigit')?.hasError('required') && this.bachelorcardForm.get('checkDigit')?.hasError('pattern')) {
+      checkDigitErrMsg = 'Ungültige Prüfziffer.';
+    }
+    if (!this.bachelorcardForm.get('expiry')?.hasError('required') && this.bachelorcardForm.get('expiry')?.hasError('pattern')) {
+      expiryErrMsg = 'Ungültiges Ablaufdatum (MM/YY).';
+    }
     
     /* Update the error messages for all input fields */
     this.nameErrorMessage = this.updateErrorMessage('name', nameErrMsg);
@@ -125,6 +136,11 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
     this.cardNumber = this.bachelorcardForm.get('cardNumber')?.value;
     this.checkDigit = this.bachelorcardForm.get('checkDigit')?.value;
     this.expiry = this.bachelorcardForm.get('expiry')?.value;
+
+    /* Omit a leading zero in the month part of the expiry date if it is present */
+    if (this.expiry.charAt(0) === '0') {
+      this.expiry = this.expiry.substring(1);
+    }
 
     console.log('Name:', this.name);
     console.log('Card number:', this.cardNumber);
