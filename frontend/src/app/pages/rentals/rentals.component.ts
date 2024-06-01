@@ -16,6 +16,7 @@ export class RentalsComponent implements OnInit {
   public constructor(private rentalService: RentalService, private mapService: MapService) {}
 
   // Variables for storing all rentals and the product information
+  public loadingData = true;
   public rentals: Rental[] = [];
   public products: Product[] = [];
   public errorMessage = '';
@@ -25,10 +26,12 @@ export class RentalsComponent implements OnInit {
     this.rentalService.getRentalInfo().subscribe({
       next: (value) => {
         this.rentals = value;
+        this.loadingData = false;
         console.log(this.rentals);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
+        this.loadingData = false;
         console.log(err);
       }
     });
