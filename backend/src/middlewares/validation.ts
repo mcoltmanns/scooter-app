@@ -150,7 +150,7 @@ export class Validator {
 
   public async validateHcipal(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
-      check('accountName').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Kontonamen ein.').bail().isEmail().withMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.').bail().normalizeEmail(),
+      check('accountName').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Kontonamen ein.').bail().isEmail().withMessage('Ungültige E-Mail-Adresse.').bail().normalizeEmail(),
       check('accountPassword').trim().escape().notEmpty().withMessage('Bitte geben Sie ein Kontopasswort ein.')
     ];
 
@@ -159,7 +159,7 @@ export class Validator {
 
   public async validateSwpsafe(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
-      check('swpCode').trim().escape().notEmpty().withMessage('Bitte geben Sie einen SWP-Code ein.').bail().isLength({ min: 12, max: 12 }).withMessage('Der SWP-Code muss aus 12 Stellen bestehen.')
+      check('swpCode').trim().notEmpty().withMessage('Bitte geben Sie einen SWP-Code ein.').bail().isLength({ min: 12, max: 12 }).withMessage('Der SWP-Code muss aus 12 Stellen bestehen.')
     ];
 
     await Validator.runAllChecks(400, checks, request, response, next);

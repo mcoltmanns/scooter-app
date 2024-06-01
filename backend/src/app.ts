@@ -93,8 +93,8 @@ app.get('/api/payment', payment.getAllPaymentMethods.bind(auth));
 // validate payment information for all payment requests below
 // app.put('/api/payment', validator.validatePaymentMethod, payment.addPaymentMethod.bind(auth));
 app.post('/api/payment/bachelorcard', validator.validateBachelorcard, payment.addBachelorcard);
-app.post('/api/payment/hcipal', validator.validateHcipal, payment.addPaymentMethod);
-app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addPaymentMethod);
+app.post('/api/payment/hcipal', validator.validateHcipal, payment.addHcipal);
+app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addSwpsafe);
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 

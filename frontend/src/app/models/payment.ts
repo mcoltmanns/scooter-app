@@ -10,3 +10,19 @@ export interface PaymentOptions{
         expirationDate?: string
     }
 }
+
+export interface BachelorcardObj {
+  name?: string;
+  cardNumber?: string;
+  securityCode?: string;
+  expirationDate?: string;
+}
+
+export interface HcipalObj {
+  accountName?: string,
+  accountPassword?: string
+}
+
+export interface SwpsafeObj {
+  swpCode?: string
+}

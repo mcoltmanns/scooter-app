@@ -8,13 +8,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { PaymentService } from 'src/app/services/payment.service';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
-
-interface BachelorcardObj {
-  name?: string;
-  cardNumber?: string;
-  securityCode?: string;
-  expirationDate?: string;
-}
+import { BachelorcardObj } from 'src/app/models/payment';
 
 @Component({
     selector: 'app-bachelorcard',
@@ -91,7 +85,7 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
 
   /* Method to adjust the height of the body and html element depending on the screen height */
   adjustBodyHeight(): void {
-    if (window.innerHeight < 670) {
+    if (window.innerHeight < 800) {
       this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'height', 'auto');
       this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'height', 'auto');
     } else {
@@ -207,12 +201,11 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
         this.errorMessage = '';
         this.isLoading = false;
         this.router.navigateByUrl('settings/payment');
-        // this.router.navigate(['settings/payment']);
       },
       error: (err) => {
         this.isLoading = false;
         this.handleBackendError(err);
-        // console.error(err);
+        console.error(err);
       }
     });
   }

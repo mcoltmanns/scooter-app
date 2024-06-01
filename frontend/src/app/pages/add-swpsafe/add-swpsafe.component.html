@@ -1,3 +1,5 @@
+<app-loading-overlay [isLoading]="isLoading"></app-loading-overlay>
+
 <div class="page-container">
     <h1 class="title">Zahlungsmethode hinzufügen</h1>
     <div class="scrollable-container">
@@ -23,6 +25,8 @@
         <div class="error">{{codeErrorMessage}}</div>
 
         <div class="bottom">
+          <div style="text-align: center;" class="error">{{errorMessage}}</div>
+
           <app-button class="btn" type="submit">
             Zahlungsmethode hinzufügen
           </app-button>

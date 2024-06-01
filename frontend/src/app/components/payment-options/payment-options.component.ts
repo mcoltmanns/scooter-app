@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { PaymentOptions } from 'src/app/models/paymentOptions';
+import { PaymentOptions } from 'src/app/models/payment';
 import { PaymentService } from 'src/app/services/payment.service';
 
 @Component({

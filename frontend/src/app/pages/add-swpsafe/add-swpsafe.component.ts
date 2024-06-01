@@ -1,10 +1,14 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { PaymentService } from 'src/app/services/payment.service';
+import { SwpsafeObj } from 'src/app/models/payment';
 
 
 @Component({
@@ -12,7 +16,7 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
     standalone: true,
     templateUrl: './add-swpsafe.component.html',
     styleUrl: './add-swpsafe.component.css',
-    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule]
+    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule, LoadingOverlayComponent]
 })
 export class AddswpsafeComponent implements OnInit, OnDestroy {
   /* Initialize subscriptions for the form value changes */
@@ -21,13 +25,19 @@ export class AddswpsafeComponent implements OnInit, OnDestroy {
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public swpsafeForm!: FormGroup;
 
+  /* Variable to control the state of the loading overlay */
+  public isLoading = false;
+
   /* Variables that mirror the values of the input fields */
   public code = '';
+
+  /* Variable that can hold a general error message */
+  public errorMessage = '';
 
   /* Variables that can hold error messages for the input fields */
   public codeErrorMessage= '';
 
-  constructor(private router: Router, private fb: FormBuilder, private renderer: Renderer2, private el: ElementRef) {
+  constructor(private paymentService: PaymentService, private router: Router, private fb: FormBuilder, private renderer: Renderer2, private el: ElementRef) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.swpsafeForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(12), Validators.maxLength(12)]]
@@ -93,6 +103,36 @@ export class AddswpsafeComponent implements OnInit, OnDestroy {
     this.codeErrorMessage = '';
   }
 
+  /* Set an error in the respective input form control of this form if the backend
+  * returns a validation error for that input field to visually mark the input field as invalid.
+  * Additionally assign the error messages to the respective error message variables. */
+  assignErrorMessage(validationErrors: SwpsafeObj): void {
+    if (validationErrors.swpCode) {
+      this.swpsafeForm.get('code')?.setErrors({ 'required': true });
+      this.codeErrorMessage = validationErrors.swpCode;
+    }
+  }
+
+  /* Method to handle possible backend errors, especially validation errors that the frontend validation does not catch */
+  handleBackendError(err: HttpErrorResponse): void {
+    this.errorMessage = err.error.message;
+
+    /* Assigns all backend errors to the respective variables */
+    if ((err.status === 400 || err.status === 401) && err.error.validationErrors) {
+      const validationErrors = err.error.validationErrors;
+
+      /* Reset all error messages before assigning the new ones that came from the backend */
+      this.resetErrorMessages();
+
+      /* Assign the error messages to the respective invalid input fields */
+      this.assignErrorMessage(validationErrors);
+    } else {
+      if (!this.errorMessage) {
+        this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      }
+    }
+  }
+
   onSubmit(): void {
     /* Check if the overall form is valid */
     if (!this.swpsafeForm.valid) {
@@ -104,7 +144,21 @@ export class AddswpsafeComponent implements OnInit, OnDestroy {
 
     /* Grab the latest values from the input fields */
     this.code = this.swpsafeForm.get('code')?.value;
-    console.log('Code:', this.code);
+
+    /* Send the form data to the backend */
+    this.isLoading = true;
+    this.paymentService.postSwpsafe({ swpCode: this.code }).subscribe({
+      next: () => {
+        this.errorMessage = '';
+        this.isLoading = false;
+        this.router.navigateByUrl('settings/payment');
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.handleBackendError(err);
+        console.error(err);
+      }
+    });
   }
 
   onCancel(): void {

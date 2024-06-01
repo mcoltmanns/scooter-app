@@ -1,18 +1,21 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
-
+import { PaymentService } from 'src/app/services/payment.service';
+import { HcipalObj } from 'src/app/models/payment';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
 @Component({
     selector: 'app-hcipal',
     standalone: true,
     templateUrl: './add-hcipal.component.html',
     styleUrl: './add-hcipal.component.css',
-    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule]
+    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule, LoadingOverlayComponent]
 })
 export class AddhcipalComponent implements OnInit, OnDestroy {
     /* Initialize subscriptions for the form value changes */
@@ -20,16 +23,23 @@ export class AddhcipalComponent implements OnInit, OnDestroy {
   
     /* Initialize the FormGroup instance that manages all input fields and their validators */
     public hcipalForm!: FormGroup;
+
+    /* Variable to control the state of the loading overlay */
+    public isLoading = false;
   
     /* Variables that mirror the values of the input fields */
     public email = '';
     public password = '';
+
+    /* Variable that can hold a general error message */
+    public errorMessage = '';
   
     /* Variables that can hold error messages for the input fields */
     public emailErrorMessage = '';
     public passwordErrorMessage = '';
   
     constructor(
+      private paymentService: PaymentService,
       private router: Router,
       private fb: FormBuilder,
       private renderer: Renderer2,
@@ -103,6 +113,40 @@ export class AddhcipalComponent implements OnInit, OnDestroy {
       this.emailErrorMessage = '';
       this.passwordErrorMessage = '';
     }
+
+    /* Set an error in the respective input form control of this form if the backend
+    * returns a validation error for that input field to visually mark the input field as invalid.
+    * Additionally assign the error messages to the respective error message variables. */
+    assignErrorMessage(validationErrors: HcipalObj): void {
+      if (validationErrors.accountName) {
+        this.hcipalForm.get('email')?.setErrors({ 'email': true });
+        this.emailErrorMessage = validationErrors.accountName;
+      }
+      if (validationErrors.accountPassword) {
+        this.hcipalForm.get('password')?.setErrors({ 'required': true });
+        this.passwordErrorMessage = validationErrors.accountPassword;
+      }
+    }
+
+    /* Method to handle possible backend errors, especially validation errors that the frontend validation does not catch */
+    handleBackendError(err: HttpErrorResponse): void {
+      this.errorMessage = err.error.message;
+
+      /* Assigns all backend errors to the respective variables */
+      if ((err.status === 400 || err.status === 401) && err.error.validationErrors) {
+        const validationErrors = err.error.validationErrors;
+
+        /* Reset all error messages before assigning the new ones that came from the backend */
+        this.resetErrorMessages();
+
+        /* Assign the error messages to the respective invalid input fields */
+        this.assignErrorMessage(validationErrors);
+      } else {
+        if (!this.errorMessage) {
+          this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+        }
+      }
+    }
   
     onSubmit(): void {
        /* Check if the overall form is valid */
@@ -116,9 +160,21 @@ export class AddhcipalComponent implements OnInit, OnDestroy {
       /* Grab the latest values from the input fields */
       this.email = this.hcipalForm.get('email')?.value;
       this.password = this.hcipalForm.get('password')?.value;
-      console.log('Email:', this.email);
-      console.log('Password:', this.password);
-      // this.router.navigate(['settings/payment']);
+
+      /* Send the form data to the backend */
+      this.isLoading = true;
+      this.paymentService.postHcipal({ accountName: this.email, accountPassword: this.password }).subscribe({
+        next: () => {
+          this.errorMessage = '';
+          this.isLoading = false;
+          this.router.navigateByUrl('settings/payment');
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.handleBackendError(err);
+          console.error(err);
+        }
+      });
     }
 
     onCancel(): void {

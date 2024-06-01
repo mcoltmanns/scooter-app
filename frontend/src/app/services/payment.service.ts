@@ -1,15 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
-import { PaymentOptions } from 'src/app/models/paymentOptions';
+import { PaymentOptions } from 'src/app/models/payment';
 import { ResponseMessage } from '../models/response-message';
-
-interface Bachelorcard {
-  name: string,
-  cardNumber: string,
-  securityCode?: string,
-  expirationDate?: string
-}
+import { BachelorcardObj, HcipalObj, SwpsafeObj } from '../models/payment';
 
 @Injectable({
   providedIn: 'root',
@@ -24,7 +18,15 @@ export class PaymentService {
     return this.http.get<PaymentOptions[]>('/api/payment'); 
   }
 
-  public postBachelorCard(data: Bachelorcard): Observable<ResponseMessage> {
+  public postBachelorCard(data: BachelorcardObj): Observable<ResponseMessage> {
     return this.http.post<ResponseMessage>('/api/payment/bachelorcard', data).pipe(shareReplay());
+  }
+
+  public postHcipal(data: HcipalObj): Observable<ResponseMessage> {
+    return this.http.post<ResponseMessage>('/api/payment/hcipal', data).pipe(shareReplay());
+  }
+
+  public postSwpsafe(data: SwpsafeObj): Observable<ResponseMessage> {
+    return this.http.post<ResponseMessage>('/api/payment/swpsafe', data).pipe(shareReplay());
   }
 }
