@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 export class RentalsComponent implements OnInit {
   public constructor(private rentalService: RentalService, private mapService: MapService) {}
 
+  // Variables for storing all rentals and the product information
   public rentals: Rental[] = [];
   public products: Product[] = [];
   public errorMessage = '';

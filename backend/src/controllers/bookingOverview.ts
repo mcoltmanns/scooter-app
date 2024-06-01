@@ -4,7 +4,7 @@ import { Rental } from '../models/rental';
 export class BookingOverviewController{
     /* Method that returns all entries from the Rentals table for a specific User_Id */
     public async getUserRentals(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId;
+        const userId = response.locals.userId; // get userID from session cookie
         if (!userId) {
             response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
             return;
