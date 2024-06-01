@@ -122,6 +122,6 @@ export class AddhcipalComponent implements OnInit, OnDestroy {
     }
 
     onCancel(): void {
-      this.router.navigate(['settings/payment/addPayment']);
+      this.router.navigate(['settings/payment/add']);
     }
 }

@@ -141,8 +141,8 @@ export class Validator {
     const checks = [
       check('name').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Namen ein.'),
       check('cardNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Kartennummer ein.').bail().matches(/^\d{4}-\d{4}-\d{4}-\d{4}$/).withMessage('Bitte geben Sie eine gültige Kartennummer ein.'),
-      check('checkDigit').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Prüfziffer ein.').bail().matches(/^\d{3}$/).withMessage('Bitte geben Sie eine gültige Prüfziffer ein.'),
-      check('expiry').trim().notEmpty().withMessage('Bitte geben Sie ein Ablaufdatum ein.').bail().matches(/^(1[0-2]|[1-9])\/\d{2}$/).withMessage('Bitte geben Sie ein gültiges Ablaufdatum (MM/YY) ein.')
+      check('securityCode').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Prüfziffer ein.').bail().matches(/^\d{3}$/).withMessage('Bitte geben Sie eine gültige Prüfziffer ein.'),
+      check('expirationDate').trim().notEmpty().withMessage('Bitte geben Sie ein Ablaufdatum ein.').bail().matches(/^(1[0-2]|[1-9])\/\d{2}$/).withMessage('Bitte geben Sie ein gültiges Ablaufdatum (MM/YY) ein.')
     ];
 
     await Validator.runAllChecks(400, checks, request, response, next);

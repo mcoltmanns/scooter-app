@@ -109,10 +109,10 @@ export class PaymentController {
     }
 
     /* Extract the relevant data from the request body */
-    const { name, cardNumber, checkDigit, expiry } = request.body;
+    const { name, cardNumber, securityCode, expirationDate } = request.body;
 
     /* Check if this exact bachelorcard is already in the database for that user */
-    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'bachelorcard', data: { name, cardNumber, checkDigit, expiry }, usersAuthId: userId } });
+    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'bachelorcard', data: { name, cardNumber, securityCode, expirationDate }, usersAuthId: userId } });
     if (existingPaymentMethod) {
       response.status(400).json({ status: 400, message: 'Diese Bachelorcard ist bereits in Ihrem Konto hinterlegt.' });
       return;
@@ -150,7 +150,7 @@ export class PaymentController {
     }
 
     try {
-      await PaymentMethod.create({ type: 'bachelorcard', data: { name, cardNumber, checkDigit, expiry }, usersAuthId: userId });
+      await PaymentMethod.create({ type: 'bachelorcard', data: { name, cardNumber, securityCode, expirationDate }, usersAuthId: userId });
     } catch (error) {
       response.status(500).json({ status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
       return;

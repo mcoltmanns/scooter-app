@@ -92,13 +92,13 @@ export const routes: Routes = [
       // "/settings/profil" geladen.
       { path: 'profil', component: ProfileComponent }, //edit-personal-information instead of TodoComponent
       // Alternativ können die Seiten (Komponenten) auch wiederverwendet werden auf mehreren Routen
-      {path: 'payment', children :[ //payment und alle verwandten routes
+      {path: 'payment', children :[ // payment und alle verwandten routes
         {path: '', component:PaymentComponent},
-        {path: 'addPayment', children:[ //all add payment routes
+        {path: 'add', children:[ // all add payment routes
           {path: '', component: AddPaymentComponent},
-          {path: 'addswpsafe', component: AddswpsafeComponent},
-          {path: 'addhcipal', component: AddhcipalComponent},
-          {path: 'addbachelorcard', component: AddbachelorcardComponent},
+          {path: 'swpsafe', component: AddswpsafeComponent},
+          {path: 'hcipal', component: AddhcipalComponent},
+          {path: 'bachelorcard', component: AddbachelorcardComponent},
         ]},
       ]}, //edit-payment-information component
       { path: 'about', component: AboutComponent },
