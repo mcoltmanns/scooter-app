@@ -21,32 +21,6 @@ export class PaymentController {
         console.log(error);
         response.status(500).send();
     }
-    /*response.status(200).json([
-      {
-        type: 'swpsafe',
-        data: {
-          name: 'Paul Milgram',
-          swpCode: 'y^t@y7#uMYu@',
-        },
-      },
-      {
-        type: 'hcipal',
-        data: {
-          name: 'Paul Milgram',
-          accountName: 'paul@milgram.de',
-          accountPassword: 'zJac6Em^q7JrG@w!FMf4@',
-        },
-      },
-      {
-        type: 'bachelorcard',
-        data: {
-          name: 'Paul Milgram',
-          cardNumber: '4485-5420-1334-7098',
-          securityCode: '000',
-          expirationDate: '4/44',
-        },
-      },
-    ]);*/
   }
 
   /**
