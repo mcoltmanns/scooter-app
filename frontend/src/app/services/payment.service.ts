@@ -30,7 +30,7 @@ export class PaymentService {
     return this.http.post<ResponseMessage>('/api/payment/swpsafe', data).pipe(shareReplay());
   }
 
-  public deletePaymentMethod(id: number): Observable<ResponseMessage> {
+  public deletePaymentMethod(id: number | null): Observable<ResponseMessage> {
     return this.http.delete<ResponseMessage>(`/api/payment/${id}`).pipe(shareReplay());
   }
 }

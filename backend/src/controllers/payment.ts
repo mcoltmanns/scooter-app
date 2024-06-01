@@ -240,8 +240,7 @@ export class PaymentController {
       return;
     }
 
-    /* Extract the relevant data from the request body */
-    // const { paymentId } = request.body;
+    /* Extract the relevant data from the request parameters */
     const paymentId = request.params.paymentId;
 
     /* Check if this exact payment method exists in the database for that user */

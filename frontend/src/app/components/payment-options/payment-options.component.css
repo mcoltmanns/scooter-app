@@ -3,7 +3,6 @@
   width: 100%;
   min-width: 210px;
   padding: 5px 15px 5px 15px;
-  cursor: pointer;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -54,4 +53,5 @@
   min-width: 24px;
   min-height: 28px;
   margin-right: 10px;
+  cursor: pointer;
 }

@@ -13,5 +13,6 @@ export class ButtonComponent {
   @Input() public text = 'Button';
   @Input() public disabled = false;
   @Input() public type: 'button' | 'submit' | 'reset' = 'button';
+  @Input() public design: 'thin' | '' = '';
   @Input() public color: 'primary' | 'accent' | 'warn' = 'primary';
 }
