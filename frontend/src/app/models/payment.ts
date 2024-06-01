@@ -1,4 +1,5 @@
-export interface PaymentOptions{
+export interface PaymentOptions {
+    id: number,
     type: string,
     data: {
         name: string,

@@ -89,15 +89,13 @@ app.get('/api/user', auth.getUser.bind(auth)); // get a user's information
 app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth)); // set a user's information
 app.get('/api/map', map.getAvailableScooters.bind(auth));
 
-app.get('/api/payment', payment.getAllPaymentMethods.bind(auth));
+app.get('/api/payment', payment.getAllPaymentMethods);
 // validate payment information for all payment requests below
 // app.put('/api/payment', validator.validatePaymentMethod, payment.addPaymentMethod.bind(auth));
 app.post('/api/payment/bachelorcard', validator.validateBachelorcard, payment.addBachelorcard);
 app.post('/api/payment/hcipal', validator.validateHcipal, payment.addHcipal);
 app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addSwpsafe);
-app.delete('api/payment/bachelorcard', validator.validateBachelorcard, payment.deleteBachelorCard);
-app.delete('api/payment/hcipal', validator.validateHcipal, payment.deleteHciPal);
-app.delete('api/payment/swpsafe', validator.validateSwpsafe, payment.deleteSwpSafe);
+app.delete('/api/payment/:paymentId', validator.validatePaymentId, payment.deletePayment);
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 

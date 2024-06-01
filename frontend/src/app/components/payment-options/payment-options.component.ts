@@ -11,7 +11,7 @@ import { PaymentService } from 'src/app/services/payment.service';
 
 export class PaymentOptionsComponent implements OnInit{
 
-    paymentOptions: PaymentOptions[] = []; 
+    paymentOptions: PaymentOptions[] = [];
 
     constructor(private paymentService: PaymentService) {}
 
@@ -23,8 +23,19 @@ export class PaymentOptionsComponent implements OnInit{
 
             error: (err) => {
                 console.error(err);
-                this.paymentOptions = [ { type: 'ERR', data: {name:'ERR'} }]; 
+                this.paymentOptions = [ { id: 0, type: 'ERR', data: {name:'ERR'} }]; 
             }
         });
+    }
+
+    onDelete(id: number): void {
+      this.paymentService.deletePaymentMethod(id).subscribe({
+        next: () => {
+          console.log('Deleted payment option with id: ', id);
+        },
+        error: (err) => {
+          console.error(err);
+        }
+      });
     }
 }

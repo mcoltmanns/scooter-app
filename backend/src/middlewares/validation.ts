@@ -164,4 +164,12 @@ export class Validator {
 
     await Validator.runAllChecks(400, checks, request, response, next);
   }
+
+  public async validatePaymentId(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('paymentId').trim().escape().notEmpty().withMessage('Bitte geben Sie die ID für eine Zahlungsmethode an.').bail().isNumeric().withMessage('Ungültige Zahlungsmethoden-ID.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
 }

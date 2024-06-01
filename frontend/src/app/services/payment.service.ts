@@ -29,4 +29,8 @@ export class PaymentService {
   public postSwpsafe(data: SwpsafeObj): Observable<ResponseMessage> {
     return this.http.post<ResponseMessage>('/api/payment/swpsafe', data).pipe(shareReplay());
   }
+
+  public deletePaymentMethod(id: number): Observable<ResponseMessage> {
+    return this.http.delete<ResponseMessage>(`/api/payment/${id}`).pipe(shareReplay());
+  }
 }
