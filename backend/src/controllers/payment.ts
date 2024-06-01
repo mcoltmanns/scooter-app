@@ -7,53 +7,31 @@ import { PaymentMethod } from '../models/payment';
 const bachelorcardMerchant = 'ScooterApp';
 
 export class PaymentController {
-  public async getAllPaymentMethods(
-    request: Request,
-    response: Response
-  ): Promise<void> {
-    /*
-        const codeInfo = await SwpSafe.getCountryCode('y^t@y7#uMYu@');
-        console.log(codeInfo);
-        const userId = response.locals.userId;
-        if (!userId) {
-            response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-            return;
-        }
-        try {
-            const paymentMethods = await PaymentMethod.findAll({ where: {usersDataId: userId } });
-            response.status(200).json({ paymentMethods });
-            return;
-        } catch (error) {
-            response.status(500).send();
-        }
-        */
-    // Testing methods
-    /*console.log('country');
-        console.log(await SwpSafe.getCountryCode(request.body.swpsafe));
-        console.log(await BachelorCard.getCountryCode(request.body.merchant, request.body.cardNumber));
-        console.log(await HciPal.getCountryCode(request.body.accountName));
-        console.log('transaction');
-        const ss = await SwpSafe.initTransaction(request.body.swpsafe, request.body.amount);
-        const bc = await BachelorCard.initTransaction(request.body.merchant, request.body.cardNumber, request.body.cardName, request.body.securityCode, request.body.expirationDate, request.body.amount);
-        const hp = await HciPal.initTransaction(request.body.accountName, request.body.accountPassword, request.body.amount);
-        console.log(ss);
-        console.log(bc);
-        console.log(hp);
-        console.log('commit');
-        console.log(await SwpSafe.commitTransaction(ss.message));
-        console.log(await BachelorCard.rollbackTransaction(request.body.merchant, bc.message));
-        console.log(await HciPal.commitTransaction(hp.message));*/
-    response.status(200).json([
+  public async getAllPaymentMethods(request: Request, response: Response): Promise<void> {
+    const userId = response.locals.userId;
+    if (!userId) {
+        response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
+        return;
+    }
+    try {
+        const paymentMethods = await PaymentMethod.findAll({ where: {usersAuthId: userId} });
+        response.status(200).json(paymentMethods);
+        return;
+    } catch (error) {
+        console.log(error);
+        response.status(500).send();
+    }
+    /*response.status(200).json([
       {
         type: 'swpsafe',
-        info: {
+        data: {
           name: 'Paul Milgram',
           swpCode: 'y^t@y7#uMYu@',
         },
       },
       {
         type: 'hcipal',
-        info: {
+        data: {
           name: 'Paul Milgram',
           accountName: 'paul@milgram.de',
           accountPassword: 'zJac6Em^q7JrG@w!FMf4@',
@@ -61,14 +39,14 @@ export class PaymentController {
       },
       {
         type: 'bachelorcard',
-        info: {
+        data: {
           name: 'Paul Milgram',
           cardNumber: '4485-5420-1334-7098',
           securityCode: '000',
           expirationDate: '4/44',
         },
       },
-    ]);
+    ]);*/
   }
 
   /**
@@ -278,5 +256,89 @@ export class PaymentController {
 
     response.status(201).json({ code: 201, message: 'SWPSafe-Account hinzugefügt.' });
     return;
+  }
+
+  public async deleteBachelorCard(request: Request, response: Response): Promise<void> {
+    /* Make sure we actually have a user */
+    const userId = response.locals.userId;
+    if (!userId) {
+      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
+      return;
+    }
+
+    /* Extract the relevant data from the request body */
+    const { name, cardNumber, securityCode, expirationDate } = request.body;
+
+    /* Check if this exact bachelorcard isn't already in the database for that user */
+    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'bachelorcard', data: { name, cardNumber, securityCode, expirationDate }, usersAuthId: userId } });
+    if (!existingPaymentMethod) {
+      response.status(400).json({ status: 400, message: 'Diese Bachelorcard ist nicht in Ihrem Konto hinterlegt.' });
+      return;
+    }
+
+    /* Delete the existing payment method */
+    try {
+        await existingPaymentMethod.destroy();
+    } catch (error) {
+        response.status(500).json({status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.'});
+    }
+
+    response.status(200).json({ code: 200, message: 'BachelorCard geloescht.'});
+  }
+
+  public async deleteHciPal(request: Request, response: Response): Promise<void> {
+    /* Make sure we actually have a user */
+    const userId = response.locals.userId;
+    if (!userId) {
+      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
+      return;
+    }
+
+    /* Extract the relevant data from the request body */
+    const { accountName, accountPassword } = request.body;
+
+    /* Check if this exact HCIPal account is already in the database for that user */
+    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'hcipal', data: { accountName, accountPassword }, usersAuthId: userId } });
+    if (existingPaymentMethod) {
+      response.status(400).json({ status: 400, message: 'Dieser HCIPal-Account ist bereits in Ihrem Konto hinterlegt.' });
+      return;
+    }
+
+    /* Delete the existing payment method */
+    try {
+        await existingPaymentMethod.destroy();
+    } catch (error) {
+        response.status(500).json({status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.'});
+    }
+
+    response.status(200).json({ code: 200, message: 'HCIPal-Konto geloescht.'});
+  }
+
+  public async deleteSwpSafe(request: Request, response: Response): Promise<void> {
+    /* Make sure we actually have a user */
+    const userId = response.locals.userId;
+    if (!userId) {
+      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
+      return;
+    }
+
+    /* Extract the relevant data from the request body */
+    const { swpCode } = request.body;
+
+    /* Check if this exact SWPSafe account is already in the database for that user */
+    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'swpsafe', data: { swpCode }, usersAuthId: userId } });
+    if (existingPaymentMethod) {
+      response.status(400).json({ status: 400, message: 'Dieser SWPSafe-Account ist bereits in Ihrem Konto hinterlegt.' });
+      return;
+    }
+
+    /* Delete the existing payment method */
+    try {
+        await existingPaymentMethod.destroy();
+    } catch (error) {
+        response.status(500).json({status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.'});
+    }
+
+    response.status(200).json({ code: 200, message: 'SWPSafe-Konto geloescht.'});
   }
 }

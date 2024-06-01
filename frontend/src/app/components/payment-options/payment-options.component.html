@@ -17,17 +17,17 @@
         }
         <div class="text">
             <div class="name"> 
-                {{pm.info.name}}
+                {{pm.data.name}}
             </div>
             <div class="description">
             @if (pm.type === 'swpsafe') {
-                            {{pm.info.swpCode}}
+                            {{pm.data.swpCode}}
                 } 
                 @else if (pm.type === 'hcipal') {
-                            {{pm.info.accountName}}
+                            {{pm.data.accountName}}
                 } 
                 @else if (pm.type === 'bachelorcard'){
-                            {{pm.info.cardNumber}}
+                            {{pm.data.cardNumber}}
                 }
             </div>
         </div>

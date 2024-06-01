@@ -1,6 +1,6 @@
 export interface PaymentOptions{
     type: string,
-    info: {
+    data: {
         name: string,
         swpCode?: string
         accountName?: string,
