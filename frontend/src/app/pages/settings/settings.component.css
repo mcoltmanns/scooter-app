@@ -11,6 +11,7 @@
   gap: 30px;
   width: 100%;
   min-width: min-content;
+  margin-bottom: 30px;
 }
 
 .settings-entry {
