@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PaymentOptions } from 'src/app/models/payment';
 import { PaymentService } from 'src/app/services/payment.service';
@@ -30,7 +30,7 @@ export class PaymentOptionsComponent implements OnInit {
     public showModal = false;
     public isLoading = false;
 
-    constructor(private paymentService: PaymentService) {
+    constructor(private paymentService: PaymentService, private renderer: Renderer2, private el: ElementRef) {
       this.onConfirm = this.onConfirm.bind(this);
       this.onCancel = this.onCancel.bind(this);
     }
@@ -48,14 +48,22 @@ export class PaymentOptionsComponent implements OnInit {
         });
     }
 
+    removeEntryById(id: number | null): void {
+      if (!id) return;
+      /* Remove a payment entry by id */
+      this.paymentOptions = this.paymentOptions.filter(pm => pm.id !== id);
+    }
+
     onConfirm(): void {
       this.showModal = false;
       this.isLoading = true;
 
       this.paymentService.deletePaymentMethod(this.paymentId).subscribe({
         next: (resObj) => {
-          console.log(resObj);
-          console.log('Deleted payment option with id: ', this.paymentId);
+          /* Remove the deleted payment entry from the DOM */
+          this.removeEntryById(this.paymentId);
+
+          /* Reset the paymentId and isLoading state */
           this.paymentId = null;
           this.isLoading = false;
 
@@ -65,7 +73,6 @@ export class PaymentOptionsComponent implements OnInit {
           this.toastComponent.showToast();
         },
         error: (err) => {
-          console.log('Error deleting payment option with id: ', this.paymentId);
           console.error(err);
           this.paymentId = null;
           this.isLoading = false;
@@ -86,15 +93,5 @@ export class PaymentOptionsComponent implements OnInit {
     onDelete(id: number): void {
       this.paymentId = id;
       this.showModal = true;
-    }
-
-    onShowToast(): void {
-      this.toastComponent.showToast();
-    }
-
-    onChangeToast(): void {
-      this.toastType = 'error';
-      this.toastMessage = 'Fehler beim Löschen der Zahlungsmethode!';
-      this.toastComponent.showToast();
     }
 }

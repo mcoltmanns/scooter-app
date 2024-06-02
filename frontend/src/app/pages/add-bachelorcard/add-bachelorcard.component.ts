@@ -200,7 +200,7 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
       next: () => {
         this.errorMessage = '';
         this.isLoading = false;
-        this.router.navigateByUrl('settings/payment');
+        this.router.navigateByUrl('settings/payment', { state: { addedPayment: true } });
       },
       error: (err) => {
         this.isLoading = false;

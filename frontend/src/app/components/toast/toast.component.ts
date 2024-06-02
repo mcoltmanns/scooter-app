@@ -78,7 +78,7 @@ export class ToastComponent {
   }
 
   destroyToast(): void {
-    console.log('destroy toast');
+    // console.log('destroy toast');
     this.resetTimer();
 
     this.hide();
@@ -86,7 +86,7 @@ export class ToastComponent {
   }
 
   destroyToastImmediately(): void {
-    console.log('destroy toast immediately');
+    // console.log('destroy toast immediately');
     this.resetTimer();
 
     this.isVisible = false;
@@ -97,7 +97,7 @@ export class ToastComponent {
   }
 
   showToast(): void {
-    console.log('showing toast');
+    // console.log('showing toast');
     this.destroyToastImmediately();
 
     this.show();
