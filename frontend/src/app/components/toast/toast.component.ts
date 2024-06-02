@@ -12,16 +12,18 @@ import { trigger, state, style, animate, transition } from '@angular/animations'
   animations: [
     trigger('toastAnimation', [
       state('hidden', style({
-        opacity: 0
+        opacity: 0,
+        bottom: '75px'  // move down when hidden
       })),
       state('visible', style({
-        opacity: 1
+        opacity: 1,
+        bottom: '100px'  // move to original position when visible
       })),
       transition('hidden => visible', [
-        animate('0.3s ease-in')
+        animate('0.3s ease-out')
       ]),
       transition('visible => hidden', [
-        animate('0.3s ease-out')
+        animate('0.3s ease-in')
       ]),
     ])
   ]
