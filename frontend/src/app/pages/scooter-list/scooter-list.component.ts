@@ -21,16 +21,19 @@ export class ScooterListComponent implements OnInit, OnChanges {
   public products: Product[] = [];
   public filteredScooters: Scooter[] = [];
   public errorMessage = '';
+  public loadingData = true;
   
   ngOnInit(): void {
     /* Get all scooters from backend */
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
+        this.loadingData = false;
         this.filterScooters();
       },
       error: (err) => {
         this.errorMessage = err.error.message;
+        this.loadingData = false;
         console.log(err);
       }
     });

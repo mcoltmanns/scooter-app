@@ -1,38 +1,44 @@
 <div class="scrollable-container">
-  <div *ngIf="filteredScooters.length > 0; else noScooters">
-    <ul class="scooter-list">
-      <li *ngFor="let scooter of filteredScooters" class="scooter-item">
-        <div class="top-box">
-          <div class="scooter-name">
-            <p>{{ uppercaseProductId(scooter.product_id) }}</p>       
-          </div>
-        </div>
-        <div class="scooter-box">
-          <img class="picture" [src]="getImageUrl(scooter.product_id)" />
-          <div class="dividing-line"></div>
-          <div class="secondary-text">
-            <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
-            <p class="secondary-text-font">Batteriestand</p>
-            <p class="info-box">{{  getRangeByProductId(scooter.id, scooter.battery)}} km</p>
-            <p class="secondary-text-font">Reichweite</p>
-          </div>
-          <div class="scooter-details">
-            <p class="price"> PREIS: {{ getPriceByProductId(scooter.id) }}€</p>
-            <div class="green-button" (click)="buttonToScooter(scooter.id)">
-              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="25" viewBox="0 0 26 25" fill="none">
-                <rect width="100%" height="100%" fill="transparent"/>
-                <path
-                    d="M9.9875 8.65L13.8375 12.5L9.9875 16.35L11.75 18.125L17.375 12.5L11.75 6.875L9.9875 8.65ZM0.5 12.5C0.5 19.4 6.1 25 13 25C19.9 25 25.5 19.4 25.5 12.5C25.5 5.6 19.9 0 13 0C6.1 0 0.5 5.6 0.5 12.5ZM23 12.5C23 18.025 18.525 22.5 13 22.5C7.475 22.5 3 18.025 3 12.5C3 6.975 7.475 2.5 13 2.5C18.525 2.5 23 6.975 23 12.5Z"
-                    fill="#00363D"
-                />
-              </svg>
+  <div *ngIf="!loadingData; else loading">
+    <div *ngIf="filteredScooters.length > 0; else noScooters">
+      <ul class="scooter-list">
+        <li *ngFor="let scooter of filteredScooters" class="scooter-item">
+          <div class="top-box">
+            <div class="scooter-name">
+              <p>{{ uppercaseProductId(scooter.product_id) }}</p>       
             </div>
-          </div>  
-        </div>
-      </li>
-    </ul>
+          </div>
+          <div class="scooter-box">
+            <img class="picture" [src]="getImageUrl(scooter.product_id)" />
+            <div class="dividing-line"></div>
+            <div class="secondary-text">
+              <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
+              <p class="secondary-text-font">Batteriestand</p>
+              <p class="info-box">{{ getRangeByProductId(scooter.id, scooter.battery)}} km</p>
+              <p class="secondary-text-font">Reichweite</p>
+            </div>
+            <div class="scooter-details">
+              <p class="price"> PREIS: {{ getPriceByProductId(scooter.id) }}€</p>
+              <div class="green-button" (click)="buttonToScooter(scooter.id)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26" height="25" viewBox="0 0 26 25" fill="none">
+                  <rect width="100%" height="100%" fill="transparent"/>
+                  <path
+                      d="M9.9875 8.65L13.8375 12.5L9.9875 16.35L11.75 18.125L17.375 12.5L11.75 6.875L9.9875 8.65ZM0.5 12.5C0.5 19.4 6.1 25 13 25C19.9 25 25.5 19.4 25.5 12.5C25.5 5.6 19.9 0 13 0C6.1 0 0.5 5.6 0.5 12.5ZM23 12.5C23 18.025 18.525 22.5 13 22.5C7.475 22.5 3 18.025 3 12.5C3 6.975 7.475 2.5 13 2.5C18.525 2.5 23 6.975 23 12.5Z"
+                      fill="#00363D"
+                  />
+                </svg>
+              </div>
+            </div>  
+          </div>
+        </li>
+      </ul>
+    </div>
+    <ng-template #noScooters>
+      <div class="no-scooter-container">
+        <h3>Keine Scooter gefunden.</h3>
+        <img class="noScooterpicture" src="/assets/NoScooter.png" />
+      </div>
+    </ng-template>
   </div>
-  <ng-template #noScooters>
-    <p>Keine Scooter gefunden!</p>
-  </ng-template>
+  <ng-template #loading></ng-template>
 </div>
