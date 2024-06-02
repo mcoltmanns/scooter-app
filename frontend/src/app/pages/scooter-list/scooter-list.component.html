@@ -14,11 +14,11 @@
             <div class="secondary-text">
               <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
               <p class="secondary-text-font">Batteriestand</p>
-              <p class="info-box">{{ getRangeByProductId(scooter.id, scooter.battery)}} km</p>
+              <p class="info-box">{{ convertDistanceUnits(getRangeByProductId(scooter.id, scooter.battery), selectedDistance) }}</p>
               <p class="secondary-text-font">Reichweite</p>
             </div>
             <div class="scooter-details">
-              <p class="price"> PREIS: {{ getPriceByProductId(scooter.id) }}€</p>
+              <p class="price"> PREIS: {{ convertCurrencyUnits(getPriceByProductId(scooter.id), selectedCurrency) }}</p>
               <div class="green-button" (click)="buttonToScooter(scooter.id)">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="25" viewBox="0 0 26 25" fill="none">
                   <rect width="100%" height="100%" fill="transparent"/>

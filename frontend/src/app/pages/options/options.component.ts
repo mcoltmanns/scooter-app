@@ -18,9 +18,9 @@ export class OptionsComponent implements OnInit{
   public constructor(private router: Router, private optionService: OptionService) {}
 
   /* variables used in HTML and for stuff from the backend  */
-  selectedSpeed = ''; 
-  selectedDistance = '';
-  selectedCurrency = '';
+  public selectedSpeed = ''; 
+  public selectedDistance = '';
+  public selectedCurrency = '';
   public errorMessage = '';
   public option: Option | null = null;
 
@@ -32,10 +32,6 @@ export class OptionsComponent implements OnInit{
         this.selectedSpeed = this.option.speed;
         this.selectedDistance = this.option.distance;
         this.selectedCurrency = this.option.currency; 
-        // Testing:
-        this.convertSpeedUnits(2, this.selectedSpeed);
-        this.convertDistanceUnits(2, this.selectedDistance);
-        this.convertCurrencyUnits(2, this.selectedCurrency);
       },
       error: (err) => {
         this.errorMessage = err.message;

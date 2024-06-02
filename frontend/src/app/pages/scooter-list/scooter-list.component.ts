@@ -3,8 +3,11 @@ import { Scooter } from 'src/app/models/scooter';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
 import { ButtonComponent } from 'src/app/components/button/button.component';
+import { OptionService } from 'src/app/services/option.service';
 import { Router } from '@angular/router';
 import { Product } from 'src/app/models/product';
+import { Option } from 'src/app/models/option';
+import { UnitConverter } from 'src/app/utils/unit-converter';
 
 @Component({
   selector: 'app-scooter-list',
@@ -14,7 +17,7 @@ import { Product } from 'src/app/models/product';
   styleUrls: ['./scooter-list.component.css']
 })
 export class ScooterListComponent implements OnInit, OnChanges {
-  public constructor(private mapService: MapService, private router: Router) {}
+  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
 
   @Input() searchTerm = ''; // Input property to receive the search term
   public scooters: Scooter[] = [];
@@ -22,6 +25,11 @@ export class ScooterListComponent implements OnInit, OnChanges {
   public filteredScooters: Scooter[] = [];
   public errorMessage = '';
   public loadingData = true;
+  // User Units variables
+  public selectedSpeed = ''; 
+  public selectedDistance = '';
+  public selectedCurrency = '';
+  public option: Option | null = null;
   
   ngOnInit(): void {
     /* Get all scooters from backend */
@@ -42,15 +50,23 @@ export class ScooterListComponent implements OnInit, OnChanges {
     this.mapService.getProductInfo().subscribe({
       next: (value) => {
         this.products = value;
-        /*
-        this.products.forEach(product => {
-          console.log(`Product ID: ${product.id}, HTML Discription ${product.description_html}`);
-        });
-        */
       },
       error: (err) => {
         this.errorMessage = err.error.message;
         console.log(err);
+      }
+    });
+
+    this.optionService.getUserPreferences().subscribe({
+      next: (value) => {
+        this.option = value;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+      },
+      error: (err) => {
+        this.errorMessage = err.message;
+        console.error(err);
       }
     });
   }
@@ -87,9 +103,9 @@ export class ScooterListComponent implements OnInit, OnChanges {
   }
 
   /* Get the price for each scooter */
-  getPriceByProductId(productId: number): number | undefined {
+  getPriceByProductId(productId: number): number {
     const product = this.products.find(p => p.id === productId);
-    return product ? product.price_per_hour : undefined;
+    return product ? product.price_per_hour : 0;
   }
 
   // Method to calculate the range of the scooter
@@ -98,36 +114,38 @@ export class ScooterListComponent implements OnInit, OnChanges {
   }
 
   /* Get the range for each scooter */
-  getRangeByProductId(productId: number, battery: number): number | undefined {
+  getRangeByProductId(productId: number, battery: number): number{
     const product = this.products.find(p => p.id === productId);
     if (product) {
       return this.calcRange(battery, product.max_reach);
     } else {
-      return undefined;
+      return 0; // Error no range provided
     }
   }
 
-  /* removes a scooter from the list */
-  /*
-  removeScooter(scooterId: string): void {
-    this.scooters = this.scooters.filter(scooter => scooter.product_id !== scooterId);
-    this.filteredScooters = this.filteredScooters.filter(scooter => scooter.product_id !== scooterId);
+  /* Converts the distances */
+  convertDistanceUnits(value: number, unit: string): string {
+    let str = '';
+    if(unit === 'mi'){
+      value = UnitConverter.convertDistance(value, 'km', unit);
+      str = value.toFixed(0) + ' mi'; // toFixed(0) shows no decimal places
+    } 
+    else{
+      str = value.toString() + ' km';
+    }
+    return str;
   }
-  */
 
-  /* sends rrequest to the backend to book a scooter*/
-  /*
-  bookScooter(scooterId: string): void {
-    this.mapService.bookScooter(scooterId).subscribe({
-      next: (response) => {
-        console.log('Scooter booked successfully:', response);
-        this.removeScooter(scooterId);
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        console.log(err);
-      }
-    });
+  /* Convert the currencies */
+  convertCurrencyUnits(value: number, unit: string): string {
+    let str = '';
+    if(unit === '$'){
+      value = UnitConverter.convertCurrency(value, unit, '$');
+      str = value.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
+    }
+    else{
+      str = value.toString() + ' €';
+    }
+    return str;
   }
-  */
 }
