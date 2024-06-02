@@ -24,6 +24,9 @@ export class Validator {
     if (!validationErrors.isEmpty()) {
       const errors: ErrorsObject = {};
 
+      // validationErrors.array().forEach(
+      //   (valErr: FieldValidationError) => (errors[valErr.path] = `${valErr.msg}: ${valErr.value} at ${valErr.location}`)
+      // );
       validationErrors.array().forEach(
         (valErr: FieldValidationError) => (errors[valErr.path] = valErr.msg)
       );
@@ -102,6 +105,72 @@ export class Validator {
 
     /* Run all checks */
     await Validator.runAllChecks(401, checks, request, response, next);
+  }
+
+  /**
+   * validate payment method
+    * expects: { type: 'swpsafe|hcipal|bachelorcard', credentials: {name, swpCode | (accountName, accountPassword) | (cardNumber, securityCode, expirationDate) } }
+   */
+  public async validatePaymentMethod(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('type').trim().escape().notEmpty().withMessage('No payment type').bail().matches(/swpsafe|bachelorcard|hcipal/).withMessage('Unknown payment type'),
+      check('credentials').custom((credentials) => {
+        if(!credentials.hasOwnProperty('name')) {
+          throw new Error('No name provided');
+        }
+        switch (request.body.type) {
+          case 'swpsafe':
+            if(!credentials.hasOwnProperty('swpCode')) throw new Error('No swpCode');
+            break;
+          case 'hcipal':
+            if(!credentials.hasOwnProperty('accountName') || !credentials.hasOwnProperty('accountPassword')) throw new Error('No hcipal info');
+            break;
+          case 'bachelordcard':
+            if(!credentials.hasOwnProperty('cardNumber') || !credentials.hasOwnProperty('securityCode') || !credentials.hasOwnProperty('expirationDate')) throw new Error('Incomplete payment information');
+            break;
+          default:
+            throw new Error('Unknown payment type'); // should never occur
+        }
+      })
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+
+  public async validateBachelorcard(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('name').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Namen ein.'),
+      check('cardNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Kartennummer ein.').bail().matches(/^\d{4}-\d{4}-\d{4}-\d{4}$/).withMessage('Bitte geben Sie eine gültige Kartennummer ein.'),
+      check('securityCode').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Prüfziffer ein.').bail().matches(/^\d{3}$/).withMessage('Bitte geben Sie eine gültige Prüfziffer ein.'),
+      check('expirationDate').trim().notEmpty().withMessage('Bitte geben Sie ein Ablaufdatum ein.').bail().matches(/^(1[0-2]|[1-9])\/\d{2}$/).withMessage('Bitte geben Sie ein gültiges Ablaufdatum (MM/YY) ein.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+
+  public async validateHcipal(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('accountName').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Kontonamen ein.').bail().isEmail().withMessage('Ungültige E-Mail-Adresse.').bail().normalizeEmail(),
+      check('accountPassword').trim().escape().notEmpty().withMessage('Bitte geben Sie ein Kontopasswort ein.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+
+  public async validateSwpsafe(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('swpCode').trim().notEmpty().withMessage('Bitte geben Sie einen SWP-Code ein.').bail().isLength({ min: 12, max: 12 }).withMessage('Der SWP-Code muss aus 12 Stellen bestehen.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+
+  public async validatePaymentId(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('paymentId').trim().escape().notEmpty().withMessage('Bitte geben Sie die ID für eine Zahlungsmethode an.').bail().isNumeric().withMessage('Ungültige Zahlungsmethoden-ID.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
   }
 
   public async validateBookScooter(request: Request, response: Response, next: NextFunction): Promise<void> {

@@ -9,6 +9,11 @@ import { MapComponent } from './pages/map/map.component';
 import { RegistrationComponent } from './pages/registration/registration.component';
 import { Observable, map, of } from 'rxjs';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { PaymentComponent } from './pages/payment/payment.component';
+import { AddPaymentComponent } from './pages/add-payment/add-payment.component';
+import { AddswpsafeComponent } from './pages/add-swpsafe/add-swpsafe.component';
+import { AddhcipalComponent } from './pages/add-hcipal/add-hcipal.component';
+import { AddbachelorcardComponent } from './pages/add-bachelorcard/add-bachelorcard.component';
 import { ScooterComponent } from './pages/scooter/scooter.component';
 
 /**
@@ -89,6 +94,15 @@ export const routes: Routes = [
       // "/settings/profil" geladen.
       { path: 'profil', component: ProfileComponent }, //edit-personal-information instead of TodoComponent
       // Alternativ können die Seiten (Komponenten) auch wiederverwendet werden auf mehreren Routen
+      {path: 'payment', children :[ // payment und alle verwandten routes
+        {path: '', component:PaymentComponent},
+        {path: 'add', children:[ // all add payment routes
+          {path: '', component: AddPaymentComponent},
+          {path: 'swpsafe', component: AddswpsafeComponent},
+          {path: 'hcipal', component: AddhcipalComponent},
+          {path: 'bachelorcard', component: AddbachelorcardComponent},
+        ]},
+      ]}, //edit-payment-information component
       { path: 'about', component: AboutComponent },
     ],
   },

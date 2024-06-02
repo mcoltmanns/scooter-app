@@ -1,0 +1,41 @@
+<app-toast #toastComponent [showDuration]=2500 [type]="toastType">{{toastMessage}}</app-toast>
+
+<div class="page-container">
+    <!--hard coded zurück-button, da die default implementation hier zu einem loop führen kann-->
+    <div class="back-btn" (click)="back()">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="30"
+          height="30"
+          viewBox="0 0 30 30"
+          fill="none"
+        >
+          <path
+            d="M18.615 19.62L13.995 15L18.615 10.38L16.5 8.25L9.75 15L16.5 21.75L18.615 19.62ZM30 15C30 6.72 23.28 0 15 0C6.72 0 0 6.72 0 15C0 23.28 6.72 30 15 30C23.28 30 30 23.28 30 15ZM3 15C3 8.37 8.37 3 15 3C21.63 3 27 8.37 27 15C27 21.63 21.63 27 15 27C8.37 27 3 21.63 3 15Z"
+            fill="#00363D"
+          />
+        </svg>
+      </div>
+    <h1 class="title">Zahlungsmethoden</h1>
+    <div class="scrollable-container">
+    <app-payment-options></app-payment-options>
+    
+    <div class="centered">
+      <div class="add" routerLink="add">
+        <div class="text">
+            Neue Zahlungsmethode hinzufügen 
+        </div>
+        <div class="plus">
+          <svg class="svg1" xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 23 23" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M11.5 0C5.152 0 0 5.152 0 11.5C0 17.848 5.152 23 11.5 23C17.848 23 23 17.848 23 11.5C23 5.152 17.848 0 11.5 0ZM11.4058 21.1008C6.04937 21.1008 1.71088 16.7623 1.71088 11.4058C1.71088 6.04937 6.04937 1.71088 11.4058 1.71088C16.7623 1.71088 21.1008 6.04937 21.1008 11.4058C21.1008 16.7623 16.7623 21.1008 11.4058 21.1008Z" fill="white"/>
+          </svg>
+          <svg class="svg2" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M16.2442 11.8102H11.2399V16.8145H9.57182V11.8102H4.5675V10.1421H9.57182V5.13782H11.2399V10.1421H16.2442V11.8102Z" fill="white"/>
+          </svg>
+          <svg class="svg3" xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27" fill="none">
+            <circle cx="13.5" cy="13.5" r="13.5" fill="#00363D"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+ </div>

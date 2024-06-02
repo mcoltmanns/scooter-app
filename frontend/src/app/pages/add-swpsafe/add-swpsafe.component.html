@@ -1,0 +1,41 @@
+<app-loading-overlay [isLoading]="isLoading"></app-loading-overlay>
+
+<div class="page-container">
+    <h1 class="title">Zahlungsmethode hinzufügen</h1>
+    <div class="scrollable-container">
+    
+    <div class="text">
+        Zahlungsanbieter wählen:
+    </div>
+    
+    <div class="options">
+        <div class="icon" routerLink="../bachelorcard"> <img src='../../../assets/payment/bachelorcard.png'></div>
+        <div class="icon" routerLink="../hcipal"> <img src='../../../assets/payment/hciPal.png'></div>
+        <div class="icon active">
+          <img src='../../../assets/payment/swpsafe.png'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+          </svg>
+        </div>
+    </div>
+
+    <div class="form-container">
+      <form [formGroup]="swpsafeForm" (ngSubmit)="onSubmit()">
+        <app-user-input label="Code" [(text)]="code" formControlName="code" (blurEvent)="updateErrorMessages()"></app-user-input>
+        <div class="error">{{codeErrorMessage}}</div>
+
+        <div class="bottom">
+          <div style="text-align: center;" class="error">{{errorMessage}}</div>
+
+          <app-button class="btn" type="submit">
+            Zahlungsmethode hinzufügen
+          </app-button>
+          <app-button color="accent" class="btn" (click)="onCancel()">
+            Abbrechen
+          </app-button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>

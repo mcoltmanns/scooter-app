@@ -17,6 +17,7 @@ import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
 import { Validator } from './middlewares/validation';
 import { MapController } from './controllers/map';
+import { PaymentController } from './controllers/payment';
 
 // Express server instanziieren
 const app = express();
@@ -71,6 +72,7 @@ const validator = new Validator();
 const auth = new AuthController();
 const api = new ApiController();
 const map = new MapController();
+const payment = new PaymentController();
 
 /* Routes without authentication */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
@@ -90,6 +92,14 @@ app.get('/api/singleScooter/:scooterId', map.getScooterById); // get scooter inf
 app.get('/api/product', map.getAllProducts.bind(auth)); // get all product information
 app.post('/api/bookScooter', validator.validateBookScooter, map.bookScooter); // get all product information
 app.get('/api/productInfo/:scooterId', map.getProductByScooterId); //get for a specific scooter the products info
+
+app.get('/api/payment', payment.getAllPaymentMethods);
+// validate payment information for all payment requests below
+// app.put('/api/payment', validator.validatePaymentMethod, payment.addPaymentMethod.bind(auth));
+app.post('/api/payment/bachelorcard', validator.validateBachelorcard, payment.addBachelorcard);
+app.post('/api/payment/hcipal', validator.validateHcipal, payment.addHcipal);
+app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addSwpsafe);
+app.delete('/api/payment/:paymentId', validator.validatePaymentId, payment.deletePayment);
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 
