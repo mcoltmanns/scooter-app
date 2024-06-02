@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, ElementRef, Input, TemplateRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
-// import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-confirm-modal',

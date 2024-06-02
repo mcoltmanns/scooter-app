@@ -4,6 +4,12 @@
   Bist du sicher, dass du die ausgewählte Zahlungsmethode aus dem System löschen willst?
 </app-confirm-modal>
 
+<app-toast #toastComponent [showDuration]=2000 [type]="toastType" >{{toastMessage}}</app-toast>
+
+<button (click)="onShowToast()">Show Status</button>
+
+<button (click)="onChangeToast()">Change Toast</button>
+
 @for (pm of paymentOptions; track paymentOptions){
     <div class="payment-entry">
         @if (pm.type === 'swpsafe') {
