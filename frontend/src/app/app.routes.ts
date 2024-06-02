@@ -2,7 +2,6 @@ import { inject } from '@angular/core';
 import { Router, Routes } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { LoginComponent } from './pages/login/login.component';
-import { TodoComponent } from './pages/todo/todo.component';
 import { AboutComponent } from './pages/about/about.component';
 import { SettingsComponent } from './pages/settings/settings.component';
 import { MapComponent } from './pages/map/map.component';
