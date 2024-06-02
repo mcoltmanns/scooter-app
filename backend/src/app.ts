@@ -93,9 +93,8 @@ app.get('/api/product', map.getAllProducts.bind(auth)); // get all product infor
 app.post('/api/bookScooter', validator.validateBookScooter, map.bookScooter); // get all product information
 app.get('/api/productInfo/:scooterId', map.getProductByScooterId); //get for a specific scooter the products info
 
+/* Routes to manage payment methods */
 app.get('/api/payment', payment.getAllPaymentMethods);
-// validate payment information for all payment requests below
-// app.put('/api/payment', validator.validatePaymentMethod, payment.addPaymentMethod.bind(auth));
 app.post('/api/payment/bachelorcard', validator.validateBachelorcard, payment.addBachelorcard);
 app.post('/api/payment/hcipal', validator.validateHcipal, payment.addHcipal);
 app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addSwpsafe);

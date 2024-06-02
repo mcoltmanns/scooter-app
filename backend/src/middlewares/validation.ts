@@ -107,36 +107,6 @@ export class Validator {
     await Validator.runAllChecks(401, checks, request, response, next);
   }
 
-  /**
-   * validate payment method
-    * expects: { type: 'swpsafe|hcipal|bachelorcard', credentials: {name, swpCode | (accountName, accountPassword) | (cardNumber, securityCode, expirationDate) } }
-   */
-  public async validatePaymentMethod(request: Request, response: Response, next: NextFunction): Promise<void> {
-    const checks = [
-      check('type').trim().escape().notEmpty().withMessage('No payment type').bail().matches(/swpsafe|bachelorcard|hcipal/).withMessage('Unknown payment type'),
-      check('credentials').custom((credentials) => {
-        if(!credentials.hasOwnProperty('name')) {
-          throw new Error('No name provided');
-        }
-        switch (request.body.type) {
-          case 'swpsafe':
-            if(!credentials.hasOwnProperty('swpCode')) throw new Error('No swpCode');
-            break;
-          case 'hcipal':
-            if(!credentials.hasOwnProperty('accountName') || !credentials.hasOwnProperty('accountPassword')) throw new Error('No hcipal info');
-            break;
-          case 'bachelordcard':
-            if(!credentials.hasOwnProperty('cardNumber') || !credentials.hasOwnProperty('securityCode') || !credentials.hasOwnProperty('expirationDate')) throw new Error('Incomplete payment information');
-            break;
-          default:
-            throw new Error('Unknown payment type'); // should never occur
-        }
-      })
-    ];
-
-    await Validator.runAllChecks(400, checks, request, response, next);
-  }
-
   public async validateBachelorcard(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
       check('name').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Namen ein.'),
