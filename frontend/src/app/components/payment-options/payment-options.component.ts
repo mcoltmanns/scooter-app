@@ -30,20 +30,29 @@ export class PaymentOptionsComponent implements OnInit {
     public showModal = false;
     public isLoading = false;
 
+    /* Manage the state of laoding the payment methods */
+    public paymentsStatus: string | null = null;
+
     constructor(private paymentService: PaymentService, private renderer: Renderer2, private el: ElementRef) {
       this.onConfirm = this.onConfirm.bind(this);
       this.onCancel = this.onCancel.bind(this);
     }
 
     ngOnInit(): void { 
+        /* Load all payment methods */
+        this.paymentsStatus = 'Lade Zahlungsmethoden...';
         this.paymentService.getAllPaymentMethods().subscribe({
             next: (payopt) => {
-                this.paymentOptions = payopt;
+                this.paymentOptions = payopt.body;
+                if(this.paymentOptions.length === 0) {
+                  this.paymentsStatus = 'Keine Zahlungsmethoden hinterlegt.';
+                } else {
+                  this.paymentsStatus = null;
+                }
             },
-
             error: (err) => {
                 console.error(err);
-                this.paymentOptions = [ { id: 0, type: 'ERR', data: {name:'ERR'} }]; 
+                this.paymentsStatus = 'Fehler beim Laden der Zahlungsmethoden!';
             }
         });
     }
@@ -52,6 +61,10 @@ export class PaymentOptionsComponent implements OnInit {
       if (!id) return;
       /* Remove a payment entry by id */
       this.paymentOptions = this.paymentOptions.filter(pm => pm.id !== id);
+
+      if (this.paymentOptions.length === 0) {
+        this.paymentsStatus = 'Keine Zahlungsmethoden hinterlegt.';
+      }
     }
 
     onConfirm(): void {

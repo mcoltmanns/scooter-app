@@ -6,6 +6,14 @@ import { PaymentMethod } from '../models/payment';
 
 const bachelorcardMerchant = 'ScooterApp';
 
+interface PaymentMethod {
+  id: number;
+  type: string;
+  data: {
+    [key: string]: string;
+  };
+}
+
 export class PaymentController {
   public async getAllPaymentMethods(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
@@ -14,12 +22,41 @@ export class PaymentController {
         return;
     }
     try {
-        const paymentMethods = await PaymentMethod.findAll({ where: { usersAuthId: userId } });
-        response.status(200).json(paymentMethods);
+        // const paymentMethods = await PaymentMethod.findAll({ where: { usersAuthId: userId } });
+        const paymentMethods = await PaymentMethod.findAll({
+          where: { usersAuthId: userId },
+          attributes: ['id', 'type', 'data'],
+        });
+        
+        /* Filter the payment methods to only include the allowed fields and anonymize data */
+        const allowed = ['name', 'cardNumber', 'swpCode', 'accountName'];
+
+        const filteredPaymentMethods: PaymentMethod[] = paymentMethods.map(method => {
+          /* Convert the Sequelize object to a plain object */
+          const plainMethod = method.get({ plain: true });
+          /* Filter the data object to only include the allowed fields */
+          plainMethod.data = Object.keys(plainMethod.data)
+            .filter(key => allowed.includes(key))
+            .reduce((obj: { [key: string]: string }, key: string) => {
+              /* Anonymize the cardNumber and swpCode */
+              if (key === 'cardNumber') {
+                obj[key] = '**** ' + plainMethod.data[key].slice(-4);
+              } else if (key === 'swpCode') {
+                obj[key] = '**** ' + plainMethod.data[key].slice(-2);
+              } else {
+                obj[key] = plainMethod.data[key];
+              }
+              return obj;
+            }, {});
+          return plainMethod;
+        });
+
+        response.status(200).json({ status: 200, body: filteredPaymentMethods });
         return;
     } catch (error) {
         console.log(error);
-        response.status(500).send();
+        response.status(400).json({ status: 400, message: 'Keine Zahlungsmethoden hinterlegt.' });
+        return;
     }
   }
 

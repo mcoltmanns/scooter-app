@@ -6,7 +6,12 @@
 
 <app-toast #toastComponent [showDuration]=2500 [type]="toastType" >{{toastMessage}}</app-toast>
 
-@for (pm of paymentOptions; track paymentOptions){
+<ng-container *ngIf="paymentsStatus; else paymentEnties">
+  <div class="status-message">{{paymentsStatus}}</div>
+</ng-container>
+
+<ng-template #paymentEnties>
+  @for (pm of paymentOptions; track paymentOptions) {
     <div class="payment-entry">
         @if (pm.type === 'swpsafe') {
             <div class="payment-icon">
@@ -43,4 +48,5 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 63" fill="#65696d"><path d="M17.123 16.97h6.672v32.026h-6.672zm13.016 0h6.672v32.026h-6.672zM53.996 2.959H-.005V9.77h3.904v47.413c.046 1.537.653 3.12 1.566 4.118s2.363 1.664 3.768 1.706h35.472c1.405-.042 2.856-.705 3.769-1.706s1.519-2.581 1.565-4.118V9.769h3.957v-6.81zM10.138 56.197V9.769H43.8v46.428H10.138z"/><path d="M17.141.007h19.658V3.01H17.141z"/></svg>
         </div>
     </div>
-}               
+  }        
+</ng-template>

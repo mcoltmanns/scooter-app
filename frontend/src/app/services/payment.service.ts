@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
-import { PaymentOptions } from 'src/app/models/payment';
-import { ResponseMessage } from '../models/response-message';
+import { ResObjAllPaymentOptions, ResponseMessage } from '../models/response-message';
 import { BachelorcardObj, HcipalObj, SwpsafeObj } from '../models/payment';
 
 @Injectable({
@@ -14,8 +13,8 @@ export class PaymentService {
   
   constructor(private http: HttpClient) {}
 
-  public getAllPaymentMethods(): Observable<PaymentOptions[]> {
-    return this.http.get<PaymentOptions[]>('/api/payment'); 
+  public getAllPaymentMethods(): Observable<ResObjAllPaymentOptions> {
+    return this.http.get<ResObjAllPaymentOptions>('/api/payment'); 
   }
 
   public postBachelorCard(data: BachelorcardObj): Observable<ResponseMessage> {
