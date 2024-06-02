@@ -18,6 +18,7 @@ import { AuthController } from './controllers/auth';
 import { Validator } from './middlewares/validation';
 import { MapController } from './controllers/map';
 import { PaymentController } from './controllers/payment';
+import { OptionController } from './controllers/option';
 
 // Express server instanziieren
 const app = express();
@@ -73,6 +74,7 @@ const auth = new AuthController();
 const api = new ApiController();
 const map = new MapController();
 const payment = new PaymentController();
+const option = new OptionController();
 
 /* Routes without authentication */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
@@ -99,6 +101,9 @@ app.post('/api/payment/bachelorcard', validator.validateBachelorcard, payment.ad
 app.post('/api/payment/hcipal', validator.validateHcipal, payment.addHcipal);
 app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addSwpsafe);
 app.delete('/api/payment/:paymentId', validator.validatePaymentId, payment.deletePayment);
+app.post('/api/bookScooter', map.bookScooter.bind(auth)); // get all product information
+app.get('/api/preferencesForUser', option.getUserPreferenceByUserId); // get the preferences for a user
+app.post('/api/updateUserPreferences', option.updateUserPreferences); // update the preferences for a user
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 

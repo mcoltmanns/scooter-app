@@ -1,0 +1,91 @@
+.text {
+    color: var(--Headline-Color, #FFF);
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 21px; /* 140% */
+    letter-spacing: 0.5px;
+    margin-top: 60px;
+    margin-left: 20px;
+}
+
+.options {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center; /* Center the buttons horizontally */
+    align-items: center;
+    text-align: center;
+    width: 100%;
+    padding: 0 20px; /* Padding around the options container */
+    gap: 30px; /* Increased space between the two buttons */
+}
+
+.toggle-section {
+    margin-top: 20px; /* Add margin between toggle sections */
+}
+
+.toggle-button {
+    position: relative;
+    padding-right: 24px; 
+    height: 80px;
+    padding: 16px 26px;
+    border-radius: 4px;
+    border: 1px solid var(--Textfeld-Stroke, #000);
+    background: #FFF;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
+    width: calc(40% - 30px); /* Adjust width to fit two buttons within the container */
+    transition: all 0.3s ease; /* Übergangseffekt für alle Eigenschaften mit einer Dauer von 0,3 Sekunden */
+}
+
+.toggle-button:active {
+    transform: scale(0.9); /* Verkleinere den Button bei Klick */
+}
+
+.toggle-button.active {
+    background: #d5e9d7;
+    border-color: #888;
+}
+
+.checkmark {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background-color: transparent; 
+}
+
+.text-label {
+    color: #000;
+    font-family: "Racing Sans One";
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px; /* 116.667% */
+    letter-spacing: -0.32px;
+}
+
+.description-label {
+    margin-top: 5px;
+    color: #646363;
+    font-family: "Roboto";
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 200;
+    line-height: 21px; /* 150% */
+    letter-spacing: -0.32px;
+}
+
+.bottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+    padding: 40px;
+    margin-top: 20px;
+}
+
+.logout-btn {
+    width: 65%;
+}

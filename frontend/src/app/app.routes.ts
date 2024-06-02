@@ -15,6 +15,7 @@ import { AddswpsafeComponent } from './pages/add-swpsafe/add-swpsafe.component';
 import { AddhcipalComponent } from './pages/add-hcipal/add-hcipal.component';
 import { AddbachelorcardComponent } from './pages/add-bachelorcard/add-bachelorcard.component';
 import { ScooterComponent } from './pages/scooter/scooter.component';
+import { OptionsComponent } from './pages/options/options.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -104,6 +105,8 @@ export const routes: Routes = [
         ]},
       ]}, //edit-payment-information component
       { path: 'about', component: AboutComponent },
+      // Path for the options to change metrics
+      { path: 'option', component: OptionsComponent }, //edit-personal-information instead of TodoComponent
     ],
   },
 
