@@ -54,7 +54,7 @@ export class RentalsComponent implements OnInit {
     const date2 = new Date(end);
 
     const diffMs = date2.getTime() - date1.getTime();
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
 
     // If the number of hours is less than 10, remove the leading zero
     const hoursStr = diffHours < 10 ? String(diffHours) : String(diffHours).padStart(2, '0');
