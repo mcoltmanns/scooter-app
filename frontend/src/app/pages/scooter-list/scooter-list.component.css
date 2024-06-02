@@ -137,3 +137,15 @@
     cursor: pointer; /* Mouse pointer change when moving over  */
     margin-left: -10px;
 }
+
+.no-scooter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.noScooterpicture {
+    width: 100%;
+}
