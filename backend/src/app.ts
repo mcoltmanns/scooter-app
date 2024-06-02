@@ -19,6 +19,7 @@ import { Validator } from './middlewares/validation';
 import { MapController } from './controllers/map';
 import { PaymentController } from './controllers/payment';
 import { OptionController } from './controllers/option';
+import { BookingOverviewController } from './controllers/bookingOverview';
 
 // Express server instanziieren
 const app = express();
@@ -75,6 +76,7 @@ const api = new ApiController();
 const map = new MapController();
 const payment = new PaymentController();
 const option = new OptionController();
+const bookingOverview = new BookingOverviewController();
 
 /* Routes without authentication */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
@@ -94,6 +96,7 @@ app.get('/api/singleScooter/:scooterId', map.getScooterById); // get scooter inf
 app.get('/api/product', map.getAllProducts.bind(auth)); // get all product information
 app.post('/api/bookScooter', validator.validateBookScooter, map.bookScooter); // get all product information
 app.get('/api/productInfo/:scooterId', map.getProductByScooterId); //get for a specific scooter the products info
+app.get('/api/bookScooterHistory', bookingOverview.getUserRentals); // get all the rentals for a specific user
 
 /* Routes to manage payment methods */
 app.get('/api/payment', payment.getAllPaymentMethods);

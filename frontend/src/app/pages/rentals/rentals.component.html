@@ -1,0 +1,41 @@
+<div class="page-container">
+  <h1 class="title">Meine Buchungen</h1>
+  <div class="scrollable-container">
+    <div class="rentals-container" *ngIf="!loadingData; else loading">
+      <ul *ngIf="rentals.length > 0; else noRentals">
+        <li *ngFor="let rental of rentals">
+          <div class="scooter-container">
+            <img class="picture" [src]="getPictureByProductId(rental.scooter_id)" />
+            <div class="scooter-details">
+              <p class="scooter-name">{{ getNameByProductId(rental.scooter_id) }}</p>
+              <p class="date-text">Ausgeliehen am:<span class="extra-space">{{ formatDateTime(rental.createdAt) }}</span></p>
+              <p class="date-text">Zurückgegeben am: &nbsp;{{ formatDateTime(rental.endedAt) }}</p>
+              <div class="green-boxes">
+                <div class="green-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                    <path d="M16.625 3.5H15.75V1.75H14V3.5H7V1.75H5.25V3.5H4.375C3.40375 3.5 2.625 4.2875 2.625 5.25V17.5C2.625 18.4625 3.40375 19.25 4.375 19.25H16.625C17.5875 19.25 18.375 18.4625 18.375 17.5V5.25C18.375 4.2875 17.5875 3.5 16.625 3.5ZM16.625 17.5H4.375V8.75H16.625V17.5ZM16.625 7H4.375V5.25H16.625V7ZM6.125 10.5H10.5V14.875H6.125V10.5Z" fill="#123800"/>
+                  </svg>
+                  <p>{{ rentalDuration(rental.createdAt, rental.endedAt)}}h</p>    
+                </div>
+                <div class="green-box">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21" fill="none">
+                    <path d="M18.732 9.9857L11.0058 2.25945C10.682 1.9357 10.2358 1.75195 9.77204 1.75195H3.49829C2.53579 1.75195 1.74829 2.53945 1.74829 3.50195V9.7757C1.74829 10.2395 1.93204 10.6857 2.26454 11.0095L9.99079 18.7357C10.6733 19.4182 11.7845 19.4182 12.467 18.7357L18.7408 12.462C19.4233 11.7795 19.4233 10.677 18.732 9.9857ZM11.2245 17.502L3.49829 9.7757V3.50195H9.77204L17.4983 11.2282L11.2245 17.502Z" fill="#123800"/>
+                    <path d="M5.68579 7.00195C6.41066 7.00195 6.99829 6.41433 6.99829 5.68945C6.99829 4.96458 6.41066 4.37695 5.68579 4.37695C4.96092 4.37695 4.37329 4.96458 4.37329 5.68945C4.37329 6.41433 4.96092 7.00195 5.68579 7.00195Z" fill="#123800"/>
+                  </svg>
+                  <p>{{ getTotalPrice(rental.scooter_id, rental.createdAt, rental.endedAt)}}€</p>          
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+      <ng-template #noRentals>
+        <div class="no-scooter-container">
+          <h3>Keine gebuchten Scooter gefunden.</h3>
+          <img class="noScooterpicture" src="/assets/NoScooter.png" />
+        </div>
+      </ng-template>
+    </div>
+    <ng-template #loading> </ng-template>
+  </div>
+</div>

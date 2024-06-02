@@ -108,11 +108,9 @@ export class MapController {
             await scooter.save({ transaction });
 
             await transaction.commit();
-            response.status(200).json({ message: 'Roller erfolgreich gebucht', rental });
         } catch (error) {
             await transaction.rollback(); // Rollback the transaction in case of an error
             console.error(error);
-            //response.status(500).json({code: 500, message: 'Fehler bei der Buchung des Rollers' });
             return;
         }
 
