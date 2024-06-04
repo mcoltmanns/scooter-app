@@ -1,0 +1,78 @@
+.scooter-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 25px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin: 50px 20px 20px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.picture {
+    width: 90px;
+    height: auto;
+    display: block;
+    margin-right: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.scooter-details {
+    flex-grow: 1;
+    margin-left: 20px;
+}
+
+.scooter-details p {
+    margin: 5px 0;
+    color: #4a4242;
+}
+
+.scooter-details .scooter-name {
+    font-family: Roboto;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: -10px;
+}
+
+.scooter-stats {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 220px;
+    height: 70px;
+    margin-right: 30px;
+    margin-top: -10px;
+}
+
+.scooter-stats-row {
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+    height: 35px;
+    margin: 0;
+}
+
+.scooter-attribute {
+    margin: 0; 
+
+    color: var(--Textfeld-Stroke, #000);
+    font-family: Roboto;
+    font-size: 12px;
+    font-style: italic;
+    font-weight: 100;
+    line-height: 21px;
+}
+
+.values {
+    margin-top: -17px;
+
+    color: var(--Textfeld-Stroke, #000);
+    font-family: Roboto;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 21px;
+    letter-spacing: -0.32px;
+}

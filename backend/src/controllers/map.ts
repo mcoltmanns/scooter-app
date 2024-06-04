@@ -59,7 +59,6 @@ export class MapController {
                 response.status(404).json({ code: 404, message: 'Produkt nicht gefunden.' });
                 return;
             }
-    
             response.status(200).json(product); // return product for the specific scooter
         } catch (error) {
             console.error(error);

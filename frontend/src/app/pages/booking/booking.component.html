@@ -1,1 +1,44 @@
-<p>booking works!</p>
+<div *ngIf="product && scooter && option" class="page-container">
+    <app-back-button></app-back-button>
+    <h1 class="title">Scooter buchen</h1>
+    <div class="scooter-box">
+        <img class="picture" src="http://localhost:8000/img/products/{{ product.name }}.jpg">
+        <div class="scooter-details">
+            <p class="scooter-name">{{ scooter.product_id }}</p>
+            <div class="scooter-stats">
+                <div class="scooter-stats-row">
+                    <div class="scooter-attribute">
+                        <p>Batteriestand:</p>
+                    </div>
+                    <div class="values">
+                        <p>{{ scooter.battery.toFixed(0) }}%</p>
+                    </div>
+                </div>
+                <div class="scooter-stats-row">
+                    <div class="scooter-attribute">
+                        <p>Reichweite:</p>
+                    </div>
+                    <div class="values">
+                        <p>{{ convertDistanceUnits(calcRange(product.max_reach, scooter.battery), this.selectedDistance) }}</p>
+                    </div>
+                </div>
+                <div class="scooter-stats-row">
+                    <div class="scooter-attribute">
+                        <p>Geschwindigkeit:</p>
+                    </div>
+                    <div class="values">
+                        <p>{{ convertSpeedUnits(product.max_speed, this.selectedSpeed) }}</p>
+                    </div>
+                </div>
+                <div class="scooter-stats-row">
+                    <div class="scooter-attribute">
+                        <p>Preis pro Stunde:</p>
+                    </div>
+                    <div class="values">
+                        <p>{{ convertCurrencyUnits(product.price_per_hour, this.selectedCurrency) }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -36,6 +36,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
+        console.log(this.scooters);
         this.loadingData = false;
         this.filterScooters();
       },
