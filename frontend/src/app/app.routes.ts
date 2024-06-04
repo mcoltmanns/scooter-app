@@ -16,6 +16,7 @@ import { AddbachelorcardComponent } from './pages/add-bachelorcard/add-bachelorc
 import { ScooterComponent } from './pages/scooter/scooter.component';
 import { OptionsComponent } from './pages/options/options.component';
 import { RentalsComponent } from './pages/rentals/rentals.component';
+import { TodoComponent } from './pages/todo/todo.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -78,6 +79,7 @@ export const routes: Routes = [
   { path: 'search', component: MapComponent, canActivate: [loginGuard] },
   { path: 'scooter/:id', component: ScooterComponent, canActivate: [loginGuard] },
   { path: 'booking', component: RentalsComponent, canActivate: [loginGuard] },
+  { path: 'search/checkout/:id', component: TodoComponent, canActivate: [loginGuard] },
 
   // Routen können auch geschachtelt werden, indem der "Child" Eigenschaft der
   // Route nochmals ein paar Routen übergeben werden.
