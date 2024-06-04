@@ -61,7 +61,7 @@ export class ScooterComponent implements OnInit {
     console.log('scooterBook button pressed');
 
     const scooterId = this.product?.id;
-    this.router.navigate(['search/booking', scooterId]); // Route to booking page
+    this.router.navigate(['search/checkout', scooterId]); // Route to booking page
   }
 
   // Method to calculate the range of the scooter
