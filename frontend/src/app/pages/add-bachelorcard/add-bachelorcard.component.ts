@@ -211,6 +211,6 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    this.router.navigate(['settings/payment/add']);
+    this.router.navigate(['settings/payment']);
   }
 }
