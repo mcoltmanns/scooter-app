@@ -36,9 +36,9 @@ export class ScooterListComponent implements OnInit, OnChanges {
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
-        console.log(this.scooters);
         this.loadingData = false;
         this.filterScooters();
+        console.log(this.scooters);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -104,8 +104,8 @@ export class ScooterListComponent implements OnInit, OnChanges {
   }
 
   /* Get the price for each scooter */
-  getPriceByProductId(productId: number): number {
-    const product = this.products.find(p => p.id === productId);
+  getPriceByProductId(name: String): number {
+    const product = this.products.find(p => p.name === name);
     return product ? product.price_per_hour : 0;
   }
 
@@ -115,8 +115,8 @@ export class ScooterListComponent implements OnInit, OnChanges {
   }
 
   /* Get the range for each scooter */
-  getRangeByProductId(productId: number, battery: number): number{
-    const product = this.products.find(p => p.id === productId);
+  getRangeByProductId(name: String, battery: number): number{
+    const product = this.products.find(p => p.name === name);
     if (product) {
       return this.calcRange(battery, product.max_reach);
     } else {

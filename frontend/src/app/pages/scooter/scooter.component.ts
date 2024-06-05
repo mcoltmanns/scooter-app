@@ -60,7 +60,7 @@ export class ScooterComponent implements OnInit {
   onSubmit(): void {
     console.log('scooterBook button pressed');
 
-    const scooterId = this.product?.id;
+    const scooterId = this.scooter?.id;
     this.router.navigate(['search/checkout', scooterId]); // Route to booking page
   }
 
