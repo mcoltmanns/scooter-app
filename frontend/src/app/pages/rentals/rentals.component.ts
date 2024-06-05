@@ -4,6 +4,9 @@ import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
 import { Product } from 'src/app/models/product';
 import { CommonModule } from '@angular/common';
+import { OptionService } from 'src/app/services/option.service';
+import { Option } from 'src/app/models/option';
+import { UnitConverter } from 'src/app/utils/unit-converter';
 
 @Component({
   selector: 'app-rentals',
@@ -13,25 +16,33 @@ import { CommonModule } from '@angular/common';
   styleUrl: './rentals.component.css'
 })
 export class RentalsComponent implements OnInit {
-  public constructor(private rentalService: RentalService, private mapService: MapService) {}
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService) {}
 
   // Variables for storing all rentals and the product information
-  public loadingData = true;
+  public loadingDataScooter = true;
+  public loadingDataProduct = true;
+  public loadingDataOption = true;
   public rentals: Rental[] = [];
   public products: Product[] = [];
   public errorMessage = '';
+
+  // User Units variables
+  public selectedSpeed = ''; 
+  public selectedDistance = '';
+  public selectedCurrency = '';
+  public option: Option | null = null;
 
   ngOnInit(): void {
     /* Get all scooter bookings for the User from the backend*/
     this.rentalService.getRentalInfo().subscribe({
       next: (value) => {
         this.rentals = value;
-        this.loadingData = false;
+        this.loadingDataScooter = false;
         console.log(this.rentals);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
-        this.loadingData = false;
+        this.loadingDataScooter = false;
         console.log(err);
       }
     });
@@ -40,10 +51,28 @@ export class RentalsComponent implements OnInit {
     this.mapService.getProductInfo().subscribe({
       next: (value) => {
         this.products = value;
+        this.loadingDataProduct = false;
       },
       error: (err) => {
         this.errorMessage = err.error.message;
+        this.loadingDataProduct = false;
         console.log(err);
+      }
+    });
+
+    /* Get the metrics settings for a user */
+    this.optionService.getUserPreferences().subscribe({
+      next: (value) => {
+        this.option = value;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+        this.loadingDataOption = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.message;
+        this.loadingDataOption = false;
+        console.error(err);
       }
     });
   }
@@ -104,5 +133,23 @@ export class RentalsComponent implements OnInit {
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
     return `${day}.${month}.${year} ${hours}:${minutes}`;
+  }
+
+  /* Convert the currencies */
+  convertCurrencyUnits(value: string | undefined, unit: string): string {
+    if (value === undefined){
+      console.log('Something went wrong while converting Currency Units...');
+      return '';
+    }
+    let intValue = parseInt(value);
+    let str = '';
+    if(unit === '$'){
+      intValue = UnitConverter.convertCurrency(intValue, unit, '$');
+      str = intValue.toFixed(2) + '$'; // toFixed(2) only shows the last two decimal place
+    }
+    else{
+      str = value.toString() + '€';
+    }
+    return str;
   }
 }
