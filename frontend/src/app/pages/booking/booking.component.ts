@@ -14,23 +14,16 @@ import { CustomValidators } from 'src/app/validators/custom-validators';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { PaymentMethodCardComponent } from 'src/app/components/payment-method-card/payment-method-card.component';
+import { AddButtonComponent } from 'src/app/components/add-button/add-button.component';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent],
+  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
 export class BookingComponent implements OnInit{
-  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService) {
-    /* Create a FormGroup instance with all input fields and their validators */
-    this.checkoutForm = this.fb.group({
-      duration: ['5', [Validators.required, CustomValidators.inInterval(1, 48) ]],
-      radioButtonChoice: ['', [Validators.required]]
-    });
-  }
-
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public checkoutForm!: FormGroup;
 
@@ -47,9 +40,14 @@ export class BookingComponent implements OnInit{
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
-  
-  // Variable for user input field
-  public hours = '5';
+
+  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService) {
+    /* Create a FormGroup instance with all input fields and their validators */
+    this.checkoutForm = this.fb.group({
+      duration: ['5', [Validators.required, CustomValidators.inInterval(1, 48) ]],
+      radioButtonChoice: ['', [Validators.required]]
+    });
+  }
 
   ngOnInit(): void {
     // read the last number from the url:
@@ -101,12 +99,12 @@ export class BookingComponent implements OnInit{
     this.paymentService.getAllPaymentMethods().subscribe({
         next: (payopt) => {
             this.paymentMethods = payopt.body;
-            if(this.paymentMethods.length === 0) {
-              this.paymentsStatus = 'Keine Zahlungsmethoden hinterlegt.';
-            } else {
-              this.paymentsStatus = null;
-              // this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id); // Optionally select the first payment method as default
-            }
+            this.paymentsStatus = null;
+
+            /* Optionally select the first payment method as default */
+            // if(this.paymentMethods.length > 0) {
+            //   this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id);
+            // }
         },
         error: (err) => {
             console.error(err);
@@ -136,8 +134,8 @@ export class BookingComponent implements OnInit{
       return 'Something went wrong...';
     }
     else{
-      if (/^\d+$/.test(this.hours)) {
-        const intValue = parseInt(this.hours, 10); // Convert the string to an integer
+      if (/^\d+$/.test(this.checkoutForm.get('duration')!.value)) {
+        const intValue = parseInt(this.checkoutForm.get('duration')!.value, 10); // Convert the string to an integer
         const total = pricePerHour * intValue;
         const totalWithTwoDecimals = total.toFixed(2); // Limited to two decimal places
         return this.convertCurrencyUnits(parseFloat(totalWithTwoDecimals), this.selectedCurrency);
@@ -223,14 +221,14 @@ export class BookingComponent implements OnInit{
   handlePlusClick(): void {
     console.log('Plus-Button wurde geklickt!');
     // Check whether the string contains only numbers
-    if (/^\d+$/.test(this.hours)) {
-      const intValue = parseInt(this.hours, 10); // Convert the string to an integer
+    if (/^\d+$/.test(this.checkoutForm.get('duration')!.value)) {
+      const intValue = parseInt(this.checkoutForm.get('duration')!.value, 10); // Convert the string to an integer
       const newValue = intValue + 1; // add +1
       if (newValue <= 48){
-        this.hours = newValue.toString(); // Convert the integer back into a string
+        this.checkoutForm.get('duration')!.setValue(newValue.toString()); // Convert the integer back into a string
       }
       else {
-        this.hours = '48';
+        this.checkoutForm.get('duration')!.setValue('48');
       }
     }
   }
@@ -239,14 +237,14 @@ export class BookingComponent implements OnInit{
   handleMinusClick():void {
     console.log('Minus-Button wurde geklickt!');
     // Check whether the string contains only numbers
-    if (/^\d+$/.test(this.hours)) {
-      const intValue = parseInt(this.hours, 10); // Convert the string to an integer
+    if (/^\d+$/.test(this.checkoutForm.get('duration')!.value)) {
+      const intValue = parseInt(this.checkoutForm.get('duration')!.value, 10); // Convert the string to an integer
       const newValue = intValue - 1; // subtract -1
       if (newValue >= 1){
-        this.hours = newValue.toString(); // Convert the integer back into a string
+        this.checkoutForm.get('duration')!.setValue(newValue.toString()); // Convert the integer back into a string
       }
       else {
-        this.hours = '1';
+        this.checkoutForm.get('duration')!.setValue('1');
       }
     }
   }
