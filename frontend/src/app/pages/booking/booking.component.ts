@@ -298,6 +298,6 @@ export class BookingComponent implements OnInit, AfterViewInit {
   }
 
   onCancel(): void {
-    console.log('Form canceled.');
+    this.router.navigateByUrl(`search/scooter/${this.scooter?.id}`); 
   }
 }
