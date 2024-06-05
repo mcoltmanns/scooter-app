@@ -145,7 +145,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
       str = value.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
     }
     else{
-      str = value.toString() + ' €';
+      str = value.toString() + ' €/H';
     }
     return str;
   }

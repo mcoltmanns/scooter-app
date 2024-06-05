@@ -123,6 +123,8 @@
 .price {
     font-weight: bold;
     font-family: Roboto;
+    letter-spacing: 1.25px;
+    font-size: 14px;
 }
 
 .green-button {
