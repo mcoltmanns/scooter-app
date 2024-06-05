@@ -7,16 +7,36 @@ import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { PaymentService } from 'src/app/services/payment.service';
+import { PaymentOptions } from 'src/app/models/payment';
+import { CustomValidators } from 'src/app/validators/custom-validators';
+import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
+import { ButtonComponent } from 'src/app/components/button/button.component';
+import { PaymentMethodCardComponent } from 'src/app/components/payment-method-card/payment-method-card.component';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [BackButtonComponent, CommonModule],
+  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
 export class BookingComponent implements OnInit{
-  public constructor(private mapService: MapService, private optionService: OptionService) {}
+  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService) {
+    /* Create a FormGroup instance with all input fields and their validators */
+    this.checkoutForm = this.fb.group({
+      duration: ['5', [Validators.required, CustomValidators.inInterval(1, 48) ]],
+      radioButtonChoice: ['', [Validators.required]]
+    });
+  }
+
+  /* Initialize the FormGroup instance that manages all input fields and their validators */
+  public checkoutForm!: FormGroup;
+
+  /* Manage payment methods and the state of laoding the payment methods */
+  public paymentMethods: PaymentOptions[] = [];
+  public paymentsStatus: string | null = null;
 
   // Variables for data from the backend
   public errorMessage = '';
@@ -72,6 +92,24 @@ export class BookingComponent implements OnInit{
         console.error(err);
       }
     });
+
+    /* Get all payment methods for the user */
+    this.paymentsStatus = 'Lade Zahlungsmethoden...';
+    this.paymentService.getAllPaymentMethods().subscribe({
+        next: (payopt) => {
+            this.paymentMethods = payopt.body;
+            if(this.paymentMethods.length === 0) {
+              this.paymentsStatus = 'Keine Zahlungsmethoden hinterlegt.';
+            } else {
+              this.paymentsStatus = null;
+              // this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id); // Optionally select the first payment method as default
+            }
+        },
+        error: (err) => {
+            console.error(err);
+            this.paymentsStatus = 'Fehler beim Laden der Zahlungsmethoden!';
+        }
+    });
   }
 
   /* Get Picture from the product list*/
@@ -87,6 +125,28 @@ export class BookingComponent implements OnInit{
     else{
       return Math.ceil(battery / 100 * max_reach);
     }
+  }
+
+  /* Getter methods to check if the inputs of the checkoutForm are valid */
+  get durationErrors(): string | null {
+    const control = this.checkoutForm.get('duration');
+    if (!control || !control.touched || !control.errors) {
+      return null;
+    }
+    if (control.errors['inInterval']) {
+      return control.errors['inInterval'];
+    }
+    return null;
+  }
+  get radioButtonErrors(): string | null {
+    const control = this.checkoutForm.get('radioButtonChoice');
+    if (!control || !control.touched || !control.errors) {
+      return null;
+    }
+    if (control.errors['required']) {
+      return 'Bitte eine Zahlungsmethode auswählen.';
+    }
+    return null;
   }
 
   /* Converts the distances */
@@ -138,5 +198,26 @@ export class BookingComponent implements OnInit{
       str = value.toString() + ' €';
     }
     return str;
+  }
+
+  onSubmit(): void {
+    /* Check if the overall form is valid */
+    if (!this.checkoutForm.valid) {
+      this.checkoutForm.markAllAsTouched();
+      return; // Form submission canceled
+    }
+
+    const finalForm = {
+      scooterId: this.scooter?.id,
+      duration: this.checkoutForm.value.duration,
+      paymentMethodId: this.checkoutForm.value.radioButtonChoice
+    };
+
+    /* Send the login request to the backend */
+    console.log(finalForm);
+  }
+
+  onCancel(): void {
+    console.log('Form canceled.');
   }
 }

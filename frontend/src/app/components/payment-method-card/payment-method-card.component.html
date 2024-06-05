@@ -1,0 +1,39 @@
+<div class="payment-entry" [ngClass]="{'checked': isChecked}" *ngIf="paymentMethod">
+  @if (paymentMethod.type === 'swpsafe') {
+      <div class="payment-icon">
+          <img class="payment-icon" src='../../../assets/payment/swpsafe.png'>
+      </div>
+  } 
+  @else if (paymentMethod.type === 'hcipal') {
+      <div class="payment-icon">
+          <img class="payment-icon" src='../../../assets/payment/hciPal.png'>
+      </div>
+  } 
+  @else if (paymentMethod.type === 'bachelorcard'){
+      <div class="payment-icon">
+          <img class="payment-icon" src='../../../assets/payment/bachelorcard.png'>
+      </div>
+  }
+  <div class="text">
+      <div class="name"> 
+          {{paymentMethod.data.name}}
+      </div>
+      <div class="description">
+        @if (paymentMethod.type === 'swpsafe') {
+          {{paymentMethod.data.swpCode}}
+        } 
+        @else if (paymentMethod.type === 'hcipal') {
+          {{paymentMethod.data.accountName}}
+        } 
+        @else if (paymentMethod.type === 'bachelorcard'){
+          {{paymentMethod.data.cardNumber}}
+        }
+      </div>
+  </div>
+  <div class="delete-icon" *ngIf="isDeletable" (click)="onDelete(paymentMethod.id)">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54 63" fill="#65696d"><path d="M17.123 16.97h6.672v32.026h-6.672zm13.016 0h6.672v32.026h-6.672zM53.996 2.959H-.005V9.77h3.904v47.413c.046 1.537.653 3.12 1.566 4.118s2.363 1.664 3.768 1.706h35.472c1.405-.042 2.856-.705 3.769-1.706s1.519-2.581 1.565-4.118V9.769h3.957v-6.81zM10.138 56.197V9.769H43.8v46.428H10.138z"/><path d="M17.141.007h19.658V3.01H17.141z"/></svg>
+  </div>
+  <svg *ngIf="isChecked" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
+  </svg>
+</div>

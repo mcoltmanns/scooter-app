@@ -52,9 +52,9 @@ button.warn {
 }
 
 button:disabled {
-  background-color: #ccc;
-  color: #888;
-  border-color: #888;
+  background-color: #B4B4B4;
+  color: #FFFFFF;
+  border-color: #FFFFFF;
   cursor: not-allowed;
 }
 
