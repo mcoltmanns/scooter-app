@@ -55,22 +55,24 @@
             ></app-user-input>
 
             <p>Stunden</p>
-            <div class="svg-container"(click)="handlePlusClick()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27" fill="none">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M21.3981 14.6388H14.8981V21.1388H12.7315V14.6388H6.23148V12.4722H12.7315V5.97217H14.8981V12.4722H21.3981V14.6388Z" fill="white"/>
-              </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M14.9371 0C6.69183 0 0 6.69183 0 14.9371C0 23.1824 6.69183 29.8742 14.9371 29.8742C23.1824 29.8742 29.8742 23.1824 29.8742 14.9371C29.8742 6.69183 23.1824 0 14.9371 0ZM14.8148 27.4074C7.85741 27.4074 2.22222 21.7722 2.22222 14.8148C2.22222 7.85741 7.85741 2.22222 14.8148 2.22222C21.7722 2.22222 27.4074 7.85741 27.4074 14.8148C27.4074 21.7722 21.7722 27.4074 14.8148 27.4074Z" fill="white"/>
-              </svg>
-            </div>
-
-            <div class="svg-container-minus" (click)="handleMinusClick()">
-              <svg xmlns="http://www.w3.org/2000/svg" width="31" height="30" viewBox="0 0 31 30" fill="none">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M15.8114 0C7.56607 0 0.874237 6.69183 0.874237 14.9371C0.874237 23.1824 7.56607 29.8742 15.8114 29.8742C24.0567 29.8742 30.7485 23.1824 30.7485 14.9371C30.7485 6.69183 24.0567 0 15.8114 0ZM15.6891 27.4074C8.73164 27.4074 3.09646 21.7722 3.09646 14.8148C3.09646 7.85741 8.73164 2.22222 15.6891 2.22222C22.6465 2.22222 28.2816 7.85741 28.2816 14.8148C28.2816 21.7722 22.6465 27.4074 15.6891 27.4074Z" fill="white"/>
-              </svg>
-              <svg xmlns="http://www.w3.org/2000/svg" width="17" height="3" viewBox="0 0 17 3" fill="none">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M16.8683 2.25352H0.854462V0.290039H16.8683V2.25352Z" fill="white"/>
-              </svg>
+            <div class="input-controls">
+              <div class="svg-container" (click)="handlePlusClick()">
+                <svg class="svg1" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M14.9371 0C6.69183 0 0 6.69183 0 14.9371C0 23.1824 6.69183 29.8742 14.9371 29.8742C23.1824 29.8742 29.8742 23.1824 29.8742 14.9371C29.8742 6.69183 23.1824 0 14.9371 0ZM14.8148 27.4074C7.85741 27.4074 2.22222 21.7722 2.22222 14.8148C2.22222 7.85741 7.85741 2.22222 14.8148 2.22222C21.7722 2.22222 27.4074 7.85741 27.4074 14.8148C27.4074 21.7722 21.7722 27.4074 14.8148 27.4074Z" fill="white"/>
+                </svg>
+                <svg class="svg2" xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M21.3981 14.6388H14.8981V21.1388H12.7315V14.6388H6.23148V12.4722H12.7315V5.97217H14.8981V12.4722H21.3981V14.6388Z" fill="white"/>
+                </svg>
+              </div>
+  
+              <div class="svg-container" (click)="handleMinusClick()">
+                <svg class="svg3" xmlns="http://www.w3.org/2000/svg" width="31" height="30" viewBox="0 0 31 30" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M15.8114 0C7.56607 0 0.874237 6.69183 0.874237 14.9371C0.874237 23.1824 7.56607 29.8742 15.8114 29.8742C24.0567 29.8742 30.7485 23.1824 30.7485 14.9371C30.7485 6.69183 24.0567 0 15.8114 0ZM15.6891 27.4074C8.73164 27.4074 3.09646 21.7722 3.09646 14.8148C3.09646 7.85741 8.73164 2.22222 15.6891 2.22222C22.6465 2.22222 28.2816 7.85741 28.2816 14.8148C28.2816 21.7722 22.6465 27.4074 15.6891 27.4074Z" fill="white"/>
+                </svg>
+                <svg class="svg4" xmlns="http://www.w3.org/2000/svg" width="17" height="3" viewBox="0 0 17 3" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M16.8683 2.25352H0.854462V0.290039H16.8683V2.25352Z" fill="white"/>
+                </svg>
+              </div>
             </div>
 
           </div>

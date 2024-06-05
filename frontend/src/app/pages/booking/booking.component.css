@@ -105,7 +105,9 @@
 .input-container {
   width: 100%;
   display: flex;
+  align-items: center;
   justify-content: flex-start; /* Aligns the input to the left */
+  gap: 15px;
 }
 
 .form-container app-user-input {
@@ -115,8 +117,6 @@
 
 .input-container p {
   margin: 0;
-  margin-top: 10px;
-  margin-left: 20px;
 
   color: var(--Text, #FFF);
   font-family: Roboto;
@@ -127,28 +127,46 @@
   letter-spacing: -0.32px;
 }
 
+.input-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 7px;
+  margin-left: auto;
+}
+
 .svg-container {
-  position: relative;
-  right: -160px;
+  display: inline-grid;
+  justify-items: center;
+  align-items: center;
+  cursor: pointer;
 }
 
 .svg-container svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  grid-area: 1 / 1 / 2 / 2;
 }
 
-.svg-container-minus {
-  position: relative;
-  right: -200px;
+.svg-container .svg1 {
+  width: 30px;
+  height: 30px;
+  z-index: 1;
 }
 
-.svg-container-minus svg {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.svg-container .svg2 {
+  width: 27px;
+  height: 27px;
+  z-index: 2;
+}
+
+.svg-container .svg3 {
+  width: 31px;
+  height: 30px;
+  z-index: 1;
+}
+
+.svg-container .svg4 {
+  width: 17px;
+  height: 3px;
+  z-index: 2;
 }
 
 .form-label {
