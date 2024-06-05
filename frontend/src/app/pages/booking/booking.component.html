@@ -51,7 +51,6 @@
           <div class="input-container">
             <app-user-input 
               [center]="true"
-              [(text)]="hours"
               formControlName="duration"
             ></app-user-input>
 
@@ -83,9 +82,15 @@
   
           <label class="form-label">Zahlungsmethoden</label>
   
-          <ng-container *ngIf="paymentsStatus; else paymentEntries">
+          <ng-container *ngIf="paymentsStatus; else paymentMethodsCheck">
             <div class="status-message">{{paymentsStatus}}</div>
           </ng-container>
+          
+          <ng-template #paymentMethodsCheck>
+            <ng-container *ngIf="paymentMethods.length === 0; else paymentEntries">
+              <div>No payment methods available.</div>
+            </ng-container>
+          </ng-template>
   
           <ng-template #paymentEntries>
             <div class="payment-method" *ngFor="let method of paymentMethods">
