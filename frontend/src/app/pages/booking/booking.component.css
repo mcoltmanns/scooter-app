@@ -102,8 +102,53 @@
   height: 100%;
 }
 
-app-user-input {
+.input-container {
   width: 100%;
+  display: flex;
+  justify-content: flex-start; /* Aligns the input to the left */
+}
+
+.form-container app-user-input {
+  width: 25%;  /* Set the width to 50% or another value */
+  max-width: 300px;  /* Optionally set a max-width */
+}
+
+.input-container p {
+  margin: 0;
+  margin-top: 10px;
+  margin-left: 20px;
+
+  color: var(--Text, #FFF);
+  font-family: Roboto;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 200;
+  line-height: 21px; /* 140% */
+  letter-spacing: -0.32px;
+}
+
+.svg-container {
+  position: relative;
+  right: -160px;
+}
+
+.svg-container svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.svg-container-minus {
+  position: relative;
+  right: -200px;
+}
+
+.svg-container-minus svg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .form-label {

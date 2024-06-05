@@ -47,6 +47,9 @@ export class BookingComponent implements OnInit{
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
+  
+  // Variable for user input field
+  public hours = '5';
 
   ngOnInit(): void {
     // read the last number from the url:
@@ -127,6 +130,22 @@ export class BookingComponent implements OnInit{
     }
   }
 
+  /* calculates the price for a scooter*/
+  calcPrice(pricePerHour: number |undefined): String {
+    if (pricePerHour === undefined){
+      return 'Something went wrong...';
+    }
+    else{
+      if (/^\d+$/.test(this.hours)) {
+        const intValue = parseInt(this.hours, 10); // Convert the string to an integer
+        const total = pricePerHour * intValue;
+        const totalWithTwoDecimals = total.toFixed(2); // Limited to two decimal places
+        return this.convertCurrencyUnits(parseFloat(totalWithTwoDecimals), this.selectedCurrency);
+      }
+      return '';
+    }
+  }
+
   /* Getter methods to check if the inputs of the checkoutForm are valid */
   get durationErrors(): string | null {
     const control = this.checkoutForm.get('duration');
@@ -198,6 +217,38 @@ export class BookingComponent implements OnInit{
       str = value.toString() + ' €';
     }
     return str;
+  }
+
+  /* if plus button is clicked */
+  handlePlusClick(): void {
+    console.log('Plus-Button wurde geklickt!');
+    // Check whether the string contains only numbers
+    if (/^\d+$/.test(this.hours)) {
+      const intValue = parseInt(this.hours, 10); // Convert the string to an integer
+      const newValue = intValue + 1; // add +1
+      if (newValue <= 48){
+        this.hours = newValue.toString(); // Convert the integer back into a string
+      }
+      else {
+        this.hours = '48';
+      }
+    }
+  }
+  
+  /* if minus button is clicked */
+  handleMinusClick():void {
+    console.log('Minus-Button wurde geklickt!');
+    // Check whether the string contains only numbers
+    if (/^\d+$/.test(this.hours)) {
+      const intValue = parseInt(this.hours, 10); // Convert the string to an integer
+      const newValue = intValue - 1; // subtract -1
+      if (newValue >= 1){
+        this.hours = newValue.toString(); // Convert the integer back into a string
+      }
+      else {
+        this.hours = '1';
+      }
+    }
   }
 
   onSubmit(): void {
