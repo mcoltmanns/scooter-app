@@ -4,72 +4,111 @@ import { BackButtonComponent } from 'src/app/components/back-button/back-button.
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { SampleService } from 'src/app/services/sample.service';
 import { ActivatedRoute } from '@angular/router';
+import { ButtonComponent } from 'src/app/components/button/button.component';
+import { PDFDocument, rgb, StandardFonts, PageSizes } from 'pdf-lib';
 
 @Component({
   standalone: true,
   selector: 'app-todo',
-  imports: [BackButtonComponent, UserInputComponent, CommonModule],
+  imports: [BackButtonComponent, UserInputComponent, CommonModule, ButtonComponent],
   templateUrl: './todo.component.html',
   styleUrls: ['./todo.component.css'],
 })
 export class TodoComponent implements OnInit {
-  /**
-   *  Damit der Text in der HTML Komponente bereitsteht, legen wir den Text als 'public' fest.
-   */
-  public text = 'Dieser Text wird zwischen zwei Komponenten synchronisiert!';
-
-  /**
-   *  Hier definieren wir ein Array von Objekten für Links. Damit das HTML Template (landingpage.component.html)
-   *  auch Zugriff auf dieses Attribut hat, deklarieren wir es als public. Der Typ dieses Attributs definieren wir
-   *  als Array [] von Objekten {}, die einen "name" String und einen "url" String haben.
-   */
-  public links: { name: string; url: string }[] = [
-    {
-      name: 'Overview: HTML',
-      url: 'https://developer.mozilla.org/en-US/docs/Learn/HTML',
-    },
-    {
-      name: 'Overview: CSS',
-      url: 'https://developer.mozilla.org/en-US/docs/Learn/CSS',
-    },
-    {
-      name: 'Overview: JavaScript',
-      url: 'https://developer.mozilla.org/en-US/docs/Learn/JavaScript',
-    },
-    {
-      name: 'Getting Started with Typescript',
-      url: 'https://www.typescriptlang.org/docs/',
-    },
-    { name: 'Angular Homepage', url: 'https://angular.io/' },
-    { name: 'Angular Documentation', url: 'https://angular.io/docs' },
-    { name: 'Learn Angular', url: 'https://angular.io/tutorial' },
-    { name: 'UI Komponenten', url: 'https://primeng.org/' },
-  ];
-
-  /**
-   *  Wie bei den Services wird auch in den Komponenten der Konstruktor über Angular aufgerufen.
-   *  D.h. wir können hier verschiedene Services spezifizieren, auf die wir Zugriff haben möchten, welche
-   *  automatisch durch "Dependency injection" hier instanziiert werden.
-   */
   constructor(public sampleService: SampleService, private route: ActivatedRoute) {}
 
-  /**
-   *  Da unsere Komponente das "OnInit" Interface implementiert müssen wir eine "ngOnInit" Methhode implementieren.
-   *  Diese Methode wird aufgerufen, sobald der HTML code dieser Komponente instanziiert und aufgebaut wurde
-   *  (quasi wie ein zweiter Constructor, der von Angular automatisch aufgerufen wird).
-   *  Weiterführende Infos gibt es hier: https://angular.io/guide/lifecycle-hooks
-   */
   ngOnInit(): void {
     // TESTEN OB DIE ÜBERGABE MIT DEN PARAMETERN KLAPPT
-    this.route.queryParams.subscribe(params => {
-      const scooterId = params['id'];
-      const name = params['name'];
-      const description_html = params['description_html'];
-      const image = params['image'];
-      console.log('Received scooterId:', scooterId);
-      console.log(name);
-      console.log(description_html);
-      console.log(image);
+  }
+
+  async onSubmit(): Promise<void> {
+    console.log('button clicked');
+    /*
+    try {
+      const editedPdfBytes = await this.editPdf();
+      this.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
+      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
+    } catch (error) {
+      console.error('Error editing PDF:', error);
+    }
+    */
+  }
+
+  async editPdf(): Promise<Uint8Array> {
+    // Lade die vorhandene PDF-Datei (hier als ArrayBuffer)
+    const existingPdfBytes = await fetch('/assets/test.pdf').then(res => res.arrayBuffer());
+
+    // Lade das PDF-Dokument
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+    // Erstelle eine Seite (füge Inhalte zur ersten Seite hinzu)
+    let [firstPage] = pdfDoc.getPages();
+    const { height } = firstPage.getSize();
+
+    // Schriftarten hinzufügen
+    const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+
+    // Rechnungsdetails hinzufügen
+    const fontSize = 12;
+    const textYPosition = height - 100;
+    const lineHeight = fontSize + 4;
+    const items = [
+      { description: 'Scooter Model A', quantity: 1, price: 300 },
+      { description: 'Helmet', quantity: 1, price: 50 },
+      { description: 'Service Fee', quantity: 1, price: 20 },
+    ];
+
+    let currentYPosition = textYPosition;
+
+    items.forEach(item => {
+      // Überprüfe, ob der Text auf die aktuelle Seite passt
+      if (currentYPosition - lineHeight < 50) {
+        // Wenn nicht, füge eine neue Seite hinzu
+        const newPage = pdfDoc.addPage(PageSizes.A4);
+        firstPage = newPage;
+        currentYPosition = height - 50;
+      }
+
+      firstPage.drawText(`${item.description} - ${item.quantity} x $${item.price}`, {
+        x: 50,
+        y: currentYPosition,
+        size: fontSize,
+        font: timesRomanFont,
+        color: rgb(0, 0, 0),
+      });
+      currentYPosition -= lineHeight;
     });
+
+    currentYPosition -= lineHeight * 150;
+    // Gesamtpreis berechnen und anzeigen
+    const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0);
+
+    // Überprüfe erneut, ob der "Total" Text auf die aktuelle Seite passt
+    if (currentYPosition - lineHeight < 50) {
+      // Wenn nicht, füge eine neue Seite hinzu
+      const newPage = pdfDoc.addPage(PageSizes.A4);
+      firstPage = newPage;
+      currentYPosition = height - 50;
+    }
+
+    firstPage.drawText(`Total: $${totalPrice}`, {
+      x: 50,
+      y: currentYPosition - lineHeight,
+      size: fontSize,
+      font: timesRomanFont,
+      color: rgb(0, 0, 0),
+    });
+
+    // Speichere die bearbeitete PDF-Datei
+    return await pdfDoc.save();
+  }
+
+  download(bytes: Uint8Array, filename: string): void {
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
   }
 }

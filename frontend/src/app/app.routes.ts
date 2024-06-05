@@ -13,7 +13,7 @@ import { AddPaymentComponent } from './pages/add-payment/add-payment.component';
 import { AddswpsafeComponent } from './pages/add-swpsafe/add-swpsafe.component';
 import { AddhcipalComponent } from './pages/add-hcipal/add-hcipal.component';
 import { AddbachelorcardComponent } from './pages/add-bachelorcard/add-bachelorcard.component';
-import { ScooterComponent } from './pages/scooter/scooter.component';
+//import { ScooterComponent } from './pages/scooter/scooter.component';
 import { OptionsComponent } from './pages/options/options.component';
 import { RentalsComponent } from './pages/rentals/rentals.component';
 import { TodoComponent } from './pages/todo/todo.component';
@@ -77,7 +77,7 @@ export const routes: Routes = [
   // Durch 'canActive' können wir festlegen, ob eine Route aktiviert werden kann - z.B. können wir
   // die Route sperren, falls der Benutzer nicht eingeloggt ist.
   { path: 'search', component: MapComponent, canActivate: [loginGuard] },
-  { path: 'scooter/:id', component: ScooterComponent, canActivate: [loginGuard] },
+  { path: 'scooter/:id', component: TodoComponent, canActivate: [loginGuard] },
   { path: 'booking', component: RentalsComponent, canActivate: [loginGuard] },
   { path: 'search/checkout/:id', component: TodoComponent, canActivate: [loginGuard] },
 
