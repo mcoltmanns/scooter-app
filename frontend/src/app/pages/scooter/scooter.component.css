@@ -39,7 +39,7 @@ hr.solid {
     line-height: 21px; /* 131.25% */
     letter-spacing: -0.32px;
     margin: 10px;
-    margin-bottom: 180px;
+    margin-bottom: 30px;
     margin-top: 40px;
 }
 
@@ -112,3 +112,21 @@ hr.solid {
     margin-right: 0%;
     margin-left: auto;
 }
+
+.map {
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+    height: 300px;
+    padding: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.scrollable-container {
+    max-height: 80vh; /* 80% of the screen height */
+    overflow-y: auto; /* Activate vertical scrolling */
+}
+

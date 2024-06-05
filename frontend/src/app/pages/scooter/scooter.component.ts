@@ -1,17 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Product } from 'src/app/models/product';
 import { MapService } from 'src/app/services/map.service';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { Scooter } from 'src/app/models/scooter';
+import * as Leaflet from 'leaflet';
 
+const defaultIcon = Leaflet.icon({
+  iconSize: [40, 40],
+  iconUrl: '/assets/marker.png',
+});
 
 @Component({
   selector: 'app-scooter',
   standalone: true,
-  imports: [ButtonComponent, BackButtonComponent, CommonModule],
+  imports: [ButtonComponent, BackButtonComponent, CommonModule, LeafletModule],
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })
@@ -21,6 +27,23 @@ export class ScooterComponent implements OnInit {
   public errorMessage = '';
   public product: Product | null = null;
   public scooter: Scooter | null = null;
+
+  options: Leaflet.MapOptions = {
+    layers: [
+      new Leaflet.TileLayer(
+        'http://konstrates.uni-konstanz.de:8080/tile/{z}/{x}/{y}.png',
+      ),
+    ],
+    zoom: 16,
+    attributionControl: false,
+  };
+  
+  public center = new Leaflet.LatLng(0, 0);
+
+  layers: Leaflet.Layer[] = [];
+
+
+
 
   ngOnInit(): void {
     // read the last number from the url:
@@ -35,6 +58,9 @@ export class ScooterComponent implements OnInit {
         this.scooter = value;
         console.log('Scooter information:', this.scooter);
         //console.log(this.scooter.battery);
+        const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
+        this.layers.push(marker); 
+        this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
       },
       error: (err) => {
         this.errorMessage = err.error.message;

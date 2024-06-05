@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, NgZone } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
  
 
@@ -37,7 +37,7 @@ export class MapComponent implements OnInit {
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
 
-  public constructor(private mapService: MapService, private router: Router) {}
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
@@ -74,7 +74,8 @@ export class MapComponent implements OnInit {
   }
 
   buttonToScooter(scooterId: number): void {
-    this.router.navigate(['/scooter', scooterId]);
+    this.ngZone.run(() => this.router.navigate(['/scooter', scooterId]));
+    //this.router.navigate(['/scooter', scooterId]);
     
   }
 
@@ -108,7 +109,7 @@ export class MapComponent implements OnInit {
       }
     });
 
-    for (const layer of this.layers) {
+    /*for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
       // auch direkt in Typescript hinzugefügt werden
       layer.on('click', (e: Leaflet.LeafletMouseEvent) => {
@@ -120,7 +121,7 @@ export class MapComponent implements OnInit {
         // was die Entwicklung erleichtern kann
         console.log(e);
       });
-    }
+    }*/
   }
 
   toggleListView(): void {

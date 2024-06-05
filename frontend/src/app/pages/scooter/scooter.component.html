@@ -1,10 +1,10 @@
-<h1 class="title logo" style="font-size: 25px; margin: 22px;">{{ product?.name}}</h1>
+<h1 class="title logo" style="font-size: 25px; margin-bottom: 22px; margin-top: 20px;">{{this.product?.name}}</h1>
 <app-back-button></app-back-button>
-<div class="scrollable-container" style="padding: 0;">
+<div class="scrollable-container" style="padding-left: 0; padding-right: 0; padding-bottom: 10; padding-top: 10; position: relative;">
     
 
     <div class="box" style="display: flex;">
-        <img class="picture" src="http://localhost:8000/img/products/{{ product?.name}}.jpg" >
+    <img class="picture" src="http://localhost:8000/img/products/{{ product?.name}}.jpg" >
     <div class="information-block" *ngIf="scooter !== null && product !==null">
         <div class="content-block">
             <p class="primary-text">{{ roundUpBattery(scooter.battery) }}%</p>
@@ -37,8 +37,20 @@
             Scooter buchen
         </app-button>        
     </div>
-
+    <div style="padding: 15px;">
     <hr class="solid">
 
     <div class="description" innerHTML="{{product?.description_html}}"> Beschreibung</div>
-</div>
+
+    <hr class="solid">
+    
+    <h2 style="margin-left: 10px;">Standort</h2>
+
+    <div class = "map"
+    leaflet 
+    [leafletOptions]="options"
+    [(leafletCenter)]="center"
+    [leafletLayers]="layers">
+    </div>
+    </div>
+    </div>
