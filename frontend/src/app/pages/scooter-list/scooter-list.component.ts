@@ -38,7 +38,6 @@ export class ScooterListComponent implements OnInit, OnChanges {
         this.scooters = value;
         this.loadingData = false;
         this.filterScooters();
-        console.log(this.scooters);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -142,7 +141,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
     let str = '';
     if(unit === '$'){
       value = UnitConverter.convertCurrency(value, unit, '$');
-      str = value.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
+      str = value.toFixed(2) + ' $/H'; // toFixed(2) only shows the last two decimal place
     }
     else{
       str = value.toString() + ' €/H';
