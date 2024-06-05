@@ -1,7 +1,10 @@
 <div class="add-container" [style]="style ? style : null">
   <div class="add" (click)="onClickAdd()">
     <div class="text">
-        Neue Zahlungsmethode hinzufügen 
+      <div #content><ng-content></ng-content></div>
+      <ng-container *ngIf="!content.hasChildNodes()">
+        Hinzufügen
+      </ng-container>
     </div>
     <div class="plus">
       <svg class="svg1" xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 23 23" fill="none">

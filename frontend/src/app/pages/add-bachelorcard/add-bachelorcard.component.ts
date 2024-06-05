@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -47,7 +47,8 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
     private router: Router,
     private fb: FormBuilder,
     private renderer: Renderer2,
-    private el: ElementRef
+    private el: ElementRef,
+    private route: ActivatedRoute
   ) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.bachelorcardForm = this.fb.group({
@@ -200,6 +201,14 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
       next: () => {
         this.errorMessage = '';
         this.isLoading = false;
+
+        /* Check if the originState object exists and navigate back to the origin path */
+        if (history.state.originState && history.state.originState.path) {
+          const statePayload = { originState: history.state.originState, addedPayment: true };
+          this.router.navigate([history.state.originState.path], { state: statePayload });
+          return;
+        }
+        /* Navigate back to the payment page as default */
         this.router.navigateByUrl('settings/payment', { state: { addedPayment: true } });
       },
       error: (err) => {
@@ -210,7 +219,23 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
     });
   }
 
+  onNavigate(relativePath: string): void {
+    /* Pass the originState object to the next route if it exists */
+    const originState = history.state.originState ? { originState: history.state.originState } : {};
+    this.router.navigate([relativePath], { 
+      relativeTo: this.route,
+      state: originState
+    });
+  }
+
   onCancel(): void {
+    /* Check if the originState object exists and navigate back to the origin path */
+    if (history.state.originState && history.state.originState.path) {
+      const originState = { originState: history.state.originState };
+      this.router.navigate([history.state.originState.path], { state: originState });
+      return;
+    }
+    /* Navigate back to the payment page as default */
     this.router.navigate(['settings/payment']);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { Product } from 'src/app/models/product';
 import { Scooter } from 'src/app/models/scooter';
@@ -15,15 +15,21 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { PaymentMethodCardComponent } from 'src/app/components/payment-method-card/payment-method-card.component';
 import { AddButtonComponent } from 'src/app/components/add-button/add-button.component';
+import { Router } from '@angular/router';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent],
+  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
-export class BookingComponent implements OnInit{
+export class BookingComponent implements OnInit, AfterViewInit {
+  /* Manage the state of the success toast */
+  @ViewChild('toastComponent') toastComponent!: ToastComponent; // Get references to the toast component
+  public showToast = false;
+
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public checkoutForm!: FormGroup;
 
@@ -41,7 +47,7 @@ export class BookingComponent implements OnInit{
   public selectedCurrency = '';
   public option: Option | null = null;
 
-  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService) {
+  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService, private router: Router) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.checkoutForm = this.fb.group({
       duration: ['5', [Validators.required, CustomValidators.inInterval(1, 48) ]],
@@ -50,6 +56,17 @@ export class BookingComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    /* Set the duration state if it was passed from the previous page */
+    if (history.state.originState && history.state.originState.duration) {
+      this.checkoutForm.get('duration')!.setValue(history.state.originState.duration);
+    }
+
+    /* If a payment method was added show the success toast */
+    if(history.state.addedPayment) {
+      this.showToast = true;
+    }
+    history.replaceState({}, '');   // Clear the router state to prevent the toast from showing again and also get rid of the originState on reload
+
     // read the last number from the url:
     const currentPath = window.location.pathname;
     const parts = currentPath.split('/');
@@ -101,16 +118,24 @@ export class BookingComponent implements OnInit{
             this.paymentMethods = payopt.body;
             this.paymentsStatus = null;
 
-            /* Optionally select the first payment method as default */
-            // if(this.paymentMethods.length > 0) {
-            //   this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id);
-            // }
+            /* If only one payment method is available, select it by default */
+            if(this.paymentMethods.length === 1) {
+              this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id);
+            }
         },
         error: (err) => {
             console.error(err);
             this.paymentsStatus = 'Fehler beim Laden der Zahlungsmethoden!';
         }
     });
+  }
+
+  ngAfterViewInit(): void {
+    /* Show the toast after the view has been initialized */
+    if(this.showToast) {
+      this.toastComponent.showToast();
+      this.showToast = false; // Reset the state to prevent the toast from showing again
+    }
   }
 
   /* Get Picture from the product list*/
@@ -247,6 +272,12 @@ export class BookingComponent implements OnInit{
         this.checkoutForm.get('duration')!.setValue('1');
       }
     }
+  }
+
+  onClickAddPaymentMethod(): void {
+    const redirectUrl = `search/checkout/${this.scooter?.id}`;
+    const currentDuration = this.checkoutForm.get('duration')!.value;
+    this.router.navigateByUrl('settings/payment/add', { state: { originState: { path: redirectUrl, duration: currentDuration } } });
   }
 
   onSubmit(): void {

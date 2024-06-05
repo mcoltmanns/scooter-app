@@ -1,3 +1,5 @@
+<app-toast #toastComponent [showDuration]=2500 type="success">Zahlungsmethode hinzugefügt!</app-toast>
+
 <div *ngIf="product && scooter && option" class="page-container">
     <app-back-button></app-back-button>
     <h1 class="title">Scooter buchen</h1>
@@ -88,7 +90,7 @@
           
           <ng-template #paymentMethodsCheck>
             <ng-container *ngIf="paymentMethods.length === 0; else paymentEntries">
-              <div>No payment methods available.</div>
+              <app-add-button [clickAdd]="onClickAddPaymentMethod.bind(this)">Neue Zahlungsmethode hinzufügen</app-add-button>
             </ng-container>
           </ng-template>
   

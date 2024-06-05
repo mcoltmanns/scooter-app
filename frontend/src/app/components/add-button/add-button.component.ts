@@ -1,10 +1,11 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-add-button',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './add-button.component.html',
   styleUrls: ['./add-button.component.css'],
 })

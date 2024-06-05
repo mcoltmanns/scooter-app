@@ -39,7 +39,7 @@ export class PaymentComponent implements AfterViewInit, OnInit {
     /* Show the toast after the view has been initialized */
     if(this.showToast) {
       this.toastComponent.showToast();
-      this.showToast = false;
+      this.showToast = false; // Reset the state to prevent the toast from showing again
     }
   }
 

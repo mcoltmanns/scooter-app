@@ -181,6 +181,10 @@
   text-align: left;
 }
 
+app-add-button {
+  width: 100%;
+}
+
 .payment-method {
   display: relative;
   width: 100%;
