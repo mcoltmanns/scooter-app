@@ -18,6 +18,10 @@ input {
   padding: 7px;
 }
 
+.center {
+  text-align: center;
+}
+
 /* Remove outline when input is selected */
 input:focus {
   outline: none;

@@ -1,4 +1,4 @@
 <div class="container" [class.disabled]="disabled">
   <p class="label" *ngIf="label">{{ label }}</p>
-  <input ngDefaultControl [type]="type" [(ngModel)]="text" (ngModelChange)="onChange($event)" (ngModelChange)="onTextChange()" (blur)="onTouched()" (blur)="onBlur()" [disabled]="disabled"/> <!-- disables interaction with user input field -->
+  <input ngDefaultControl [ngClass]="{'center': center}" [type]="type" [(ngModel)]="text" (ngModelChange)="onChange($event)" (ngModelChange)="onTextChange()" (blur)="onTouched()" (blur)="onBlur()" [disabled]="disabled"/> <!-- disables interaction with user input field -->
 </div>

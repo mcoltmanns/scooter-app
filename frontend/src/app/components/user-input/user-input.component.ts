@@ -103,6 +103,8 @@ export class UserInputComponent implements ControlValueAccessor {
 
   @Input() disabled = false; // disables interaction with user input field property
 
+  @Input() center = false; // centers the user input field content property
+
   onTextChange(): void {
     this.textChange.emit(this.text);
   }
