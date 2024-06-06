@@ -17,6 +17,7 @@ import { ScooterComponent } from './pages/scooter/scooter.component';
 import { OptionsComponent } from './pages/options/options.component';
 import { RentalsComponent } from './pages/rentals/rentals.component';
 import { BookingComponent } from './pages/booking/booking.component';
+import { CheckoutSuccessComponent } from './pages/checkout-success/checkout-success.component';
 
 /**
  *  Hier definieren wir eine Funktion, die wir später (Zeile 43ff) dem Router übergeben.
@@ -79,6 +80,7 @@ export const routes: Routes = [
   { path: 'search', component: MapComponent, canActivate: [loginGuard] },
   { path: 'scooter/:id', component: ScooterComponent, canActivate: [loginGuard] },
   { path: 'booking', component: RentalsComponent, canActivate: [loginGuard] },
+  { path: 'search/checkout/success', component: CheckoutSuccessComponent, canActivate: [loginGuard] },
   { path: 'search/checkout/:id', component: BookingComponent, canActivate: [loginGuard] },
 
   // Routen können auch geschachtelt werden, indem der "Child" Eigenschaft der

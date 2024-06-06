@@ -9,6 +9,7 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PaymentService } from 'src/app/services/payment.service';
+import { BookingService } from 'src/app/services/booking.service';
 import { PaymentOptions } from 'src/app/models/payment';
 import { CustomValidators } from 'src/app/validators/custom-validators';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
@@ -17,21 +18,28 @@ import { PaymentMethodCardComponent } from 'src/app/components/payment-method-ca
 import { AddButtonComponent } from 'src/app/components/add-button/add-button.component';
 import { Router } from '@angular/router';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { HttpErrorResponse } from '@angular/common/http';
+import { CheckoutObject } from 'src/app/models/booking';
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent],
+  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent, LoadingOverlayComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
 export class BookingComponent implements OnInit, AfterViewInit {
   /* Manage the state of the success toast */
-  @ViewChild('toastComponent') toastComponent!: ToastComponent; // Get references to the toast component
-  public showToast = false;
+  @ViewChild('toastComponentPaymentAdded') toastComponentPaymentAdded!: ToastComponent; // Get references to the toast component
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
+  public showPaymentAddedToast = false;
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public checkoutForm!: FormGroup;
+
+  /* Variable to control the state of the loading overlay */
+  public isLoading = false;
 
   /* Manage payment methods and the state of laoding the payment methods */
   public paymentMethods: PaymentOptions[] = [];
@@ -47,7 +55,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
   public selectedCurrency = '';
   public option: Option | null = null;
 
-  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService, private router: Router) {
+  public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService, private router: Router, private bookingService: BookingService) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.checkoutForm = this.fb.group({
       duration: ['5', [Validators.required, CustomValidators.inInterval(1, 48) ]],
@@ -63,7 +71,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
     /* If a payment method was added show the success toast */
     if(history.state.addedPayment) {
-      this.showToast = true;
+      this.showPaymentAddedToast = true;
     }
     history.replaceState({}, '');   // Clear the router state to prevent the toast from showing again and also get rid of the originState on reload
 
@@ -132,9 +140,9 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     /* Show the toast after the view has been initialized */
-    if(this.showToast) {
-      this.toastComponent.showToast();
-      this.showToast = false; // Reset the state to prevent the toast from showing again
+    if(this.showPaymentAddedToast) {
+      this.toastComponentPaymentAdded.showToast();
+      this.showPaymentAddedToast = false; // Reset the state to prevent the toast from showing again
     }
   }
 
@@ -186,7 +194,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
       return null;
     }
     if (control.errors['required']) {
-      return 'Bitte eine Zahlungsmethode auswählen.';
+      return typeof control.errors['required'] === 'string' ? control.errors['required'] : 'Bitte eine Zahlungsmethode auswählen.';
     }
     return null;
   }
@@ -280,6 +288,49 @@ export class BookingComponent implements OnInit, AfterViewInit {
     this.router.navigateByUrl('settings/payment/add', { state: { originState: { path: redirectUrl, duration: currentDuration } } });
   }
 
+  /* Reset all error variables to empty strings */
+  resetErrorMessages(): void {
+    this.checkoutForm.get('duration')!.setErrors(null);
+    this.checkoutForm.get('radioButtonChoice')!.setErrors(null);
+  }
+
+  /* Set an error in the respective input form control of this form if the backend
+  * returns a validation error for that input field to visually mark the input field as invalid.
+  * Additionally assign the error messages to the respective error message variables. */
+  assignErrorMessage(validationErrors: CheckoutObject): void {
+    if (validationErrors.duration) {
+      this.checkoutForm.get('duration')!.setErrors({ 'inInterval': validationErrors.duration });
+    }
+    if (validationErrors.paymentMethodId) {
+      this.checkoutForm.get('radioButtonChoice')!.setErrors({ 'required': validationErrors.paymentMethodId });
+    }
+    if(validationErrors.scooterId) {
+      this.errorMessage = validationErrors.scooterId as string;
+      this.toastComponentError.showToast();
+    }
+  }
+
+  /* Method to handle possible backend errors, especially validation errors that the frontend validation does not catch */
+  handleBackendError(err: HttpErrorResponse): void {
+    this.errorMessage = err.error.message;
+
+    /* Assigns all backend errors to the respective variables */
+    if ((err.status === 400 || err.status === 401) && err.error.validationErrors) {
+      const validationErrors = err.error.validationErrors;
+
+      /* Reset all error messages before assigning the new ones that came from the backend */
+      this.resetErrorMessages();
+
+      /* Assign the error messages to the respective invalid input fields */
+      this.assignErrorMessage(validationErrors);
+    } else {
+      if (!this.errorMessage) {
+        this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      }
+      this.toastComponentError.showToast();
+    }
+  }
+
   onSubmit(): void {
     /* Check if the overall form is valid */
     if (!this.checkoutForm.valid) {
@@ -288,13 +339,27 @@ export class BookingComponent implements OnInit, AfterViewInit {
     }
 
     const finalForm = {
-      scooterId: this.scooter?.id,
+      scooterId: this.scooter!.id,
       duration: Number(this.checkoutForm.value.duration),
-      paymentMethodId: this.checkoutForm.value.radioButtonChoice
+      paymentMethodId: this.checkoutForm.value.radioButtonChoice ? Number(this.checkoutForm.value.radioButtonChoice) : undefined
     };
 
-    /* Send the login request to the backend */
-    console.log(finalForm);
+    /* Send the form data to the backend */
+    this.isLoading = true;
+    this.bookingService.postCheckout(finalForm).subscribe({
+      next: () => {
+        this.errorMessage = '';
+        this.isLoading = false;
+
+        /* Navigate to the success page */
+        this.router.navigateByUrl('search/checkout/success');
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.handleBackendError(err);
+        console.error(err);
+      }
+    });
   }
 
   onCancel(): void {

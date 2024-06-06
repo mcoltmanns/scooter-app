@@ -1,4 +1,7 @@
-<app-toast #toastComponent [showDuration]=2500 type="success">Zahlungsmethode hinzugefügt!</app-toast>
+<app-loading-overlay [isLoading]="isLoading"></app-loading-overlay>
+
+<app-toast #toastComponentPaymentAdded [showDuration]=2500 type="success">Zahlungsmethode hinzugefügt!</app-toast>
+<app-toast #toastComponentError [showDuration]=2500 type="error">{{errorMessage}}</app-toast>
 
 <div *ngIf="product && scooter && option" class="page-container">
     <app-back-button></app-back-button>
@@ -106,6 +109,8 @@
           <div *ngIf="radioButtonErrors" class="error" style="margin-top:10px; text-align: center;">{{ radioButtonErrors }}</div>
   
           <div class="bottom">
+            <div style="text-align: center;" class="error">{{errorMessage}}</div>
+
             <app-button class="btn" type="submit" [disabled]="checkoutForm.invalid">
               Buchung bestätigen
             </app-button>
