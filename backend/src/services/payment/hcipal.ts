@@ -16,6 +16,9 @@ abstract class HciPal {
             post('https://pass.hci.uni-konstanz.de/hcipal/country', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), 'country'));
+            })
+            .catch((error) => {
+                resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
     }
@@ -26,6 +29,9 @@ abstract class HciPal {
             post('https://pass.hci.uni-konstanz.de/hcipal/check', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), 'token'));
+            })
+            .catch((error) => {
+                resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
     }
@@ -36,6 +42,9 @@ abstract class HciPal {
             post('https://pass.hci.uni-konstanz.de/hcipal/payment', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), ''));
+            })
+            .catch((error) => {
+                resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
     }
@@ -46,6 +55,9 @@ abstract class HciPal {
             post('https://pass.hci.uni-konstanz.de/hcipal/payback', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), ''));
+            })
+            .catch((error) => {
+                resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
     }
