@@ -9,3 +9,11 @@ export interface ResObjAllPaymentOptions {
   code: number,
   body: PaymentOptions[]
 }
+
+export interface ResponseMessageCheckout {
+  code: number;
+  message: string;
+  booking?: {
+    endedAt?: string;
+  }
+}

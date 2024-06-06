@@ -347,12 +347,14 @@ export class BookingComponent implements OnInit, AfterViewInit {
     /* Send the form data to the backend */
     this.isLoading = true;
     this.bookingService.postCheckout(finalForm).subscribe({
-      next: () => {
+      next: (response) => {
         this.errorMessage = '';
         this.isLoading = false;
 
         /* Navigate to the success page */
-        this.router.navigateByUrl('search/checkout/success');
+        this.router.navigateByUrl('search/checkout/success', { 
+          state: { booking: response.booking }
+        });
       },
       error: (err) => {
         this.isLoading = false;

@@ -167,7 +167,7 @@ export class CheckoutController {
       return;
     }
 
-    response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!'});
+    response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: { endTimestamp: newRental.endedAt } });
     return;
   }
 }
