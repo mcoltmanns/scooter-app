@@ -84,7 +84,7 @@ export class ScooterListComponent implements OnInit, OnChanges {
 
   /* Function for the green button */
   buttonToScooter(scooterId: number): void {
-    this.router.navigate(['/scooter', scooterId]);
+    this.router.navigate(['/search/scooter', scooterId]);
   }
 
   /* Function that rounds up Battery */

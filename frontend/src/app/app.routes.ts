@@ -77,7 +77,7 @@ export const routes: Routes = [
   // Durch 'canActive' können wir festlegen, ob eine Route aktiviert werden kann - z.B. können wir
   // die Route sperren, falls der Benutzer nicht eingeloggt ist.
   { path: 'search', component: MapComponent, canActivate: [loginGuard] },
-  { path: 'scooter/:id', component: ScooterComponent, canActivate: [loginGuard] },
+  { path: 'search/scooter/:id', component: ScooterComponent, canActivate: [loginGuard] },
   { path: 'booking', component: RentalsComponent, canActivate: [loginGuard] },
   { path: 'search/checkout/:id', component: TodoComponent, canActivate: [loginGuard] },
 
