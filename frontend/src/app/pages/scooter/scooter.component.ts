@@ -1,26 +1,54 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Product } from 'src/app/models/product';
 import { MapService } from 'src/app/services/map.service';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { Scooter } from 'src/app/models/scooter';
+import * as Leaflet from 'leaflet';
+import { OptionService } from 'src/app/services/option.service';
+import { Option } from 'src/app/models/option';
+import { UnitConverter } from 'src/app/utils/unit-converter';
 
+const defaultIcon = Leaflet.icon({
+  iconSize: [40, 40],
+  iconUrl: '/assets/marker.png',
+});
 
 @Component({
   selector: 'app-scooter',
   standalone: true,
-  imports: [ButtonComponent, BackButtonComponent, CommonModule],
+  imports: [ButtonComponent, BackButtonComponent, CommonModule, LeafletModule],
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })
 export class ScooterComponent implements OnInit {
-  public constructor(private mapService: MapService, private router: Router) {}
+  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
 
   public errorMessage = '';
   public product: Product | null = null;
   public scooter: Scooter | null = null;
+  // User Units variables
+  public selectedSpeed = ''; 
+  public selectedDistance = '';
+  public selectedCurrency = '';
+  public option: Option | null = null;
+
+  options: Leaflet.MapOptions = {
+    layers: [
+      new Leaflet.TileLayer(
+        'http://konstrates.uni-konstanz.de:8080/tile/{z}/{x}/{y}.png',
+      ),
+    ],
+    zoom: 16,
+    attributionControl: false,
+  };
+  
+  public center = new Leaflet.LatLng(0, 0);
+
+  layers: Leaflet.Layer[] = [];
 
   ngOnInit(): void {
     // read the last number from the url:
@@ -35,6 +63,9 @@ export class ScooterComponent implements OnInit {
         this.scooter = value;
         console.log('Scooter information:', this.scooter);
         //console.log(this.scooter.battery);
+        const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
+        this.layers.push(marker); 
+        this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -46,12 +77,23 @@ export class ScooterComponent implements OnInit {
     this.mapService.getSingleProductInfo(scooterId).subscribe({
       next: (value) => {
         this.product = value;
-        console.log('Product information:', this.product);
-        console.log('HTML Discription:', this.product.description_html);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
         console.log(err);
+      }
+    });
+
+    this.optionService.getUserPreferences().subscribe({
+      next: (value) => {
+        this.option = value;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+      },
+      error: (err) => {
+        this.errorMessage = err.message;
+        console.error(err);
       }
     });
   }
@@ -65,12 +107,68 @@ export class ScooterComponent implements OnInit {
   }
 
   // Method to calculate the range of the scooter
-  calcRange(battery: number, max_reach: number): number {
-    return Math.ceil(battery / 100 * max_reach);
+  calcRange(battery: number | undefined, max_reach: number | undefined): number {
+    if(battery === undefined || max_reach === undefined){
+      return 0;
+    }
+    else{
+      return Math.ceil(battery / 100 * max_reach);
+    }
   }
 
   /* Function that rounds up Battery */
   roundUpBattery(battery: number): number {
     return Math.ceil(battery);
+  }
+
+  /* Converts the distances */
+  convertDistanceUnits(value: number | undefined, unit: string | undefined): string {
+    if(unit === undefined ||value === undefined){
+      return 'error';
+    }
+
+    let str = '';
+    if(unit === 'mi'){
+      value = UnitConverter.convertDistance(value, 'km', unit);
+      str = value.toFixed(0) + ' mi'; // toFixed(0) shows no decimal places
+    } 
+    else{
+      str = value.toString() + ' km';
+    }
+    return str;
+  }
+
+  /* converts the speeds */
+  convertSpeedUnits(value: number | undefined, unit: string |undefined): string {
+    if(unit === undefined ||value === undefined){
+      return 'error';
+    }
+
+    let str = '';
+    if(unit === 'mp/h'){
+      value = UnitConverter.convertSpeed(value, 'km/h', unit);
+      str = value.toFixed(1) + ' mp/h'; // toFixed(1) only shows the last decimal place
+    }
+    else{
+      str = value.toString() + ' km/h';
+    }
+    return str;
+  }
+
+  /* Convert the currencies */
+  convertCurrencyUnits(value: number, unit: string |undefined): string {
+    if(unit === undefined){
+      return 'error';
+    }
+
+    let str = '';
+    if(unit === '$'){
+      value = UnitConverter.convertCurrency(value, unit, '$');
+      str = value.toFixed(2) + ' $/h'; // toFixed(2) only shows the last two decimal place
+    }
+    else{
+      str = value.toString() + ' €/h';
+    }
+    return str;
   }
 }

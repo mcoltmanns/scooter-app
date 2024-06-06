@@ -1,3 +1,12 @@
+.header {
+    width: 100%;
+    height: 111px;
+    background-color: #26627C;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .bottom {
     display: flex;
     flex-direction: column;
@@ -9,12 +18,26 @@
     margin-bottom: 40px;
 }
 
-  .error {
+.productName {
+    margin: 0;
+    font-family: 'Racing Sans One';
+    font-size: 25px;
+    font-weight: 400;
+    letter-spacing: -0.32px;
+    justify-content: center;
+    text-align: center;
+    word-wrap: break-word;
+    max-width: 70%;
+    width: 100%;
+    line-height: 1.2;
+}
+
+.error {
     color: rgb(226, 27, 27);
 }
 
 .scooterBook-btn {
-    width: 80%;
+    width: 50%;
     min-width: min-content;
 }
 
@@ -29,18 +52,19 @@
 
 hr.solid {
     border-top: 2px solid #97FB64;
-  }
+}
 
 .description {
     font-family: Roboto;
     font-size: 16px;
     font-style: normal;
     font-weight: 300;
-    line-height: 21px; /* 131.25% */
     letter-spacing: -0.32px;
-    margin: 10px;
-    margin-bottom: 180px;
-    margin-top: 40px;
+    line-height: 35px;
+    margin-bottom: 30px;
+    padding-top: 40px;
+    padding-left: 15px;
+    padding-right: 15px;
 }
 
 .box {
@@ -52,38 +76,32 @@ hr.solid {
     padding: 0;
 }
 
-.content-block {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 12px;
-    margin-left: 8px;
-}
-
 .secondary-text {
     color: var(--Textfeld-Stroke, #000);
     font-family: Roboto;
-    font-size: 14px;
+    font-size: 15px;
     font-style: italic;
     font-weight: 100;
-    line-height: 20px; /* 142.857% */
+    line-height: 21px; /* 142.857% */
     letter-spacing: 0.25px;
+    margin-top: 17px;
 }
 
 .primary-text {
     color: #000;
     font-family: "Racing Sans One";
-    font-size: 18px;
+    font-size: 17px;
     font-style: normal;
     font-weight: 400;
     line-height: 21px; /* 116.667% */
     letter-spacing: -0.32px;
     text-align: center;
+    line-height: 14px;
 }
 
 .information-block {
     margin-right: 19px;
-    margin-top: 32px;
+    margin-top: 10px;
 }
 
 .price {
@@ -95,9 +113,13 @@ hr.solid {
     padding-left: 6px;
     padding-right: 6px;
     margin-bottom: 10px;
-    margin-right: 20px;
-    margin-top: auto;
+    margin-right: -60px;
+    margin-top: 60px;
     margin-left: auto;
+}
+
+.price svg {
+    margin-top: 1px;
 }
 
 .price-text {
@@ -109,6 +131,40 @@ hr.solid {
     line-height: 21px; /* 116.667% */
     letter-spacing: -0.32px;
     text-align: center;
-    margin-right: 0%;
-    margin-left: auto;
+    margin-top: 1px;
+    margin-left: 2px;
 }
+
+.map {
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+    height: 300px;
+    padding: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+
+.scrollable-container {
+    max-height: 80vh; /* 80% of the screen height */
+    overflow-y: auto; /* Activate vertical scrolling */
+}
+
+.container {
+    display: flex;
+    align-items: center;
+}
+
+.box1 {
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    border-radius: 5px;
+    width: 50px;
+    height: 5px;
+    margin-left: 10px;
+    gap: 10px;
+}
+
