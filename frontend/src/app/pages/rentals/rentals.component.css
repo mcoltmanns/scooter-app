@@ -85,17 +85,12 @@
     margin-top: 2px;
 }
 
-.green-box p{
-    font-size: 1em;
+.green-box p {
+    font-size: 0.8em; /* Smaller font size */
     font-family: Roboto;
     margin-left: 30px;
-    margin-top: -32px;
-}
-.error-message {
-    color: red;
-    margin-top: 10px;
-    font-weight: bold;
-    text-align: center;
+    margin-top: -30px;
+    letter-spacing: 0.5px; /* Adjust letter spacing */
 }
 
 .extra-space {
