@@ -1,56 +1,58 @@
-<h1 class="title logo" style="font-size: 25px; margin-bottom: 22px; margin-top: 20px;">{{this.product?.name}}</h1>
-<app-back-button></app-back-button>
-<div class="scrollable-container" style="padding-left: 0; padding-right: 0; padding-bottom: 10; padding-top: 10; position: relative;">
-    
-
-    <div class="box" style="display: flex;">
-    <img class="picture" src="http://localhost:8000/img/products/{{ product?.name}}.jpg" >
-    <div class="information-block" *ngIf="scooter !== null && product !==null">
-        <div class="content-block">
-            <p class="primary-text">{{ roundUpBattery(scooter.battery) }}%</p>
-            <p class="secondary-text">Batteriestand</p>
-        </div>
-        <div class="content-block">
-            <p class="primary-text">{{calcRange(scooter.battery, product.max_reach)}} km </p>
-            <p class="secondary-text">Reichweite</p>
-        </div>
-        <div class="content-block">
-            <p class="primary-text">{{ product.max_speed }} km/h</p>
-            <p class="secondary-text">Geschwindigkeit</p>
-        </div>
-        <div class="price" style="display: flex;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <path d="M19.6242 10.4613L11.53 2.36712C11.1908 2.02795 10.7233 1.83545 10.2375 1.83545H3.665C2.65667 1.83545 1.83167 2.66045 1.83167 3.66878V10.2413C1.83167 10.7271 2.02416 11.1946 2.3725 11.5338L10.4667 19.628C11.1817 20.343 12.3458 20.343 13.0608 19.628L19.6333 13.0555C20.3483 12.3405 20.3483 11.1854 19.6242 10.4613ZM11.7592 18.3355L3.665 10.2413V3.66878H10.2375L18.3317 11.7629L11.7592 18.3355Z" fill="#97FB64"/>
-                <path d="M5.95667 7.33545C6.71606 7.33545 7.33167 6.71984 7.33167 5.96045C7.33167 5.20106 6.71606 4.58545 5.95667 4.58545C5.19727 4.58545 4.58167 5.20106 4.58167 5.96045C4.58167 6.71984 5.19727 7.33545 5.95667 7.33545Z" fill="#97FB64"/>
-            </svg>
-            <div class="price-text">{{product.price_per_hour }}€/h</div>
-         </div>
-    </div>
+<div class="page-container">
+    <h1 class="title logo" style="font-size: 20px; margin-bottom: 22px; margin-top: 20px; text-align: center">{{this.product?.name}}</h1>
+    <app-back-button></app-back-button>
+    <div class="scrollable-container" style="padding-left: 0; padding-right: 0; padding-bottom: 10; padding-top: 10; position: relative;">
         
 
-    </div>
+        <div class="box" style="display: flex;">
+        <img class="picture" src="http://localhost:8000/img/products/{{ product?.name}}.jpg" >
+        <div class="information-block" *ngIf="scooter !== null && product !==null">
+            <div class="content-block">
+                <p class="primary-text">{{ roundUpBattery(scooter.battery) }}%</p>
+                <p class="secondary-text">Batteriestand</p>
+            </div>
+            <div class="content-block">
+                <p class="primary-text">{{convertDistanceUnits(calcRange(scooter.battery, product.max_reach), selectedDistance)}}</p>
+                <p class="secondary-text">Reichweite</p>
+            </div>
+            <div class="content-block">
+                <p class="primary-text">{{ convertSpeedUnits(product.max_speed, selectedSpeed) }}</p>
+                <p class="secondary-text">Geschwindigkeit</p>
+            </div>
+            <div class="price" style="display: flex;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M19.6242 10.4613L11.53 2.36712C11.1908 2.02795 10.7233 1.83545 10.2375 1.83545H3.665C2.65667 1.83545 1.83167 2.66045 1.83167 3.66878V10.2413C1.83167 10.7271 2.02416 11.1946 2.3725 11.5338L10.4667 19.628C11.1817 20.343 12.3458 20.343 13.0608 19.628L19.6333 13.0555C20.3483 12.3405 20.3483 11.1854 19.6242 10.4613ZM11.7592 18.3355L3.665 10.2413V3.66878H10.2375L18.3317 11.7629L11.7592 18.3355Z" fill="#97FB64"/>
+                    <path d="M5.95667 7.33545C6.71606 7.33545 7.33167 6.71984 7.33167 5.96045C7.33167 5.20106 6.71606 4.58545 5.95667 4.58545C5.19727 4.58545 4.58167 5.20106 4.58167 5.96045C4.58167 6.71984 5.19727 7.33545 5.95667 7.33545Z" fill="#97FB64"/>
+                </svg>
+                <div class="price-text">{{convertCurrencyUnits(product.price_per_hour, selectedCurrency)}}</div>
+            </div>
+        </div>
+            
 
-    <div class="bottom">
-        <div style="text-align: center;" class="error">{{errorMessage}}</div>
-    
-        <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onSubmit()">
-            Scooter buchen
-        </app-button>        
-    </div>
-    <div style="padding: 15px;">
-    <hr class="solid">
+        </div>
 
-    <div class="description" innerHTML="{{product?.description_html}}"> Beschreibung</div>
+        <div class="bottom">
+            <div style="text-align: center;" class="error">{{errorMessage}}</div>
+        
+            <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onSubmit()">
+                Scooter buchen
+            </app-button>        
+        </div>
+        <div style="padding: 15px;">
+        <hr class="solid">
 
-    <hr class="solid">
-    
-    <h2 style="margin-left: 10px;">Standort</h2>
+        <div class="description" innerHTML="{{product?.description_html}}"> Beschreibung</div>
 
-    <div class = "map"
-    leaflet 
-    [leafletOptions]="options"
-    [(leafletCenter)]="center"
-    [leafletLayers]="layers">
+        <hr class="solid">
+        
+        <h2 style="margin-left: 10px;">Standort</h2>
+
+        <div class = "map"
+        leaflet 
+        [leafletOptions]="options"
+        [(leafletCenter)]="center"
+        [leafletLayers]="layers">
+        </div>
+        </div>
     </div>
-    </div>
-    </div>
+</div>

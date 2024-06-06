@@ -14,7 +14,7 @@
 }
 
 .scooterBook-btn {
-    width: 80%;
+    width: 50%;
     min-width: min-content;
 }
 
@@ -29,7 +29,7 @@
 
 hr.solid {
     border-top: 2px solid #97FB64;
-  }
+}
 
 .description {
     font-family: Roboto;
@@ -38,9 +38,14 @@ hr.solid {
     font-weight: 300;
     line-height: 21px; /* 131.25% */
     letter-spacing: -0.32px;
-    margin: 10px;
     margin-bottom: 30px;
-    margin-top: 40px;
+    padding-top: 40px; /* Padding top instead of margin top */
+    padding-left: 20px; /* Increase left padding */
+    padding-right: 20px; /* Increase right padding */
+}
+
+.description h1 {
+    line-height: 6; /* Ändere die Zahl entsprechend deiner Präferenz */
 }
 
 .box {
@@ -51,7 +56,6 @@ hr.solid {
     flex-shrink: 0;
     padding: 0;
 }
-
 .content-block {
     display: flex;
     align-items: center;
@@ -95,9 +99,12 @@ hr.solid {
     padding-left: 6px;
     padding-right: 6px;
     margin-bottom: 10px;
-    margin-right: 20px;
-    margin-top: auto;
+    margin-right: 5px;
     margin-left: auto;
+}
+
+.price svg {
+    margin-top: 1px;
 }
 
 .price-text {
@@ -109,8 +116,8 @@ hr.solid {
     line-height: 21px; /* 116.667% */
     letter-spacing: -0.32px;
     text-align: center;
-    margin-right: 0%;
-    margin-left: auto;
+    margin-top: 1px;
+    margin-left: 2px;
 }
 
 .map {

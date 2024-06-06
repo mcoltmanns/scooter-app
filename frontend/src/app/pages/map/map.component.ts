@@ -74,7 +74,7 @@ export class MapComponent implements OnInit {
   }
 
   buttonToScooter(scooterId: number): void {
-    this.ngZone.run(() => this.router.navigate(['/scooter', scooterId]));
+    this.ngZone.run(() => this.router.navigate(['search/scooter', scooterId]));
     //this.router.navigate(['/scooter', scooterId]);
     
   }
