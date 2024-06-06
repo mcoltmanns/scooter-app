@@ -4,8 +4,6 @@ import SwpSafe from '../services/payment/swpsafe';
 import HciPal from '../services/payment/hcipal';
 import { PaymentMethod } from '../models/payment';
 
-const bachelorcardMerchant = 'ScooterApp';
-
 interface PaymentMethod {
   id: number;
   type: string;
@@ -60,35 +58,6 @@ export class PaymentController {
     }
   }
 
-  /**
-   * add a payment method, and associate it with the current user's login information in the database
-   * expects: { type: 'swpsafe|hcipal|bachelorcard', credentials: {name, swpCode | (accountName, accountPassword) | (cardNumber, securityCode, expirationDate) } }
-   */
-  public async addPaymentMethod(
-    request: Request,
-    response: Response
-  ): Promise<void> {
-    switch (request.body.type) {
-      case 'swpsafe':
-        response.status(200).json('swpsafe');
-        break;
-
-      case 'hcipal':
-        response.status(200).json('hcipal');
-        break;
-
-      case 'bachelorcard':
-        response.status(200).json('bachelorcard');
-        break;
-
-      default:
-        response
-          .status(400)
-          .json({ status: 400, message: 'Unknown payment type' });
-        return;
-    }
-  }
-
   public async addBachelorcard(request: Request, response: Response): Promise<void> {
     /* Make sure we actually have a user */
     const userId = response.locals.userId;
@@ -108,7 +77,7 @@ export class PaymentController {
     }
 
     /* Check if the bachelorcard account is from germany */
-    const { status:statusCode, message:countryCode } = await BachelorCard.getCountryCode(bachelorcardMerchant, cardNumber);
+    const { status:statusCode, message:countryCode } = await BachelorCard.getCountryCode(cardNumber);
 
     /* Check if we got a 'Bad Request' when checking the country code */
     if (statusCode === 400) {

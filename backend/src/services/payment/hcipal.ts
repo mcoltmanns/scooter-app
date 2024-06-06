@@ -1,4 +1,5 @@
 import post from 'axios';
+import { HciPalData } from '../../interfaces/payment-service.interface';
 
 abstract class HciPal {
     private static processResponse(data: string, fieldWanted: string): {status: number, message: string} {
@@ -19,8 +20,8 @@ abstract class HciPal {
         });
     }
 
-    public static initTransaction(accountName: string, accountPassword: string, amount: number): Promise<{status: number, message: string}> {
-        const data = { accountName: accountName, accountPassword: accountPassword, amount: amount };
+    public static initTransaction(dataObject: HciPalData, amount: number): Promise<{status: number, message: string}> {
+        const data = { accountName: dataObject.accountName, accountPassword: dataObject.accountPassword, amount: amount };
         return new Promise((resolve) => {
             post('https://pass.hci.uni-konstanz.de/hcipal/check', {data: data, method: 'POST'})
             .then((response) => {

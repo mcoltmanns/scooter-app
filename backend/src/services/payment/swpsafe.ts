@@ -1,9 +1,11 @@
 import { parse } from 'csv-parse';
 import get from 'axios';
+import { SwpSafeData } from '../../interfaces/payment-service.interface';
 
 abstract class SwpSafe {
     private static processResponse(data: string, fieldWanted: string): Promise<{ status: number, message: string }> {
         return new Promise((resolve) => {
+            console.log(data);
             parse(data, {delimiter: ',', skip_empty_lines: true}, (err, records) => {
                 if(err) resolve({status: 500, message: `csv parse error: ${err}`});
                 resolve({status: parseInt(records[1][0]), message: records[1][records[0].indexOf(records[1][0] === '200' ? fieldWanted : 'errormessage')]});
@@ -23,9 +25,10 @@ abstract class SwpSafe {
         });
     }
 
-    public static initTransaction(accountId: string, amount: number): Promise<{status: number, message: string}> {
+    public static initTransaction(dataObject: SwpSafeData, amount: number): Promise<{status: number, message: string}> {
+        const { swpCode } = dataObject;
         return new Promise((resolve) => {
-            get(`https://pass.hci.uni-konstanz.de/swpsafe/check/code/${encodeURIComponent(accountId)}/amount/${encodeURIComponent(amount.toString())}`)
+            get(`https://pass.hci.uni-konstanz.de/swpsafe/check/code/${encodeURIComponent(swpCode)}/amount/${encodeURIComponent(amount.toString())}`)
             .then((response) => {
                 resolve(this.processResponse(response.data, 'token'));
             })
@@ -49,7 +52,7 @@ abstract class SwpSafe {
 
     public static rollbackTransaction(token: string): Promise<{status: number, message: string}> {
         return new Promise((resolve) => {
-            get(`https://pass.hci.uni-konstanz.de/swpsafe/use/${encodeURIComponent(token)}`)
+            get(`https://pass.hci.uni-konstanz.de/swpsafe/return/${encodeURIComponent(token)}`)
             .then((response) => {
                 resolve(this.processResponse(response.data, 'errormessage'));
             })

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Rental } from '../models/rental';
 
-export class BookingOverviewController{
+export class BookingsController {
     /* Method that returns all entries from the Rentals table for a specific User_Id */
     public async getUserRentals(request: Request, response: Response): Promise<void> {
         const userId = response.locals.userId; // get userID from session cookie

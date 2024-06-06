@@ -1,7 +1,12 @@
 import { parseString } from 'xml2js';
 import post from 'axios';
+import { BachelorCardData } from '../../interfaces/payment-service.interface';
 
-abstract class BachelorCard {
+const merchantName = 'ScooterApp';
+
+class BachelorCard {
+    private constructor() {} // Private constructor prevents instantiation
+
     private static processResponse(data: string, fieldWanted: string): Promise<{status: number, message: string}> {
         return new Promise((resolve) => {
           parseString(data, (err, result) => {
@@ -17,7 +22,7 @@ abstract class BachelorCard {
         });
     }
 
-    public static getCountryCode(merchantName: string, cardNumber: string): Promise<{status: number, message: string}> {
+    public static getCountryCode(cardNumber: string): Promise<{status: number, message: string}> {
         const data = `<?xml version="1.0" encoding="utf-8"?><transactionRequest type="country"><version>1.0.0</version><merchantInfo><name>${merchantName}</name></merchantInfo><cardNumber>${cardNumber}</cardNumber></transactionRequest>`;
         return new Promise((resolve) => {
             post('https://pass.hci.uni-konstanz.de/bachelorcard', { headers: {
@@ -36,8 +41,10 @@ abstract class BachelorCard {
         });
     }
 
-    public static initTransaction(merchantName: string, cardNumber: string, name: string, securityCode: string, expirationDate: string, amount: number): Promise<{status: number, message: string}> {
-        const data = `<?xml version="1.0" encoding="utf-8"?>
+    public static initTransaction(dataObject: BachelorCardData, amount: number): Promise<{status: number, message: string}> {
+      const { cardNumber, name, securityCode, expirationDate } = dataObject;
+      
+      const data = `<?xml version="1.0" encoding="utf-8"?>
         <transactionRequest type="validate">
         <version>1.0.0</version>
         <merchantInfo>
@@ -75,7 +82,7 @@ abstract class BachelorCard {
         });
     }
 
-    public static commitTransaction(merchantName: string, token: string): Promise<{status: number, message: string}> {
+    public static commitTransaction(token: string): Promise<{status: number, message: string}> {
         const data = `<?xml version="1.0" encoding="utf-8"?>
         <transactionRequest type="pay">
         <version>1.0.0</version>
@@ -102,7 +109,7 @@ abstract class BachelorCard {
         });
     }
 
-    public static rollbackTransaction(merchantName: string, token: string): Promise<{status: number, message: string}> {
+    public static rollbackTransaction(token: string): Promise<{status: number, message: string}> {
         const data = `<?xml version="1.0" encoding="utf-8"?>
         <transactionRequest type="cancellation">
         <version>1.0.0</version>

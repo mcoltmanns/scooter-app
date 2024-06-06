@@ -16,10 +16,11 @@ import cookieParser from 'cookie-parser';
 import { ApiController } from './controllers/api';
 import { AuthController } from './controllers/auth';
 import { Validator } from './middlewares/validation';
-import { MapController } from './controllers/map';
+import { ScooterController } from './controllers/scooter';
 import { PaymentController } from './controllers/payment';
 import { OptionController } from './controllers/option';
-import { BookingOverviewController } from './controllers/bookingOverview';
+import { BookingsController } from './controllers/bookings';
+import { CheckoutController } from './controllers/checkout';
 
 // Express server instanziieren
 const app = express();
@@ -73,12 +74,13 @@ app.use(cookieParser());
 const validator = new Validator();
 const auth = new AuthController();
 const api = new ApiController();
-const map = new MapController();
+const scooter = new ScooterController();
 const payment = new PaymentController();
 const option = new OptionController();
-const bookingOverview = new BookingOverviewController();
+const bookings = new BookingsController();
+const checkout = new CheckoutController();
 
-/* Routes without authentication */
+/* ROUTES WITHOUT AUTHENTICATION */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
 app.post('/api/login', validator.validateLogin, auth.login.bind(auth));
 app.get('/api/employees', api.getEmployeeInfo); // map about/employees to the function for getting employee info
@@ -86,17 +88,19 @@ app.get('/api/employees', api.getEmployeeInfo); // map about/employees to the fu
 /* Run authentication middleware for all api routes below */
 app.all('/api/*', validator.validateSessionCookie, auth.authorize.bind(auth));
 
-/* Routes with authentication */
+/* ROUTES WITH AUTHENTICATION */
+/* Routes to manage user information */
 app.delete('/api/logout', auth.logout.bind(auth)); // log the user out
-app.get('/api/authenticate', auth.getAuth.bind(auth)); // get the user's authentification status TODO: seems redundant?
+app.get('/api/authenticate', auth.getAuth.bind(auth)); // get the user's authentification status TODO: seems redundant? No.
 app.get('/api/user', auth.getUser.bind(auth)); // get a user's information
 app.put('/api/user', validator.validateUpdateUser, auth.updateUser.bind(auth)); // set a user's information
-app.get('/api/map', map.getAvailableScooters.bind(auth));
-app.get('/api/singleScooter/:scooterId', map.getScooterById); // get scooter information by scooterId
-app.get('/api/product', map.getAllProducts.bind(auth)); // get all product information
-app.post('/api/bookScooter', validator.validateBookScooter, map.bookScooter); // get all product information
-app.get('/api/productInfo/:scooterId', map.getProductByScooterId); //get for a specific scooter the products info
-app.get('/api/bookScooterHistory', bookingOverview.getUserRentals); // get all the rentals for a specific user
+
+/* Routes to manage scooter information */
+app.get('/api/map', scooter.getAvailableScooters.bind(auth));
+app.get('/api/singleScooter/:scooterId', scooter.getScooterById); // get scooter information by scooterId
+app.get('/api/product', scooter.getAllProducts.bind(auth)); // get all product information
+app.get('/api/productInfo/:scooterId', scooter.getProductByScooterId); //get for a specific scooter the products info
+app.get('/api/bookScooterHistory', bookings.getUserRentals); // get all the rentals for a specific user
 
 /* Routes to manage payment methods */
 app.get('/api/payment', payment.getAllPaymentMethods);
@@ -104,9 +108,13 @@ app.post('/api/payment/bachelorcard', validator.validateBachelorcard, payment.ad
 app.post('/api/payment/hcipal', validator.validateHcipal, payment.addHcipal);
 app.post('/api/payment/swpsafe', validator.validateSwpsafe, payment.addSwpsafe);
 app.delete('/api/payment/:paymentId', validator.validatePaymentId, payment.deletePayment);
-app.post('/api/bookScooter', map.bookScooter.bind(auth)); // get all product information
+
+/* Routes to manage user preferences */
 app.get('/api/preferencesForUser', option.getUserPreferenceByUserId); // get the preferences for a user
 app.post('/api/updateUserPreferences', option.updateUserPreferences); // update the preferences for a user
+
+/* Route to process the checkout (book a scooter) */
+app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 

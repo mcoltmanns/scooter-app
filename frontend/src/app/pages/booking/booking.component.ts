@@ -289,7 +289,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
     const finalForm = {
       scooterId: this.scooter?.id,
-      duration: this.checkoutForm.value.duration,
+      duration: Number(this.checkoutForm.value.duration),
       paymentMethodId: this.checkoutForm.value.radioButtonChoice
     };
 
