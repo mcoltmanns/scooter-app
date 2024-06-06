@@ -50,9 +50,6 @@ export class ScooterComponent implements OnInit {
 
   layers: Leaflet.Layer[] = [];
 
-
-
-
   ngOnInit(): void {
     // read the last number from the url:
     const currentPath = window.location.pathname;
@@ -80,7 +77,6 @@ export class ScooterComponent implements OnInit {
     this.mapService.getSingleProductInfo(scooterId).subscribe({
       next: (value) => {
         this.product = value;
-        console.log(this.product.description_html);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -120,12 +116,10 @@ export class ScooterComponent implements OnInit {
     }
   }
 
-
   /* Function that rounds up Battery */
   roundUpBattery(battery: number): number {
     return Math.ceil(battery);
   }
-
 
   /* Converts the distances */
   convertDistanceUnits(value: number | undefined, unit: string | undefined): string {
