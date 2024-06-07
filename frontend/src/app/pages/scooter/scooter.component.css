@@ -42,12 +42,9 @@
 }
 
 .picture {
-    width: auto;
-    height: auto;
     margin-top: 35px;
-    max-width: 70%;
-    max-height: 70%;
-    display: block; /* Ensures that the image is treated as a block element */
+    max-width: 80%;
+    max-height: 80%;
 }
 
 hr.solid {
@@ -153,6 +150,7 @@ hr.solid {
 }
 
 .container {
+    margin-left: -20px;
     display: flex;
     align-items: center;
 }
@@ -168,3 +166,56 @@ hr.solid {
     gap: 10px;
 }
 
+/* Block for battery circle */
+.battery {
+    width: 60px;
+    height: 73px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Outer circle styling */
+.outer {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    border: 1px solid rgb(255,255,255);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: conic-gradient(#97FB64 0% var(--battery), transparent 0%);
+  }
+  
+  /* Inner circle styling */
+  .inner {
+    height: 54px;
+    width: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255,255,255);
+    background-color: rgb(255,255,255);
+  }
+
+  #inside-circle-battery {
+    font-family: 'Racing Sans One';
+    font-size: 18px;
+    letter-spacing: -0.32px;
+    font-weight: 400;
+    color: #000000;
+  }
+
+  #inside-circle-reach {
+    font-family: 'Racing Sans One';
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: -0.32px;
+    color: #000000;
+    width: 43px;
+    text-align: center;
+    word-wrap: break-word;
+    line-height: 1;
+  }

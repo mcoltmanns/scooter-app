@@ -10,7 +10,15 @@
     <div class="information-block" *ngIf="scooter !== null && product !==null">
         <div class="container">
             <div class="box1">
-                <p class="primary-text">{{ roundUpBattery(scooter.battery) }}%</p>
+                <div class="battery">
+                    <div class="outer" [style.--battery]="roundUpBattery(scooter.battery) + '%'">
+                      <div class="inner">
+                        <div id="inside-circle-battery">
+                          {{ roundUpBattery(scooter.battery) }}%
+                        </div>
+                      </div>
+                    </div>
+                </div>
             </div>
             <div class="box1">
                 <p class="secondary-text">Batteriestand</p>
@@ -18,7 +26,15 @@
         </div>
         <div class="container">
             <div class="box1">
-                <p class="primary-text">{{convertDistanceUnits(calcRange(scooter.battery, product.max_reach), selectedDistance)}}</p>
+                <div class="battery">
+                    <div class="outer" [style.--battery]="calcRange(scooter.battery, product.max_reach) + '%'">
+                      <div class="inner">
+                        <div id="inside-circle-reach">
+                          {{ convertDistanceUnits(calcRange(scooter.battery, product.max_reach), selectedDistance) }}
+                        </div>
+                      </div>
+                    </div>
+                </div>
             </div>
             <div class="box1">
                 <p class="secondary-text">Reichweite</p>
@@ -26,7 +42,15 @@
         </div>
         <div class="container">
             <div class="box1">
-                <p class="primary-text">{{convertSpeedUnits(product.max_speed, selectedSpeed)}}</p>
+                <div class="battery">
+                    <div class="outer" [style.--battery]="product.max_speed + '%'">
+                      <div class="inner">
+                        <div id="inside-circle-reach">
+                          {{ convertSpeedUnits(product.max_speed, selectedSpeed) }}
+                        </div>
+                      </div>
+                    </div>
+                </div>
             </div>
             <div class="box1">
                 <p class="secondary-text">Geschwindigkeit</p>
