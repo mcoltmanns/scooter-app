@@ -54,6 +54,7 @@
     margin-top: -15px; /* Adjust this to move the name further up */
     margin-bottom: 10px; /* Adjust the spacing below the name */
     margin-left: 10px;
+    line-height: 20px;
 }
 
 .scooter-details .date-text {
