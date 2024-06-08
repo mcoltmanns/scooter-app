@@ -36,6 +36,7 @@ export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
+  public listScrollPosition: string | null = null;
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
@@ -95,6 +96,16 @@ export class MapComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(history.state);
+    /* Check if the user has navigated to this page from the list view or the map view and set the view accordingly */
+    if (history.state.originState && history.state.originState.searchToggle) {
+      this.view = history.state.originState.searchToggle;
+    }
+    /* Check if the user wants to see the list view at the same scroll position as before */
+    if (history.state.originState && history.state.originState.listScrollPosition && history.state.originState.searchToggle === 'list') {
+      this.listScrollPosition = history.state.originState.listScrollPosition;
+    }
+
     // Using mapService to get the data about scooters from backend
     // and add markers on the map using addScootersToMap()-method
     this.mapService.getScooterInfo().subscribe({
@@ -126,5 +137,9 @@ export class MapComponent implements OnInit {
 
   toggleListView(): void {
     this.view = this.view === 'map' ? 'list' : 'map';
+    if (this.view === 'map') {
+      this.listScrollPosition = null;
+    }
+    history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
 }

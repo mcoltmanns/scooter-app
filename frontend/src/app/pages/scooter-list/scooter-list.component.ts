@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { Scooter } from 'src/app/models/scooter';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -8,18 +8,23 @@ import { Router } from '@angular/router';
 import { Product } from 'src/app/models/product';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
+import { take } from 'rxjs';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-scooter-list',
   standalone: true,
-  imports: [CommonModule, ButtonComponent],
+  imports: [CommonModule, ButtonComponent, LoadingOverlayComponent],
   templateUrl: './scooter-list.component.html',
   styleUrls: ['./scooter-list.component.css']
 })
-export class ScooterListComponent implements OnInit, OnChanges {
+export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
   public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
 
+  @ViewChildren('elementRef') elementsRef!: QueryList<ElementRef>;
+
   @Input() searchTerm = ''; // Input property to receive the search term
+  @Input() scrollPosition: string | null = null; // Input property to receive the scroll position
   public scooters: Scooter[] = [];
   public products: Product[] = [];
   public filteredScooters: Scooter[] = [];
@@ -71,6 +76,16 @@ export class ScooterListComponent implements OnInit, OnChanges {
     });
   }
 
+  ngAfterViewInit(): void {
+    /* Scroll to the scroll position where the user was before clicking on a scooter */
+    /* take(1) ensures that the subscription is only called once */
+    if (this.scrollPosition) {
+      this.elementsRef.changes.pipe(take(1)).subscribe(() => {
+        this.jumpToPosition(this.scrollPosition);
+      });
+    }
+  }
+
   ngOnChanges(): void {
     this.filterScooters(); // Call filter method whenever searchTerm changes
   }
@@ -84,7 +99,13 @@ export class ScooterListComponent implements OnInit, OnChanges {
 
   /* Function for the green button */
   buttonToScooter(scooterId: number): void {
+    history.replaceState({ originState: { searchToggle: 'list', listScrollPosition: scooterId.toString() } }, '');
     this.router.navigate(['/search/scooter', scooterId]);
+    // this.router.navigate(['/search/scooter', scooterId], { 
+    //   state: { 
+    //     originState: { searchToggle: 'list', listScrollPosition: scooterId.toString() }
+    //   }
+    // });
   }
 
   /* Function that rounds up Battery */
@@ -147,5 +168,15 @@ export class ScooterListComponent implements OnInit, OnChanges {
       str = value.toString() + ' €/H';
     }
     return str;
+  }
+
+  jumpToPosition(id: string | null): void {
+    if (!id) {
+      return;
+    }
+    const element = this.elementsRef.find(el => el.nativeElement.id === id);
+    if (element) {
+      element.nativeElement.scrollIntoView();
+    }
   }
 }

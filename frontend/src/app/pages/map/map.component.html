@@ -26,5 +26,5 @@
   ></div>
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
-  <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm"></app-scooter-list>
+  <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
 </div>

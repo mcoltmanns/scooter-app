@@ -12,4 +12,5 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 })
 export class LoadingOverlayComponent {
   @Input() public isLoading = false;
+  @Input() public type: 'overlay' | 'inline' = 'overlay';
 }

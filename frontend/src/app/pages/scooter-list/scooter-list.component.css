@@ -7,10 +7,27 @@
     list-style-type: none;
     padding: 0;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: min-content;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .scooter-item {
     margin-bottom: 25px; /* Changes the spacing of the scooter boxes */
+    animation: fadeIn 0.25s ease-out;
+    width: 100%;
+    min-width: 245px;
+    max-width: 800px;
 }
 
 .top-box {
@@ -40,18 +57,19 @@
 }
 
 .scooter-box {
-    padding: 0px 0 30px;
+    padding: 0px 0 13px;
     border: none; /* Remove all borders */
     border-radius: 15px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     background-color: #f9f9f9;
-    height: 350px; /* Adjust the height to accommodate the rounded-top-box */
+    /* height: 350px; */
     width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    /* height: min-content; */
 }
 
 .scooter-box h3 {
@@ -70,43 +88,55 @@
     width: 100%; 
     height: 2px; 
     background-color: #7FFF00; 
-    margin-top: -4px; 
 }
 
 .picture {
     width: 60%;
     height: auto;
-    max-width: 70%;
+    max-height: 400px;
+    object-fit: contain;
+    display: block;
     margin: 10px auto;
-    display: block; /* Ensures that the image is treated as a block element */
 }
 
 .secondary-text {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: left;
     align-items: center;
-    margin-top: 12px; /* Distance upwards */
-    margin-left: 15px; /* Distance to the left edge of the screen */
-    margin-right: 50px; /* Distance to the right edge of the screen */
+    gap: 40px;
+    margin: 15px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+}
+@media only screen and (max-width: 500px) {
+  .secondary-text {
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .info-box {
-    padding: 6px 9px 4px 9px;
-    align-items: flex-start;
-    gap: 1px;
+    padding: 4px 9px 2px 9px;
     border-radius: 4px;
     background: var(--Surface-overlay, rgba(33, 33, 33, 0.08));
-    margin-top: 4px;
-    margin-bottom: 4px;
-    margin-left: 5px;
+    white-space: nowrap;
 }
 
 
 .secondary-text .secondary-text-font {
     font-size: 14px;
     color: #808080; 
-    margin-left: 1px;
-    margin-right: 1px;
+    padding-top: 2px;
 }
 
 .scooter-details {
@@ -114,10 +144,9 @@
     justify-content: space-between; /* Placement of green-button on the right */
     align-items: center; /* Centering content for green-button */
     padding: 2px;
-    margin-top: auto;
+    /* margin-top: 7px; */
     padding-right: 15px;
     padding-left: 15px;
-    margin-bottom: -15px;
 }
 
 .price {

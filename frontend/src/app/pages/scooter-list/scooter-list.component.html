@@ -2,7 +2,7 @@
   <div *ngIf="!loadingData; else loading">
     <div *ngIf="filteredScooters.length > 0; else noScooters">
       <ul class="scooter-list">
-        <li *ngFor="let scooter of filteredScooters" class="scooter-item">
+        <li *ngFor="let scooter of filteredScooters" class="scooter-item" [id]="scooter.id" #elementRef>
           <div class="top-box">
             <div class="scooter-name">
               <p>{{ uppercaseProductId(scooter.product_id) }}</p>       
@@ -12,10 +12,14 @@
             <img class="picture" [src]="getImageUrl(scooter.product_id)" />
             <div class="dividing-line"></div>
             <div class="secondary-text">
-              <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
-              <p class="secondary-text-font">Batteriestand</p>
-              <p class="info-box">{{ convertDistanceUnits(getRangeByProductId(scooter.product_id, scooter.battery), selectedDistance) }}</p>
-              <p class="secondary-text-font">Reichweite</p>
+              <div class="stat-item">
+                <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
+                <p class="secondary-text-font">Batteriestand</p>
+              </div>
+              <div class="stat-item">
+                <p class="info-box">{{ convertDistanceUnits(getRangeByProductId(scooter.product_id, scooter.battery), selectedDistance) }}</p>
+                <p class="secondary-text-font">Reichweite</p>
+              </div>
             </div>
             <div class="scooter-details">
               <p class="price"> PREIS: {{ convertCurrencyUnits(getPriceByProductId(scooter.product_id), selectedCurrency) }}</p>
@@ -40,5 +44,7 @@
       </div>
     </ng-template>
   </div>
-  <ng-template #loading></ng-template>
+  <ng-template #loading>
+    <app-loading-overlay [isLoading]="true" type="inline"></app-loading-overlay>
+  </ng-template>
 </div>
