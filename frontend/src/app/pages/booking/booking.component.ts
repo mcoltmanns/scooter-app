@@ -70,8 +70,8 @@ export class BookingComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    /* Handle the state of the previous page */
     const historyState = history.state;
-    console.log(historyState);
 
     /* Set the duration state if it was passed from the previous page */
     if (historyState.originState && historyState.originState.duration) {

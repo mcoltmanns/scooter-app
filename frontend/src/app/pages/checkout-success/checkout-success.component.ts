@@ -24,7 +24,6 @@ export class CheckoutSuccessComponent implements OnInit {
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    console.log(history.state);
     /* Redirect to search if there is no booking object in the history state */
     if (!history.state.booking) {
       this.router.navigate(['/search']);

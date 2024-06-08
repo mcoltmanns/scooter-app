@@ -96,7 +96,6 @@ export class MapComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(history.state);
     /* Check if the user has navigated to this page from the list view or the map view and set the view accordingly */
     if (history.state.originState && history.state.originState.searchToggle) {
       this.view = history.state.originState.searchToggle;
