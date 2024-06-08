@@ -24,7 +24,7 @@
 }
 
 .scooter-item {
-    padding-top: 19px; /* Changes the spacing of the scooter boxes */
+    padding-top: 24px; /* Changes the spacing of the scooter boxes */
     margin-top: 1px;
     animation: fadeIn 0.25s ease-out;
     width: 100%;
