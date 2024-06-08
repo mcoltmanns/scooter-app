@@ -95,8 +95,8 @@
     background: conic-gradient(#97FB64 0% var(--battery), transparent 0%);
 }
   
-  /* inner circle styling */
-  .inner {
+/* inner circle styling */
+.inner {
     height: 54px;
     width: 54px;
     border-radius: 50%;
@@ -107,7 +107,7 @@
     background-color: rgb(255,255,255);
 }
 
-  #inside-circle-battery {
+#inside-circle-battery {
     font-family: 'Racing Sans One';
     font-size: 18px;
     letter-spacing: -0.32px;
@@ -115,7 +115,7 @@
     color: #000000;
 }
 
-  #inside-circle-reach {
+#inside-circle-reach {
     font-family: 'Racing Sans One';
     font-weight: 400;
     font-size: 16px;
