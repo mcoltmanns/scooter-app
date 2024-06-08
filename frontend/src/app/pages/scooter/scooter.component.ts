@@ -46,6 +46,7 @@ export class ScooterComponent implements OnInit {
     ],
     zoom: 16,
     attributionControl: false,
+    center: new Leaflet.LatLng(0, 0)
   };
   
   public center = new Leaflet.LatLng(0, 0);
@@ -67,6 +68,7 @@ export class ScooterComponent implements OnInit {
         const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
         this.layers.push(marker); 
         this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
+        this.options.center = this.center; // Set the map center
       },
       error: (err) => {
         this.errorMessage = err.error.message;
