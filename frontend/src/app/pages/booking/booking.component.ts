@@ -47,8 +47,14 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
   // Variables for data from the backend
   public errorMessage = '';
+  public scooterNotFound = false;
   public product: Product | null = null;
   public scooter: Scooter | null = null;
+  // loading data variables
+  public loadingPage = true;
+  public loadingOptions = true;
+  public loadingProduct = true;
+  public loadingPayment = true;
   // User Units variables
   public selectedSpeed = ''; 
   public selectedDistance = '';
@@ -85,10 +91,13 @@ export class BookingComponent implements OnInit, AfterViewInit {
     this.mapService.getSingleScooterInfo(scooterId).subscribe({
       next: (value) => {
         this.scooter = value;
+        this.loadingPage = false;
         console.log('Scooter information:', this.scooter);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
+        this.loadingPage = false;
+        this.scooterNotFound = true;
         console.log(err);
       }
     });
@@ -97,10 +106,12 @@ export class BookingComponent implements OnInit, AfterViewInit {
     this.mapService.getSingleProductInfo(scooterId).subscribe({
       next: (value) => {
         this.product = value;
+        this.loadingProduct = false;
         console.log('Product information:', this.product);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
+        this.loadingProduct = false;
         console.log(err);
       }
     });
@@ -112,9 +123,11 @@ export class BookingComponent implements OnInit, AfterViewInit {
         this.selectedSpeed = this.option.speed;
         this.selectedDistance = this.option.distance;
         this.selectedCurrency = this.option.currency;
+        this.loadingOptions = false;
       },
       error: (err) => {
         this.errorMessage = err.message;
+        this.loadingOptions = false;
         console.error(err);
       }
     });
@@ -130,10 +143,12 @@ export class BookingComponent implements OnInit, AfterViewInit {
             if(this.paymentMethods.length === 1) {
               this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id);
             }
+            this.loadingPayment = false;
         },
         error: (err) => {
             console.error(err);
             this.paymentsStatus = 'Fehler beim Laden der Zahlungsmethoden!';
+            this.loadingPayment = false;
         }
     });
   }

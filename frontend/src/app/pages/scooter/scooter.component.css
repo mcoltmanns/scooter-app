@@ -224,3 +224,17 @@ hr.solid {
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
 }
+
+/* no Scooter Found */
+.no-scooter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* no Scooter picture  */
+.noScooterpicture {
+    width: 100%;
+}

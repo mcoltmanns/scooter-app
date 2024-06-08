@@ -21,10 +21,11 @@ export class ScooterController {
         const { scooterId } = request.params;
 
         try {
-            const scooter = await Scooter.findByPk(scooterId); // find the scooter with the matching ID
+            // find the scooter with the matching ID and check if active_rental_id is null
+            const scooter = await Scooter.findOne({ where: { id: scooterId, active_rental_id: null } });
 
             if (!scooter) {
-                response.status(404).json({ code: 404, message: 'Scooter nicht gefunden.' });
+                response.status(404).json({ code: 404, message: 'Scooter nicht gefunden oder ist derzeit vermietet.' });
                 return;
             }
 

@@ -229,3 +229,18 @@ app-button {
   text-align: center;
   font-size: 14px;
 }
+
+/* no Scooter Found */
+.no-scooter-container {
+  margin-top: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* no Scooter picture  */
+.noScooterpicture {
+  width: 100%;
+}

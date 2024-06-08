@@ -28,6 +28,8 @@ export class ScooterComponent implements OnInit {
   public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
 
   public errorMessage = '';
+  public scooterNotFound = false;
+  public loadingScooter = true;
   public product: Product | null = null;
   public scooter: Scooter | null = null;
   // User Units variables
@@ -61,14 +63,15 @@ export class ScooterComponent implements OnInit {
     this.mapService.getSingleScooterInfo(scooterId).subscribe({
       next: (value) => {
         this.scooter = value;
-        console.log('Scooter information:', this.scooter);
-        //console.log(this.scooter.battery);
+        this.loadingScooter = false;
         const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
         this.layers.push(marker); 
         this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
+        this.loadingScooter = false;
+        this.scooterNotFound = true;
         console.log(err);
       }
     });
