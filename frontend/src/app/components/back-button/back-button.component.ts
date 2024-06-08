@@ -18,13 +18,11 @@ export class BackButtonComponent {
     /* If no path is provided, go back to the previous page. */
     if (!this.path) {
       this.location.back();
-      console.log('Back button clicked: location.back()');
       return;
     }
 
     /* If a path is provided, navigate to it and
        pass the originState object to the next route if it exists. */
-       console.log('Back button clicked: path', history.state);
     const originState = history.state.originState ? { originState: history.state.originState } : {};
     this.router.navigate([this.path], { 
       state: originState

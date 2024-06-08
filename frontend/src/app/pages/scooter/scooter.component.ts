@@ -54,6 +54,8 @@ export class ScooterComponent implements OnInit {
   layers: Leaflet.Layer[] = [];
 
   ngOnInit(): void {
+    console.log(history.state);
+
     // read the last number from the url:
     const currentPath = window.location.pathname;
     const parts = currentPath.split('/');
@@ -105,10 +107,14 @@ export class ScooterComponent implements OnInit {
 
   /* If "Scooter Buchen" is pressed */
   onSubmit(): void {
-    console.log('scooterBook button pressed');
-
+    // console.log('scooterBook button pressed');
     const scooterId = this.scooter?.id;
-    this.router.navigate(['search/checkout', scooterId]); // Route to booking page
+
+    /* Pass the originState object to the next route if it exists. */
+    const originState = history.state.originState ? { originState: history.state.originState } : {};
+    this.router.navigate(['search/checkout', scooterId], { 
+      state: originState
+    });
   }
 
   // Method to calculate the range of the scooter

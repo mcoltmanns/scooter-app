@@ -70,16 +70,32 @@ export class BookingComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    const historyState = history.state;
+    console.log(historyState);
+
     /* Set the duration state if it was passed from the previous page */
-    if (history.state.originState && history.state.originState.duration) {
-      this.checkoutForm.get('duration')!.setValue(history.state.originState.duration);
+    if (historyState.originState && historyState.originState.duration) {
+      this.checkoutForm.get('duration')!.setValue(historyState.originState.duration);
     }
 
     /* If a payment method was added show the success toast */
-    if(history.state.addedPayment) {
+    if(historyState.addedPayment) {
       this.showPaymentAddedToast = true;
     }
-    history.replaceState({}, '');   // Clear the router state to prevent the toast from showing again and also get rid of the originState on reload
+
+    /* Clear addedPayment to prevent the toast from showing again and
+       also get rid of the duration in originState on reload and
+       also get rid of the path in originState */
+    if (historyState && 'addedPayment' in historyState) {
+      delete historyState.addedPayment;
+    }
+    if (historyState && historyState.originState && 'duration' in historyState.originState) {
+      delete historyState.originState.duration;
+    }
+    if (historyState && historyState.originState && 'path' in historyState.originState) {
+      delete historyState.originState.path;
+    }
+    history.replaceState(historyState, '');   // Update the router state
 
     // read the last number from the url:
     const currentPath = window.location.pathname;
@@ -267,7 +283,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
   /* if plus button is clicked */
   handlePlusClick(): void {
-    console.log('Plus-Button wurde geklickt!');
+    // console.log('Plus-Button wurde geklickt!');
     // Check whether the string contains only numbers
     if (/^\d+$/.test(this.checkoutForm.get('duration')!.value)) {
       const intValue = parseInt(this.checkoutForm.get('duration')!.value, 10); // Convert the string to an integer
@@ -283,7 +299,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
   
   /* if minus button is clicked */
   handleMinusClick():void {
-    console.log('Minus-Button wurde geklickt!');
+    // console.log('Minus-Button wurde geklickt!');
     // Check whether the string contains only numbers
     if (/^\d+$/.test(this.checkoutForm.get('duration')!.value)) {
       const intValue = parseInt(this.checkoutForm.get('duration')!.value, 10); // Convert the string to an integer
@@ -300,7 +316,16 @@ export class BookingComponent implements OnInit, AfterViewInit {
   onClickAddPaymentMethod(): void {
     const redirectUrl = `search/checkout/${this.scooter?.id}`;
     const currentDuration = this.checkoutForm.get('duration')!.value;
-    this.router.navigateByUrl('settings/payment/add', { state: { originState: { path: redirectUrl, duration: currentDuration } } });
+    const oldOriginState = history.state.originState || {};
+    this.router.navigateByUrl('settings/payment/add', {
+      state: {
+        originState: {
+          ...oldOriginState,
+          path: redirectUrl,
+          duration: currentDuration
+        }
+      }
+    });
   }
 
   /* Reset all error variables to empty strings */
@@ -366,9 +391,22 @@ export class BookingComponent implements OnInit, AfterViewInit {
         this.errorMessage = '';
         this.isLoading = false;
 
-        /* Navigate to the success page */
-        this.router.navigateByUrl('search/checkout/success', { 
-          state: { booking: response.booking }
+        /* Update originState before redirecting to the payment success page */
+        const historyState = history.state;
+        /* Clear listScrollPosition from originState because we can't scroll to this scooter
+           in the list because we have just booked it and it is not in the list anymore. */
+        if (historyState && historyState.originState && 'listScrollPosition' in historyState.originState) {
+          delete historyState.originState.listScrollPosition;
+        }
+        history.replaceState(historyState, '');   // Update the router state
+
+        /* Navigate to the success page inclduding the booking object and originState if it exists */
+        const oldOriginState = history.state.originState || {};
+        this.router.navigateByUrl('search/checkout/success', {
+          state: {
+            ...(Object.keys(oldOriginState).length > 0 && { originState: oldOriginState }),
+            booking: response.booking
+          }
         });
       },
       error: (err) => {
@@ -380,6 +418,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
   }
 
   onCancel(): void {
-    this.router.navigateByUrl(`search/scooter/${this.scooter?.id}`); 
+    // TODO: Keep originState
+    this.router.navigateByUrl(`search/scooter/${this.scooter?.id}`);
   }
 }

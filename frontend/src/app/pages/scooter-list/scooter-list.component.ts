@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, QueryList, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Scooter } from 'src/app/models/scooter';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -21,6 +21,7 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
   public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
 
+  @ViewChild('scrollableContainer', { static: false }) scrollableContainer!: ElementRef;
   @ViewChildren('elementRef') elementsRef!: QueryList<ElementRef>;
 
   @Input() searchTerm = ''; // Input property to receive the search term
@@ -99,13 +100,11 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   /* Function for the green button */
   buttonToScooter(scooterId: number): void {
-    history.replaceState({ originState: { searchToggle: 'list', listScrollPosition: scooterId.toString() } }, '');
-    this.router.navigate(['/search/scooter', scooterId]);
-    // this.router.navigate(['/search/scooter', scooterId], { 
-    //   state: { 
-    //     originState: { searchToggle: 'list', listScrollPosition: scooterId.toString() }
-    //   }
-    // });
+    this.router.navigate(['/search/scooter', scooterId], { 
+      state: { 
+        originState: { searchToggle: 'list', listScrollPosition: scooterId.toString() }
+      }
+    });
   }
 
   /* Function that rounds up Battery */
@@ -176,7 +175,9 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
     }
     const element = this.elementsRef.find(el => el.nativeElement.id === id);
     if (element) {
-      element.nativeElement.scrollIntoView();
+      setTimeout(() => {
+        element.nativeElement.scrollIntoView({ behavior: 'auto', block: 'start' });
+      }, 0);
     }
   }
 }

@@ -1,6 +1,7 @@
 .scrollable-container {
     max-height: 80vh; /* 80% of the screen height */
     overflow-y: auto; /* Activate vertical scrolling */
+    padding-top: 0;
 }
 
 .scooter-list {
@@ -23,7 +24,8 @@
 }
 
 .scooter-item {
-    margin-bottom: 25px; /* Changes the spacing of the scooter boxes */
+    padding-top: 19px; /* Changes the spacing of the scooter boxes */
+    margin-top: 1px;
     animation: fadeIn 0.25s ease-out;
     width: 100%;
     min-width: 245px;

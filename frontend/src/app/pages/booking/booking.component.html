@@ -5,7 +5,7 @@
 
 <ng-container *ngIf="!loadingPage && !loadingOptions && !loadingOptions else loading">
   <div *ngIf="product && scooter && option; else noScooters1" class="page-container">
-    <app-back-button></app-back-button>
+    <app-back-button [path]="'search/scooter/' + scooter.id"></app-back-button>
     <h1 class="title">Scooter buchen</h1>
       <div class="scrollable-container">
 
