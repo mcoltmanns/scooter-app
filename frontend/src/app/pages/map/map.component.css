@@ -1,10 +1,14 @@
 :host {
   --header-height: 80px;
+  --header-padding: 20px;
+  --header-padding-top: 40px;
+  --logo-title-height: 60px;
 }
 
 .logo.title {
   /* "Lokale" Styles können "Globale" Styles überschreiben */
   font-size: 38px;
+  height: var(--logo-title-height);
   margin: 0;
 }
 
@@ -17,7 +21,7 @@
 .map-header {
   position: relative;
   padding: 20px;
-  padding-top: 40px;
+  padding-top: var(--header-padding-top);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   min-height: var(--header-height);
   width: 100%;
@@ -36,7 +40,23 @@
     Wegen einigen Eigenheiten von Leaflet muss die Karte die volle Höhe einnehmen,
     außer den Platz, der für den Header reserviert ist. "Calc" erlaubt es uns 
     diese Größe automatisch zu errechnen. */
-  height: calc(100% - var(--header-height));
+
+  /* height: calc(100% - var(--header-height)); */
+
+  /*
+    Update (Silvan Ronge): Um die Höhe des Headers wieder von der Höhe der Karte abzuziehen, ist es nicht
+    sinnvoll, den Wert, der dem Header bei min-height zugewiesen wird, abzuziehen. Der Grund dafür ist, dass
+    der Inhalt des Headers eine tatsächliche Höhe erzeugt, die den Wert von 80px überschreitet. Da es sich um
+    min-height handelt, wird der Header auf die tatsächliche Höhe des Inhalts erweitert. Deshalb ist es notwendig,
+    die tatsächliche Höhe des Headers von der Höhe der Karte abzuziehen. Diese setzt sich zusammen aus dem Padding,
+    das in .map-header definiert ist und der Höhe der inneren Elemente. Davon gibt es nur eines, nämlich das Element
+    mit den Klassen "title logo". Diesem Element habe ich nun eine feste Höhe von 60px zugewiesen, da sich die Höhe
+    sonst dynamisch an den Inhalt anpasst. Das würde in diesem Fall von der Schriftgröße des Wortes "SCOOTER" abhängen.
+    Dabei kann aber ein krummer Wert rauskommen (z.B. eine Höhe von 60.8). Damit können wir hier nicht exakt rechnen.
+    Die tatsächliche Höhe des Header ergibt sich dann wie folgt:
+    60px (Höhe des Elements "title logo") + 40px (Padding oben) + 20px (Padding unten) = 120px.
+  */
+  height: calc(100% - var(--logo-title-height) - var(--header-padding-top) - var(--header-padding));
   width: 100%;
   padding: 0;
 }
