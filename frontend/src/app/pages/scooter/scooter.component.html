@@ -1,95 +1,83 @@
 <header class="header">
     <app-back-button></app-back-button>
-    <h1 class="productName" style="height: 10px; margin-left: 10px;">{{ scooter?.product_id }}</h1>
+    <h1 class="productName" style="height: 10px; margin-left: 10px;">
+        {{ scooter?.product_id }}
+    </h1>
 </header>
 
-<div class="scrollable-container" style="padding-left: 0; padding-right: 0; padding-bottom: 10; padding-top: 10; position: relative;">
-
-    <div class="box" style="display: flex;">
-    <img class="picture" src="http://localhost:8000/img/products/{{ product?.name}}.jpg" >
-    <div class="information-block" *ngIf="scooter !== null && product !==null">
-        <div class="container">
-            <div class="box1">
-                <div class="battery">
-                    <div class="outer" [style.--battery]="roundUpBattery(scooter.battery) + '%'">
-                      <div class="inner">
-                        <div id="inside-circle-battery">
-                          {{ roundUpBattery(scooter.battery) }}%
+<div class="scrollable-container" style="padding: 10px 0 10px 0; position: relative;">
+    <div class="white-box" style="display: flex;">
+        <img class="picture" src="http://localhost:8000/img/products/{{ product?.name }}.jpg">
+        <div class="information-block" *ngIf="scooter !== null && product !== null">
+            <div class="container">
+                <div class="box-info">
+                    <div class="circle">
+                        <div class="outer" [style.--battery]="roundUpBattery(scooter.battery) + '%'">
+                            <div class="inner">
+                                <div id="inside-circle-battery">
+                                    {{ roundUpBattery(scooter.battery) }}%
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
                 </div>
-            </div>
-            <div class="box1">
-                <p class="secondary-text">Batteriestand</p>
-            </div>
-        </div>
-        <div class="container">
-            <div class="box1">
-                <div class="battery">
-                    <div class="outer" [style.--battery]="calcRange(scooter.battery, product.max_reach) + '%'">
-                      <div class="inner">
-                        <div id="inside-circle-reach">
-                          {{ convertDistanceUnits(calcRange(scooter.battery, product.max_reach), selectedDistance) }}
-                        </div>
-                      </div>
-                    </div>
+                <div class="box-info">
+                    <p class="secondary-text">Batteriestand</p>
                 </div>
             </div>
-            <div class="box1">
-                <p class="secondary-text">Reichweite</p>
-            </div>
-        </div>
-        <div class="container">
-            <div class="box1">
-                <div class="battery">
-                    <div class="outer" [style.--battery]="product.max_speed + '%'">
-                      <div class="inner">
-                        <div id="inside-circle-reach">
-                          {{ convertSpeedUnits(product.max_speed, selectedSpeed) }}
+            <div class="container">
+                <div class="box-info">
+                    <div class="circle">
+                        <div class="outer" [style.--battery]="calcRange(scooter.battery, product.max_reach) + '%'">
+                            <div class="inner">
+                                <div id="inside-circle-reach">
+                                    {{ convertDistanceUnits(calcRange(scooter.battery, product.max_reach), selectedDistance) }}
+                                </div>
+                            </div>
                         </div>
-                      </div>
                     </div>
                 </div>
+                <div class="box-info">
+                    <p class="secondary-text">Reichweite</p>
+                </div>
             </div>
-            <div class="box1">
-                <p class="secondary-text">Geschwindigkeit</p>
+            <div class="container">
+                <div class="box-info">
+                    <div class="circle">
+                        <div class="outer" [style.--battery]="product.max_speed + '%'">
+                            <div class="inner">
+                                <div id="inside-circle-reach">
+                                    {{ convertSpeedUnits(product.max_speed, selectedSpeed) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-info">
+                    <p class="secondary-text">Geschwindigkeit</p>
+                </div>
+            </div>
+            <div class="price" style="display: flex;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <path d="M19.6242 10.4613L11.53 2.36712C11.1908 2.02795 10.7233 1.83545 10.2375 1.83545H3.665C2.65667 1.83545 1.83167 2.66045 1.83167 3.66878V10.2413C1.83167 10.7271 2.02416 11.1946 2.3725 11.5338L10.4667 19.628C11.1817 20.343 12.3458 20.343 13.0608 19.628L19.6333 13.0555C20.3483 12.3405 20.3483 11.1854 19.6242 10.4613ZM11.7592 18.3355L3.665 10.2413V3.66878H10.2375L18.3317 11.7629L11.7592 18.3355Z" fill="#97FB64"/>
+                    <path d="M5.95667 7.33545C6.71606 7.33545 7.33167 6.71984 7.33167 5.96045C7.33167 5.20106 6.71606 4.58545 5.95667 4.58545C5.19727 4.58545 4.58167 5.20106 4.58167 5.96045C4.58167 6.71984 5.19727 7.33545 5.95667 7.33545Z" fill="#97FB64"/>
+                </svg>
+                <div class="price-text">{{ convertCurrencyUnits(product.price_per_hour, selectedCurrency) }}</div>
             </div>
         </div>
-        <div class="price" style="display: flex;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none">
-                <path d="M19.6242 10.4613L11.53 2.36712C11.1908 2.02795 10.7233 1.83545 10.2375 1.83545H3.665C2.65667 1.83545 1.83167 2.66045 1.83167 3.66878V10.2413C1.83167 10.7271 2.02416 11.1946 2.3725 11.5338L10.4667 19.628C11.1817 20.343 12.3458 20.343 13.0608 19.628L19.6333 13.0555C20.3483 12.3405 20.3483 11.1854 19.6242 10.4613ZM11.7592 18.3355L3.665 10.2413V3.66878H10.2375L18.3317 11.7629L11.7592 18.3355Z" fill="#97FB64"/>
-                <path d="M5.95667 7.33545C6.71606 7.33545 7.33167 6.71984 7.33167 5.96045C7.33167 5.20106 6.71606 4.58545 5.95667 4.58545C5.19727 4.58545 4.58167 5.20106 4.58167 5.96045C4.58167 6.71984 5.19727 7.33545 5.95667 7.33545Z" fill="#97FB64"/>
-            </svg>
-            <div class="price-text">{{convertCurrencyUnits(product.price_per_hour, selectedCurrency)}}</div>
-        </div>
-        
-    </div>
-        
-
     </div>
 
-    <div class="bottom">
-        <div style="text-align: center;" class="error">{{errorMessage}}</div>
-    
+    <div class="bottom">  
         <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onSubmit()">
             Scooter buchen
         </app-button>        
     </div>
+
     <div style="padding: 15px;">
-    <hr class="solid">
-
-    <div class="description" innerHTML="{{product?.description_html}}"> Beschreibung</div>
-
-    <hr class="solid">
-    
-    <h2 style="margin-left: 10px;">Standort</h2>
-
-    <div class = "map"
-    leaflet 
-    [leafletOptions]="options"
-    [(leafletCenter)]="center"
-    [leafletLayers]="layers">
-    </div>
+        <hr class="solid">
+        <div class="description" innerHTML="{{ product?.description_html }}">Beschreibung</div>
+        <hr class="solid">
+        <h2 style="margin-left: 10px;">Standort</h2>
+        <div class="map" leaflet [leafletOptions]="options" [(leafletCenter)]="center" [leafletLayers]="layers"></div>
     </div>
 </div>

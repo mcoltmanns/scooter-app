@@ -7,17 +7,7 @@
     align-items: center;
 }
 
-.bottom {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 15px;
-    padding: 0px;
-    margin-top: 20px; /* Add an upper spacing */
-    margin-bottom: 40px;
-}
-
+/* name of the scooter */
 .productName {
     margin: 0;
     font-family: 'Racing Sans One';
@@ -32,25 +22,183 @@
     line-height: 1.2;
 }
 
-.error {
-    color: rgb(226, 27, 27);
+.scrollable-container {
+    max-height: 80vh; /* 80% of the screen height */
+    overflow-y: auto; /* Activate vertical scrolling */
 }
 
+/* white background for scooter and details */
+.white-box {
+    display: flex;
+    height: 260px;
+    margin-left: 0;
+    background: var(--Textfeld-Fill, #FFF);
+    flex-shrink: 0;
+    padding: 0;
+    overflow: hidden; /* Ensures the content does not overflow the box */
+}
+
+/* scooter picture */
+.picture {
+    max-width: 61%;
+    max-height: 100%;
+    object-fit: cover; /* Ensure the image covers the box without overflow */
+}
+
+/* container for the scooter information */
+.information-block {
+    margin-right: 19px;
+    margin-top: -40px;
+}
+
+/* Container for one row of information*/
+.container {
+    margin-left: -30px;
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+}
+
+/* container for Circular and discription */
+.box-info {
+    padding: 20px;
+    margin: 10px;
+    text-align: center;
+    border-radius: 5px;
+    width: 50px;
+    height: 5px;
+    margin-left: 10px;
+    gap: 10px;
+}
+
+/* Display and information of the dynamic circles: */
+
+/* block for all circles */
+.circle {
+    width: 60px;
+    height: 73px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* outer circle styling */
+.outer {
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    border: 1px solid rgb(255,255,255);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: conic-gradient(#97FB64 0% var(--battery), transparent 0%);
+}
+  
+  /* inner circle styling */
+  .inner {
+    height: 54px;
+    width: 54px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgb(255,255,255);
+    background-color: rgb(255,255,255);
+}
+
+  #inside-circle-battery {
+    font-family: 'Racing Sans One';
+    font-size: 18px;
+    letter-spacing: -0.32px;
+    font-weight: 400;
+    color: #000000;
+}
+
+  #inside-circle-reach {
+    font-family: 'Racing Sans One';
+    font-weight: 400;
+    font-size: 16px;
+    letter-spacing: -0.32px;
+    color: #000000;
+    width: 43px;
+    text-align: center;
+    word-wrap: break-word;
+    line-height: 1;
+}
+/* end of displing circles */
+
+/* text for the discription of the circles */
+.secondary-text {
+    color: var(--Textfeld-Stroke, #000);
+    font-family: Roboto;
+    font-size: 11.5px;
+    font-style: italic;
+    font-weight: 70;
+    line-height: 21px; /* 142.857% */
+    letter-spacing: 0.25px;
+    margin-top: 22px;
+}
+
+/* price container with rounded dark green box */
+.price {
+    width: 90px;
+    height: 26px;
+    border-radius: 15px;
+    border: 1px solid var(--Highlights-Stroke, #123800);
+    background: var(--Highlights-Stroke, #123800);
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-bottom: 10px;
+    margin-right: -50px;
+    margin-top: 40px;
+    margin-left: auto;
+}
+
+/* price svg picture */
+.price svg {
+    margin-top: 1px;
+    margin-left: -3px;
+}
+
+/* price text */
+.price-text {
+    color: var(--Highlights, #97FB64);
+    font-family: "Racing Sans One";
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 21px; /* 116.667% */
+    letter-spacing: -0.32px;
+    text-align: center;
+    margin-top: 1px;
+    margin-left: 2px;
+}
+
+/* container for Scooter Buchen button */
+.bottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+    padding: 0px;
+    margin-top: 30px; /* Add an upper spacing */
+    margin-bottom: 30px;
+}
+
+/* scooter Buchen button */
 .scooterBook-btn {
     width: 50%;
     min-width: min-content;
 }
 
-.picture {
-    margin-top: 35px;
-    max-width: 80%;
-    max-height: 80%;
-}
-
+/* green line */
 hr.solid {
     border-top: 2px solid #97FB64;
 }
 
+/* html description text */
 .description {
     font-family: Roboto;
     font-size: 16px;
@@ -64,74 +212,7 @@ hr.solid {
     padding-right: 15px;
 }
 
-.box {
-    display: "flex";
-    height: 290px;
-    margin-left: 0;
-    background: var(--Textfeld-Fill, #FFF);
-    flex-shrink: 0;
-    padding: 0;
-}
-
-.secondary-text {
-    color: var(--Textfeld-Stroke, #000);
-    font-family: Roboto;
-    font-size: 15px;
-    font-style: italic;
-    font-weight: 100;
-    line-height: 21px; /* 142.857% */
-    letter-spacing: 0.25px;
-    margin-top: 17px;
-}
-
-.primary-text {
-    color: #000;
-    font-family: "Racing Sans One";
-    font-size: 17px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 21px; /* 116.667% */
-    letter-spacing: -0.32px;
-    text-align: center;
-    line-height: 14px;
-}
-
-.information-block {
-    margin-right: 19px;
-    margin-top: 10px;
-}
-
-.price {
-    width: 110px;
-    height: 26px;
-    border-radius: 15px;
-    border: 1px solid var(--Highlights-Stroke, #123800);
-    background: var(--Highlights-Stroke, #123800);
-    padding-left: 6px;
-    padding-right: 6px;
-    margin-bottom: 10px;
-    margin-right: -60px;
-    margin-top: 60px;
-    margin-left: auto;
-}
-
-.price svg {
-    margin-top: 1px;
-}
-
-.price-text {
-    color: var(--Highlights, #97FB64);
-    font-family: "Racing Sans One";
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 21px; /* 116.667% */
-    letter-spacing: -0.32px;
-    text-align: center;
-    margin-top: 1px;
-    margin-left: 2px;
-}
-
+/* scooter map */
 .map {
     margin-left: 2.5%;
     margin-right: 2.5%;
@@ -143,79 +224,3 @@ hr.solid {
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
 }
-
-.scrollable-container {
-    max-height: 80vh; /* 80% of the screen height */
-    overflow-y: auto; /* Activate vertical scrolling */
-}
-
-.container {
-    margin-left: -20px;
-    display: flex;
-    align-items: center;
-}
-
-.box1 {
-    padding: 20px;
-    margin: 10px;
-    text-align: center;
-    border-radius: 5px;
-    width: 50px;
-    height: 5px;
-    margin-left: 10px;
-    gap: 10px;
-}
-
-/* Block for battery circle */
-.battery {
-    width: 60px;
-    height: 73px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Outer circle styling */
-.outer {
-    height: 60px;
-    width: 60px;
-    border-radius: 50%;
-    border: 1px solid rgb(255,255,255);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: conic-gradient(#97FB64 0% var(--battery), transparent 0%);
-  }
-  
-  /* Inner circle styling */
-  .inner {
-    height: 54px;
-    width: 54px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid rgb(255,255,255);
-    background-color: rgb(255,255,255);
-  }
-
-  #inside-circle-battery {
-    font-family: 'Racing Sans One';
-    font-size: 18px;
-    letter-spacing: -0.32px;
-    font-weight: 400;
-    color: #000000;
-  }
-
-  #inside-circle-reach {
-    font-family: 'Racing Sans One';
-    font-weight: 400;
-    font-size: 16px;
-    letter-spacing: -0.32px;
-    color: #000000;
-    width: 43px;
-    text-align: center;
-    word-wrap: break-word;
-    line-height: 1;
-  }
