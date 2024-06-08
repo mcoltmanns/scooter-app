@@ -42,8 +42,29 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
-        this.loadingData = false;
-        this.filterScooters();
+
+        /* Creating an array of promises to load all images. */
+        const imageLoadPromises = this.scooters.map(scooter => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = this.getImageUrl(scooter.product_id);
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+        });
+      
+        /* Wait for all images to load and only then set loadingData to false. This way, the loading overlay
+        will be removed only after all images are loaded. It is also necessary because it can come to problems
+        with the scroll position if they are calculated before the images are loaded. */
+        Promise.all(imageLoadPromises)
+          .then(() => {
+            this.loadingData = false;
+            this.filterScooters();
+          })
+          .catch(error => {
+            console.error('One or more images failed to load:', error);
+            this.loadingData = false;
+          });
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -175,6 +196,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
     }
     const element = this.elementsRef.find(el => el.nativeElement.id === id);
     if (element) {
+      /* Scroll into view with a timeout of 0ms to ensure that the scroll is done after the view is rendered */
       setTimeout(() => {
         element.nativeElement.scrollIntoView({ behavior: 'auto', block: 'start' });
       }, 0);
