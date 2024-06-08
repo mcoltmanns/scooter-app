@@ -45,6 +45,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     margin: 0 auto; /* Adjust margin to center the box and cover borders */
     padding: 10px;
+    cursor: pointer;
 }
 
 .scooter-name {
@@ -65,13 +66,12 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
     background-color: #f9f9f9;
-    /* height: 350px; */
     width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    /* height: min-content; */
+    cursor: pointer;
 }
 
 .scooter-box h3 {
@@ -167,7 +167,7 @@
     background-color: #7FFF00;
     padding: 2px;
     border-radius: 50%;
-    cursor: pointer; /* Mouse pointer change when moving over  */
+    cursor: pointer;
     margin-left: -10px;
 }
 

@@ -3,12 +3,12 @@
     <div *ngIf="filteredScooters.length > 0; else noScooters">
       <ul class="scooter-list">
         <li *ngFor="let scooter of filteredScooters" class="scooter-item" [id]="scooter.id" #elementRef>
-          <div class="top-box">
+          <div class="top-box" (click)="buttonToScooter(scooter.id)">
             <div class="scooter-name">
               <p>{{ uppercaseProductId(scooter.product_id) }}</p>       
             </div>
           </div>
-          <div class="scooter-box">
+          <div class="scooter-box" (click)="buttonToScooter(scooter.id)">
             <img class="picture" [src]="getImageUrl(scooter.product_id)" />
             <div class="dividing-line"></div>
             <div class="secondary-text">
@@ -23,7 +23,7 @@
             </div>
             <div class="scooter-details">
               <p class="price"> PREIS: {{ convertCurrencyUnits(getPriceByProductId(scooter.product_id), selectedCurrency) }}</p>
-              <div class="green-button" (click)="buttonToScooter(scooter.id)">
+              <div class="green-button">
                 <svg xmlns="http://www.w3.org/2000/svg" width="26" height="25" viewBox="0 0 26 25" fill="none">
                   <rect width="100%" height="100%" fill="transparent"/>
                   <path

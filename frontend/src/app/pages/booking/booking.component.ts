@@ -418,7 +418,10 @@ export class BookingComponent implements OnInit, AfterViewInit {
   }
 
   onCancel(): void {
-    // TODO: Keep originState
-    this.router.navigateByUrl(`search/scooter/${this.scooter?.id}`);
+    /* Pass the originState object to the next route if it exists. */
+    const originState = history.state.originState ? { originState: history.state.originState } : {};
+    this.router.navigateByUrl(`search/scooter/${this.scooter?.id}`, {
+      state: originState
+    });
   }
 }
