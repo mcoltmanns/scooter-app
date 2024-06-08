@@ -54,7 +54,6 @@ export class ScooterComponent implements OnInit {
   layers: Leaflet.Layer[] = [];
 
   ngOnInit(): void {
-    console.log(history.state);
     // read the last number from the url:
     const currentPath = window.location.pathname;
     const parts = currentPath.split('/');
