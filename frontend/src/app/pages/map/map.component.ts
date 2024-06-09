@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, NgZone } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
- 
-
 
 /**
  * Typescript erlaub es uns, auch einen ganzen Namespace zu importieren statt einzelne Komponenten.
@@ -81,8 +79,6 @@ export class MapComponent implements OnInit {
 
   buttonToScooter(scooterId: number): void {
     this.ngZone.run(() => this.router.navigate(['search/scooter', scooterId]));
-    //this.router.navigate(['/scooter', scooterId]);
-    
   }
 
   /**
@@ -124,41 +120,30 @@ export class MapComponent implements OnInit {
       }
     });
 
-    // Überprüfen, ob der Browser Geolocation unterstützt
+    // check if browser supports geolocation
     if ('geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          // Erfolgreich die Position erhalten
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
           console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-          const userMarker = Leaflet.marker([latitude, longitude], { icon: userIcon });
+          const userMarker = Leaflet.marker([latitude, longitude], { icon: userIcon }); // display user via gps
           this.layers.push(userMarker);
+          this.options.center = new Leaflet.LatLng(latitude, longitude); // change center of the map according to user position
+          
         },
         (error) => {
-          // Fehlerbehandlung
           console.error('Fehler beim Abrufen der Position', error);
+        },
+        {
+          enableHighAccuracy: true, // Enable high accuracy to get a more precise location
         }
       );
     } else {
       console.error('Geolocation wird von diesem Browser nicht unterstützt');
     }
-
-    /*for (const layer of this.layers) {
-      // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
-      // auch direkt in Typescript hinzugefügt werden
-      layer.on('click', (e: Leaflet.LeafletMouseEvent) => {
-        // Mittels der (im Browser eingebauten) alert() Methode wird ein
-        // Browser Pop-up Fenster geöffnet
-        alert('Marker was clicked!');
-
-        // In der Konsole können die Events genauer angeschaut werden,
-        // was die Entwicklung erleichtern kann
-        console.log(e);
-      });
-    }*/
   }
-
+  
   toggleListView(): void {
     this.view = this.view === 'map' ? 'list' : 'map';
     if (this.view === 'map') {
