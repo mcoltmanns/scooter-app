@@ -1,0 +1,30 @@
+@startuml Authorization Control Class Diagram
+skinparam linetype ortho
+
+class AuthController {
+    + Promise<void> authorize(Request request, Response response, NextFunction next)
+    + Promise<void> register(Request request, Response response)
+    + Promise<void> login(Request request, Response response)
+    + Promise<void> getAuth(Request request, Response response)
+    + Promise<void> getUser(Request request, Response response)
+    + Promise<void> updateUser(Request request, Response response)
+}
+
+class SessionManager {
+    + Promise<boolean> sessionExpired(Model session)
+    + Promise<boolean> isValidSession(String cookieSessionId, String userAuthId)
+    + Promise<Model> createSession(String userAuthId)
+}
+
+class Database {
+    Sequelize sequelize
+
+    + Sequelize getSequelize()
+    + connect()
+}
+
+AuthController .u.> SessionManager : use
+AuthController .r.> Database : use
+SessionManager ..> Database : use
+
+@enduml

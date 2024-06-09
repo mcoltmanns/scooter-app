@@ -1,0 +1,70 @@
+@startuml Payment Class Diagram
+skinparam linetype ortho
+
+interface BachelorCardData {
+    String name
+    String cardNumber
+    String securityCode
+    String expirationDate
+}
+
+interface SwpSafeData {
+    String swpCode
+}
+
+interface HciPalData {
+    String accountName
+    String accountPassword
+}
+
+abstract PaymentService {
+    + Promise<{ Number status, String message }> getCountryCode(BachelorCardData | SwpSafeData | HciPalData dataObject)
+    + Promise<{ Number status, String message }> initTransaction(BachelorCardData | SwpSafeData | HciPalData dataObject, Number amount)
+    + Promise<{ Number status, String message }> commitTransaction(String token)
+    + Promise<{ Number status, String message }> rollbackTransaction(String token)
+    - Promise<{status: number, message: string}> processResponse(String data, String fieldWanted)
+}
+
+class BachelorCard
+
+class HciPal
+
+class SwpSafe
+
+class Database {
+    Sequelize sequelize
+
+    + Sequelize getSequelize()
+    + connect()
+}
+
+class PaymentController {
+    + Promise<void> getAllPaymentMethods(Request request, Response response)
+    + Promise<void> addBachelorCard(Request request, Response response)
+    + Promise<void> addHciPal(Request request, Response response)
+    + Promise<void> addSwpSafe(Request request, Response response)
+    + Promise<void> deletePayment(Request request, Response response)
+}
+
+class CheckoutController {
+    + Promise<void> processCheckout(Request request, Response response)
+}
+
+PaymentService <|-- BachelorCard : implements
+PaymentService <|-- HciPal : implements
+PaymentService <|-- SwpSafe : implements
+
+PaymentController -r-> BachelorCard : use
+PaymentController -r-> HciPal : use
+PaymentController -r-> SwpSafe : use
+PaymentController -d-> Database : use
+
+CheckoutController -u-> BachelorCard : use
+CheckoutController -u-> HciPal : use
+CheckoutController -u-> SwpSafe : use
+CheckoutController -l-> Database : use
+
+HciPal -r-> HciPalData : use
+BachelorCard -r-> BachelorCardData : use
+SwpSafe -r-> SwpSafeData : use
+@enduml
