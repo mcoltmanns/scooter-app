@@ -25,6 +25,11 @@ const defaultIcon = Leaflet.icon({
   iconUrl: '/assets/marker.png',
 });
 
+const userIcon = Leaflet.icon({
+  iconSize: [40, 40],
+  iconUrl: '/assets/person.png',
+});
+
 @Component({
   standalone: true,
   imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule],
@@ -118,6 +123,26 @@ export class MapComponent implements OnInit {
         console.log(err);
       }
     });
+
+    // Überprüfen, ob der Browser Geolocation unterstützt
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Erfolgreich die Position erhalten
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          const userMarker = Leaflet.marker([latitude, longitude], { icon: userIcon });
+          this.layers.push(userMarker);
+        },
+        (error) => {
+          // Fehlerbehandlung
+          console.error('Fehler beim Abrufen der Position', error);
+        }
+      );
+    } else {
+      console.error('Geolocation wird von diesem Browser nicht unterstützt');
+    }
 
     /*for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
