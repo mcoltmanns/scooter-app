@@ -7,6 +7,7 @@ import Database from './database';
 import SourceMap from 'source-map-support';
 import { UsersSession } from './models/user';
 import { Op } from 'sequelize';
+import { Reservation } from './models/rental';
 SourceMap.install();
 
 class Server {
@@ -21,10 +22,17 @@ class Server {
       /* Connect to the database */
       await Database.connect();
 
+      const now = new Date;
+
       /* Purge all expired sessions */
       console.log('purging expired sessions...');
-      const purged = await UsersSession.destroy({ where: { expires: { [Op.lt]: new Date } } }); // TODO: put this on a scheduler
-      console.log(`purged ${purged} expired sessions.`);
+      const purgedSessions = await UsersSession.destroy({ where: { expires: { [Op.lt]: now } } }); // TODO: put this on a scheduler
+      console.log(`purged ${purgedSessions} expired sessions.`);
+
+      /* Purge all expired reservations */
+      console.log('purging expired reservations...');
+      const purgedReservations = await Reservation.destroy({ where: { endsAt: { [Op.lt]: now } } });
+      console.log(`purged ${purgedReservations} expired reservations.`);
 
       /* Start the server */
       app.listen(this.port, () => {

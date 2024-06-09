@@ -1,7 +1,7 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { Product } from './product';
-import { Rental } from './rental';
+import { Rental, Reservation } from './rental';
 
 /**
  * model of an actual instance of a scooter - these scooters really exist!
@@ -61,4 +61,17 @@ Rental.hasOne(Scooter, { // every rental can have a scooter - if a scooter's act
         name: 'active_rental_id',
         allowNull: true // scooters don't need to always be rented
     },
+});
+
+Reservation.hasOne(Scooter, {
+    foreignKey: {
+        name: 'reservation_id',
+        allowNull: true // every reservation has a scooter
+    }
+});
+Scooter.hasOne(Reservation, {
+    foreignKey: {
+        name: 'scooter_id',
+        allowNull: true // scooters aren't always reserved
+    }
 });

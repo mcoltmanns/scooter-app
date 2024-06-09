@@ -116,6 +116,8 @@ app.post('/api/updateUserPreferences', option.updateUserPreferences); // update 
 /* Route to process the checkout (book a scooter) */
 app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);
 
+app.post('/api/reserve', bookings.startReservation.bind(auth));
+
 app.get('/api', api.getInfo); // DEBUG testing session validator
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
