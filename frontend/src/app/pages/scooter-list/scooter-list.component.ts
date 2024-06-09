@@ -10,6 +10,7 @@ import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
 import { take } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { Levenshtein } from 'src/app/utils/levenshtein';
 
 @Component({
   selector: 'app-scooter-list',
@@ -29,6 +30,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
   public scooters: Scooter[] = [];
   public products: Product[] = [];
   public filteredScooters: Scooter[] = [];
+  public levenshteinFilteredScooters: Scooter[] = [];
   public errorMessage = '';
   public loadingData = true;
   // User Units variables
@@ -89,6 +91,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   ngOnChanges(): void {
     this.filterScooters(); // Call filter method whenever searchTerm changes
+    this.levenshteinFilterScooters();
   }
 
   /* Filters the scooters for the "search scooter" input field */
@@ -142,6 +145,17 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
       return 0; // Error no range provided
     }
   }
+
+  /* allows fault tolerance for Input string */
+  levenshteinFilterScooters(): void {
+    const threshold = 2; // threshold for simularity
+    const len = this.searchTerm.length;
+    this.levenshteinFilteredScooters= this.scooters.filter(scooter => 
+      Levenshtein.levenshteinMethod(scooter.product_id.substring(0, len).toLowerCase(), this.searchTerm.toLowerCase()) <= threshold
+    );
+    console.log(this.filterScooters.length);
+  }
+
 
   /* Converts the distances */
   convertDistanceUnits(value: number, unit: string): string {
