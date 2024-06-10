@@ -113,10 +113,10 @@ app.delete('/api/payment/:paymentId', validator.validatePaymentId, payment.delet
 app.get('/api/preferencesForUser', option.getUserPreferenceByUserId); // get the preferences for a user
 app.post('/api/updateUserPreferences', option.updateUserPreferences); // update the preferences for a user
 
-/* Route to process the checkout (book a scooter) */
+/* Route to process reservations/checkout (book a scooter) */
+app.post('/api/reserve', validator.validateReservation, bookings.reserveScooter.bind(auth)); // start a reservation
+app.get('api/reserve', bookings.getUserReservation.bind(auth)); // get a user's active reservation
 app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);
-
-app.post('/api/reserve', bookings.startReservation.bind(auth));
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
 

@@ -11,7 +11,7 @@ import { Model } from 'sequelize';
 import { BachelorCardData, PaymentService } from '../interfaces/payment-service.interface';
 import { SwpSafeData } from '../interfaces/payment-service.interface';
 import { HciPalData } from '../interfaces/payment-service.interface';
-import bookings from './bookings';
+import ReservationManager from '../services/reservation-manager';
 
 interface ProductInstance extends Model {
   price_per_hour: number;
@@ -129,10 +129,10 @@ export class CheckoutController {
       scooter.set('active_rental_id', rental.get('id'));
       await scooter.save({ transaction });
 
-      // delete the reservation
-      await bookings.endReservation(reservation.getDataValue('id'), transaction);
-
       await transaction.commit();
+
+      // delete the reservation - starts its own transaction, so must be done after the commit
+      await ReservationManager.endReservation(reservation);
     } catch (error) {
       console.error(error);
 

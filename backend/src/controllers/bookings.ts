@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
-import { RESERVATION_LIFETIME, Rental, Reservation } from '../models/rental';
-import { Scooter } from '../models/scooter';
-import Database from '../database';
-import { CronJob } from 'cron';
-import { Transaction } from 'sequelize';
+import { Rental, Reservation } from '../models/rental';
+import ReservationManager from '../services/reservation-manager';
 
 export class BookingsController {
     /* Method that returns all entries from the Rentals table for a specific User_Id */
@@ -29,89 +26,59 @@ export class BookingsController {
         }
     }
 
-    // mark a scooter as reserved for the next 10 minutes
-    public async startReservation(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId;
+    // get the reservation for a user, if it exists
+    public async getUserReservation(request: Request, response: Response): Promise<void> {
+        const userId = response.locals.userId; // get userID from session cookie
         if (!userId) {
             response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
             return;
         }
 
-        const scooterId = request.body.scooterId;
-        if(!scooterId) {
-            response.status(401).json({ code: 401, message: 'Kein Scooter angegeben.' });
-            return;
-        }
-
-        const transaction = await Database.getSequelize().transaction();
-        let reservationId: number;
-        let expiration: Date;
         try {
-            // user may only reserve if no reservations are active
-            const reservations = await Reservation.findAll({ where: { user_id: userId } });
-            if(reservations.length > 0) {
-                response.status(401).json({ code: 401, message: 'User hat bereits eine Reservation.'});
+            const reservation = await Reservation.findOne({ where: { user_id: userId } });
+            if(!reservation) {
+                response.status(404).json({ code: 404, message: 'Keine Reservierung gefunden.' });
                 return;
             }
-
-            // scooter may only be reserved if it exists and is free
-            const scooter = await Scooter.findOne({ where: { id: scooterId } });
-            if(!scooter) {
-                response.status(404).json({ code: 404, message: 'Angegebener Scooter existiert nicht.'});
-                return;
-            }
-            console.log(scooter.dataValues);
-            if(scooter.dataValues.reservation_id !== null || scooter.dataValues.active_rental_id !== null) {
-                response.status(401).json({ code: 404, message: 'Angegebener Scooter ist nicht verfuegbar.'});
-                return;
-            }
-
-            // create the new reservation
-            expiration = new Date(Date.now() + RESERVATION_LIFETIME);
-            const newReservation = await Reservation.create({ user_id: userId, scooter_id: scooterId, endsAt: expiration }, {transaction: transaction});
-            reservationId = newReservation.dataValues.id;
-            // update scooters table
-            scooter.setDataValue('reservation_id', newReservation.dataValues.id);
-            await scooter.save({transaction: transaction});
-            await transaction.commit();
-            // dispatch a job to delete the reservation when it expires
-            new CronJob(
-                expiration,
-                async () => { // on tick
-                    const transaction = await Database.getSequelize().transaction();
-                    try {
-                        await this.endReservation(reservationId, transaction);
-                        await transaction.commit();
-                    } catch (error) {
-                        console.error(`could not delete transaction after expiry!\n${error}`);
-                        await transaction.rollback();
-                    }
-                },
-                () => {
-                    console.log('deleted expired reservation'); // on complete
-                },
-                true // start now
-            );
+            response.status(200).json(reservation);
         } catch (error) {
-            console.log(error);
-            response.status(500).json({code: 500, message: 'Etwas ist schief gelaufen.'});
-            await transaction.rollback();
-            return;
+            console.error(error);
+            response.status(500).json({ code: 500, message: 'Fehler beim Abrufen der Reservierung.' });
         }
-
-        response.status(200).json({code: 200, message: 'Reservierung erfolgreich.', reservationId: reservationId, expiry: expiration});
-        return;
     }
 
-    // delete a reservation and mark the associated scooter as free
-    public async endReservation(reservationId: number, transaction: Transaction): Promise<void> {
-        console.log(`deleting reservation ${reservationId}`);
-        const reservation = await Reservation.findByPk(reservationId);
-        const scooter = await Scooter.findByPk(reservation.getDataValue('scooter_id'));
-        await reservation.destroy({transaction: transaction});
-        scooter.setDataValue('reservation_id', null);
-        await scooter.save({transaction: transaction});
-        console.log('success');
+    // reserve a scooter for a given user
+    public async reserveScooter(request: Request, response: Response): Promise<void> {
+        const userId = response.locals.userId; // get userID from session cookie
+        if (!userId) {
+            response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
+            return;
+        }
+        const scooterId = request.body.scooterId;
+        try {
+            const reservation = await ReservationManager.startReservation(userId, scooterId);
+            response.status(200).json(reservation);
+            return;
+        } catch (error) {
+            if(error.message === 'SCOOTER_DOES_NOT_EXIST') {
+                response.status(404).json('Angegebener Scooter existiert nicht');
+                return;
+            }
+            if(error.message === 'SCOOTER_UNAVAILABLE'){
+                response.status(401).json('Scooter ist derzeit nicht reservierbar.');
+                return;
+            }
+            if(error.message === 'USER_HAS_RESERVATION') {
+                response.status(401).json('User hat bereits eine Reservierung.');
+                return;
+            }
+            if(error.message === 'RESERVATION_FAILED') {
+                response.status(500).json('Reservierung konnte nicht angelegt werden.');
+                return;
+            }
+            response.status(500).json(error.message);
+            return;
+        }
     }
 }
 

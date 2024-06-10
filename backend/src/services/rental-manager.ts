@@ -6,14 +6,19 @@
  * - end a rental
  */
 
+import { Model } from 'sequelize';
+import { Rental } from '../models/rental';
+
 abstract class RentalManager {
-    /**
-     * check if a scooter is currently being rented
-     * 
-     * @param scooterId scooter id to check status for
-     * @returns         true if scooter is being rented, false if not, null on failure
-     */
-    public static async isRented(scooterId: number): Promise<boolean> {
-        return true;
+    // get the rental associated with a scooter
+    public static async getRentalsFromScooter(scooterId: number): Promise<Model[]> {
+        return await Rental.findAll({ where: { scooter_id: scooterId } });
+    }
+
+    // get all rentals associated with a user
+    public static async getRentalsFromUser(userId: number): Promise<Model[]> {
+        return await Rental.findAll({ where: { user_id: userId } });
     }
 }
+
+export default RentalManager;
