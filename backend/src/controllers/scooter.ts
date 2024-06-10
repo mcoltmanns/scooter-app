@@ -3,10 +3,11 @@ import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 
 export class ScooterController {
+    // get scooters that aren't rented or reserved
     public async getAvailableScooters(request: Request, response: Response): Promise<void> {
         let scooters = [];
         try {
-            scooters = (await Scooter.findAll({ where: { active_rental_id: null } })).map((scooterModel) => scooterModel.get());
+            scooters = (await Scooter.findAll({ where: { active_rental_id: null, reservation_id: null } })).map((scooterModel) => scooterModel.get());
         } catch (error) {
             console.log(error);
             response.status(500).json('Datenbank Fehler');

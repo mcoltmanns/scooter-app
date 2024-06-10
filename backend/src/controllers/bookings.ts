@@ -3,6 +3,7 @@ import { RESERVATION_LIFETIME, Rental, Reservation } from '../models/rental';
 import { Scooter } from '../models/scooter';
 import Database from '../database';
 import { CronJob } from 'cron';
+import { Transaction } from 'sequelize';
 
 export class BookingsController {
     /* Method that returns all entries from the Rentals table for a specific User_Id */
@@ -79,13 +80,11 @@ export class BookingsController {
                 async () => { // on tick
                     const transaction = await Database.getSequelize().transaction();
                     try {
-                        await Reservation.destroy({ where: { id: reservationId } });
-                        scooter.setDataValue('reservation_id', null);
-                        await scooter.save({transaction: transaction});
+                        await this.endReservation(reservationId, transaction);
                         await transaction.commit();
                     } catch (error) {
-                        console.error(`Could not delete reservation after expiry!\n${error})`);
-                        transaction.rollback();
+                        console.error(`could not delete transaction after expiry!\n${error}`);
+                        await transaction.rollback();
                     }
                 },
                 () => {
@@ -96,11 +95,24 @@ export class BookingsController {
         } catch (error) {
             console.log(error);
             response.status(500).json({code: 500, message: 'Etwas ist schief gelaufen.'});
-            transaction.rollback();
+            await transaction.rollback();
             return;
         }
 
         response.status(200).json({code: 200, message: 'Reservierung erfolgreich.', reservationId: reservationId, expiry: expiration});
         return;
     }
+
+    // delete a reservation and mark the associated scooter as free
+    public async endReservation(reservationId: number, transaction: Transaction): Promise<void> {
+        console.log(`deleting reservation ${reservationId}`);
+        const reservation = await Reservation.findByPk(reservationId);
+        const scooter = await Scooter.findByPk(reservation.getDataValue('scooter_id'));
+        await reservation.destroy({transaction: transaction});
+        scooter.setDataValue('reservation_id', null);
+        await scooter.save({transaction: transaction});
+        console.log('success');
+    }
 }
+
+export default new BookingsController();

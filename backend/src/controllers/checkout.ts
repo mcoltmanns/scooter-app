@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Scooter } from '../models/scooter';
-import { Rental } from '../models/rental';
+import { Rental, Reservation } from '../models/rental';
 import Database from '../database';
 import { PaymentMethod } from '../models/payment';
 import { Product } from '../models/product';
@@ -11,6 +11,7 @@ import { Model } from 'sequelize';
 import { BachelorCardData, PaymentService } from '../interfaces/payment-service.interface';
 import { SwpSafeData } from '../interfaces/payment-service.interface';
 import { HciPalData } from '../interfaces/payment-service.interface';
+import bookings from './bookings';
 
 interface ProductInstance extends Model {
   price_per_hour: number;
@@ -47,6 +48,12 @@ export class CheckoutController {
     const transaction = await Database.getSequelize().transaction();
 
     try {
+      // make sure the user has reserved the scooter
+      const reservation = await Reservation.findOne({ where: { scooter_id: scooterId, user_id: userId } });
+      if(!reservation) {
+        throw new Error('NO_RESERVATION');
+      }
+
       const scooter = await Scooter.findByPk(scooterId, { 
         include: [{
           model: Product,
@@ -122,9 +129,12 @@ export class CheckoutController {
       scooter.set('active_rental_id', rental.get('id'));
       await scooter.save({ transaction });
 
+      // delete the reservation
+      await bookings.endReservation(reservation.getDataValue('id'), transaction);
+
       await transaction.commit();
     } catch (error) {
-      // console.error(error);
+      console.error(error);
 
       await transaction.rollback(); // Rollback the transaction in case of an error
 
@@ -160,6 +170,10 @@ export class CheckoutController {
       }
       if (error.message === 'PAYMENT_FAILED') {
         response.status(500).json({ code: 500, message: 'Die Zahlung konnte nicht durchgeführt werden.'});
+        return;
+      }
+      if(error.message === 'NO_RESERVATION') {
+        response.status(401).json({ code: 401, message: 'Der Scooter ist nicht von ihnen reserviert.'});
         return;
       }
 
