@@ -17,3 +17,14 @@ export interface ResponseMessageCheckout {
     endedAt?: string;
   }
 }
+
+export interface ResponseMessageReservation {
+  code: number;
+  message: string;
+  reservation?: {
+    id: number;
+    user_id: number;
+    scooter_id: number;
+    endsAt: string;
+  }
+}

@@ -3,3 +3,7 @@ export interface CheckoutObject {
   paymentMethodId?: number | string;
   scooterId?: number | string;
 }
+
+export interface ReservationObject {
+  scooterId: number | string;
+}

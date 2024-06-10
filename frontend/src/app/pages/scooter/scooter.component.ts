@@ -11,6 +11,7 @@ import * as Leaflet from 'leaflet';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
+import { BookingService } from 'src/app/services/booking.service';
 
 const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
@@ -25,7 +26,7 @@ const defaultIcon = Leaflet.icon({
   styleUrl: './scooter.component.css'
 })
 export class ScooterComponent implements OnInit {
-  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
+  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) {}
 
   public errorMessage = '';
   public scooterNotFound = false;
@@ -104,7 +105,7 @@ export class ScooterComponent implements OnInit {
   }
 
   /* If "Scooter Buchen" is pressed */
-  onSubmit(): void {
+  onBook(): void {
     // console.log('scooterBook button pressed');
     const scooterId = this.scooter?.id;
 
@@ -112,6 +113,23 @@ export class ScooterComponent implements OnInit {
     const originState = history.state.originState ? { originState: history.state.originState } : {};
     this.router.navigate(['search/checkout', scooterId], { 
       state: originState
+    });
+  }
+
+  // if "Scooter Reservieren" is pressed
+  onReserve(): void {
+    const scooterId = this.scooter!.id;
+
+    console.log(`reserve scooter ${scooterId}`);
+    // ask the booking service to try and take out a reservation on this scooter
+    this.bookingService.postReservation({ scooterId: scooterId }).subscribe({
+      next: (value) => {
+        console.log(value);
+        this.router.navigate(['search']); // needs more feedback on if reservation was successful
+      },
+      error: (err) => {
+        console.error(err); // needs more feedback on if reservation failed
+      }
     });
   }
 
