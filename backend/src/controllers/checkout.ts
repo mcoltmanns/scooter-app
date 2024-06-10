@@ -7,7 +7,7 @@ import { Product } from '../models/product';
 import BachelorCard from '../services/payment/bachelorcard';
 import SwpSafe from '../services/payment/swpsafe';
 import HciPal from '../services/payment/hcipal';
-import { Model } from 'sequelize';
+import { Model, Op } from 'sequelize';
 import { BachelorCardData, PaymentService } from '../interfaces/payment-service.interface';
 import { SwpSafeData } from '../interfaces/payment-service.interface';
 import { HciPalData } from '../interfaces/payment-service.interface';
@@ -48,10 +48,10 @@ export class CheckoutController {
     const transaction = await Database.getSequelize().transaction();
 
     try {
-      // make sure the user has reserved the scooter
-      const reservation = await Reservation.findOne({ where: { scooter_id: scooterId, user_id: userId } });
-      if(!reservation) {
-        throw new Error('NO_RESERVATION');
+      // make sure the scooter isn't reserved by someone else  
+      const reservation = await Reservation.findOne({ where: { scooter_id: scooterId, user_id: { [Op.ne]: userId } } });
+      if(reservation) {
+        throw new Error('SCOOTER_UNAVAILABLE');
       }
 
       const scooter = await Scooter.findByPk(scooterId, { 
@@ -152,7 +152,7 @@ export class CheckoutController {
       }
 
       /* Handle thrown errors and translate the error messages to a more user-friendly format */
-      if (error.message === 'SCOOTER_CURRENTLY_RENTED') {
+      if (error.message === 'SCOOTER_UNAVAILABLE') {
         response.status(400).json({code: 400, message: 'Der Scooter ist nicht mehr verfügbar.' });
         return;
       }
@@ -170,10 +170,6 @@ export class CheckoutController {
       }
       if (error.message === 'PAYMENT_FAILED') {
         response.status(500).json({ code: 500, message: 'Die Zahlung konnte nicht durchgeführt werden.'});
-        return;
-      }
-      if(error.message === 'NO_RESERVATION') {
-        response.status(401).json({ code: 401, message: 'Der Scooter ist nicht von ihnen reserviert.'});
         return;
       }
 
