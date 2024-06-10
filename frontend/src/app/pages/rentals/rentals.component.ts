@@ -7,6 +7,7 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
+import { CreateInvoice } from 'src/app/utils/createInvoice';
 
 @Component({
   selector: 'app-rentals',
@@ -75,6 +76,21 @@ export class RentalsComponent implements OnInit {
         console.error(err);
       }
     });
+
+    //this.createAndDownloadInvoice();
+  }
+
+  /**
+   * creates an invoice for a scooter
+   */
+  async createAndDownloadInvoice(): Promise<void> {
+    try {
+      const editedPdfBytes = await CreateInvoice.editPdf();
+      CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
+      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
+    } catch (error) {
+      console.error('Error editing PDF:', error);
+    }
   }
   
   /* how long a user booked the scooter */
