@@ -6,7 +6,8 @@ export interface Rental {
     scooter_id: number;
 }
 
-export interface RentalWithScooterId{
+/* interface with products + scooterId for all bookings */
+export interface ProductWithScooterId{
     id: number;
     name: string;
     brand: string;

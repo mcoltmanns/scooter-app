@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Rental, RentalWithScooterId } from 'src/app/models/rental';
+import { Rental, ProductWithScooterId } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -23,7 +23,7 @@ export class RentalsComponent implements OnInit {
   public loadingDataProduct = true;
   public loadingDataOption = true;
   public rentals: Rental[] = [];
-  public products: RentalWithScooterId[] = [];
+  public products: ProductWithScooterId[] = [];
   public errorMessage = '';
 
   // User Units variables
@@ -93,27 +93,15 @@ export class RentalsComponent implements OnInit {
     return `${hoursStr}`;
   }
 
-
-  skipProduct(productId: number):number{
-    if(productId === undefined){
-      return 0;
-    }
-    if(productId >= 26){
-      return productId + 1;
-    }
-    return productId;
-  }
-
   /* Get the price for each scooter */
-  getPriceByProductId(productId: number): number | undefined {
-    productId = this.skipProduct(productId);
-    const product = this.products.find(p => p.id === productId);
+  getPriceByProductId(scooterId: number): number | undefined {
+    const product = this.products.find(p => p.scooterId === scooterId);
     return product ? product.price_per_hour : undefined;
   }
 
   /* Calculates the total price for a scooter booking*/
-  getTotalPrice(productId: number, begin: string, end: string): string | undefined {
-    const pricePerHour = this.getPriceByProductId(productId);
+  getTotalPrice(scooterId: number, begin: string, end: string): string | undefined {
+    const pricePerHour = this.getPriceByProductId(scooterId);
     if (pricePerHour === undefined) return undefined;
 
     const durationHours = Number(this.rentalDuration(begin, end));
@@ -127,16 +115,14 @@ export class RentalsComponent implements OnInit {
   }
 
   /* Get the name for each scooter */
-  getNameByProductId(productId: number): string | undefined {
-    productId = this.skipProduct(productId);
-    const product = this.products.find(p => p.id === productId);
+  getNameByProductId(scooterId: number): string | undefined {
+    const product = this.products.find(p => p.scooterId === scooterId);
     return product ? product.name.toUpperCase() : undefined;
   }
 
   /* Get Picture from the product list*/
-  getPictureByProductId(productId: number): String{
-    productId = this.skipProduct(productId);
-    const product = this.products.find(p => p.id === productId);
+  getPictureByProductId(scooterId: number): String{
+    const product = this.products.find(p => p.scooterId === scooterId);
     return `http://localhost:8000/img/products/${product ? product.name : undefined}.jpg`;
   }
 
