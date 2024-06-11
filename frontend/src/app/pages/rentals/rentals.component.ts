@@ -38,7 +38,6 @@ export class RentalsComponent implements OnInit {
       next: (value) => {
         this.rentals = value;
         this.loadingDataScooter = false;
-        console.log(this.rentals);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -52,7 +51,6 @@ export class RentalsComponent implements OnInit {
       next: (value) => {
         this.products = value;
         this.loadingDataProduct = false;
-        console.log(this.products);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -94,14 +92,14 @@ export class RentalsComponent implements OnInit {
   }
 
   /* Get the price for each scooter */
-  getPriceByProductId(scooterId: number): number | undefined {
+  getPriceByScooterId(scooterId: number): number | undefined {
     const product = this.products.find(p => p.scooterId === scooterId);
     return product ? product.price_per_hour : undefined;
   }
 
   /* Calculates the total price for a scooter booking*/
   getTotalPrice(scooterId: number, begin: string, end: string): string | undefined {
-    const pricePerHour = this.getPriceByProductId(scooterId);
+    const pricePerHour = this.getPriceByScooterId(scooterId);
     if (pricePerHour === undefined) return undefined;
 
     const durationHours = Number(this.rentalDuration(begin, end));
@@ -115,13 +113,13 @@ export class RentalsComponent implements OnInit {
   }
 
   /* Get the name for each scooter */
-  getNameByProductId(scooterId: number): string | undefined {
+  getNameByScooterId(scooterId: number): string | undefined {
     const product = this.products.find(p => p.scooterId === scooterId);
     return product ? product.name.toUpperCase() : undefined;
   }
 
   /* Get Picture from the product list*/
-  getPictureByProductId(scooterId: number): String{
+  getPictureByScooterId(scooterId: number): String{
     const product = this.products.find(p => p.scooterId === scooterId);
     return `http://localhost:8000/img/products/${product ? product.name : undefined}.jpg`;
   }
@@ -167,8 +165,22 @@ export class RentalsComponent implements OnInit {
   }
   
   /* downloads the invoice pdf when download button is clicked */
-  downloadInvoice():void{
+  downloadInvoice(invoiceId:number, scooterId:number, begin: string, end: string):void{
+    const scooterName = this.getNameByScooterId(scooterId); 
+    const price_per_hour = this.getPriceByScooterId(scooterId);
+    const duartion = this.rentalDuration(begin, end);
+    const total = this.getTotalPrice(scooterId, begin, end);
+
+    console.log(price_per_hour);
+    console.log(scooterName);
+    console.log(duartion);
+    console.log(total);
     //this.createAndDownloadInvoice();
+    begin = this.formatDateTime(begin);
+    end = this.formatDateTime(end);
+    console.log(invoiceId);
+    console.log(begin);
+    console.log(end);
     this.createAndPreviewInvoice();
   }
 
