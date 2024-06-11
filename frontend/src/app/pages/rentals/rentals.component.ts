@@ -77,7 +77,7 @@ export class RentalsComponent implements OnInit {
       }
     });
 
-    //this.createAndDownloadInvoice();
+    this.createAndDownloadInvoice();
   }
 
   /**
@@ -86,7 +86,7 @@ export class RentalsComponent implements OnInit {
   async createAndDownloadInvoice(): Promise<void> {
     try {
       const editedPdfBytes = await CreateInvoice.editPdf();
-      CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
+      //CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
       console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
     } catch (error) {
       console.error('Error editing PDF:', error);

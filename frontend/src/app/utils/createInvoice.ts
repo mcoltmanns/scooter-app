@@ -14,7 +14,15 @@ export class CreateInvoice {
         const existingPdfBytes = await fetch('/assets/Rechnung.pdf').then(res => res.arrayBuffer()); // load the existing PDF file
     
         const pdfDoc = await PDFDocument.load(existingPdfBytes); // load pdf document
-    
+
+        /* create date when the invoice is created */
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth() +1; // +1 because getMonth() is zero based
+        const day = today.getDate();
+        const currentDate =  day + '.' + month + '.' + year;
+        console.log(currentDate);
+
         /* get first pdf page */
         const firstPage = pdfDoc.getPage(0);
         const { height } = firstPage.getSize();
