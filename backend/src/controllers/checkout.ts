@@ -12,6 +12,7 @@ import { BachelorCardData, PaymentService } from '../interfaces/payment-service.
 import { SwpSafeData } from '../interfaces/payment-service.interface';
 import { HciPalData } from '../interfaces/payment-service.interface';
 import ReservationManager from '../services/reservation-manager';
+import RentalManager from '../services/rental-manager';
 
 interface ProductInstance extends Model {
   price_per_hour: number;
@@ -48,11 +49,8 @@ export class CheckoutController {
     const transaction = await Database.getSequelize().transaction();
 
     try {
-      // make sure the scooter isn't reserved by someone else  
-      const reservation = await Reservation.findOne({ where: { scooter_id: scooterId, user_id: { [Op.ne]: userId } } });
-      if(reservation) {
-        throw new Error('SCOOTER_UNAVAILABLE');
-      }
+      await RentalManager.startRental(userId, scooterId, duration * 60 * 60 * 1000, transaction); // ask the rental manager for a rental - check scooter existance and availability, and sets up the transaction to update scooter, reservation, and rental tables
+      // also ends associated reservation, if there was one
 
       const scooter = await Scooter.findByPk(scooterId, { 
         include: [{
@@ -60,20 +58,7 @@ export class CheckoutController {
           attributes: ['price_per_hour']
         }],
         transaction 
-      }) as ScooterInstance;
-
-      if (!scooter) {
-        throw new Error('SCOOTER_NOT_FOUND');
-      }
-
-      /* Note: We are using a transaction, so it is safe to do that critical check here.
-       * A transaction is treated atomically, so we can be sure that the scooter is not
-       * booked by another user in the meantime. */
-      if (scooter.get('active_rental_id') !== null) {
-        throw new Error('SCOOTER_CURRENTLY_RENTED');
-        /* Note: To ensure the atomicity of the transaction, it is better to throw errors
-         * for such checks instead of returning a response. */
-      }
+      }) as ScooterInstance; // figure out our scooter and model
 
       const paymentMethod = await PaymentMethod.findOne({ 
         where: { id: paymentMethodId, usersAuthId: userId },
@@ -123,16 +108,7 @@ export class CheckoutController {
       /* If we reach this point, the payment was successful */
       paymentToken = token;   // Save the payment token in case we need to rollback the transaction
 
-      /* Book the scooter */
-      const rental = await Rental.create(newRental, { transaction });
-      
-      scooter.set('active_rental_id', rental.get('id'));
-      await scooter.save({ transaction });
-
       await transaction.commit();
-
-      // delete the reservation - starts its own transaction, so must be done after the commit
-      await ReservationManager.endReservation(reservation);
     } catch (error) {
       console.error(error);
 
