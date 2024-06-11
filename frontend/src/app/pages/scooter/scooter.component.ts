@@ -122,7 +122,7 @@ export class ScooterComponent implements OnInit {
 
     console.log(`reserve scooter ${scooterId}`);
     // ask the booking service to try and take out a reservation on this scooter
-    this.bookingService.postReservation({ scooterId: scooterId }).subscribe({
+    this.bookingService.makeReservation({ scooterId: scooterId }).subscribe({
       next: (value) => {
         console.log(value);
         this.router.navigate(['search']); // needs more feedback on if reservation was successful

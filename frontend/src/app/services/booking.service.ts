@@ -17,7 +17,13 @@ export class BookingService {
     return this.http.post<ResponseMessageCheckout>('/api/checkout', data).pipe(shareReplay());
   }
 
-  public postReservation(data: ReservationObject): Observable<ResponseMessageReservation> {
+  // try to make a reservation
+  public makeReservation(data: ReservationObject): Observable<ResponseMessageReservation> {
     return this.http.post<ResponseMessageReservation>('/api/reserve', data).pipe(shareReplay());
+  }
+
+  // get the reservation info associated with this session
+  public getReservation(): Observable<ResponseMessageReservation> {
+    return this.http.get<ResponseMessageReservation>('/api/reserve').pipe(shareReplay());
   }
 }

@@ -7,6 +7,9 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
+import { Reservation } from 'src/app/models/reservation';
+import { BookingService } from 'src/app/services/booking.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-rentals',
@@ -16,14 +19,16 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
   styleUrl: './rentals.component.css'
 })
 export class RentalsComponent implements OnInit {
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService) {}
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private bookingService: BookingService, private router: Router) {}
 
   // Variables for storing all rentals and the product information
   public loadingDataScooter = true;
   public loadingDataProduct = true;
   public loadingDataOption = true;
+  public loadingDataReservation = true;
   public rentals: Rental[] = [];
   public products: Product[] = [];
+  public reservation: Reservation | undefined = {id: 1,user_id: 2,scooter_id: 1,endsAt: 'never'};
   public errorMessage = '';
 
   // User Units variables
@@ -72,6 +77,19 @@ export class RentalsComponent implements OnInit {
       error: (err) => {
         this.errorMessage = err.message;
         this.loadingDataOption = false;
+        console.error(err);
+      }
+    });
+
+    // get this user's reservation, if they have one
+    this.bookingService.getReservation().subscribe({
+      next: value => {
+          this.reservation = value.reservation;
+          console.log(this.reservation);
+      },
+      error: (err) => {
+        this.errorMessage = err.message;
+        this.loadingDataReservation = false;
         console.error(err);
       }
     });
@@ -151,5 +169,18 @@ export class RentalsComponent implements OnInit {
       str = value.toString() + '€';
     }
     return str;
+  }
+
+  // navigate to the info page for the reserved scooter
+  goToScooterPage(scooter_id: number): void {
+  const oldOriginState = history.state.originState || {};
+  this.router.navigateByUrl(`search/scooter/${scooter_id}`, {
+    state: {
+      originState: {
+        ...oldOriginState,
+        path: 'booking'
+      }
+    }
+  });
   }
 }
