@@ -10,6 +10,12 @@ export class CreateInvoice {
      * @returns 
      */
     static async editPdf(): Promise<Uint8Array> {
+
+        /* variables for user data */
+        const name = 'Swift Stream - Art Nuveau Edition';
+        const price_per_hour = 12.33;
+        const rentalDuration = 3;
+        const total = 12.33;
         
         const existingPdfBytes = await fetch('/assets/Rechnung.pdf').then(res => res.arrayBuffer()); // load the existing PDF file
     
@@ -18,7 +24,7 @@ export class CreateInvoice {
         /* create date when the invoice is created */
         const today = new Date();
         const year = today.getFullYear();
-        const month = today.getMonth() +1; // +1 because getMonth() is zero based
+        const month = today.getMonth() + 1; // +1 because getMonth() is zero based
         const day = today.getDate();
         const currentDate =  day + '.' + month + '.' + year;
         console.log(currentDate);
@@ -29,20 +35,49 @@ export class CreateInvoice {
     
         /* add fonts */
         const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-        const fontSize = 12;
+        const fontSize = 9;
     
-        const name = 'Nimbus 2000';
         const lineHeight = fontSize + 400;
-        const currentYPosition = 40; // Adjust this value as needed for proper positioning
+        const currentYPosition = 170; // current y position
+        const textWidth = timesRomanFont.widthOfTextAtSize(name, fontSize);
 
-        // Add name into the pdf
+        // add name into the pdf
         firstPage.drawText(name, {
-        x: 50,
+        x: 140 - (textWidth / 2),
         y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
         size: fontSize,
         font: timesRomanFont,
         color: rgb(0, 0, 0),
         });
+
+        // add price_per_hour into the pdf
+        firstPage.drawText(price_per_hour.toString(), {
+            x: 240,
+            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        // add rental duartion into the pdf
+        firstPage.drawText(rentalDuration.toString(), {
+            x: 360,
+            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        // add total price into the pdf
+        firstPage.drawText(total.toString(), {
+            x: 450,
+            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+
         return await pdfDoc.save(); // Save the edited pdf file
     }
 

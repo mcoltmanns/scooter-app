@@ -1,8 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { Rental } from 'src/app/models/rental';
+import { Rental, RentalWithScooterId } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
-import { Product } from 'src/app/models/product';
 import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
@@ -24,7 +23,7 @@ export class RentalsComponent implements OnInit {
   public loadingDataProduct = true;
   public loadingDataOption = true;
   public rentals: Rental[] = [];
-  public products: Product[] = [];
+  public products: RentalWithScooterId[] = [];
   public errorMessage = '';
 
   // User Units variables
@@ -49,10 +48,11 @@ export class RentalsComponent implements OnInit {
     });
 
     /* Get all scooters from backend */
-    this.mapService.getProductInfo().subscribe({
+    this.rentalService.getRentalProduct().subscribe({
       next: (value) => {
         this.products = value;
         this.loadingDataProduct = false;
+        console.log(this.products);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -76,23 +76,9 @@ export class RentalsComponent implements OnInit {
         console.error(err);
       }
     });
-
-    this.createAndDownloadInvoice();
   }
 
-  /**
-   * creates an invoice for a scooter
-   */
-  async createAndDownloadInvoice(): Promise<void> {
-    try {
-      const editedPdfBytes = await CreateInvoice.editPdf();
-      //CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
-      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
-    } catch (error) {
-      console.error('Error editing PDF:', error);
-    }
-  }
-  
+
   /* how long a user booked the scooter */
   rentalDuration(begin: string, end: string): string {
     const date1 = new Date(begin);
@@ -107,8 +93,20 @@ export class RentalsComponent implements OnInit {
     return `${hoursStr}`;
   }
 
+
+  skipProduct(productId: number):number{
+    if(productId === undefined){
+      return 0;
+    }
+    if(productId >= 26){
+      return productId + 1;
+    }
+    return productId;
+  }
+
   /* Get the price for each scooter */
   getPriceByProductId(productId: number): number | undefined {
+    productId = this.skipProduct(productId);
     const product = this.products.find(p => p.id === productId);
     return product ? product.price_per_hour : undefined;
   }
@@ -130,14 +128,62 @@ export class RentalsComponent implements OnInit {
 
   /* Get the name for each scooter */
   getNameByProductId(productId: number): string | undefined {
+    productId = this.skipProduct(productId);
     const product = this.products.find(p => p.id === productId);
     return product ? product.name.toUpperCase() : undefined;
   }
 
   /* Get Picture from the product list*/
   getPictureByProductId(productId: number): String{
+    productId = this.skipProduct(productId);
     const product = this.products.find(p => p.id === productId);
     return `http://localhost:8000/img/products/${product ? product.name : undefined}.jpg`;
+  }
+
+   /**
+   * creates an invoice for a scooter
+   */
+   async createAndDownloadInvoice(): Promise<void> {
+    try {
+      const editedPdfBytes = await CreateInvoice.editPdf();
+      CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
+      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
+    } catch (error) {
+      console.error('Error editing PDF:', error);
+    }
+  }
+
+  /**
+   * Previews a invoice pdf
+   * METHODE WIRD IM MOMENT NICHT AKTIV IN DER APP GENUTZT -> ZUM DEBUGGEN DER PDF HILFREICH
+   * KÖNNTE MAN ABER NOCH BENUTZEN
+   */
+  async createAndPreviewInvoice(): Promise<void> {
+    try {
+      const editedPdfBytes = await CreateInvoice.editPdf();
+      const blob = new Blob([editedPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+  
+      // PDF im neuen Tab oder in einem iframe anzeigen
+      window.open(url);
+  
+      // Optional: Eine Schaltfläche zum Herunterladen hinzufügen
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = 'bearbeiteteRechnung.pdf';
+      downloadLink.textContent = 'PDF herunterladen';
+      document.body.appendChild(downloadLink);
+      
+      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt und wird im Browser angezeigt.');
+    } catch (error) {
+      console.error('Error editing PDF:', error);
+    }
+  }
+  
+  /* downloads the invoice pdf when download button is clicked */
+  downloadInvoice():void{
+    //this.createAndDownloadInvoice();
+    this.createAndPreviewInvoice();
   }
 
   /* Formats date time from the backend */

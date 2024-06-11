@@ -22,8 +22,13 @@
                     <path d="M18.732 9.9857L11.0058 2.25945C10.682 1.9357 10.2358 1.75195 9.77204 1.75195H3.49829C2.53579 1.75195 1.74829 2.53945 1.74829 3.50195V9.7757C1.74829 10.2395 1.93204 10.6857 2.26454 11.0095L9.99079 18.7357C10.6733 19.4182 11.7845 19.4182 12.467 18.7357L18.7408 12.462C19.4233 11.7795 19.4233 10.677 18.732 9.9857ZM11.2245 17.502L3.49829 9.7757V3.50195H9.77204L17.4983 11.2282L11.2245 17.502Z" fill="#123800"/>
                     <path d="M5.68579 7.00195C6.41066 7.00195 6.99829 6.41433 6.99829 5.68945C6.99829 4.96458 6.41066 4.37695 5.68579 4.37695C4.96092 4.37695 4.37329 4.96458 4.37329 5.68945C4.37329 6.41433 4.96092 7.00195 5.68579 7.00195Z" fill="#123800"/>
                   </svg>
-                  <p>{{convertCurrencyUnits(getTotalPrice(rental.scooter_id, rental.createdAt, rental.endedAt), selectedCurrency)}}</p>          
+                  <p>{{convertCurrencyUnits(getTotalPrice(rental.scooter_id, rental.createdAt, rental.endedAt), selectedCurrency)}}</p>        
                 </div>
+                <div class="download-button" (click)="downloadInvoice()">
+                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 16L12 4M12 16L8 12M12 16L16 12M4 20H20" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>  
               </div>
             </div>
           </div>
