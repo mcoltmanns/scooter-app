@@ -31,6 +31,10 @@ class HciPal
 
 class SwpSafe
 
+class Scooter
+
+class Rental
+
 class Database {
     Sequelize sequelize
 
@@ -63,6 +67,8 @@ CheckoutController -u-> BachelorCard : use
 CheckoutController -u-> HciPal : use
 CheckoutController -u-> SwpSafe : use
 CheckoutController -l-> Database : use
+CheckoutController -d-> Scooter : use
+CheckoutController -d-> Rental : use
 
 HciPal -r-> HciPalData : use
 BachelorCard -r-> BachelorCardData : use
