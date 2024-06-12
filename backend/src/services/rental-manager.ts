@@ -25,6 +25,7 @@ abstract class RentalManager {
     }
 
     // set a scooter as rented for a user, if possible (scooter is free)
+    // if caller provides a transaction, use that and don't commit/rollback. otherwise, checkout and manage a new transaction
     public static async startRental(userId: number, scooterId: number, rental_duration_ms: number, transaction?: Transaction): Promise<Model> {
         let rental: Model;
         let expiration: Date;
@@ -34,8 +35,6 @@ abstract class RentalManager {
         const scooter = await Scooter.findByPk(scooterId);
         if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
         // can't reserve if scooter is reserved by someone else or rented
-        console.log(await this.getRentalsFromScooter(scooterId)); // DEBUG
-        console.log(await ReservationManager.getReservationFromScooter(scooterId)); // DEBUG
         const reservation = await ReservationManager.getReservationFromScooter(scooterId);
         if((await RentalManager.getRentalsFromScooter(scooterId)).length !== 0 || (reservation && reservation.dataValues.user_id !== userId)) {
             console.log('reserved');
@@ -50,16 +49,19 @@ abstract class RentalManager {
             scooter.setDataValue('active_rental_id', rental.dataValues.id);
             scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
-            if(reservation) ReservationManager.endReservation(reservation); // if there was a reservation, end it
-            // dispatch a job to delete the rental when it expires
+            if(reservation) ReservationManager.endReservation(reservation, transaction); // if there was a reservation, end it
+            // dispatch a job to end the rental when it expires
             new CronJob(
                 expiration,
                 async () => { // on tick
-                    await this.endRental(rental);
+                    try {
+                        await this.endRental(rental);
+                        console.log('ended rental');
+                    } catch (error) {
+                        console.error(`could not end rental at scheduled time!\n${error}`);
+                    }
                 },
-                () => {
-                    console.log('deleted expired rental'); // on complete
-                },
+                null,
                 true // start now
             );
         } catch (error) {
@@ -71,17 +73,19 @@ abstract class RentalManager {
     }
 
     // end a rental, freeing the scooter
-    public static async endRental(rental: Model): Promise<void> {
-        const transaction = await database.getSequelize().transaction();
+    // if caller provides a transaction, use that and don't commit/rollback. otherwise, checkout and manage a new transaction
+    public static async endRental(rental: Model, transaction?: Transaction): Promise<void> {
+        const transactionExtern: boolean = transaction !== undefined;
+        if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
             const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'));
-            await rental.destroy({transaction: transaction});
+            //await rental.destroy({transaction: transaction}); // this will be needed when we start booking dynamically!
             scooter.setDataValue('active_rental_id', null);
             await scooter.save({transaction: transaction});
-            transaction.commit();
+            if(!transactionExtern) await transaction.commit();
         } catch (error) {
-            console.error(`could not end rental!\n${error}`);
-            await transaction.rollback();
+            if(!transactionExtern) await transaction.rollback();
+            throw new Error('END_RENTAL_FAILED');
         }
         return;
     }

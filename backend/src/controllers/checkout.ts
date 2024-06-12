@@ -1,17 +1,15 @@
 import { Request, Response } from 'express';
 import { Scooter } from '../models/scooter';
-import { Rental, Reservation } from '../models/rental';
 import Database from '../database';
 import { PaymentMethod } from '../models/payment';
 import { Product } from '../models/product';
 import BachelorCard from '../services/payment/bachelorcard';
 import SwpSafe from '../services/payment/swpsafe';
 import HciPal from '../services/payment/hcipal';
-import { Model, Op } from 'sequelize';
+import { Model } from 'sequelize';
 import { BachelorCardData, PaymentService } from '../interfaces/payment-service.interface';
 import { SwpSafeData } from '../interfaces/payment-service.interface';
 import { HciPalData } from '../interfaces/payment-service.interface';
-import ReservationManager from '../services/reservation-manager';
 import RentalManager from '../services/rental-manager';
 
 interface ProductInstance extends Model {
@@ -49,7 +47,7 @@ export class CheckoutController {
     const transaction = await Database.getSequelize().transaction();
 
     try {
-      await RentalManager.startRental(userId, scooterId, duration * 60 * 60 * 1000, transaction); // ask the rental manager for a rental - check scooter existance and availability, and sets up the transaction to update scooter, reservation, and rental tables
+      await RentalManager.startRental(userId, scooterId, duration * 60 * 60 * 1000, transaction); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
       // also ends associated reservation, if there was one
 
       const scooter = await Scooter.findByPk(scooterId, { 
