@@ -25,6 +25,8 @@ abstract PaymentService {
     - Promise<{status: number, message: string}> processResponse(String data, String fieldWanted)
 }
 
+entity Frontend
+
 class BachelorCard
 
 class HciPal
@@ -57,37 +59,45 @@ class CheckoutController {
 }
 
 class RentalManager {
-
+    + Promise<Model> startRental(Number userId, Number scooterId, Number duration)
+    + Promise<void> endRental(Rental rental)
 }
 
 class ReservationManager {
-
+    + Promise<Model> startReservation(Number userId, Number scooterId)
+    + Promise<void> endReservation(Reservation reservation)
 }
+
+class PaymentMethod
 
 PaymentService <|-- BachelorCard : implements
 PaymentService <|-- HciPal : implements
 PaymentService <|-- SwpSafe : implements
 
-PaymentController -u-> BachelorCard : use
-PaymentController -u-> HciPal : use
-PaymentController -u-> SwpSafe : use
-PaymentController -d-> Database : use
+PaymentController -u-> BachelorCard : uses
+PaymentController -u-> HciPal : uses
+PaymentController -u-> SwpSafe : uses
+PaymentController -d-> Database : queries
+PaymentController -l-> PaymentMethod : manages instances of
 
-CheckoutController -l-> Database : use
+CheckoutController -l-> Database : queries
 CheckoutController -d-> RentalManager : use
-CheckoutController -d-> ReservationManager : use
+CheckoutController -u-> ReservationManager : use
 CheckoutController -u-> PaymentController : use
 
-HciPal -r-> HciPalData : use
-BachelorCard -r-> BachelorCardData : use
-SwpSafe -r-> SwpSafeData : use
+HciPal -l-> HciPalData : use
+BachelorCard -l-> BachelorCardData : use
+SwpSafe -l-> SwpSafeData : use
 
-RentalManager -d-> Scooter : use
-RentalManager -d-> Reservation : use
-RentalManager -d-> Rental : use
+RentalManager -u-> Scooter : manages instances of
+RentalManager -u-> Reservation : manages instances of
+RentalManager -u-> Rental : manages instances of
 
-ReservationManager -d-> Scooter : use
-ReservationManager -d-> Reservation : use
-ReservationManager -d-> Rental : use
+ReservationManager -d-> Scooter : manages instances of
+ReservationManager -d-> Reservation : manages instances of
+ReservationManager -d-> Rental : manages instances of
+
+Frontend <-u-> CheckoutController : communicate
+Frontend <-u-> PaymentController : communicate
 
 @enduml
