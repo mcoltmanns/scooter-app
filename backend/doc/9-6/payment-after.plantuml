@@ -33,11 +33,30 @@ class HciPal
 
 class SwpSafe
 
-class Scooter
+class Scooter {
+    id: int
+    product_id : string
+    battery: float
+    coordinates_lat: float
+    coordinates_lng: float
+    active_rental_id: int
+    reservation_id: int
+}
 
-class Rental
+class Rental {
+    id: int
+    endedAt: Date
+    createdAt: Date
+    user_id: int
+    scooter_id: int
+}
 
-class Reservation
+class Reservation{
+    id: int
+    endedAt: Date
+    user_id: int
+    scooter_id: int
+}
 
 class Database {
     Sequelize sequelize
@@ -68,8 +87,6 @@ class ReservationManager {
     + Promise<void> endReservation(Reservation reservation)
 }
 
-class PaymentMethod
-
 PaymentService <|-- BachelorCard : implements
 PaymentService <|-- HciPal : implements
 PaymentService <|-- SwpSafe : implements
@@ -78,16 +95,15 @@ PaymentController -u-> BachelorCard : uses
 PaymentController -u-> HciPal : uses
 PaymentController -u-> SwpSafe : uses
 PaymentController -d-> Database : queries
-PaymentController -l-> PaymentMethod : manages instances of
 
-CheckoutController -l-> Database : queries
+CheckoutController -d-> Database : queries
 CheckoutController -d-> RentalManager : use
-CheckoutController -u-> ReservationManager : use
-CheckoutController -u-> PaymentController : use
+CheckoutController -l-> ReservationManager : use
+CheckoutController -r-> PaymentController : use
 
-HciPal -l-> HciPalData : use
-BachelorCard -l-> BachelorCardData : use
-SwpSafe -l-> SwpSafeData : use
+HciPal -r-> HciPalData : use
+BachelorCard -r-> BachelorCardData : use
+SwpSafe -r-> SwpSafeData : use
 
 RentalManager -u-> Scooter : manages instances of
 RentalManager -u-> Reservation : manages instances of
@@ -97,7 +113,11 @@ ReservationManager -d-> Scooter : manages instances of
 ReservationManager -d-> Reservation : manages instances of
 ReservationManager -d-> Rental : manages instances of
 
-Frontend <-u-> CheckoutController : communicate
-Frontend <-u-> PaymentController : communicate
+Frontend <-d-> CheckoutController : communicate
+Frontend <-d-> PaymentController : communicate
+
+Scooter -> Database : stored in
+Rental -> Database : stored in
+Reservation -> Database : stored in
 
 @enduml
