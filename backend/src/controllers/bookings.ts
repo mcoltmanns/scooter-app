@@ -3,6 +3,7 @@ import { Rental } from '../models/rental';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { Op } from 'sequelize';
+import { CreateInvoice } from '../utils/createInvoice'; 
 
 export class BookingsController {
     /* Method that returns all entries from the Rentals table for a specific User_Id */
@@ -61,6 +62,38 @@ export class BookingsController {
         } catch (error) {
             console.error(error);
             response.status(500).json({ code: 500, message: 'Fehler beim Abrufen der Produkte.' });
+        }
+    }
+
+    /* method to get the information for the invoice pdf */
+    public async generateInvoice(request: Request, response: Response): Promise<void> {
+        const { rentalId } = request.body;
+
+        if (!rentalId) {
+            response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
+            return;
+        }
+
+        try {
+            // search for a rental agreement using the rentalId
+            const rental = await Rental.findOne({ where: { id: rentalId } });
+
+            if (!rental) {
+                response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
+                return;
+            }
+
+            //create PDF
+            console.log('test');
+            const pdfBytes = await CreateInvoice.editPdf();
+
+            // send PDF as an answer
+            response.setHeader('Content-Type', 'application/pdf');
+            response.setHeader('Content-Disposition', 'attachment; filename="invoice.pdf"');
+            response.send(pdfBytes);
+        } catch (error) {
+            console.error(error);
+            response.status(500).json({ code: 500, message: 'Fehler beim Erstellen der Rechnung.' });
         }
     }
 }

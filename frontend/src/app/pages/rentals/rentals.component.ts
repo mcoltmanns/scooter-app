@@ -74,6 +74,9 @@ export class RentalsComponent implements OnInit {
         console.error(err);
       }
     });
+
+    console.log('test');
+    this.createAndPreviewInvoice();
   }
 
 
@@ -182,6 +185,31 @@ export class RentalsComponent implements OnInit {
     console.log(begin);
     console.log(end);
     this.createAndPreviewInvoice();
+  }
+
+  /* Previews generated PDF rom the Backend */
+  async createAndPreviewInvoice1(): Promise<void> {
+    try {
+      const pdfObservable = this.rentalService.generateInvoicePdf(1);
+      
+      pdfObservable.subscribe({
+        next: (pdfBlob) => {
+          const blob = new Blob([pdfBlob], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+  
+          // Open PDF in a new tab or iframe
+          window.open(url);
+  
+          console.log('Invoice preview displayed successfully.');
+        },
+        error: (error) => {
+          console.error('Error fetching invoice PDF:', error);
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error displaying invoice preview:', error);
+    }
   }
 
   /* Formats date time from the backend */
