@@ -31,9 +31,23 @@ class HciPal
 
 class SwpSafe
 
-class Scooter
+class Scooter {
+    id: int
+    product_id : string
+    battery: float
+    coordinates_lat: float
+    coordinates_lng: float
+    active_rental_id: int
+    reservation_id: int
+}
 
-class Rental
+class Rental {
+    id: int
+    endedAt: Date
+    createdAt: Date
+    user_id: int
+    scooter_id: int
+}
 
 class Database {
     Sequelize sequelize
