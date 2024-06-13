@@ -11,7 +11,7 @@ export class CreateInvoice {
      * edits pdf file with scooter information
      * @returns 
      */
-    static async editPdf(): Promise<Uint8Array> {
+    static async editPdf(rentalId : number): Promise<Uint8Array> {
 
         /* variables for user data */
         const name = 'Swift Stream - Art Nuveau Edition';
@@ -43,8 +43,17 @@ export class CreateInvoice {
         const fontSize = 9;
     
         const lineHeight = fontSize + 400;
-        const currentYPosition = 170; // current y position
+        const currentYPosition = 100; // current y position
         const textWidth = timesRomanFont.widthOfTextAtSize(name, fontSize);
+
+        // add name into the pdf
+        firstPage.drawText(rentalId.toString(), {
+            x: 100 - (textWidth / 2),
+            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+            });
 
         // add name into the pdf
         firstPage.drawText(name, {

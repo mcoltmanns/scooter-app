@@ -4,6 +4,8 @@ import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { Op } from 'sequelize';
 import { CreateInvoice } from '../utils/createInvoice'; 
+import fs from 'fs';
+import path from 'path';
 
 export class BookingsController {
     /* Method that returns all entries from the Rentals table for a specific User_Id */
@@ -66,6 +68,7 @@ export class BookingsController {
     }
 
     /* method to get the information for the invoice pdf */
+    /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
         const { rentalId } = request.body;
 
@@ -83,14 +86,27 @@ export class BookingsController {
                 return;
             }
 
-            //create PDF
+            // create PDF
             console.log('test');
-            const pdfBytes = await CreateInvoice.editPdf();
+            const pdfBytes = await CreateInvoice.editPdf(rentalId);
 
+            // specify path to save the file
+            const filePath = path.resolve(process.cwd(), 'src', 'utils', 'test.pdf');
+
+            // write PDF to file
+            fs.writeFile(filePath, pdfBytes, (err) => {
+                if (err) {
+                    console.error('Fehler beim Speichern der PDF-Datei:', err);
+                    response.status(500).json({ code: 500, message: 'Fehler beim Speichern der PDF-Datei.' });
+                    return;
+                }
+                console.log(`Die PDF wurde erfolgreich gespeichert unter: ${filePath}`);
+            });
             // send PDF as an answer
             response.setHeader('Content-Type', 'application/pdf');
-            response.setHeader('Content-Disposition', 'attachment; filename="invoice.pdf"');
+            response.setHeader('Content-Disposition', 'inline; filename="Rechnung.pdf"');
             response.send(pdfBytes);
+
         } catch (error) {
             console.error(error);
             response.status(500).json({ code: 500, message: 'Fehler beim Erstellen der Rechnung.' });
