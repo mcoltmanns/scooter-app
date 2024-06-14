@@ -1,11 +1,3 @@
-/**
- * rental management service
- * given a scooter, check if it's rented
- * given a user:
- * - initiate a rental with that user and the first availabe instance of the model queried (only if the user isn't already renting)
- * - end a rental
- */
-
 import { Model, Transaction } from 'sequelize';
 import { Rental } from '../models/rental';
 import ReservationManager from './reservation-manager';
@@ -14,7 +6,7 @@ import database from '../database';
 import { CronJob } from 'cron';
 
 abstract class RentalManager {
-    // get the rental associated with a scooter
+    // get all rentals associated with a scooter (active and ended)
     public static async getRentalsFromScooter(scooterId: number): Promise<Model[]> {
         return await Rental.findAll({ where: { scooter_id: scooterId } });
     }
@@ -36,7 +28,7 @@ abstract class RentalManager {
         if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
         // can't reserve if scooter is reserved by someone else or rented
         const reservation = await ReservationManager.getReservationFromScooter(scooterId);
-        if((await RentalManager.getRentalsFromScooter(scooterId)).length !== 0 || (reservation && reservation.dataValues.user_id !== userId)) {
+        if(scooter.getDataValue('active_rental_id') !== null || (reservation && reservation.dataValues.user_id !== userId)) {
             console.log('reserved');
             throw new Error('SCOOTER_UNAVAILABLE');
         }

@@ -1,6 +1,5 @@
 import { Model, Transaction } from 'sequelize';
 import { RESERVATION_LIFETIME, Reservation } from '../models/rental';
-import RentalManager from './rental-manager';
 import database from '../database';
 import { Scooter } from '../models/scooter';
 import { CronJob } from 'cron';
@@ -27,7 +26,7 @@ abstract class ReservationManager {
         const scooter = await Scooter.findByPk(scooterId);
         if(!scooter) throw new Error('SCOOTER_DOES_NOT_EXIST');
         // can't reserve if scooter is reserved or rented
-        if((await RentalManager.getRentalsFromScooter(scooterId)).length !== 0 || await this.getReservationFromScooter(scooterId)) {
+        if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await this.getReservationFromScooter(scooterId) !== null) {
             throw new Error('SCOOTER_UNAVAILABLE');
         }
         // can't reserve if user already has reservation
@@ -43,6 +42,7 @@ abstract class ReservationManager {
             // update scooters table
             scooter.setDataValue('reservation_id', reservation.dataValues.id);
             await scooter.save({transaction: transaction});
+            console.log(scooter);
             if(!transactionExtern) await transaction.commit();
             // dispatch a job to delete the reservation when it expires
             new CronJob(

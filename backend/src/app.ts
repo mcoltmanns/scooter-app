@@ -115,7 +115,8 @@ app.post('/api/updateUserPreferences', option.updateUserPreferences); // update 
 
 /* Route to process reservations/checkout (book a scooter) */
 app.post('/api/reserve', validator.validateReservation, bookings.reserveScooter.bind(auth)); // start a reservation
-app.get('api/reserve', bookings.getUserReservation.bind(auth)); // get a user's active reservation
+app.get('/api/reserve', bookings.getUserReservation); // get a user's active reservation
+app.delete('/api/reserve', bookings.endUserReservation); // end a user's active reservation
 app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);
 
 app.get('/api', api.getInfo); // DEBUG testing session validator
