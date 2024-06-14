@@ -1,5 +1,5 @@
 import { Location } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
@@ -14,16 +14,9 @@ export class FilterButtonComponent {
 
   constructor(private location: Location, private router: Router) {}
 
-  toggleFilters(): void {
-    //rewrite for filters, so on booking it shows teh booking filters, on scooter it shows the scooter filters
+  @Output() filterToggle = new EventEmitter<void>();
 
-
-    /* If no path is provided, go back to the previous page. */
-    //if (!this.path) {this.location.back();return;}
-
-    /* If a path is provided, navigate to it and
-       pass the originState object to the next route if it exists. */
-    //const originState = history.state.originState ? { originState: history.state.originState } : {};
-    //this.router.navigate([this.path], { state: originState});
+  toggleFilters() {
+    this.filterToggle.emit();
   }
 }

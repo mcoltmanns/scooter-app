@@ -20,7 +20,7 @@ export class Filters {
     static filterDate(startAfter: Date, endBefore: Date, rentals: Rental[]) : Rental[] {
         const filteredRentals: Rental[] = [];
         rentals.forEach(rental => {
-            if (!( new Date(rental.createdAt) <= startAfter) && !( new Date(rental.endedAt) >= endBefore)){
+            if (( new Date(rental.createdAt) >= startAfter) && ( new Date(rental.endedAt) <= endBefore)){
                 filteredRentals.push(rental);
             }      
         });

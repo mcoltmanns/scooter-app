@@ -8,16 +8,28 @@ import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
 //import { CreateInvoice } from 'src/app/utils/createInvoice'; // imports PDF Generation from the frontend
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
+import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
+import { ButtonComponent } from 'src/app/components/button/button.component';
+import { FormGroup, FormBuilder, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Filters } from 'src/app/utils/util-filters';
 
 @Component({
     selector: 'app-rentals',
     standalone: true,
     templateUrl: './rentals.component.html',
     styleUrl: './rentals.component.css',
-    imports: [CommonModule, FilterButtonComponent]
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule]
 })
 export class RentalsComponent implements OnInit {
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService) {}
+
+  /* Initialize the FormGroup instance that manages all input fields and their validators */
+  public bookingFilterForm!: FormGroup;
+
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder) 
+  {this.bookingFilterForm = this.fb.group({
+    lower: ['', Validators.required],
+    upper: ['', Validators.required]
+  });}
 
   // Variables for storing all rentals and the product information
   public loadingDataScooter = true;
@@ -35,17 +47,7 @@ export class RentalsComponent implements OnInit {
 
   ngOnInit(): void {
     /* Get all scooter bookings for the User from the backend*/
-    this.rentalService.getRentalInfo().subscribe({
-      next: (value) => {
-        this.rentals = value;
-        this.loadingDataScooter = false;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingDataScooter = false;
-        console.log(err);
-      }
-    });
+    this.loadRentalInfo();
 
     /* Get all scooters from backend */
     this.rentalService.getRentalProduct().subscribe({
@@ -78,6 +80,21 @@ export class RentalsComponent implements OnInit {
 
     //this.downloadInvoice1(1);
   }
+
+  loadRentalInfo(): void {
+    this.rentalService.getRentalInfo().subscribe({
+      next: (value) => {
+        this.rentals = value;
+        this.loadingDataScooter = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        this.loadingDataScooter = false;
+        console.log(err);
+      }
+    });
+  }
+
 
 
   /* how long a user booked the scooter */
@@ -221,5 +238,25 @@ export class RentalsComponent implements OnInit {
 
   //functionalities for the filters
 
-  
+  filterMenuVisible = false;
+  /* Variables that mirror the values of the input fields */
+  public lower = '';
+  public upper = '';
+
+
+
+  toggle(): void {
+    this.filterMenuVisible = !this.filterMenuVisible;
+  }
+
+  onSubmit(): void {
+    this.lower = this.bookingFilterForm.get('lower')?.value;
+    this.upper = this.bookingFilterForm.get('upper')?.value;
+    this.rentals = Filters.filterDate(new Date(this.lower), new Date(this.upper), this.rentals);
+  }
+
+  onCancel(): void {
+    this.loadRentalInfo();
+  }
+    
 }
