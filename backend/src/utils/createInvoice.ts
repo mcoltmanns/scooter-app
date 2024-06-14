@@ -19,7 +19,7 @@ export class CreateInvoice {
         const rentalDuration = 3;
         const total = 12.33;
         
-        const pdfPath = path.resolve(process.cwd(), 'src', 'utils', 'Rechnung.pdf');
+        const pdfPath = path.resolve(process.cwd(), 'img', 'pdf', 'Rechnung.pdf');
 
         // Read the PDF file
         const existingPdfBytes = fs.readFileSync(pdfPath);
@@ -94,19 +94,4 @@ export class CreateInvoice {
 
         return await pdfDoc.save(); // Save the edited pdf file
     }
-
-
-    /**
-     * downloads pdf file
-     * @param bytes 
-     * @param filename 
-     */
-    static download(bytes: Uint8Array, filename: string): void {
-        const blob = new Blob([bytes], { type: 'application/pdf' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-        URL.revokeObjectURL(link.href);
-    }    
 }
