@@ -1,3 +1,29 @@
+/**
+ * 
+ * 
+ * 
+ * FUNKTIONIEREN NICHT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
+ */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import { Rental } from 'src/app/models/rental';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
