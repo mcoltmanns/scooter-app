@@ -75,8 +75,8 @@ export class RentalsComponent implements OnInit {
       }
     });
 
-    console.log('test');
-    this.downloadInvoice1(1);
+    //this.downloadInvoice1(1);
+    this.openPdfInNewTab('test');
   }
 
 
@@ -254,5 +254,10 @@ export class RentalsComponent implements OnInit {
         console.error('Fehler beim Herunterladen der Rechnung:', error);
       }
     );
+  }
+
+  openPdfInNewTab(fileName: string): void {
+    const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
+    window.open(pdfUrl, '_blank');
   }
 }
