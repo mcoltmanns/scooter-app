@@ -221,7 +221,5 @@ export class RentalsComponent implements OnInit {
 
   //functionalities for the filters
 
-  toggleFilters(): void{
-    console.log('Button was clicked');
-  }
+  
 }
