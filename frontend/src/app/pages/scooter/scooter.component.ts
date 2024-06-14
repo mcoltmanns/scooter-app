@@ -39,6 +39,10 @@ export class ScooterComponent implements OnInit {
   public selectedCurrency = '';
   public option: Option | null = null;
 
+  public canRent = false; // is the scooter free for booking/reservation?
+  public canReserve = false; // can the user reserve the scooter?
+  public canCancel = false; // can the user end the reservation on this scooter?
+
   options: Leaflet.MapOptions = {
     layers: [
       new Leaflet.TileLayer(
@@ -65,11 +69,33 @@ export class ScooterComponent implements OnInit {
     this.mapService.getSingleScooterInfo(scooterId).subscribe({
       next: (value) => {
         this.scooter = value;
+        console.log(this.scooter);
         this.loadingScooter = false;
         const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
         this.layers.push(marker); 
         this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
         this.options.center = this.center; // Set the map center
+
+        // check reservation info (only once we have scooter info)
+        this.bookingService.getUserReservation().subscribe({
+          next: (value) => {
+            // got a reservation? (user has a reservation)
+            this.canCancel = value.scooter_id === this.scooter!.id; // user can cancel the reservation if their reservation was on this scooter
+            this.canRent = (this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null) || this.canCancel; // user can rent this scooter if they can cancel or if scooter is neither reserved nor rented
+            this.canReserve = false; // user can't reserve this scooter (already reserved)
+          },
+          error: (err) => {
+            // didn't get a reservation?
+            if(err.status === 404) { // 404 means no reservation found
+              this.canCancel = false; // user can't cancel reservation on this scooter
+              this.canReserve = this.canRent = this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null; // user can reserve or rent this scooter if it isn't otherwise reserved or rented
+            }
+            else { // other errors mean something unexpected
+              this.errorMessage = err.message;
+              console.error(err);
+            }
+          }
+        });
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -125,10 +151,24 @@ export class ScooterComponent implements OnInit {
     this.bookingService.makeReservation({ scooterId: scooterId }).subscribe({
       next: (value) => {
         console.log(value);
-        this.router.navigate(['search']); // needs more feedback on if reservation was successful
+        this.router.navigate(['reservation']); // TODO: needs more feedback on if reservation was successful
       },
       error: (err) => {
-        console.error(err); // needs more feedback on if reservation failed
+        console.error(err); // TODO: needs more feedback on if reservation failed - popup?
+      }
+    });
+  }
+
+  // if "Reservierung beenden" is pressed
+  onEndReservation(): void {
+    // ask the booking service to end the reservation for this user
+    this.bookingService.endReservation().subscribe({
+      next: () => {
+        // ok
+        this.router.navigate(['search']); // TODO also needs more feedback
+      },
+      error: (err) => {
+        console.error(err); // TODO also needs more feedback
       }
     });
   }

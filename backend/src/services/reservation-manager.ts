@@ -42,7 +42,6 @@ abstract class ReservationManager {
             // update scooters table
             scooter.setDataValue('reservation_id', reservation.dataValues.id);
             await scooter.save({transaction: transaction});
-            console.log(scooter);
             if(!transactionExtern) await transaction.commit();
             // dispatch a job to delete the reservation when it expires
             new CronJob(

@@ -29,7 +29,6 @@ abstract class RentalManager {
         // can't reserve if scooter is reserved by someone else or rented
         const reservation = await ReservationManager.getReservationFromScooter(scooterId);
         if(scooter.getDataValue('active_rental_id') !== null || (reservation && reservation.dataValues.user_id !== userId)) {
-            console.log('reserved');
             throw new Error('SCOOTER_UNAVAILABLE');
         }
         if(!transactionExtern) transaction = await database.getSequelize().transaction();

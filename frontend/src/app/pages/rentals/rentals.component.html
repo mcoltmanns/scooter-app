@@ -1,22 +1,22 @@
 <div class="page-container">
-  <h1 class="title">Meine Buchungen</h1>
   <div class="scrollable-container">
-    <div class="rentals-container" *ngIf="!loadingDataScooter && !loadingDataProduct && !loadingDataOption; else loading">
-      <div class="reservation-container" *ngIf="reservation != undefined; else noReservation">
-        <h2 class="subtitle">Reservierter Scooter</h2>
+    <div class="reservation-container" *ngIf="!loadingDataReservation; else loading">
+      <div *ngIf="reservation; else noReservation">
+        <h1 class="title">Reservierter Scooter</h1>
         <div class="scooter-container" (click)="goToScooterPage(reservation.scooter_id)">
-          <img class="picture" [src]="getPictureByProductId(reservation.scooter_id)" />
+          <img class="picture" [src]="getPictureByProductId(reservation.scooter_id)"/>
           <div class="scooter-details">
             <p class="scooter-name">{{ getNameByProductId(reservation.scooter_id) }}</p>
-            <p class="date-text">Endet am: DUMMY</p>
+            <p class="date-text">Reserviert bis: {{ formatDateTime(reservation.endsAt) }}</p>
           </div>
         </div>
       </div>
       <ng-template #noReservation>
-        <div class="reservation-container">
-          <h3>Kein Scooter reserviert.</h3>
-        </div>
+        <h1 class="title">Kein Scooter reserviert</h1>
       </ng-template>
+    </div>
+    <div class="rentals-container" *ngIf="!loadingDataScooter && !loadingDataProduct && !loadingDataOption; else loading">
+      <h1 class="title">Meine Buchungen</h1>
       <ul *ngIf="rentals.length > 0; else noRentals">
         <li *ngFor="let rental of rentals">
           <div class="scooter-container">

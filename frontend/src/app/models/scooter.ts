@@ -4,5 +4,7 @@ export interface Scooter {
     product_id: string,
     battery: number,
     coordinates_lat: number,
-    coordinates_lng: number
+    coordinates_lng: number,
+    active_rental_id: number,
+    reservation_id: number
 }

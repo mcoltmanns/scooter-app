@@ -7,9 +7,9 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-import { Reservation } from 'src/app/models/reservation';
 import { BookingService } from 'src/app/services/booking.service';
 import { Router } from '@angular/router';
+import { Reservation } from 'src/app/models/reservation';
 
 @Component({
   selector: 'app-rentals',
@@ -28,7 +28,7 @@ export class RentalsComponent implements OnInit {
   public loadingDataReservation = true;
   public rentals: Rental[] = [];
   public products: Product[] = [];
-  public reservation: Reservation | undefined = {id: 1,user_id: 2,scooter_id: 1,endsAt: 'never'};
+  public reservation: Reservation | null = null;
   public errorMessage = '';
 
   // User Units variables
@@ -81,16 +81,19 @@ export class RentalsComponent implements OnInit {
       }
     });
 
-    // get this user's reservation, if they have one
-    this.bookingService.getReservation().subscribe({
-      next: value => {
-          this.reservation = value.reservation;
-          console.log(this.reservation);
+    // get the user's reservation info
+    this.bookingService.getUserReservation().subscribe({
+      next: (value) => {
+        this.reservation = value;
+        this.loadingDataReservation = false;
       },
       error: (err) => {
-        this.errorMessage = err.message;
+        this.reservation = null;
+        if(err.code !== 404) { // if the error was anything other than there being no reservation
+          this.errorMessage = err.message;
+          console.error(err);
+        }
         this.loadingDataReservation = false;
-        console.error(err);
       }
     });
   }
@@ -171,16 +174,16 @@ export class RentalsComponent implements OnInit {
     return str;
   }
 
-  // navigate to the info page for the reserved scooter
+  // navigate to the info page for a given scooter
   goToScooterPage(scooter_id: number): void {
-  const oldOriginState = history.state.originState || {};
-  this.router.navigateByUrl(`search/scooter/${scooter_id}`, {
-    state: {
-      originState: {
-        ...oldOriginState,
-        path: 'booking'
+    const oldOriginState = history.state.originState || {};
+    this.router.navigateByUrl(`search/scooter/${scooter_id}`, {
+      state: {
+        originState: {
+          ...oldOriginState,
+          path: 'reservation'
+        }
       }
-    }
-  });
+    });
   }
 }

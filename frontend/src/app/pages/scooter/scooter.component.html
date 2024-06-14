@@ -70,12 +70,19 @@
             </div>
 
             <div class="bottom">
-                <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onBook()">
+                <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onBook()" [disabled]="!canRent">
                     Scooter buchen
                 </app-button>
-                <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onReserve()">
-                    Scooter reservieren
-                </app-button>
+                <ng-container *ngIf="!canCancel">
+                    <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onReserve()" [disabled]="!canRent || !canReserve">
+                        Scooter reservieren
+                    </app-button>
+                </ng-container>
+                <ng-container *ngIf="canCancel">
+                    <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onEndReservation()">
+                        Reservierung beenden
+                    </app-button>
+                </ng-container>
             </div>
 
             <div style="padding: 15px;">
