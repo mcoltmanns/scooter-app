@@ -86,11 +86,10 @@ export class BookingsController {
             }
 
             // create PDF
-            console.log('test');
             const pdfBytes = await CreateInvoice.editPdf(rentalId);
 
             // specify path to save the file
-            const filePath = path.resolve(process.cwd(), 'src', 'utils', 'test.pdf');
+            const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
 
             // write PDF to file
             fs.writeFile(filePath, pdfBytes, (err) => {
@@ -99,11 +98,11 @@ export class BookingsController {
                     response.status(500).json({ code: 500, message: 'Fehler beim Speichern der PDF-Datei.' });
                     return;
                 }
-                console.log(`Die PDF wurde erfolgreich gespeichert unter: ${filePath}`);
+                //console.log(`Die PDF wurde erfolgreich gespeichert unter: ${filePath}`);
             });
             // send PDF as an answer
             response.setHeader('Content-Type', 'application/pdf');
-            response.setHeader('Content-Disposition', 'inline; filename="Rechnung.pdf"');
+            response.setHeader('Content-Disposition', 'inline; filename="InvoiceScooter.pdf"');
             response.send(pdfBytes);
 
         } catch (error) {

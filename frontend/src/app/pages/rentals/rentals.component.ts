@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-import { CreateInvoice } from 'src/app/utils/createInvoice';
+//import { CreateInvoice } from 'src/app/utils/createInvoice'; // imports PDF Generation from the frontend
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 
 @Component({
@@ -77,7 +77,6 @@ export class RentalsComponent implements OnInit {
     });
 
     //this.downloadInvoice1(1);
-    this.openPdfInNewTab('test');
   }
 
 
@@ -128,91 +127,6 @@ export class RentalsComponent implements OnInit {
     return `http://localhost:8000/img/products/${product ? product.name : undefined}.jpg`;
   }
 
-   /**
-   * creates an invoice for a scooter
-   */
-   async createAndDownloadInvoice(): Promise<void> {
-    try {
-      const editedPdfBytes = await CreateInvoice.editPdf();
-      CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
-      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
-    } catch (error) {
-      console.error('Error editing PDF:', error);
-    }
-  }
-
-  /**
-   * Previews a invoice pdf
-   * METHODE WIRD IM MOMENT NICHT AKTIV IN DER APP GENUTZT -> ZUM DEBUGGEN DER PDF HILFREICH
-   * KÖNNTE MAN ABER NOCH BENUTZEN
-   */
-  async createAndPreviewInvoice(): Promise<void> {
-    try {
-      const editedPdfBytes = await CreateInvoice.editPdf();
-      const blob = new Blob([editedPdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-  
-      // PDF im neuen Tab oder in einem iframe anzeigen
-      window.open(url);
-  
-      // Optional: Eine Schaltfläche zum Herunterladen hinzufügen
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = 'bearbeiteteRechnung.pdf';
-      downloadLink.textContent = 'PDF herunterladen';
-      document.body.appendChild(downloadLink);
-      
-      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt und wird im Browser angezeigt.');
-    } catch (error) {
-      console.error('Error editing PDF:', error);
-    }
-  }
-  
-  /* downloads the invoice pdf when download button is clicked */
-  downloadInvoice(invoiceId:number, scooterId:number, begin: string, end: string):void{
-    const scooterName = this.getNameByScooterId(scooterId); 
-    const price_per_hour = this.getPriceByScooterId(scooterId);
-    const duartion = this.rentalDuration(begin, end);
-    const total = this.getTotalPrice(scooterId, begin, end);
-
-    console.log(price_per_hour);
-    console.log(scooterName);
-    console.log(duartion);
-    console.log(total);
-    //this.createAndDownloadInvoice();
-    begin = this.formatDateTime(begin);
-    end = this.formatDateTime(end);
-    console.log(invoiceId);
-    console.log(begin);
-    console.log(end);
-    this.createAndPreviewInvoice();
-  }
-
-  /* Previews generated PDF rom the Backend */
-  async createAndPreviewInvoice1(): Promise<void> {
-    try {
-      const pdfObservable = this.rentalService.generateInvoicePdf(1);
-      
-      pdfObservable.subscribe({
-        next: (pdfBlob) => {
-          const blob = new Blob([pdfBlob], { type: 'application/pdf' });
-          const url = URL.createObjectURL(blob);
-  
-          // Open PDF in a new tab or iframe
-          window.open(url);
-  
-          console.log('Invoice preview displayed successfully.');
-        },
-        error: (error) => {
-          console.error('Error fetching invoice PDF:', error);
-        }
-      });
-      
-    } catch (error) {
-      console.error('Error displaying invoice preview:', error);
-    }
-  }
-
   /* Formats date time from the backend */
   formatDateTime(dateString: string): string {
     const date = new Date(dateString);
@@ -243,13 +157,20 @@ export class RentalsComponent implements OnInit {
   }
 
 
-  downloadInvoice1(rentalId: number): void {
+  /* This method should retrieve the invoice pdf from the backend */
+  displayInvoice(rentalId: number): void {
     this.rentalService.generateInvoicePdf(rentalId).subscribe(
       (pdfBlob: Blob) => {
         const blob = new Blob([pdfBlob]);
         console.log(blob);
+        /* This does not work ! */
+        /*
         const blobUrl = URL.createObjectURL(pdfBlob);
         window.open(blobUrl);
+        */
+       const fileName = 'InvoiceScooter';
+        const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
+        window.open(pdfUrl, '_blank');
       },
       (error) => {
         console.error('Fehler beim Herunterladen der Rechnung:', error);
@@ -257,10 +178,44 @@ export class RentalsComponent implements OnInit {
     );
   }
 
-  openPdfInNewTab(fileName: string): void {
-    const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
-    window.open(pdfUrl, '_blank');
+  // AB hier alles alte Methdoden die für die Generierung im Frontend verwendet wurden
+  /*
+  //creates an invoice for a scooter
+  async createAndDownloadInvoice(): Promise<void> {
+    try {
+      const editedPdfBytes = await CreateInvoice.editPdf();
+      CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
+      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
+    } catch (error) {
+      console.error('Error editing PDF:', error);
+    }
   }
+
+  //Previews a invoice pdf
+  //METHODE WIRD IM MOMENT NICHT AKTIV IN DER APP GENUTZT -> ZUM DEBUGGEN DER PDF HILFREICH
+  //KÖNNTE MAN ABER NOCH BENUTZEN
+  async createAndPreviewInvoice(): Promise<void> {
+    try {
+      const editedPdfBytes = await CreateInvoice.editPdf();
+      const blob = new Blob([editedPdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+  
+      // PDF im neuen Tab oder in einem iframe anzeigen
+      window.open(url);
+  
+      // Optional: Eine Schaltfläche zum Herunterladen hinzufügen
+      const downloadLink = document.createElement('a');
+      downloadLink.href = url;
+      downloadLink.download = 'bearbeiteteRechnung.pdf';
+      downloadLink.textContent = 'PDF herunterladen';
+      document.body.appendChild(downloadLink);
+      
+      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt und wird im Browser angezeigt.');
+    } catch (error) {
+      console.error('Error editing PDF:', error);
+    }
+  }
+  */
 
 
 
