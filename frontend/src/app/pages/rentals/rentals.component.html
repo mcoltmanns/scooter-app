@@ -1,5 +1,12 @@
 <div class="page-container">
-  <h1 class="title">Meine Buchungen</h1>
+  <div class="header">
+    <app-filter-button></app-filter-button>
+    <h1 class="title">Meine Buchungen</h1>
+  </div>
+
+
+
+ 
   <div class="scrollable-container">
     <div class="rentals-container" *ngIf="!loadingDataScooter && !loadingDataProduct && !loadingDataOption; else loading">
       <ul *ngIf="rentals.length > 0; else noRentals">

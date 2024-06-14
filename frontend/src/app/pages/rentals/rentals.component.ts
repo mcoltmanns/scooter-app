@@ -7,13 +7,14 @@ import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
 import { CreateInvoice } from 'src/app/utils/createInvoice';
+import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 
 @Component({
-  selector: 'app-rentals',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './rentals.component.html',
-  styleUrl: './rentals.component.css'
+    selector: 'app-rentals',
+    standalone: true,
+    templateUrl: './rentals.component.html',
+    styleUrl: './rentals.component.css',
+    imports: [CommonModule, FilterButtonComponent]
 })
 export class RentalsComponent implements OnInit {
   public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService) {}
@@ -259,5 +260,13 @@ export class RentalsComponent implements OnInit {
   openPdfInNewTab(fileName: string): void {
     const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
     window.open(pdfUrl, '_blank');
+  }
+
+
+
+  //functionalities for the filters
+
+  toggleFilters(): void{
+    console.log('Button was clicked');
   }
 }
