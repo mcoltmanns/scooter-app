@@ -76,7 +76,7 @@ export class RentalsComponent implements OnInit {
     });
 
     console.log('test');
-    //this.downloadInvoice1(1);
+    this.downloadInvoice1(1);
   }
 
 
@@ -241,13 +241,14 @@ export class RentalsComponent implements OnInit {
     return str;
   }
 
+
   downloadInvoice1(rentalId: number): void {
     this.rentalService.generateInvoicePdf(rentalId).subscribe(
       (pdfBlob: Blob) => {
         const blob = new Blob([pdfBlob]);
-        const blobUrl = URL.createObjectURL(blob);
-        console.log(blobUrl);
-        window.open(blobUrl, '_blank');
+        console.log(blob);
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        window.open(blobUrl);
       },
       (error) => {
         console.error('Fehler beim Herunterladen der Rechnung:', error);

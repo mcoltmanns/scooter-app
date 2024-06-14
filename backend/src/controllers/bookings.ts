@@ -68,7 +68,6 @@ export class BookingsController {
     }
 
     /* method to get the information for the invoice pdf */
-    /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
         const { rentalId } = request.body;
 

@@ -23,7 +23,7 @@ export class RentalService{
 
     private apiUrl = '/api/bookings/generateInvoice';
 
-    
+
     generateInvoicePdf(rentalId: number): Observable<Blob> {
         return this.http.post<Blob>(this.apiUrl, { rentalId }, {
           responseType: 'blob' as 'json',
