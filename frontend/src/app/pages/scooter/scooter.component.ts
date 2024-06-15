@@ -118,6 +118,8 @@ export class ScooterComponent implements OnInit {
             this.animateScooterStatusCircles();
           });
 
+
+        // TODO: Integrate the following code into the forkJoin
         // check reservation info (only once we have scooter info)
         this.bookingService.getUserReservation().subscribe({
           next: (value) => {
