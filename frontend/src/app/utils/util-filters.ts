@@ -1,32 +1,7 @@
-/**
- * 
- * 
- * 
- * FUNKTIONIEREN NICHT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * 
- * 
- * 
- * 
- * 
- * 
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { Rental } from 'src/app/models/rental';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
+import { parse, isAfter, isBefore } from 'date-fns';
 
 //TODO     connect to pages and  test
 //(as of 10.06 11:33  UNTESTED)   
@@ -43,14 +18,31 @@ export class Filters {
      * @param rentals list of scooters that where booked by the user in total
      * @returns list of scooters that where booked in the given date frame
      */
-    static filterDate(startAfter: Date, endBefore: Date, rentals: Rental[]) : Rental[] {
+    static filterDate(startAfter: string, endBefore: string, rentals: Rental[]) : Rental[] {
         const filteredRentals: Rental[] = [];
+        const begin = this.stringToDate(startAfter);
+        const end = this.stringToDate(endBefore);
         rentals.forEach(rental => {
-            if (( new Date(rental.createdAt) >= startAfter) && ( new Date(rental.endedAt) <= endBefore)){
+            const created = this.stringToDate(this.backendToDate(rental.createdAt));
+            const ended = this.stringToDate(this.backendToDate(rental.endedAt));
+            //isAfter(1,2) checks if "1 > 2" so to say, isBefore (1,2) checks if "1<2" so to say
+            if(isAfter(created, begin) && isBefore(ended, end)){
                 filteredRentals.push(rental);
-            }      
+            }
         });
         return filteredRentals;
+    }
+
+    static stringToDate(input:string): Date{
+        return parse(input, 'dd-MM-yyyy', new Date());
+    }
+
+    static backendToDate(dateString: string): string {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear());
+        return day+'-'+month+'-'+year;
     }
 
     /**

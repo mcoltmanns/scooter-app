@@ -250,11 +250,14 @@ export class RentalsComponent implements OnInit {
   }
 
   onSubmit(): void {
-    
+    this.lower = this.bookingFilterForm.get('lower')?.value;
+    this.upper = this.bookingFilterForm.get('upper')?.value;
+
+    this.rentals = Filters.filterDate(this.lower, this.upper, this.rentals);
   }
 
   onCancel(): void {
-    
+    this.loadRentalInfo();
   }
     
 }
