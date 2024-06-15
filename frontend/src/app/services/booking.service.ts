@@ -5,6 +5,11 @@ import { ResponseMessageCheckout, ResponseMessageReservation } from '../models/r
 import { CheckoutObject, ReservationObject } from '../models/booking';
 import { Reservation } from '../models/reservation';
 
+interface ReservationResponse {
+  code: number;
+  reservation: Reservation;
+}
+
 const reservePath = '/api/reserve';
 
 @Injectable({
@@ -27,8 +32,8 @@ export class BookingService {
   }
 
   // get the reservation info associated with this session
-  public getUserReservation(): Observable<Reservation> {
-    return this.http.get<Reservation>(reservePath).pipe(shareReplay());
+  public getUserReservation(): Observable<ReservationResponse> {
+    return this.http.get<ReservationResponse>(reservePath).pipe(shareReplay());
   }
 
   // end this user's active reservation

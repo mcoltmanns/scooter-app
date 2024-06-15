@@ -41,7 +41,7 @@ export class RentalsComponent implements OnInit {
     /* Get all scooter bookings for the User from the backend*/
     this.rentalService.getRentalInfo().subscribe({
       next: (value) => {
-        this.rentals = value;
+        this.rentals = value.rentals;
         this.loadingDataScooter = false;
         console.log(this.rentals);
       },
@@ -84,7 +84,7 @@ export class RentalsComponent implements OnInit {
     // get the user's reservation info
     this.bookingService.getUserReservation().subscribe({
       next: (value) => {
-        this.reservation = value;
+        this.reservation = value.reservation;
         this.loadingDataReservation = false;
       },
       error: (err) => {

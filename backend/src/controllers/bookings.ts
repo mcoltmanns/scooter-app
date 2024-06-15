@@ -16,14 +16,14 @@ export class BookingsController {
             const rentals = await RentalManager.getRentalsFromUser(userId);
 
             if (rentals.length === 0) {
-                response.status(404).json({ code: 404, message: 'Keine Mietverträge gefunden.' });
+                response.status(404).json({ code: 404, message: 'Keine Buchungen gefunden.' });
                 return;
             }
 
-            response.status(200).json(rentals);
+            response.status(200).json({ code: 200, rentals: rentals });
         } catch (error) {
             console.error(error);
-            response.status(500).json({ code: 500, message: 'Fehler beim Abrufen der Mietverträge.' });
+            response.status(500).json({ code: 500, message: 'Fehler beim Abrufen der Buchungen.' });
         }
     }
 
@@ -37,14 +37,15 @@ export class BookingsController {
         try {
             const reservation = await ReservationManager.getReservationFromUser(userId);
             if(!reservation) {
-                response.status(404).json('Keine Reservierung gefunden.');
+                response.status(404).json({ code: 404, message: 'Keine Reservierung gefunden.' });
                 return;
             }
-            response.status(200).json(reservation);
+
+            response.status(200).json({ code: 200, reservation: reservation });
             return;
         } catch (error) {
             console.error(error);
-            response.status(500).json('Fehler beim Abrufen der Reservierung.');
+            response.status(500).json({ code: 500, message: 'Fehler beim Abrufen der Reservierung.' });
         }
     }
 
@@ -58,15 +59,16 @@ export class BookingsController {
         try {
             const reservation = await ReservationManager.getReservationFromUser(userId);
             if(!reservation) {
-                response.status(404).json('Keine Reservierung gefunden.');
+                response.status(404).json({ code: 404, message: 'Keine Reservierung gefunden.' });
                 return;
             }
             await ReservationManager.endReservation(reservation);
-            response.status(200).json(reservation);
+
+            response.status(200).json({ code: 200, message: 'Reservierung erfolgreich beendet.' });
             return;
         } catch (error) {
             console.error(error);
-            response.status(500).json('Fehler beim Abrufen der Reservierung.');
+            response.status(500).json({ code: 500, message: 'Fehler beim Aufheben der Reservierung.' });
         }
     }
 
@@ -80,26 +82,27 @@ export class BookingsController {
         const scooterId = request.body.scooterId;
         try {
             const reservation = await ReservationManager.startReservation(userId, scooterId);
-            response.status(200).json(reservation);
+            
+            response.status(200).json({ code: 200, reservation: reservation });
             return;
         } catch (error) {
             if(error.message === 'SCOOTER_DOES_NOT_EXIST') {
-                response.status(404).json('Angegebener Scooter existiert nicht');
+                response.status(404).json({ code: 404, message: 'Angegebener Scooter existiert nicht.' });
                 return;
             }
             if(error.message === 'SCOOTER_UNAVAILABLE'){
-                response.status(401).json('Scooter ist derzeit nicht reservierbar.');
+                response.status(401).json({ code: 401, message: 'Scooter ist derzeit nicht reservierbar.' });
                 return;
             }
             if(error.message === 'USER_HAS_RESERVATION') {
-                response.status(401).json('User hat bereits eine Reservierung.');
+                response.status(401).json({ code: 401, message: 'Es kann nur ein Scooter gleichzeitig reserviert werden.' });
                 return;
             }
             if(error.message === 'RESERVATION_FAILED') {
-                response.status(500).json('Reservierung konnte nicht angelegt werden.');
+                response.status(500).json({ code: 500, message: 'Reservierung konnte nicht angelegt werden.' });
                 return;
             }
-            response.status(500).json(error.message);
+            response.status(500).json({ code: 500, message: 'Fehler beim Reservieren.' });
             return;
         }
     }

@@ -18,21 +18,26 @@ abstract class RentalManager {
 
     // set a scooter as rented for a user, if possible (scooter is free)
     // if caller provides a transaction, use that and don't commit/rollback. otherwise, checkout and manage a new transaction
-    public static async startRental(userId: number, scooterId: number, rental_duration_ms: number, transaction?: Transaction): Promise<Model> {
+    public static async startRental(userId: number, scooterId: number, rental_duration_ms: number, transaction?: Transaction, scooter?: Model): Promise<Model> {
         let rental: Model;
         let expiration: Date;
         const transactionExtern: boolean = transaction !== undefined;
-
-        // can't reserve if the scooter isn't real
-        const scooter = await Scooter.findByPk(scooterId);
-        if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
-        // can't reserve if scooter is reserved by someone else or rented
-        const reservation = await ReservationManager.getReservationFromScooter(scooterId);
-        if(scooter.getDataValue('active_rental_id') !== null || (reservation && reservation.dataValues.user_id !== userId)) {
-            throw new Error('SCOOTER_UNAVAILABLE');
-        }
+        
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
+        
         try {
+            /* Fetch the scooter if it wasn't provided */
+            if (!scooter) {
+              scooter = await Scooter.findByPk(scooterId, { transaction: transaction });
+            }
+            if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
+
+            // can't book if scooter is reserved by someone else or rented
+            const reservation = await ReservationManager.getReservationFromScooter(scooterId, transaction);
+            if(scooter.getDataValue('active_rental_id') !== null || (reservation && reservation.dataValues.user_id !== userId)) {
+                throw new Error('SCOOTER_UNAVAILABLE');
+            }
+
             // all good?
             // start the new rental
             expiration = new Date(Date.now() + rental_duration_ms);
@@ -40,7 +45,7 @@ abstract class RentalManager {
             scooter.setDataValue('active_rental_id', rental.dataValues.id);
             await scooter.save({transaction: transaction});
 
-            if(reservation) await ReservationManager.endReservation(reservation, transaction); // if there was a reservation, end it
+            if(reservation) await ReservationManager.endReservation(reservation, transaction, scooter); // if there was a reservation, end it
             
             if(!transactionExtern) await transaction.commit();
 

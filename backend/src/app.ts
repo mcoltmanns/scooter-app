@@ -114,7 +114,7 @@ app.get('/api/preferencesForUser', option.getUserPreferenceByUserId); // get the
 app.post('/api/updateUserPreferences', option.updateUserPreferences); // update the preferences for a user
 
 /* Route to process reservations/checkout (book a scooter) */
-app.post('/api/reserve', validator.validateReservation, bookings.reserveScooter.bind(auth)); // start a reservation
+app.post('/api/reserve', validator.validateReservation, bookings.reserveScooter); // start a reservation
 app.get('/api/reserve', bookings.getUserReservation); // get a user's active reservation
 app.delete('/api/reserve', bookings.endUserReservation); // end a user's active reservation
 app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);

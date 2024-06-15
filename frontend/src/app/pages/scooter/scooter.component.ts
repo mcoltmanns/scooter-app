@@ -80,7 +80,7 @@ export class ScooterComponent implements OnInit {
         this.bookingService.getUserReservation().subscribe({
           next: (value) => {
             // got a reservation? (user has a reservation)
-            this.canCancel = value.scooter_id === this.scooter!.id; // user can cancel the reservation if their reservation was on this scooter
+            this.canCancel = value.reservation.scooter_id === this.scooter!.id; // user can cancel the reservation if their reservation was on this scooter
             this.canRent = (this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null) || this.canCancel; // user can rent this scooter if they can cancel or if scooter is neither reserved nor rented
             this.canReserve = false; // user can't reserve this scooter (already reserved)
           },
@@ -149,8 +149,8 @@ export class ScooterComponent implements OnInit {
     console.log(`reserve scooter ${scooterId}`);
     // ask the booking service to try and take out a reservation on this scooter
     this.bookingService.makeReservation({ scooterId: scooterId }).subscribe({
-      next: (value) => {
-        console.log(value);
+      next: () => {
+        // console.log(value.reservation);
         this.router.navigate(['reservation']); // TODO: needs more feedback on if reservation was successful
       },
       error: (err) => {
