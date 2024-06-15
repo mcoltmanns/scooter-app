@@ -170,8 +170,25 @@ export class RentalsComponent implements OnInit {
 
 
   /* This method should retrieve the invoice pdf from the backend */
-  displayInvoice(rentalId: number): void {
-    this.rentalService.generateInvoicePdf(rentalId).subscribe(
+  displayInvoice(rentalId: number, scooterId: number, createdAt : string, endedAt: string): void {
+    console.log('dowload pressed');
+    const scooterName = this.getNameByScooterId(scooterId);
+    const total = this.getTotalPrice(scooterId, createdAt, endedAt);
+    const duration = this.rentalDuration(createdAt, endedAt);
+    const pricePerHour = this.getPriceByScooterId(scooterId);
+    if(scooterName === undefined){
+      console.log('Error with ScooterName');
+      return;
+    }
+    if(total === undefined){
+      console.log('Error with total price');
+      return;
+    }
+    if(pricePerHour === undefined){
+      console.log('Error with Price per hour');
+      return;
+    }
+    this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour).subscribe(
       (pdfBlob: Blob) => {
         const blob = new Blob([pdfBlob]);
         console.log(blob);

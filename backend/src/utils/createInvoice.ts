@@ -11,10 +11,9 @@ export class CreateInvoice {
      * edits pdf file with scooter information
      * @returns 
      */
-    static async editPdf(rentalId : number, email: string, name:string, street: string): Promise<Uint8Array> {
+    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string): Promise<Uint8Array> {
 
         /* variables for user data */
-        const scooterName = 'Swift Stream - Art Nuveau Edition';
         const price_per_hour = 12.33;
         const rentalDuration = 3;
         const total = 12.33;

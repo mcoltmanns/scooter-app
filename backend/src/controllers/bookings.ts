@@ -79,7 +79,7 @@ export class BookingsController {
 
     /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
-        const { rentalId } = request.body;
+        const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour } = request.body;
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -105,7 +105,7 @@ export class BookingsController {
              }
 
             // create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street);
+            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street, scooterName);
 
             // specify path to save the file
             const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
@@ -117,7 +117,6 @@ export class BookingsController {
                     response.status(500).json({ code: 500, message: 'Fehler beim Speichern der PDF-Datei.' });
                     return;
                 }
-                //console.log(`Die PDF wurde erfolgreich gespeichert unter: ${filePath}`);
             });
             // send PDF as an answer
             response.setHeader('Content-Type', 'application/pdf');
