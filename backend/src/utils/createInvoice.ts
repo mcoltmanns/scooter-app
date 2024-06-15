@@ -41,19 +41,22 @@ export class CreateInvoice {
         /* add fonts */
         const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
         const fontSize = 9;
+        const fontSizeHeader = 11;
     
         const lineHeight = fontSize + 400;
         const currentYPosition = 100; // current y position
         const textWidth = timesRomanFont.widthOfTextAtSize(name, fontSize);
 
+        /* Data for User Header: */
+        
         // add name into the pdf
         firstPage.drawText(rentalId.toString(), {
-            x: 100 - (textWidth / 2),
-            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
-            size: fontSize,
+            x: 160,
+            y: height + 166 - lineHeight,
+            size: fontSizeHeader,
             font: timesRomanFont,
             color: rgb(0, 0, 0),
-            });
+        });
 
         // add name into the pdf
         firstPage.drawText(name, {

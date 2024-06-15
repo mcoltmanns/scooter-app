@@ -10,7 +10,7 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
-import { FormGroup, FormBuilder, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
 
 @Component({
@@ -77,10 +77,9 @@ export class RentalsComponent implements OnInit {
         console.error(err);
       }
     });
-
-    //this.downloadInvoice1(1);
   }
 
+  /* load information about all booked scooters for a user */
   loadRentalInfo(): void {
     this.rentalService.getRentalInfo().subscribe({
       next: (value) => {
@@ -94,8 +93,6 @@ export class RentalsComponent implements OnInit {
       }
     });
   }
-
-
 
   /* how long a user booked the scooter */
   rentalDuration(begin: string, end: string): string {
@@ -124,8 +121,6 @@ export class RentalsComponent implements OnInit {
 
     const durationHours = Number(this.rentalDuration(begin, end));
     const totalPrice = pricePerHour * durationHours;
-
-    // Round to two decimal places
     const roundedPrice = totalPrice.toFixed(2);
 
     // Check whether the decimal value has only one digit
@@ -185,7 +180,7 @@ export class RentalsComponent implements OnInit {
         const blobUrl = URL.createObjectURL(pdfBlob);
         window.open(blobUrl);
         */
-       const fileName = 'InvoiceScooter';
+        const fileName = 'InvoiceScooter';
         const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
         window.open(pdfUrl, '_blank');
       },
@@ -233,8 +228,6 @@ export class RentalsComponent implements OnInit {
     }
   }
   */
-
-
 
   //functionalities for the filters
 
