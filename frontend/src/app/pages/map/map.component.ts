@@ -115,17 +115,7 @@ export class MapComponent implements OnInit {
 
     // Using mapService to get the data about scooters from backend
     // and add markers on the map using addScootersToMap()-method
-    this.mapService.getScooterInfo().subscribe({
-      next: (value) => {
-        this.scooters = value;
-        this.addScootersToMap();
-      },
-
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        console.log(err);
-      }
-    });
+    this.loadScooters();
 
     /*for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
@@ -140,6 +130,20 @@ export class MapComponent implements OnInit {
         console.log(e);
       });
     }*/
+  }
+
+  loadScooters(): void{
+    this.mapService.getScooterInfo().subscribe({
+      next: (value) => {
+        this.scooters = value;
+        this.addScootersToMap();
+      },
+
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
   }
 
   toggleListView(): void {
