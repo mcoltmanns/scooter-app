@@ -64,7 +64,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
   public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService, private router: Router, private bookingService: BookingService) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.checkoutForm = this.fb.group({
-      duration: ['5', [Validators.required, CustomValidators.inInterval(1, 48) ]],
+      duration: ['1', [Validators.required, CustomValidators.inInterval(1, 48) ]],
       radioButtonChoice: ['', [Validators.required]]
     });
   }

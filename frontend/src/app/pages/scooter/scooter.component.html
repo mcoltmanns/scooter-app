@@ -5,17 +5,19 @@
     </div>
 </header>
 
-<div class="scrollable-container" style="padding: 0 0 10px 0; position: relative;">
-    <ng-container *ngIf="!loadingScooter">
+<div class="scrollable-container">
+    <ng-container *ngIf="!loadingScooter; else loading">
         <ng-container *ngIf="!scooterNotFound; else noScooters">
             <div class="white-box" style="display: flex;">
-                <img *ngIf="product" class="picture" src="http://localhost:8000/img/products/{{ product.name }}.jpg">
+                <!-- <img *ngIf="product" class="picture" src="http://localhost:8000/img/products/{{ product.name }}.jpg"> -->
+                <img *ngIf="product" class="picture" [src]="getImageUrl(product.name)">
                 <div class="information-block" *ngIf="scooter !== null && product !== null">
 
                   <div class="status-circles-container">
                     <div class="container">
                         <div class="circle">
-                            <div class="outer" [style.--battery]="roundUpBattery(scooter.battery) + '%'">
+                            <!-- <div class="outer" [style.--battery]="roundUpBattery(scooter.battery) + '%'"> -->
+                            <div class="outer" [style.--battery]="batteryStatus + '%'">
                                 <div class="inner">
                                     <div id="inside-circle-battery">
                                         {{ roundUpBattery(scooter.battery) }}%
@@ -27,7 +29,8 @@
                     </div>
                     <div class="container">
                         <div class="circle">
-                            <div class="outer" [style.--battery]="calcRange(scooter.battery, product.max_reach) + '%'">
+                            <!-- <div class="outer" [style.--battery]="calcRange(scooter.battery, product.max_reach) + '%'"> -->
+                            <div class="outer" [style.--battery]="rangeStatus + '%'">
                                 <div class="inner">
                                     <div id="inside-circle-reach">
                                         {{ convertDistanceUnits(calcRange(scooter.battery, product.max_reach), selectedDistance) }}
@@ -39,7 +42,8 @@
                     </div>
                     <div class="container">
                         <div class="circle">
-                            <div class="outer" [style.--battery]="product.max_speed + '%'">
+                            <!-- <div class="outer" [style.--battery]="product.max_speed + '%'"> -->
+                            <div class="outer" [style.--battery]="speedStatus + '%'">
                                 <div class="inner">
                                     <div id="inside-circle-reach">
                                         {{ convertSpeedUnits(product.max_speed, selectedSpeed) }}
@@ -67,11 +71,11 @@
                 </app-button>
             </div>
 
-            <div style="padding: 15px; padding-bottom: 120px;">
+            <div style="padding: 15px;">
                 <hr class="solid">
                 <div class="description" innerHTML="{{ product?.description_html }}">Beschreibung</div>
                 <hr class="solid">
-                <h2 style="margin-left: 10px;">Standort</h2>
+                <h2 style="margin: 15px;">Standort</h2>
                 <div class="map" leaflet [leafletOptions]="options" [(leafletCenter)]="center" [leafletLayers]="layers"></div>
             </div>
         </ng-container>
@@ -82,5 +86,9 @@
             <h3>Scooter nicht gefunden.</h3>
             <img class="noScooterpicture" src="/assets/NoScooter.png" />
         </div>
+    </ng-template>
+
+    <ng-template #loading>
+      <app-loading-overlay [isLoading]="true" type="inline"></app-loading-overlay>
     </ng-template>
 </div>

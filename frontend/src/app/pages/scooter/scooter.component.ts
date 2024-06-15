@@ -11,6 +11,8 @@ import * as Leaflet from 'leaflet';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
+import { forkJoin } from 'rxjs';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
 const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
@@ -20,12 +22,18 @@ const defaultIcon = Leaflet.icon({
 @Component({
   selector: 'app-scooter',
   standalone: true,
-  imports: [ButtonComponent, BackButtonComponent, CommonModule, LeafletModule],
+  imports: [ButtonComponent, BackButtonComponent, CommonModule, LeafletModule, LoadingOverlayComponent],
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })
 export class ScooterComponent implements OnInit {
-  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
+  public batteryStatus = 0;
+  public rangeStatus = 0;
+  public speedStatus = 0;
+
+  public loadingOperations = 2; // One scooter image in html code the forkJoin in ngOnInit
+
+  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) { }
 
   public errorMessage = '';
   public scooterNotFound = false;
@@ -60,15 +68,50 @@ export class ScooterComponent implements OnInit {
     const lastPart = parts[parts.length - 1];
     const scooterId = parseInt(lastPart); // save the last number of URL in scooterId
 
-    /* get the scooter information by scooterId*/
-    this.mapService.getSingleScooterInfo(scooterId).subscribe({
-      next: (value) => {
-        this.scooter = value;
-        this.loadingScooter = false;
+    forkJoin([
+      this.mapService.getSingleScooterInfo(scooterId),
+      this.mapService.getSingleProductInfo(scooterId),
+      this.optionService.getUserPreferences()
+    ]).subscribe({
+      next: ([scooter, product, option]) => {
+        /* Proess the scooter information */
+        this.scooter = scooter;
         const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
         this.layers.push(marker); 
         this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
         this.options.center = this.center; // Set the map center
+    
+        /* Process the product information */
+        this.product = product;
+    
+        /* Process the user preferences */
+        this.option = option;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+
+        /* Load the product image */
+        const imageLoadPromise = new Promise((resolve, reject) => {
+          const img = new Image();
+          img.src = this.getImageUrl(this.product!.name);
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+        imageLoadPromise
+          .then(() => {
+            this.loadingScooter = false;
+
+            /* Animate the scooter status circles */
+            this.animateScooterStatusCircles();
+          })
+          .catch(error => {
+            console.error('Image failed to load:', error);
+
+            this.loadingScooter = false;
+
+            /* Animate the scooter status circles */
+            this.animateScooterStatusCircles();
+          });
       },
       error: (err) => {
         this.errorMessage = err.error.message;
@@ -77,30 +120,37 @@ export class ScooterComponent implements OnInit {
         console.log(err);
       }
     });
+  }
 
-    /* get the product information for the scooter */
-    this.mapService.getSingleProductInfo(scooterId).subscribe({
-      next: (value) => {
-        this.product = value;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        console.log(err);
+  animateScooterStatusCircles(): void {
+    /* Calculate the maximum status values, limit them to 100 and animate the status circles */
+    const maxBatteryStatus = Math.min(this.roundUpBattery(this.scooter!.battery), 100);
+    const maxRangeStatus = Math.min(this.calcRange(this.scooter!.battery, this.product!.max_reach), 100);
+    const maxSpeedStatus = Math.min(this.product!.max_speed, 100);
+  
+    const duration = 1500; // Duration of the animation in milliseconds
+    const startTime = performance.now(); // Start time of the animation
+  
+    const easeOutCubic = (t: number): number => 1 - (1 - t) * (1 - t) * (1 - t);
+  
+    const animateStatus = (status: 'batteryStatus' | 'rangeStatus' | 'speedStatus', maxStatus: number): void => {
+      const timeElapsed = performance.now() - startTime;  // Time elapsed since the start of the animation
+      const t = Math.min(timeElapsed / duration, 1);    // Progress of the animation (between 0 and 1)
+      this[status] = Math.round(maxStatus * easeOutCubic(t));  // Calculate the current status value
+  
+      if (t < 1) {  // Continue the animation if it is not finished
+        requestAnimationFrame(() => animateStatus(status, maxStatus));
       }
-    });
+    };
+  
+    animateStatus('batteryStatus', maxBatteryStatus);
+    animateStatus('rangeStatus', maxRangeStatus);
+    animateStatus('speedStatus', maxSpeedStatus);
+  }
 
-    this.optionService.getUserPreferences().subscribe({
-      next: (value) => {
-        this.option = value;
-        this.selectedSpeed = this.option.speed;
-        this.selectedDistance = this.option.distance;
-        this.selectedCurrency = this.option.currency;
-      },
-      error: (err) => {
-        this.errorMessage = err.message;
-        console.error(err);
-      }
-    });
+  /* Gets the image url for the scooters from the backend */
+  getImageUrl(fileName: string): string {
+    return `http://localhost:8000/img/products/${fileName}.jpg`;
   }
 
   /* If "Scooter Buchen" is pressed */

@@ -93,12 +93,14 @@
 }
 
 .picture {
-    width: 60%;
+    width: auto;
     height: auto;
-    max-height: 400px;
-    object-fit: contain;
+    max-width: 60%;
+    max-height: 350px;
+    /* object-fit: contain; */
     display: block;
     margin: 10px auto;
+    border-radius: 15px;
 }
 
 .secondary-text {
