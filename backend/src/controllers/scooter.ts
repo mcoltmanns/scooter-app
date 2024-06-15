@@ -3,6 +3,7 @@ import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 
 export class ScooterController {
+    // get scooters that aren't rented
     public async getAvailableScooters(request: Request, response: Response): Promise<void> {
         let scooters = [];
         try {

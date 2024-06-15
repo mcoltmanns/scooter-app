@@ -9,6 +9,12 @@
     color: #fff;
 }
 
+.subtitle {
+    text-align: center;
+    font-size: 1em;
+    color: #fff;
+}
+
 .scrollable-container {
     overflow-y: auto;
 }
@@ -108,4 +114,12 @@
 
 .noScooterpicture {
     width: 100%;
+}
+
+.reservation-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }

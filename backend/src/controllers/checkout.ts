@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { Scooter } from '../models/scooter';
-import { Rental } from '../models/rental';
 import Database from '../database';
 import { PaymentMethod } from '../models/payment';
 import { Product } from '../models/product';
@@ -11,6 +10,7 @@ import { Model } from 'sequelize';
 import { BachelorCardData, PaymentService } from '../interfaces/payment-service.interface';
 import { SwpSafeData } from '../interfaces/payment-service.interface';
 import { HciPalData } from '../interfaces/payment-service.interface';
+import RentalManager from '../services/rental-manager';
 
 interface ProductInstance extends Model {
   price_per_hour: number;
@@ -31,13 +31,7 @@ export class CheckoutController {
 
     const { scooterId, paymentMethodId, duration } = request.body;
 
-    const endTimestamp = new Date(Date.now() + duration * 60 * 60 * 1000); // Adding the specified number of hours in milliseconds
-
-    const newRental = {
-      endedAt: endTimestamp,
-      user_id: userId,
-      scooter_id: scooterId,
-    };
+    let endTimestamp;
 
     let paymentService: PaymentService | null = null;
 
@@ -53,20 +47,7 @@ export class CheckoutController {
           attributes: ['price_per_hour']
         }],
         transaction 
-      }) as ScooterInstance;
-
-      if (!scooter) {
-        throw new Error('SCOOTER_NOT_FOUND');
-      }
-
-      /* Note: We are using a transaction, so it is safe to do that critical check here.
-       * A transaction is treated atomically, so we can be sure that the scooter is not
-       * booked by another user in the meantime. */
-      if (scooter.get('active_rental_id') !== null) {
-        throw new Error('SCOOTER_CURRENTLY_RENTED');
-        /* Note: To ensure the atomicity of the transaction, it is better to throw errors
-         * for such checks instead of returning a response. */
-      }
+      }) as ScooterInstance; // figure out our scooter and model
 
       const paymentMethod = await PaymentMethod.findOne({ 
         where: { id: paymentMethodId, usersAuthId: userId },
@@ -116,15 +97,16 @@ export class CheckoutController {
       /* If we reach this point, the payment was successful */
       paymentToken = token;   // Save the payment token in case we need to rollback the transaction
 
-      /* Book the scooter */
-      const rental = await Rental.create(newRental, { transaction });
-      
-      scooter.set('active_rental_id', rental.get('id'));
-      await scooter.save({ transaction });
+      /* Start the rental */
+      const rental_duration_ms = duration * 60 * 60 * 1000;  // Convert hours to milliseconds
+      const rental = await RentalManager.startRental(userId, scooterId, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
+      // also ends associated reservation, if there was one
+
+      endTimestamp = rental.getDataValue('endedAt');  // Get the end timestamp of the rental to return it to the user
 
       await transaction.commit();
     } catch (error) {
-      // console.error(error);
+      console.error(error);
 
       await transaction.rollback(); // Rollback the transaction in case of an error
 
@@ -142,7 +124,7 @@ export class CheckoutController {
       }
 
       /* Handle thrown errors and translate the error messages to a more user-friendly format */
-      if (error.message === 'SCOOTER_CURRENTLY_RENTED') {
+      if (error.message === 'SCOOTER_UNAVAILABLE') {
         response.status(400).json({code: 400, message: 'Der Scooter ist nicht mehr verfügbar.' });
         return;
       }
@@ -167,7 +149,7 @@ export class CheckoutController {
       return;
     }
 
-    response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: { endTimestamp: newRental.endedAt } });
+    response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: { endTimestamp: endTimestamp } });
     return;
   }
 }

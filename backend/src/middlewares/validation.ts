@@ -164,4 +164,12 @@ export class Validator {
     /* Run all checks */
     await Validator.runAllChecks(400, checks, request, response, next);
   }
+
+  public async validateReservation(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('scooterId').trim().escape().notEmpty().withMessage('Bitte eine Scooter-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Scooter ID.'),
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
 }
