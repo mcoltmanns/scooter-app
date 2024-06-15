@@ -3,14 +3,13 @@ import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { parse, isAfter, isBefore } from 'date-fns';
 
-//TODO     connect to pages and  test
-//(as of 10.06 11:33  UNTESTED)   
-
 
 /**
  * This class has all filters, both for map/list and rentals/booking
  */
 export class Filters {
+
+//filter for the Booking component ---------------------------------------------------------------------------
     /**
      * Filters the given list of rentals wrt to a date frame given by lower and upper
      * @param startAfter is the lower bound date of the filter
@@ -44,6 +43,12 @@ export class Filters {
         const year = String(date.getFullYear());
         return day+'-'+month+'-'+year;
     }
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+//Filters for scooter-map and scooter-list --------------------------------------------------------------------
 
     /**
      * Filters the given scooter list by the price parameter wrt to lower and upper

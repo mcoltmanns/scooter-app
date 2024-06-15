@@ -13,8 +13,11 @@ import * as Leaflet from 'leaflet';
 import { MapService } from 'src/app/services/map.service';
 import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
+import { ButtonComponent } from 'src/app/components/button/button.component';
+import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -26,10 +29,10 @@ const defaultIcon = Leaflet.icon({
 });
 
 @Component({
-  standalone: true,
-  imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule],
-  templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css'],
+    standalone: true,
+    templateUrl: './map.component.html',
+    styleUrls: ['./map.component.css'],
+    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent]
 })
 
 export class MapComponent implements OnInit {
@@ -37,8 +40,13 @@ export class MapComponent implements OnInit {
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
+  public scooterFilterForm!: FormGroup;
 
-  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder) 
+  {this.scooterFilterForm = this.fb.group({
+    lower: ['', Validators.required],
+    upper: ['', Validators.required]
+  });}
 
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
@@ -141,4 +149,24 @@ export class MapComponent implements OnInit {
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
+
+  filterMenuVisible = false;
+  
+  public lower = '';
+  public upper = '';
+
+
+
+  toggleFilterView(): void {
+    this.filterMenuVisible = !this.filterMenuVisible;
+  }
+
+  onSubmit(): void {
+
+  }
+
+  onCancel(): void {
+   
+  }
+  
 }
