@@ -4,10 +4,20 @@ import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { Op } from 'sequelize';
 import { CreateInvoice } from '../utils/createInvoice'; 
+import { UsersAuth } from '../models/user';
+import { UsersData } from '../models/user';
 import fs from 'fs';
 import path from 'path';
 
 export class BookingsController {
+
+    constructor() {
+        this.getUserRentals = this.getUserRentals.bind(this);
+        this.getRentalProducts = this.getRentalProducts.bind(this);
+        this.generateInvoice = this.generateInvoice.bind(this);
+        this.fetchUserData = this.fetchUserData.bind(this);
+    }
+
     /* Method that returns all entries from the Rentals table for a specific User_Id */
     public async getUserRentals(request: Request, response: Response): Promise<void> {
         const userId = response.locals.userId; // get userID from session cookie
@@ -77,6 +87,7 @@ export class BookingsController {
         }
 
         try {
+
             // search for a rental agreement using the rentalId
             const rental = await Rental.findOne({ where: { id: rentalId } });
 
@@ -85,8 +96,16 @@ export class BookingsController {
                 return;
             }
 
+             // Fetch user data
+             const userId = response.locals.userId;
+             const userData = await this.fetchUserData(userId);
+             if (!userData) {
+                 response.status(404).json({ code: 404, message: 'Benutzerdaten nicht gefunden.' });
+                 return;
+             }
+
             // create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rentalId);
+            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street);
 
             // specify path to save the file
             const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
@@ -108,6 +127,27 @@ export class BookingsController {
         } catch (error) {
             console.error(error);
             response.status(500).json({ code: 500, message: 'Fehler beim Erstellen der Rechnung.' });
+        }
+    }
+
+    /* Private method to fetch user data based on rentalId */
+    private async fetchUserData(userId: number): Promise<{ email: string, name: string, street: string }> {
+        try {
+            const userAuth = await UsersAuth.findOne({ where: { id: userId } });
+            const userData = await UsersData.findOne({ where: { usersAuthId: userId } });
+
+            if (!userAuth || !userData) {
+                throw new Error('User not found');
+            }
+
+            return {
+                email: `${userAuth.get('email')}`,
+                name: `${userData.get('name')}`,
+                street: `${userData.get('street')} ${userData.get('houseNumber')}`
+            };
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            throw error;
         }
     }
 }

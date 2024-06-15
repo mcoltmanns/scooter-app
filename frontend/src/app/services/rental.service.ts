@@ -24,7 +24,7 @@ export class RentalService{
     private apiUrl = '/api/bookings/generateInvoice';
 
 
-    /**  Somewhere here is a problem -> PDFs are retrieved over static backend folder at the moment */
+    /* Somewhere here is a problem -> PDFs are retrieved over static backend folder at the moment */
     generateInvoicePdf(rentalId: number): Observable<Blob> {
         return this.http.post<Blob>(this.apiUrl, { rentalId }, {
           responseType: 'blob' as 'json',
