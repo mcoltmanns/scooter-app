@@ -38,9 +38,12 @@ abstract class RentalManager {
             expiration = new Date(Date.now() + rental_duration_ms);
             rental = await Rental.create({ user_id: userId, scooter_id: scooterId, endedAt: expiration }, { transaction: transaction });
             scooter.setDataValue('active_rental_id', rental.dataValues.id);
-            scooter.save({transaction: transaction});
+            await scooter.save({transaction: transaction});
+
+            if(reservation) await ReservationManager.endReservation(reservation, transaction); // if there was a reservation, end it
+            
             if(!transactionExtern) await transaction.commit();
-            if(reservation) ReservationManager.endReservation(reservation, transaction); // if there was a reservation, end it
+
             // dispatch a job to end the rental when it expires
             new CronJob(
                 expiration,
