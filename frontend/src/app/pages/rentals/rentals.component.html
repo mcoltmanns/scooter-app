@@ -6,24 +6,22 @@
   
 
   <div *ngIf="filterMenuVisible" class="filter-menu-container">
+    <div class="top">
+      <app-button class="btn" type="submit" (click)="onSubmit()">
+        Anwenden
+      </app-button>
+      <app-button color="accent" class="btn" (click)="onCancel()">
+        Zurücksetzten
+      </app-button>
+    </div>
     <!-- Add your filter menu content here -->
     <div class="filter-content">
-      <h3>Filter Options</h3>
+      <h3 class="o-title">Filter Options</h3>
       <div class="form-container">
         <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
-          <div class="minmax">
-           <app-user-input label="Lower" [(text)]="lower" formControlName="lower"></app-user-input>
-          </div>
-          <div class="minmax">
-            <app-user-input label="Upper" [(text)]="upper" formControlName="upper"></app-user-input>
-          </div>
-          <div class="bottom">
-            <app-button class="btn" type="submit">
-              Anwenden
-            </app-button>
-            <app-button color="accent" class="btn" (click)="onCancel()">
-              Alle zurücksetzten
-            </app-button>
+          <div class="filter-row">
+            <app-user-input label="Gebucht nach" [(text)]="lower" formControlName="lower"></app-user-input>
+            <app-user-input label="Beendet vor" [(text)]="upper" formControlName="upper"></app-user-input>
           </div>
         </form>
       </div>

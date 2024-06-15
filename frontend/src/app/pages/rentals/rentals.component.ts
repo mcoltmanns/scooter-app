@@ -239,7 +239,7 @@ export class RentalsComponent implements OnInit {
   //functionalities for the filters
 
   filterMenuVisible = false;
-  /* Variables that mirror the values of the input fields */
+  
   public lower = '';
   public upper = '';
 
@@ -250,13 +250,11 @@ export class RentalsComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.lower = this.bookingFilterForm.get('lower')?.value;
-    this.upper = this.bookingFilterForm.get('upper')?.value;
-    this.rentals = Filters.filterDate(new Date(this.lower), new Date(this.upper), this.rentals);
+    
   }
 
   onCancel(): void {
-    this.loadRentalInfo();
+    
   }
     
 }

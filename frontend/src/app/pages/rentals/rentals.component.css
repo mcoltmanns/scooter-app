@@ -143,33 +143,49 @@
     color: black;
   }
 
-  .form-container {
-    min-width: min-content;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 15px;
-  }
-
-  .form-container form {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    height: 100%;
+  .filter-row {
+    display: flex; /* Verwende Flexbox */
   }
   
-  app-user-input {
-    width: 10%;
-  }
-
-  .form-container {
-    display: flex;
-    justify-content: space-between; 
+  .app-user-input {
+    margin-bottom: 10px; /* Add a vertical space between the elements */
+    flex: 1; /* Let the app-user-input components grow flexibly */
   }
   
- .minmax {
-    display: inline-block; /* Ensures elements appear in the same row */
-    justify-content: center; /* Optional: If you need to center content horizontally */
-}
+  .filter-row app-user-input {
+    flex: 1; /* Let the app-user-input components in the line grow flexibly */
+    margin-right: 10px; /* Add a horizontal space between the elements */
+  }
+  
+  .filter-row app-user-input:first-child {
+    flex: 1; /* Change the flex property of the first app-user-input element */
+  }
+  
+  .filter-row app-user-input:last-child {
+    flex: 1; /* Change the flex property of the last app-user-input element */
+    margin-right: 0;
+  }
+
+  .top {
+    margin-top: 10px;
+    display: flex;
+  }
+
+  .top app-button{
+    flex:1;
+    margin-right: 5px
+  }
+
+  .top app-button:first-child{
+    flex: 1;
+  }
+
+  .top app-button:last-child{
+    flex: 1;
+    
+  }
+
+  .o-title{
+    color: black;
+    text-align: center;
+  }
