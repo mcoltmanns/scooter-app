@@ -9,20 +9,26 @@ export class CreateInvoice {
 
     /**
      * edits pdf file with scooter information
+     * @param rentalId 
+     * @param email 
+     * @param name 
+     * @param street 
+     * @param scooterName 
+     * @param total 
+     * @param duration 
+     * @param pricePerHour 
+     * @param createdAt 
+     * @param endedAt 
+     * @param selectedCurrency
      * @returns 
      */
-    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string): Promise<Uint8Array> {
-
-        /* variables for user data */
-        const price_per_hour = 12.33;
-        const rentalDuration = 3;
-        const total = 12.33;
+    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total: string, rentalDuration: string, price_per_hour: string, createdAt: string, endedAt: string, selectedCurrency: string): Promise<Uint8Array> {
         
+        // path to get prefilled pdf
         const pdfPath = path.resolve(process.cwd(), 'img', 'pdf', 'Rechnung.pdf');
 
-        // read the PDF file
+        // read and load th pdf file 
         const existingPdfBytes = fs.readFileSync(pdfPath);
-        // load pdf file
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
         /* create date when the invoice is created */
@@ -31,7 +37,6 @@ export class CreateInvoice {
         const month = today.getMonth() + 1; // +1 because getMonth() is zero based
         const day = today.getDate();
         const currentDate =  day + '.' + month + '.' + year;
-        console.log(currentDate);
 
         /* get first pdf page */
         const firstPage = pdfDoc.getPage(0);
@@ -58,67 +63,112 @@ export class CreateInvoice {
             color: rgb(0, 0, 0),
         });
 
-        firstPage.drawText(email, {
+        // add current date into the pdf
+        firstPage.drawText(currentDate, {
             x: 160,
-            y: height + 160 - lineHeight,
+            y: height + 151 - lineHeight,
             size: fontSizeHeader,
             font: timesRomanFont,
             color: rgb(0, 0, 0),
         });
 
-        firstPage.drawText(street, {
-            x: 160,
-            y: height + 150 - lineHeight,
-            size: fontSizeHeader,
-            font: timesRomanFont,
-            color: rgb(0, 0, 0),
-        });
-
+        // add name of customer
         firstPage.drawText(name, {
             x: 160,
-            y: height + 140 - lineHeight,
+            y: height + 137 - lineHeight,
             size: fontSizeHeader,
             font: timesRomanFont,
             color: rgb(0, 0, 0),
         });
 
-        // add name into the pdf
+        // add email
+        firstPage.drawText(email, {
+            x: 160,
+            y: height + 123 - lineHeight,
+            size: fontSizeHeader,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        // add adress of the costumer
+        firstPage.drawText(street, {
+            x: 160,
+            y: height + 108 - lineHeight,
+            size: fontSizeHeader,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        /* Add booking dates into pdf */
+        
+        // add craetedAt
+        firstPage.drawText(this.formatDateTime(createdAt), {
+            x: 184,
+            y: height + 38 - lineHeight,
+            size: fontSizeHeader,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        // add endedAt
+        firstPage.drawText(this.formatDateTime(endedAt), {
+            x: 224,
+            y: height + 17 - lineHeight,
+            size: fontSizeHeader,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        /* Add Scooter Data to the PDF: */
+
+        // add scooter name into the pdf
         firstPage.drawText(scooterName, {
-        x: 140 - (textWidth / 2),
-        y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+        x: 130 - (textWidth / 2),
+        y: height - currentYPosition - lineHeight -25,
         size: fontSize,
         font: timesRomanFont,
         color: rgb(0, 0, 0),
         });
 
         // add price_per_hour into the pdf
-        firstPage.drawText(price_per_hour.toString(), {
-            x: 240,
-            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+        firstPage.drawText((price_per_hour.toString() + selectedCurrency), {
+            x: 250,
+            y: height - currentYPosition - lineHeight - 25,
             size: fontSize,
             font: timesRomanFont,
             color: rgb(0, 0, 0),
         });
 
         // add rental duartion into the pdf
+        rentalDuration = rentalDuration + 'h';
         firstPage.drawText(rentalDuration.toString(), {
-            x: 360,
-            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+            x: 387,
+            y: height - currentYPosition - lineHeight - 25, // Positionierung von oben nach unten
             size: fontSize,
             font: timesRomanFont,
             color: rgb(0, 0, 0),
         });
 
         // add total price into the pdf
-        firstPage.drawText(total.toString(), {
-            x: 450,
-            y: height - currentYPosition - lineHeight, // Positionierung von oben nach unten
+        firstPage.drawText((total.toString() + selectedCurrency), {
+            x: 475,
+            y: height - currentYPosition - lineHeight - 25, // Positionierung von oben nach unten
             size: fontSize,
             font: timesRomanFont,
             color: rgb(0, 0, 0),
         });
 
-
         return await pdfDoc.save(); // Save the edited pdf file
+    }
+
+    /* Formats date time */
+    private static formatDateTime(dateString: string): string {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = String(date.getFullYear()).slice(-2);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${day}.${month}.${year}  ${hours}:${minutes} Uhr`;
     }
 }

@@ -79,7 +79,7 @@ export class BookingsController {
 
     /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
-        const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour } = request.body;
+        const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -105,12 +105,12 @@ export class BookingsController {
              }
 
             // create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street, scooterName);
+            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street, scooterName, total, duration, pricePerHour, createdAt, endedAt, selectedCurrency);
 
             // specify path to save the file
             const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
 
-            // write PDF to file
+            // write PDF to a new file
             fs.writeFile(filePath, pdfBytes, (err) => {
                 if (err) {
                     console.error('Fehler beim Speichern der PDF-Datei:', err);

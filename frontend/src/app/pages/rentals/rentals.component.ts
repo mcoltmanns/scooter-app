@@ -176,19 +176,11 @@ export class RentalsComponent implements OnInit {
     const total = this.getTotalPrice(scooterId, createdAt, endedAt);
     const duration = this.rentalDuration(createdAt, endedAt);
     const pricePerHour = this.getPriceByScooterId(scooterId);
-    if(scooterName === undefined){
-      console.log('Error with ScooterName');
+    if(scooterName === undefined || total === undefined || pricePerHour === undefined){
+      console.log('Error - An Attribute is not defined');
       return;
     }
-    if(total === undefined){
-      console.log('Error with total price');
-      return;
-    }
-    if(pricePerHour === undefined){
-      console.log('Error with Price per hour');
-      return;
-    }
-    this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour).subscribe(
+    this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, this.selectedCurrency).subscribe(
       (pdfBlob: Blob) => {
         const blob = new Blob([pdfBlob]);
         console.log(blob);
