@@ -1,8 +1,14 @@
 <div *ngIf="onDOM" class="centering-wrapper">
-  <div class="status-island-wrapper" [@islandAnimation]="isVisible ? 'visible' : 'hidden'">
+  <div class="status-island-wrapper" [@islandAnimation]="isVisible ? 'visible' : 'hidden'" (click)="onIslandClick()">
     <div class="status-island">
-      <ng-content></ng-content>:
-      <span class="timer"> {{ getFormattedTime() }}</span>
+      <div class="status-island-container">
+        <img *ngIf="imgPath" class="status-island-image" [src]="imgPath" />
+        <div [ngClass]="{'status-island-text': true, 'no-image': !imgPath, 'with-image': imgPath}">
+          <span>{{ getShortenedTitle() }} </span>
+          <span *ngIf="showContent"><ng-content></ng-content></span>
+          <span *ngIf="showCountdown" class="timer"> {{ getFormattedTime() }}</span>
+        </div>
+      </div>
     </div>
   </div>
 </div>

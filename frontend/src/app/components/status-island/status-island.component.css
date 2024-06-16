@@ -6,10 +6,39 @@
   z-index: 9998;
 }
 
+.no-image {
+  padding: 2px 10px 2px 10px;
+  transition: padding 0.3s ease;
+}
+
+.with-image {
+  padding: 2px 10px 2px 6px;
+  transition: padding 0.3s ease;
+}
+
+.status-island-container {
+  display: flex;
+  align-items: center; /* This will vertically center align the items */
+}
+
+.status-island-image {
+  width: 26px;
+  height: 26px;
+  object-fit: cover;
+  border-radius: 50%;
+  vertical-align: middle;
+  padding: 3px;
+  transition: padding 0.3s ease, width 0.3s ease, height 0.3s ease;
+}
+
+.status-island-text {
+  white-space: nowrap;
+}
+
 .status-island-wrapper {
   position: relative;
   padding: 2px;
-  border-radius: 17px;
+  border-radius: 20px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
   cursor: pointer;
   transition: padding 0.3s ease;
@@ -20,7 +49,7 @@
   position: absolute;
   left: 0px;
   top: 0px;
-  border-radius: 17px;
+  border-radius: 20px;
   background: linear-gradient(45deg, #97fb64, #97fb64, #97fb64,#59963b, #4e8f2d, #71b64f, 
     #97fb64, #547a42,#97fb64, #97fb64);
   background-size: 400%;
@@ -32,7 +61,7 @@
 
 .status-island-wrapper:after {
   filter: blur(15px);
-  opacity: 0.7;
+  opacity: 0.5;
 }
 
 .status-island {
@@ -41,17 +70,25 @@
   letter-spacing: 0.25px;
   color: white;
   background-color: var(--Highlights-Stroke, #123800);
-  border-radius: 15px;
-  padding: 2px 10px;
-  transition: padding 0.3s ease;
+  border-radius: 18px;
 }
 
 .status-island-wrapper:hover {
   padding: 4px;
 }
 
-.status-island-wrapper:hover .status-island {
-  padding: 4px 12px;
+.status-island-wrapper:hover .no-image {
+  padding: 4px 12px 4px 12px;
+}
+
+.status-island-wrapper:hover .with-image {
+  padding: 4px 12px 4px 7px;
+}
+
+.status-island-wrapper:hover .status-island-image {
+  width: 30px;
+  height: 30px;
+  padding: 5px;
 }
 
 @keyframes steam {
