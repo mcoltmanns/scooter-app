@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { NavigationBarComponent } from 'src/app/components/navigation-bar/navigation-bar.component';
 import { AuthService } from 'src/app/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { StatusIslandComponent } from 'src/app/components/status-island/status-island.component';
 
 /**
  *  Die Root-Komponente stellt die "Haupt-Komponente" dar, die alle anderen Komponenten enthält.
@@ -12,7 +13,7 @@ import { CommonModule } from '@angular/common';
  */
 @Component({
   standalone: true,
-  imports: [CommonModule, NavigationBarComponent, RouterModule],
+  imports: [CommonModule, NavigationBarComponent, RouterModule, StatusIslandComponent],
   templateUrl: './root.component.html',
   styleUrls: ['./root.component.css'],
   selector: 'app-root',

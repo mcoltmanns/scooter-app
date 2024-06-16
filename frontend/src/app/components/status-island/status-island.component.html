@@ -1,0 +1,8 @@
+<div *ngIf="onDOM" class="centering-wrapper">
+  <div class="status-island-wrapper" [@islandAnimation]="isVisible ? 'visible' : 'hidden'">
+    <div class="status-island">
+      <ng-content></ng-content>:
+      <span class="timer"> {{ getFormattedTime() }}</span>
+    </div>
+  </div>
+</div>

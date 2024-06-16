@@ -6,6 +6,8 @@
     <router-outlet></router-outlet>
   </div>
 
+  <app-status-island *ngIf="authService.isLoggedIn()">Reservierung des Scooters</app-status-island>
+
   <!-- HTML Komponenten, die mit "app-" beginnen, sind projektspezifische Komponenten. -->
   <!-- Diese werden automatisch von Angular durch den von uns vorgegebenen Code (in dem -->
   <!-- Fall in "src/app/components/navigation-bar") dynamisch ausgetauscht. -->
