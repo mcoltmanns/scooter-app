@@ -54,19 +54,7 @@ abstract class ReservationManager {
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
             // dispatch a job to delete the reservation when it expires
-            new CronJob(
-                expiration,
-                async () => { // on tick
-                    try {
-                        await this.endReservation(reservation);
-                        console.log('deleted expired reservation');
-                    } catch (error) {
-                        console.error(`could not end reservation at scheduled time!\n${error}`);
-                    }
-                },
-                null,
-                true // start now
-            );
+            this.scheduleReservationEnding(reservation);
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error('RESERVATION_FAILED');
@@ -96,6 +84,24 @@ abstract class ReservationManager {
             throw new Error('END_RESERVATION_FAILED');
         }
         return;
+    }
+
+    public static scheduleReservationEnding(reservation: Model): void {
+        const expiration: Date = reservation.getDataValue('endsAt');
+        console.log(`scheduling reservation ending at ${expiration}`);
+        new CronJob(
+            expiration,
+            async () => {
+                try {
+                    await this.endReservation(reservation);
+                    console.log('ended reservation');
+                } catch (error) {
+                    console.error(`could not end reservation at scheduled time!\n${error}`);
+                }
+            },
+            null,
+            true // start now
+        );
     }
 }
 

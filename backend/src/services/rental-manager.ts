@@ -50,19 +50,7 @@ abstract class RentalManager {
             if(!transactionExtern) await transaction.commit();
 
             // dispatch a job to end the rental when it expires
-            new CronJob(
-                expiration,
-                async () => { // on tick
-                    try {
-                        await this.endRental(rental);
-                        console.log('ended rental');
-                    } catch (error) {
-                        console.error(`could not end rental at scheduled time!\n${error}`);
-                    }
-                },
-                null,
-                true // start now
-            );
+            this.scheduleRentalEnding(rental);
         } catch (error) {
             console.log(error);
             if(!transactionExtern) await transaction.rollback();
@@ -87,6 +75,25 @@ abstract class RentalManager {
             throw new Error('END_RENTAL_FAILED');
         }
         return;
+    }
+
+    // given a rental, schedule a cronjob to end it at its expiration
+    public static scheduleRentalEnding(rental: Model): void {
+        const expiration: Date = rental.getDataValue('endedAt');
+        console.log(`scheduling rental ending at ${expiration}`);
+        new CronJob(
+            expiration,
+            async () => {
+                try {
+                    await this.endRental(rental);
+                    console.log('ended rental');
+                } catch (error) {
+                    console.error(`could not end rental at scheduled time!\n${error}`);
+                }
+            },
+            null,
+            true // start now
+        );
     }
 }
 

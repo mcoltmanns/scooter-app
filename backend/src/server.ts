@@ -34,19 +34,29 @@ class Server {
       // FIXME: these are really hacky! What really needs to be done is define database relationships in such a way that these null setting operations are done automatically
       /* Purge all expired reservations */
       console.log('purging expired reservations...');
-      const purgedReservations = await Reservation.findAll({ where: { endsAt: { [Op.lt]: now } } });
-      for (const reservation of purgedReservations) {
+      let reservations = await Reservation.findAll({ where: { endsAt: { [Op.lt]: now } } });
+      for (const reservation of reservations) {
         await ReservationManager.endReservation(reservation);
       }
-      console.log(`purged ${purgedReservations.length} expired reservations.`);
+      console.log(`purged ${reservations.length} expired reservations.\nscheduling deletion of remaining reservations...`);
+      reservations = await Reservation.findAll();
+      for (const reservation of reservations) {
+        ReservationManager.scheduleReservationEnding(reservation);
+      }
+      console.log(`scheduled deletion for ${reservations.length} active reservations`);
 
       /* Purge all expired rentals */
       console.log('purging expired rentals...');
-      const purgedRentals = await Rental.findAll({ where: { endedAt: { [Op.lt]: now } } });
-      for (const rental of purgedRentals) {
+      let rentals = await Rental.findAll({ where: { endedAt: { [Op.lt]: now } } });
+      for (const rental of rentals) {
         await RentalManager.endRental(rental);
       }
-      console.log(`purged ${purgedRentals.length} expired rentals`);
+      console.log(`purged ${rentals.length} expired rentals.\nscheduling deletion of remaining rentals...`);
+      rentals = await Rental.findAll();
+      for (const rental of rentals) {
+        RentalManager.scheduleRentalEnding(rental);
+      }
+      console.log(`scheduled deletion for ${rentals.length} active rentals`);
 
       /* Start the server */
       app.listen(this.port, () => {
