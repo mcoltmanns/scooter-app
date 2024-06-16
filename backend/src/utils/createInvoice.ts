@@ -51,6 +51,7 @@ export class CreateInvoice {
         const lineHeight = fontSize + 400;
         const currentYPosition = 100; // current y position
         const textWidth = timesRomanFont.widthOfTextAtSize(scooterName, fontSize);
+        selectedCurrency = ' '+selectedCurrency;
 
         /* Data for User Header: */
 
@@ -150,7 +151,7 @@ export class CreateInvoice {
         });
 
         // add total price into the pdf
-        firstPage.drawText((total.toString() + selectedCurrency), {
+        firstPage.drawText((total.toString()), {
             x: 475,
             y: height - currentYPosition - lineHeight - 25, // Positionierung von oben nach unten
             size: fontSize,
@@ -158,6 +159,34 @@ export class CreateInvoice {
             color: rgb(0, 0, 0),
         });
 
+        // add total price and Mwst:
+
+        // add Nettobetrag price into the pdf
+        firstPage.drawText((this.calculateNettoValue(parseFloat(total)) + selectedCurrency), {
+            x: 475,
+            y: height - currentYPosition - lineHeight - 69, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        // add Mwst price into the pdf
+        firstPage.drawText((this.calculateMwst(parseFloat(total)) + selectedCurrency), {
+            x: 475,
+            y: height - currentYPosition - lineHeight - 84, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
+
+        // add total price into the pdf
+        firstPage.drawText((total.toString()), {
+            x: 475,
+            y: height - currentYPosition - lineHeight - 104, // Positionierung von oben nach unten
+            size: fontSize,
+            font: timesRomanFont,
+            color: rgb(0, 0, 0),
+        });
         return await pdfDoc.save(); // Save the edited pdf file
     }
 
@@ -170,5 +199,18 @@ export class CreateInvoice {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         return `${day}.${month}.${year}  ${hours}:${minutes} Uhr`;
+    }
+
+    /* calculates netto value of price */
+    private static calculateNettoValue(total: number): string {
+        const netValue = total / 1.19;
+        return netValue.toFixed(2);
+    }
+    
+    /* calculates Mwst value of price */
+    private static calculateMwst(total: number): string {
+        const netValue = total / 1.19;
+        const mwstValue = total - netValue; 
+        return mwstValue.toFixed(2); 
     }
 }

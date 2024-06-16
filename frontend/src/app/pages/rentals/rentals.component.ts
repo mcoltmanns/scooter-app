@@ -160,10 +160,10 @@ export class RentalsComponent implements OnInit {
     let str = '';
     if(unit === '$'){
       intValue = UnitConverter.convertCurrency(intValue, unit, '$');
-      str = intValue.toFixed(2) + '$'; // toFixed(2) only shows the last two decimal place
+      str = intValue.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
     }
     else{
-      str = value.toString() + '€';
+      str = value.toString() + ' €';
     }
     return str;
   }
@@ -173,17 +173,22 @@ export class RentalsComponent implements OnInit {
   displayInvoice(rentalId: number, scooterId: number, createdAt : string, endedAt: string): void {
     console.log('dowload pressed');
     const scooterName = this.getNameByScooterId(scooterId);
-    const total = this.getTotalPrice(scooterId, createdAt, endedAt);
+    let total = this.getTotalPrice(scooterId, createdAt, endedAt);
+    total = this.convertCurrencyUnits(total, this.selectedCurrency);
     const duration = this.rentalDuration(createdAt, endedAt);
-    const pricePerHour = this.getPriceByScooterId(scooterId);
+    let pricePerHour = this.getPriceByScooterId(scooterId);
+    pricePerHour = parseFloat(this.convertCurrencyUnits(pricePerHour?.toString(), this.selectedCurrency));
     if(scooterName === undefined || total === undefined || pricePerHour === undefined){
       console.log('Error - An Attribute is not defined');
       return;
     }
     this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, this.selectedCurrency).subscribe(
+      
       (pdfBlob: Blob) => {
-        const blob = new Blob([pdfBlob]);
-        console.log(blob);
+        const blob = new Blob([pdfBlob], { type: 'application/pdf' });
+        //console.log(blob)
+        const url = window.URL.createObjectURL(blob);
+        console.log(url);
         /* This does not work ! */
         /*
         const blobUrl = URL.createObjectURL(pdfBlob);
@@ -191,6 +196,15 @@ export class RentalsComponent implements OnInit {
         */
         const fileName = 'InvoiceScooter';
         const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
+        /*
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        */
+
         window.open(pdfUrl, '_blank');
       },
       (error) => {
