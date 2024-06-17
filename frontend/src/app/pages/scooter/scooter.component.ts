@@ -200,8 +200,18 @@ export class ScooterComponent implements OnInit {
     console.log(`reserve scooter ${scooterId}`);
     // ask the booking service to try and take out a reservation on this scooter
     this.bookingService.makeReservation({ scooterId: scooterId }).subscribe({
-      next: () => {
+      next: (value) => {
         // console.log(value.reservation);
+        // console.log(this.scooter);
+
+        const showReservationObj = {
+          imagePath: this.getImageUrl(this.product!.name),
+          redirectPath: `search/scooter/${scooterId}`,
+          scooterName: this.product!.name,
+          reservationEnd: value.reservation!.endsAt
+        };
+
+        this.bookingService.showReservationIsland(showReservationObj);
         this.router.navigate(['reservation']); // TODO: needs more feedback on if reservation was successful
       },
       error: (err) => {
@@ -216,6 +226,10 @@ export class ScooterComponent implements OnInit {
     this.bookingService.endReservation().subscribe({
       next: () => {
         // ok
+
+        /* Destroy the reservation island */
+        this.bookingService.destroyReservationIsland();
+
         this.router.navigate(['search']); // TODO also needs more feedback
       },
       error: (err) => {

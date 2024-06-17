@@ -3,6 +3,7 @@ import { RESERVATION_LIFETIME, Reservation } from '../models/rental';
 import database from '../database';
 import { Scooter } from '../models/scooter';
 import { CronJob } from 'cron';
+import { Product } from '../models/product';
 
 abstract class ReservationManager {
     /* check if a scooter is reserved */
@@ -14,7 +15,32 @@ abstract class ReservationManager {
     }
 
     /* check if a user has a reservation */
-    public static async getReservationFromUser(userId: number, transaction?: Transaction): Promise<Model> {
+    public static async getReservationFromUser(userId: number, transaction?: Transaction, withProduct = false): Promise<Model> {
+      if (withProduct) {
+        const reservation = await Reservation.findOne({
+          where: { user_id: userId },
+          transaction: transaction || undefined,
+          include: [{
+            model: Scooter,
+            as: 'scooter',
+            include: [{
+              model: Product,
+              as: 'product',
+              attributes: ['name', 'image'], // Select only the neccessary fields from the Product table
+            }],
+          }],
+        });
+
+        if (!reservation) {
+          return null;
+        }
+    
+        /* Post-process the result to rename the attributes and remove the scooter object */
+        const { scooter, ...otherFields } = reservation.get({ plain: true });
+        const { product } = scooter;
+        return { ...otherFields, scooterName: product.name, scooterImage: product.image };
+      }
+      
       if (transaction) {
         return await Reservation.findOne({ where: {user_id: userId }, transaction: transaction });
       }

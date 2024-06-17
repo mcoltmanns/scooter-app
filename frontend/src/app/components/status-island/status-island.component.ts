@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, AfterViewInit, OnDestroy, HostListener, AfterViewChecked } from '@angular/core';
+import { Component, Input, OnDestroy, HostListener, AfterViewChecked } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
+import { BookingService } from 'src/app/services/booking.service';
 
 @Component({
   selector: 'app-status-island',
@@ -29,14 +30,15 @@ import { ChangeDetectorRef } from '@angular/core';
     ])
   ]
 })
-export class StatusIslandComponent implements AfterViewInit, OnDestroy, AfterViewChecked {
+export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   public onDOM = false;
   public isVisible = false;
   @Input() public showCountdown = true;
-  @Input() public showDuration = 600000;
+  @Input() public showDuration = 10000;
   @Input() public imgPath: string | null = null;
   @Input() public redirectPath: string | null = null;
   @Input() public title: string | null = null;
+  @Input() public content: string | null = null;  // A secondary text besides the title
   private titleMinLength = 6;
   public showContent = false;
   private animationDuration = 300;  // Match this with your animation duration, e.g. 0.3s = 300ms
@@ -48,12 +50,29 @@ export class StatusIslandComponent implements AfterViewInit, OnDestroy, AfterVie
   private showTimeout: ReturnType<typeof setTimeout> | null = null;
   private hideTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private router: Router, private cdRef: ChangeDetectorRef) { }
+  constructor(private router: Router, private cdRef: ChangeDetectorRef, private bookingService: BookingService) { 
+    /* The status island will be used to display a users reservation. Therefore, we subscribe to the scooterReserved event. */
+    this.bookingService.scooterReserved.subscribe(reservation => {
+      this.imgPath = reservation.imagePath;
+      this.redirectPath = reservation.redirectPath;
+      this.title = reservation.scooterName;
+      this.content = 'reserviert:';
 
-  ngAfterViewInit(): void {
-    this.adjustElementsToWindow();
-    this.showAndHide();
-  }
+      /* Calculate the remaining time until the reservation ends */
+      const reservationEnd = new Date(reservation.reservationEnd);
+      const currentTime = new Date();
+      const remainingTime = reservationEnd.getTime() - currentTime.getTime();
+      this.showDuration = remainingTime;
+
+      this.adjustElementsToWindow();
+      this.showAndHide();
+    });
+
+    /* If the scooterUnreserved event is emitted, the status island will be destroyed. */
+    this.bookingService.scooterUnreserved.subscribe(() => {
+      this.destroyIsland();
+    });
+   }
 
   ngAfterViewChecked(): void {
     this.cdRef.detectChanges();
@@ -103,9 +122,10 @@ export class StatusIslandComponent implements AfterViewInit, OnDestroy, AfterVie
   }
 
   showAndHide(): void {
+    this.resetTimer();
     this.show();
 
-    this.remainingDuration = this.showDuration / 1000;
+    this.remainingDuration = Math.floor(this.showDuration / 1000);
     this.countdownInterval = setInterval(() => {
       if (this.remainingDuration > 0) {
         this.remainingDuration--;

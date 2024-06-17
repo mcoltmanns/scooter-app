@@ -3,4 +3,6 @@ export interface Reservation {
     user_id: number;
     scooter_id: number;
     endsAt: string;
+    scooterName: string;
+    scooterImage: string;
 }

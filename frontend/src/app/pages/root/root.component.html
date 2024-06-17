@@ -6,8 +6,8 @@
     <router-outlet></router-outlet>
   </div>
 
-  <!-- <app-status-island *ngIf="authService.isLoggedIn()">Reservierung des Scooters</app-status-island> -->
-  <app-status-island *ngIf="authService.isLoggedIn()" imgPath="http://localhost:8000/img/products/SnowPulse X2.jpg" redirectPath="search/scooter/14" title="FluxCapacitor Ultra High Speed Special Version High End Cruiser">reserviert:</app-status-island>
+  <!-- The status island is a small box that can show a status with an image, a text and a countdown for a certain time. -->
+  <app-status-island *ngIf="authService.isLoggedIn()"></app-status-island>
 
   <!-- HTML Komponenten, die mit "app-" beginnen, sind projektspezifische Komponenten. -->
   <!-- Diese werden automatisch von Angular durch den von uns vorgegebenen Code (in dem -->
