@@ -1,7 +1,7 @@
 import { Rental } from 'src/app/models/rental';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
-import { parse, isAfter, isBefore } from 'date-fns';
+import { parse, isAfter, isBefore, isEqual } from 'date-fns';
 
 
 /**
@@ -25,7 +25,7 @@ export class Filters {
             const created = this.stringToDate(this.backendToDate(rental.createdAt));
             const ended = this.stringToDate(this.backendToDate(rental.endedAt));
             //isAfter(1,2) checks if "1 > 2" so to say, isBefore (1,2) checks if "1<2" so to say
-            if(isAfter(created, begin) && isBefore(ended, end)){
+            if((isAfter(created, begin) || isEqual(created, begin)) && (isBefore(ended, end) || isEqual(ended, end))){
                 filteredRentals.push(rental);
             }
         });
