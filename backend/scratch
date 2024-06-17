@@ -1,0 +1,15 @@
+control flow?
+
+start static booking -> schedule booking ending -> DONE
+
+start dynamic booking -> run booking extension check              
+        booking extension check:
+                is user good for the next n minutes?
+                yes -> schedule booking extension check in n minutes
+                no -> end booking -> DONE
+
+how to cancel midway?
+        end booking with id x:
+                cancel the scheduled extension check for id x
+                        if x is running -> wait for x to finish running and try again
+                end booking normally
