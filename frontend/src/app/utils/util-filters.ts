@@ -48,7 +48,7 @@ export class Filters {
 
 
 
-//Filters for scooter-map and scooter-list --------------------------------------------------------------------
+//Filters for scooter-map and scooter-list -------------------------------------------------------------------
 
     /**
      * Filters the given scooter list by the price parameter wrt to lower and upper
@@ -58,11 +58,11 @@ export class Filters {
      * @param products list of products corresponding to scooters in list/map
      * @returns 
      */
-    static filterPrice(minPrice: number, maxPrice: number, scooters: Scooter[], products: Product[]) : Scooter[]{
+    static filterPrice(minPrice: string, maxPrice: string, scooters: Scooter[], products: Product[]) : Scooter[]{
         const filteredScooters: Scooter[] = [];
         scooters.forEach(scooter => {
-            const cost = products.find(p => p.id === Number (scooter.product_id))?.price_per_hour;
-            if ( (!(cost === undefined))&&(cost >= minPrice) && (cost <= maxPrice)){
+            const cost = products.find(p => String (p.id) === scooter.product_id)?.price_per_hour;
+            if ( (!(cost === undefined))&&( cost >= Number(minPrice)) && ( cost <= Number(maxPrice))){
                 filteredScooters.push(scooter);
             }
         });
@@ -72,16 +72,16 @@ export class Filters {
     /**
      * Filters the given scooter list by the remaining range of the scooter
      * @param minRange lower bound for the range of the scooters
-     * @param maxRange upper bound for teh range of the scooters
+     * @param maxRange upper bound for the range of the scooters
      * @param scooters list of scooters to be filtered 
      * @param products list of products corresponding to the list of scooters that is to be filtered
      * @returns list of scooters that fit the requirements of the given range 
      */
-    static filterRange(minRange: number, maxRange: number, scooters: Scooter[], products: Product[]): Scooter[]{
+    static filterRange(minRange: string, maxRange: string, scooters: Scooter[], products: Product[]): Scooter[]{
         const filteredScooters: Scooter[] = [];
         scooters.forEach(scooter => {
             const maxReach = products.find(p => p.id === Number (scooter.product_id))?.max_reach;
-            if ( (!(maxReach === undefined)) && (Math.ceil(scooter.battery / 100 * maxReach) >= minRange) && (Math.ceil(scooter.battery / 100 * maxReach) <= maxRange)){
+            if ( (!(maxReach === undefined)) && (Math.ceil(scooter.battery / 100 * maxReach) >= Number (minRange)) && (Math.ceil(scooter.battery / 100 * maxReach) <= Number (maxRange))){
                 filteredScooters.push(scooter);
             }
         });
@@ -95,10 +95,10 @@ export class Filters {
      * @param scooters list of scooters to be filtered
      * @returns list of scooters that fit the bill wrt battery percentage
      */
-    static filterBattery(minBattery: number, maxBattery: number, scooters: Scooter[]): Scooter[]{
+    static filterBattery(minBattery: string, maxBattery: string, scooters: Scooter[]): Scooter[]{
         const filteredScooters: Scooter[] = [];
         scooters.forEach(scooter => {
-            if( (scooter.battery >= minBattery) && (scooter.battery <= maxBattery)){
+            if( (scooter.battery >= Number (minBattery)) && (scooter.battery <= Number (maxBattery))){
                 filteredScooters.push(scooter);
             }
         });
@@ -113,11 +113,11 @@ export class Filters {
      * @param products list of products corresponding to the list of scooters
      * @returns list of scooters that have a speed in the desired interval
      */
-    static filterSpeed(minSpeed: number, maxSpeed: number, scooters: Scooter[], products: Product[]): Scooter[]{
+    static filterSpeed(minSpeed: string, maxSpeed: string, scooters: Scooter[], products: Product[]): Scooter[]{
         const filteredScooters: Scooter[] = [];
         scooters.forEach(scooter => {
             const speed = products.find(p => p.id === Number(scooter.product_id))?.max_speed;
-            if ( (!(speed === undefined)) && (speed >= minSpeed) && (speed <= maxSpeed)){
+            if ( (!(speed === undefined)) && (speed >= Number (minSpeed)) && (speed <= Number (maxSpeed))){
                 filteredScooters.push(scooter);
             }
         });
