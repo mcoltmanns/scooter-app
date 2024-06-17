@@ -33,30 +33,30 @@ class Server {
 
       // FIXME: these are really hacky! What really needs to be done is define database relationships in such a way that these null setting operations are done automatically
       /* Purge all expired reservations */
-      console.log('purging expired reservations...');
+      console.log('deleting and dereferencing expired reservations...');
       let reservations = await Reservation.findAll({ where: { endsAt: { [Op.lt]: now } } });
       for (const reservation of reservations) {
         await ReservationManager.endReservation(reservation);
       }
-      console.log(`purged ${reservations.length} expired reservations.\nscheduling deletion of remaining reservations...`);
-      reservations = await Reservation.findAll();
+      console.log(`deleted and dereferenced ${reservations.length} expired reservations.\nscheduling deletion and dereferencing of remaining reservations...`);
+      reservations = await Reservation.findAll({ where: { endsAt: { [Op.gte]: now } } });
       for (const reservation of reservations) {
         ReservationManager.scheduleReservationEnding(reservation);
       }
       console.log(`scheduled deletion for ${reservations.length} active reservations`);
 
       /* Purge all expired rentals */
-      console.log('purging expired rentals...');
+      console.log('unhooking references to expired rentals...');
       let rentals = await Rental.findAll({ where: { endedAt: { [Op.lt]: now } } });
       for (const rental of rentals) {
         await RentalManager.endRental(rental);
       }
-      console.log(`purged ${rentals.length} expired rentals.\nscheduling deletion of remaining rentals...`);
-      rentals = await Rental.findAll();
+      console.log(`unhooked references to ${rentals.length} expired rentals.\nscheduling endings of remaining rentals...`);
+      rentals = await Rental.findAll({ where: { endedAt: { [Op.gte]: now } } });
       for (const rental of rentals) {
         RentalManager.scheduleRentalEnding(rental);
       }
-      console.log(`scheduled deletion for ${rentals.length} active rentals`);
+      console.log(`scheduled endings for ${rentals.length} active rentals`);
 
       /* Start the server */
       app.listen(this.port, () => {

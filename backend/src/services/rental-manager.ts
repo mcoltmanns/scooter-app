@@ -3,7 +3,8 @@ import { Rental } from '../models/rental';
 import ReservationManager from './reservation-manager';
 import { Scooter } from '../models/scooter';
 import database from '../database';
-import { CronJob } from 'cron';
+import { Job, scheduleJob } from 'node-schedule';
+import JobManager from './job-manager';
 
 abstract class RentalManager {
     // get all rentals associated with a scooter (active and ended)
@@ -59,6 +60,35 @@ abstract class RentalManager {
         return rental;
     }
 
+    // extend a rental (set a new reservation expiration time)
+    public static async extendRental(userId: number, rentalId: number, extension_time_ms: number, transaction?: Transaction, rental?: Model): Promise<Model> {
+        const expiration: number = Date.now() + extension_time_ms;
+        const transactionExtern: boolean = transaction !== undefined;
+        if(!transactionExtern) transaction = await database.getSequelize().transaction();
+
+        if(!rental) {
+            rental = await Scooter.findByPk(rentalId, {transaction: transaction});
+        }
+        if(!rental) throw new Error('RENTAL_NOT_FOUND');
+        
+        // can't extend if rental isn't yours
+        if(rental.getDataValue('user_id') !== userId) {
+            throw new Error('NOT_YOUR_RENTAL');
+        }
+
+        // extend the rental
+        rental.setDataValue('endedAt', expiration);
+        JobManager.rescheduleJob(rental.getDataValue('id'), expiration);
+        try {
+            await rental.save({transaction: transaction});
+        } catch (error) {
+            console.log('could not extend rental!');
+            await transaction.rollback();
+            throw new Error('EXTENSION_FAILED');
+        }
+        return rental;
+    }
+
     // end a rental, freeing the scooter
     // if caller provides a transaction, use that and don't commit/rollback. otherwise, checkout and manage a new transaction
     public static async endRental(rental: Model, transaction?: Transaction): Promise<void> {
@@ -66,10 +96,10 @@ abstract class RentalManager {
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
             const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'));
-            //await rental.destroy({transaction: transaction}); // this will be needed when we start booking dynamically!
             scooter.setDataValue('active_rental_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
+            JobManager.removeJob(`rental${rental.getDataValue('id')}`); // remove yourself when done
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error('END_RENTAL_FAILED');
@@ -77,23 +107,21 @@ abstract class RentalManager {
         return;
     }
 
-    // given a rental, schedule a cronjob to end it at its expiration
-    public static scheduleRentalEnding(rental: Model): void {
+    // given a rental, schedule a job to end it at its expiration
+    // job's id will be the 'rental${rental.id}'
+    public static scheduleRentalEnding(rental: Model): Job {
         const expiration: Date = rental.getDataValue('endedAt');
         console.log(`scheduling rental ending at ${expiration}`);
-        new CronJob(
-            expiration,
-            async () => {
-                try {
-                    await this.endRental(rental);
-                    console.log('ended rental');
-                } catch (error) {
-                    console.error(`could not end rental at scheduled time!\n${error}`);
-                }
-            },
-            null,
-            true // start now
-        );
+        const j = scheduleJob(`rental${rental.getDataValue('id')}`, expiration, async () => {
+            try {
+                await this.endRental(rental);
+                console.log('ended rental');
+            } catch (error) {
+                console.error(`could not end rental at scheduled time!\n${error}`);
+            }
+        });
+        JobManager.addJob(j);
+        return j;
     }
 }
 

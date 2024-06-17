@@ -2,7 +2,8 @@ import { Model, Transaction } from 'sequelize';
 import { RESERVATION_LIFETIME, Reservation } from '../models/rental';
 import database from '../database';
 import { Scooter } from '../models/scooter';
-import { CronJob } from 'cron';
+import { Job, scheduleJob } from 'node-schedule';
+import jobManager from './job-manager';
 
 abstract class ReservationManager {
     /* check if a scooter is reserved */
@@ -79,6 +80,7 @@ abstract class ReservationManager {
             scooter.setDataValue('reservation_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
+            jobManager.removeJob(`reservation${reservation.getDataValue('id')}`); // remove yourself when done
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error('END_RESERVATION_FAILED');
@@ -86,22 +88,20 @@ abstract class ReservationManager {
         return;
     }
 
-    public static scheduleReservationEnding(reservation: Model): void {
+    // job id will be 'reservation${reservation.id}'
+    public static scheduleReservationEnding(reservation: Model): Job {
         const expiration: Date = reservation.getDataValue('endsAt');
         console.log(`scheduling reservation ending at ${expiration}`);
-        new CronJob(
-            expiration,
-            async () => {
-                try {
-                    await this.endReservation(reservation);
-                    console.log('ended reservation');
-                } catch (error) {
-                    console.error(`could not end reservation at scheduled time!\n${error}`);
-                }
-            },
-            null,
-            true // start now
-        );
+        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, async () => {
+            try {
+                await this.endReservation(reservation);
+                console.log('ended reservation');
+            } catch (error) {
+                console.error(`could not end reservation at scheduled time!\n${error}`);
+            }
+        });
+        jobManager.addJob(j);
+        return j;
     }
 }
 
