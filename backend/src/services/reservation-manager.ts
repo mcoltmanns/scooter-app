@@ -34,6 +34,10 @@ abstract class ReservationManager {
         if (!reservation) {
           return null;
         }
+
+        if (!reservation.get('scooter')) {
+          return null;
+        }
     
         /* Post-process the result to rename the attributes and remove the scooter object */
         const { scooter, ...otherFields } = reservation.get({ plain: true });

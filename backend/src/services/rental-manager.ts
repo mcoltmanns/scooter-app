@@ -63,7 +63,7 @@ abstract class RentalManager {
         } catch (error) {
             console.log(error);
             if(!transactionExtern) await transaction.rollback();
-            throw new Error('RENTAL_FAILED');
+            throw new Error(error.message);
         }
         return rental;
     }
@@ -75,7 +75,7 @@ abstract class RentalManager {
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
             const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'));
-            await rental.destroy({transaction: transaction});
+            // await rental.destroy({transaction: transaction}); // this will be needed when we start booking dynamically!
             scooter.setDataValue('active_rental_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
@@ -89,7 +89,15 @@ abstract class RentalManager {
     // given a rental, schedule a cronjob to end it at its expiration
     public static scheduleRentalEnding(rental: Model): void {
         const expiration: Date = rental.getDataValue('endedAt');
+
+        /* If the expiration is not in the future, don't schedule a CronJob */
+        const now = new Date();
+        if (expiration <= now) {
+            return;
+        }
+
         console.log(`scheduling rental ending at ${expiration}`);
+
         new CronJob(
             expiration,
             async () => {
