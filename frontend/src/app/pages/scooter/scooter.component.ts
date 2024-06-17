@@ -28,6 +28,8 @@ const defaultIcon = Leaflet.icon({
   styleUrl: './scooter.component.css'
 })
 export class ScooterComponent implements OnInit {
+  public backButtonPath: string | null = '/search';
+
   public batteryStatus = 0;
   public rangeStatus = 0;
   public speedStatus = 0;
@@ -68,6 +70,8 @@ export class ScooterComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
+      this.processRoutingState();  // Handle the state of the previous page
+
       /* Get the scooter id from the URL */
       const scooterId = parseInt(params.get('id')!, 10);
       
@@ -147,6 +151,30 @@ export class ScooterComponent implements OnInit {
         }
       });
     });
+  }
+
+  processRoutingState(): void {
+    /* Handle the state of the previous page */
+    const historyState = history.state;
+  
+    /* Set the back button path to null if the originator was the reservation island
+      to bring the user back to the page they were on before. */
+    if (historyState.originState && historyState.originState.island) {
+      this.backButtonPath = null;
+    }
+  
+    /* Clear the stateOrigin when coming from the reservation island */
+    if (historyState && historyState.originState && 'island' in historyState.originState) {
+      delete historyState.originState.island;
+    }
+  
+    /* Clear the originState object if it is empty */
+    if (historyState.originState && Object.keys(historyState.originState).length === 0) {
+      delete historyState.originState;
+    }
+  
+    /* Update the router state */
+    history.replaceState(historyState, '');
   }
 
   animateScooterStatusCircles(): void {

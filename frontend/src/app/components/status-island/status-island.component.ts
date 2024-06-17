@@ -186,10 +186,12 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     if (this.redirectPath) {
       /* If a path is provided, navigate to it and
        pass the originState object to the next route if it exists. */
-      const originState = history.state.originState ? { originState: history.state.originState } : {};
-      this.router.navigate([this.redirectPath], { 
-        state: originState
-      });
+       const originState = history.state.originState
+        ? { originState: { ...history.state.originState, island: true } }
+        : { originState: { island: true } };
+       this.router.navigate([this.redirectPath], { 
+         state: originState
+       });
     }
   }
 }
