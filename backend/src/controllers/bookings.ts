@@ -93,7 +93,7 @@ export class BookingsController {
                 return;
             }
             if(error.message === 'SCOOTER_UNAVAILABLE'){
-                response.status(401).json({ code: 401, message: 'Scooter ist derzeit nicht reservierbar.' });
+                response.status(401).json({ code: 401, message: 'Scooter ist nicht mehr verfügbar.', scooterAvailable: false });
                 return;
             }
             if(error.message === 'USER_HAS_RESERVATION') {
@@ -104,7 +104,7 @@ export class BookingsController {
                 response.status(500).json({ code: 500, message: 'Reservierung konnte nicht angelegt werden.' });
                 return;
             }
-            response.status(500).json({ code: 500, message: 'Fehler beim Reservieren.' });
+            response.status(500).json({ code: 500, message: 'Fehler beim Reservieren. Bitte versuche es später noch einmal.' });
             return;
         }
     }

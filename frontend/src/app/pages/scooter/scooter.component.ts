@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -14,6 +14,8 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 import { BookingService } from 'src/app/services/booking.service';
 import { forkJoin } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
+import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
 
 const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
@@ -23,35 +25,45 @@ const defaultIcon = Leaflet.icon({
 @Component({
   selector: 'app-scooter',
   standalone: true,
-  imports: [ButtonComponent, BackButtonComponent, CommonModule, LeafletModule, LoadingOverlayComponent],
+  imports: [ButtonComponent, BackButtonComponent, CommonModule, LeafletModule, LoadingOverlayComponent, ToastComponent, ConfirmModalComponent],
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })
 export class ScooterComponent implements OnInit {
-  public backButtonPath: string | null = '/search';
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
 
+  public backButtonPath: string | null = '/search';  // Path for the back button
+
+  /* Variables for the scooter status circles */
   public batteryStatus = 0;
   public rangeStatus = 0;
   public speedStatus = 0;
 
-  public loadingOperations = 2; // One scooter image in html code the forkJoin in ngOnInit
+  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) { 
+    /* By using bind(this), we ensure that these methods always refer to the ScooterComponent instance. */
+    this.onCancelReservationConfirmModal = this.onCancelReservationConfirmModal.bind(this);
+    this.onConfirmReservationConfirmModal = this.onConfirmReservationConfirmModal.bind(this);
+  }
 
-  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) { }
-
+  /* Variables for the scooter information */
   public errorMessage = '';
   public scooterNotFound = false;
   public loadingScooter = true;
   public product: Product | null = null;
   public scooter: Scooter | null = null;
-  // User Units variables
+
+  /* User Units variables */
   public selectedSpeed = ''; 
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
 
-  public canRent = false; // is the scooter free for booking/reservation?
-  public canReserve = false; // can the user reserve the scooter?
-  public canCancel = false; // can the user end the reservation on this scooter?
+  /* Reservation variables */
+  public userHasReservation = false;
+  public userReservedThisScooter = false;
+  public processingReservation = false;
+  public disableButtons = false;
+  public showReservationConfirmModal = false;
 
   options: Leaflet.MapOptions = {
     layers: [
@@ -98,15 +110,9 @@ export class ScooterComponent implements OnInit {
           this.selectedDistance = this.option.distance;
           this.selectedCurrency = this.option.currency;
 
-          /* Process the reservation information */
           if (reservation.reservation) {
-            // got a reservation? (user has a reservation)
-            this.canCancel = reservation.reservation.scooter_id === this.scooter!.id; // user can cancel the reservation if their reservation was on this scooter
-            this.canRent = (this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null) || this.canCancel; // user can rent this scooter if they can cancel or if scooter is neither reserved nor rented
-            this.canReserve = false; // user can't reserve this scooter (already reserved)
-          } else {
-            this.canCancel = false; // user can't cancel reservation on this scooter
-            this.canReserve = this.canRent = this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null; // user can reserve or rent this scooter if it isn't otherwise reserved or rented
+            this.userHasReservation = true;
+            this.userReservedThisScooter = reservation.reservation.scooter_id === this.scooter!.id;
           }
   
           /* Load the product image */
@@ -209,17 +215,53 @@ export class ScooterComponent implements OnInit {
     });
   }
 
-  // if "Scooter Reservieren" is pressed
-  onReserve(): void {
+  onCancelReservationConfirmModal(): void {
+    console.log('cancel reservation confirm modal');
+    this.showReservationConfirmModal = false;
+  }
+
+  onConfirmReservationConfirmModal(): void {
+    console.log('Confirmed reservation cancelation');
+    this.showReservationConfirmModal = false;
+
+    /* End the reservation for the other scooter. Then start the reservation for this scooter. */
+
+    /* Prevent triggering the reservation again while waiting for the response */
+    if (this.processingReservation) {
+      return;
+    }
+
+    this.processingReservation = true;
+    
+    // ask the booking service to end the reservation for this user
+    this.bookingService.endReservation().subscribe({
+      next: () => {
+        /* Destroy the reservation island */
+        this.bookingService.destroyReservationIsland();
+
+        this.userHasReservation = false;
+        this.userReservedThisScooter = false;
+
+        this.reserveScooter();
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = err.error.message;
+        this.toastComponentError.showToast();
+
+        this.processingReservation = false;
+      }
+    });
+  }
+
+  reserveScooter(): void {
     const scooterId = this.scooter!.id;
-    this.canReserve = false;
+    this.processingReservation = true;
 
     console.log(`reserve scooter ${scooterId}`);
     // ask the booking service to try and take out a reservation on this scooter
     this.bookingService.makeReservation({ scooterId: scooterId }).subscribe({
       next: (value) => {
-        this.canCancel = true;
-
         const showReservationObj = {
           imagePath: this.getImageUrl(this.product!.name),
           redirectPath: `search/scooter/${scooterId}`,
@@ -228,27 +270,66 @@ export class ScooterComponent implements OnInit {
         };
 
         this.bookingService.showReservationIsland(showReservationObj);
+
+        this.userHasReservation = true;
+        this.userReservedThisScooter = true;
+        this.processingReservation = false;
       },
       error: (err) => {
-        console.error(err); // TODO: needs more feedback on if reservation failed - popup?
+        console.error(err);
+        this.errorMessage = err.error.message;
+        this.toastComponentError.showToast();
+
+        if (err.error.scooterAvailable === false) {
+          this.disableButtons = true;
+        }
+
+        this.processingReservation = false;
       }
     });
   }
 
+  // if "Scooter Reservieren" is pressed
+  onReserve(): void {
+    /* Prevent clicking the button again while waiting for the response for the first click */
+    if (this.processingReservation) {
+      return;
+    }
+
+    /* If the user has a reservation on another scooter, ask if he wants to replace it with this one */
+    if (this.userHasReservation && !this.userReservedThisScooter) {
+      this.showReservationConfirmModal = true;
+      return;
+    }
+
+    this.reserveScooter();
+  }
+
   // if "Reservierung beenden" is pressed
   onEndReservation(): void {
-    this.canCancel = false;
+    /* Prevent clicking the button again while waiting for the response for the first click */
+    if (this.processingReservation) {
+      return;
+    }
+
+    this.processingReservation = true;
     
     // ask the booking service to end the reservation for this user
     this.bookingService.endReservation().subscribe({
       next: () => {
-        this.canReserve = true;
-
         /* Destroy the reservation island */
         this.bookingService.destroyReservationIsland();
+
+        this.userHasReservation = false;
+        this.userReservedThisScooter = false;
+        this.processingReservation = false;
       },
       error: (err) => {
-        console.error(err); // TODO also needs more feedback
+        console.error(err);
+        this.errorMessage = err.error.message;
+        this.toastComponentError.showToast();
+
+        this.processingReservation = false;
       }
     });
   }

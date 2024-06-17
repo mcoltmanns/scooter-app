@@ -1,3 +1,9 @@
+<app-confirm-modal [showModal]="showReservationConfirmModal" [confirm]="onConfirmReservationConfirmModal" [cancel]="onCancelReservationConfirmModal" title="Reservierung ersetzen">
+  Bist du sicher, dass du deine aktuell laufende Reservierung aufheben und stattdessen den Scooter {{ scooter?.product_id }} reservieren willst?
+</app-confirm-modal>
+
+<app-toast #toastComponentError [showDuration]=3000 type="error">{{errorMessage}}</app-toast>
+
 <header class="header">
     <app-back-button path="{{ backButtonPath }}"></app-back-button>
     <div class="productName">
@@ -66,19 +72,17 @@
             </div>
 
             <div class="bottom">
-                <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onBook()" [disabled]="!canRent">
+                <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onBook()" [disabled]="disableButtons">
                     Scooter buchen
                 </app-button>
-                <ng-container *ngIf="!canCancel">
-                    <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onReserve()" [disabled]="!canRent || !canReserve">
-                        Scooter reservieren
-                    </app-button>
-                </ng-container>
-                <ng-container *ngIf="canCancel">
-                    <app-button color="warn" type="submit" class="scooterBook-btn" (click)="onEndReservation()">
-                        Reservierung beenden
-                    </app-button>
-                </ng-container>
+                <app-button 
+                    [color]="userReservedThisScooter ? 'warn' : 'primary'" 
+                    type="submit" 
+                    class="scooterBook-btn" 
+                    (click)="userReservedThisScooter ? onEndReservation() : onReserve()" 
+                    [disabled]="disableButtons">
+                    {{ processingReservation ? 'Lade...' : (userReservedThisScooter ? 'Reservierung beenden' : 'Scooter reservieren') }}
+                </app-button>
             </div>
 
             <div style="padding: 15px;">

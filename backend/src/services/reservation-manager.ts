@@ -35,7 +35,10 @@ abstract class ReservationManager {
           return null;
         }
 
+        /* If the scooter is not set, the reservation only exists in the reservations table but not in the scooters table.
+           This means we have inconsistent data. We therefore destroy the reservation and return null. */
         if (!reservation.get('scooter')) {
+          await this.endReservation(reservation, transaction ? transaction : undefined);
           return null;
         }
     
@@ -87,7 +90,7 @@ abstract class ReservationManager {
             this.scheduleReservationEnding(reservation);
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
-            throw new Error('RESERVATION_FAILED');
+            throw new Error(error.message);
         }
         return reservation;
     }
@@ -104,20 +107,35 @@ abstract class ReservationManager {
             }
             if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
 
+            /* Check if the reservation still exists in the database. If we don't do this, we might
+               end up deleting a reservation from scooters table that has changed in the meantime. */
+            const existingReservation = await Reservation.findByPk(reservation.getDataValue('id'), { transaction: transaction });
+            if (!existingReservation) {
+              throw new Error('RESERVATION_DOES_NOT_EXIST_ANYMORE');
+            }
+
             await reservation.destroy({ transaction: transaction });
             scooter.setDataValue('reservation_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
-            throw new Error('END_RESERVATION_FAILED');
+            throw new Error(error.message);
         }
         return;
     }
 
     public static scheduleReservationEnding(reservation: Model): void {
         const expiration: Date = reservation.getDataValue('endsAt');
+
+        /* If the expiration is not in the future, don't schedule a CronJob */
+        const now = new Date();
+        if (expiration <= now) {
+            return;
+        }
+
         console.log(`scheduling reservation ending at ${expiration}`);
+
         new CronJob(
             expiration,
             async () => {

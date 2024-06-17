@@ -17,7 +17,7 @@ export class OptionController{
     /* Method to find an entry for a user based on their userId */
     public async getUserPreferenceByUserId(request: Request, response: Response): Promise<void> {
         const userId = response.locals.userId;
-        console.log(userId);
+        // console.log(userId);
 
         try {
             const userPreference = await UserPreferences.findOne({ where: { id: userId } });
