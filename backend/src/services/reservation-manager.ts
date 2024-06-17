@@ -100,7 +100,6 @@ abstract class ReservationManager {
             }
             if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
 
-            // const scooter = await Scooter.findByPk(reservation.getDataValue('scooter_id'));
             await reservation.destroy({ transaction: transaction });
             scooter.setDataValue('reservation_id', null);
             await scooter.save({transaction: transaction});

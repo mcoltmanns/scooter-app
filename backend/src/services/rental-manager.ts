@@ -33,8 +33,8 @@ abstract class RentalManager {
             if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
 
             // can't book if scooter is reserved by someone else or rented
-            const reservation = await ReservationManager.getReservationFromScooter(scooterId, transaction);
-            if(scooter.getDataValue('active_rental_id') !== null || (reservation && reservation.dataValues.user_id !== userId)) {
+            const scooterReservation = await ReservationManager.getReservationFromScooter(scooterId, transaction);
+            if(scooter.getDataValue('active_rental_id') !== null || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
                 throw new Error('SCOOTER_UNAVAILABLE');
             }
 
@@ -45,11 +45,20 @@ abstract class RentalManager {
             scooter.setDataValue('active_rental_id', rental.dataValues.id);
             await scooter.save({transaction: transaction});
 
-            if(reservation) await ReservationManager.endReservation(reservation, transaction, scooter); // if there was a reservation, end it
+            /* End the reservation for the user if it exists (even if it's for another scooter) */
+            const userReservation = await ReservationManager.getReservationFromUser(userId, transaction);
+            if(userReservation) {
+              if (userReservation.getDataValue('scooter_id') === scooter.getDataValue('id')) {
+                /* If the reservation is for the same scooter, send the scooter as well so that we don't have to fetch it again */
+                await ReservationManager.endReservation(userReservation, transaction, scooter);
+              } else {
+                await ReservationManager.endReservation(userReservation, transaction);
+              }
+            }
             
             if(!transactionExtern) await transaction.commit();
 
-            // dispatch a job to end the rental when it expires
+            // Dispatch a job to end the rental when it expires
             this.scheduleRentalEnding(rental);
         } catch (error) {
             console.log(error);
@@ -66,7 +75,7 @@ abstract class RentalManager {
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
             const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'));
-            //await rental.destroy({transaction: transaction}); // this will be needed when we start booking dynamically!
+            await rental.destroy({transaction: transaction});
             scooter.setDataValue('active_rental_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();

@@ -39,8 +39,8 @@ export class BookingsController {
             /* Get the reservation for the user including name and image from the product table */
             const reservation = await ReservationManager.getReservationFromUser(userId, null, true);
             if(!reservation) {
-                response.status(404).json({ code: 404, message: 'Keine Reservierung gefunden.' });
-                return;
+              response.status(200).json({ code: 200, message: 'Keine Reservierung gefunden.' });
+              return;
             }
 
             response.status(200).json({ code: 200, reservation: reservation });

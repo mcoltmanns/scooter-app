@@ -65,6 +65,10 @@ export class BookingService {
   public restoreReservationIsland(): void {
     this.getUserReservation().subscribe({
       next: (value) => {
+        if (!value.reservation) {
+          return;
+        }
+        
         const reservation = value.reservation;
 
         const showReservationObj = {

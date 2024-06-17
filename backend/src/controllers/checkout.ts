@@ -80,6 +80,13 @@ export class CheckoutController {
       const pricePerHour = scooter.product.price_per_hour;
       const totalPrice = pricePerHour * duration;  // For now always in €
 
+      /* Start the rental */
+      const rental_duration_ms = duration * 60 * 60 * 1000;  // Convert hours to milliseconds
+      const rental = await RentalManager.startRental(userId, scooterId, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
+      // also ends associated reservation, if there was one
+
+      endTimestamp = rental.getDataValue('endedAt');  // Get the end timestamp of the rental to return it to the user
+
       /* Validate the payment */
       const { status:validateStatus, message:token } = await paymentService.initTransaction(paymentData, totalPrice);
 
@@ -96,13 +103,6 @@ export class CheckoutController {
 
       /* If we reach this point, the payment was successful */
       paymentToken = token;   // Save the payment token in case we need to rollback the transaction
-
-      /* Start the rental */
-      const rental_duration_ms = duration * 60 * 60 * 1000;  // Convert hours to milliseconds
-      const rental = await RentalManager.startRental(userId, scooterId, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
-      // also ends associated reservation, if there was one
-
-      endTimestamp = rental.getDataValue('endedAt');  // Get the end timestamp of the rental to return it to the user
 
       await transaction.commit();
     } catch (error) {

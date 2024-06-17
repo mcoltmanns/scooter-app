@@ -400,6 +400,9 @@ export class BookingComponent implements OnInit, AfterViewInit {
         }
         history.replaceState(historyState, '');   // Update the router state
 
+        /* Destroy the reservation island */
+        this.bookingService.destroyReservationIsland();
+
         /* Navigate to the success page inclduding the booking object and originState if it exists */
         const oldOriginState = history.state.originState || {};
         this.router.navigateByUrl('search/checkout/success', {
