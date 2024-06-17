@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { Product } from 'src/app/models/product';
 import { MapService } from 'src/app/services/map.service';
@@ -34,7 +34,7 @@ export class ScooterComponent implements OnInit {
 
   public loadingOperations = 2; // One scooter image in html code the forkJoin in ngOnInit
 
-  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) { }
+  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) { }
 
   public errorMessage = '';
   public scooterNotFound = false;
@@ -67,86 +67,85 @@ export class ScooterComponent implements OnInit {
   layers: Leaflet.Layer[] = [];
 
   ngOnInit(): void {
-    // read the last number from the url:
-    const currentPath = window.location.pathname;
-    const parts = currentPath.split('/');
-    const lastPart = parts[parts.length - 1];
-    const scooterId = parseInt(lastPart); // save the last number of URL in scooterId
-
-    forkJoin([
-      this.mapService.getSingleScooterInfo(scooterId),
-      this.mapService.getSingleProductInfo(scooterId),
-      this.optionService.getUserPreferences()
-    ]).subscribe({
-      next: ([scooter, product, option]) => {
-        /* Proess the scooter information */
-        this.scooter = scooter;
-        const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
-        this.layers.push(marker); 
-        this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
-        this.options.center = this.center; // Set the map center
-    
-        /* Process the product information */
-        this.product = product;
-    
-        /* Process the user preferences */
-        this.option = option;
-        this.selectedSpeed = this.option.speed;
-        this.selectedDistance = this.option.distance;
-        this.selectedCurrency = this.option.currency;
-
-        /* Load the product image */
-        const imageLoadPromise = new Promise((resolve, reject) => {
-          const img = new Image();
-          img.src = this.getImageUrl(this.product!.name);
-          img.onload = resolve;
-          img.onerror = reject;
-        });
-        imageLoadPromise
-          .then(() => {
-            this.loadingScooter = false;
-
-            /* Animate the scooter status circles */
-            this.animateScooterStatusCircles();
-          })
-          .catch(error => {
-            console.error('Image failed to load:', error);
-
-            this.loadingScooter = false;
-
-            /* Animate the scooter status circles */
-            this.animateScooterStatusCircles();
+    this.route.paramMap.subscribe(params => {
+      /* Get the scooter id from the URL */
+      const scooterId = parseInt(params.get('id')!, 10);
+      
+      forkJoin([
+        this.mapService.getSingleScooterInfo(scooterId),
+        this.mapService.getSingleProductInfo(scooterId),
+        this.optionService.getUserPreferences()
+      ]).subscribe({
+        next: ([scooter, product, option]) => {
+          /* Proess the scooter information */
+          this.scooter = scooter;
+          const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
+          this.layers.push(marker); 
+          this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
+          this.options.center = this.center; // Set the map center
+      
+          /* Process the product information */
+          this.product = product;
+      
+          /* Process the user preferences */
+          this.option = option;
+          this.selectedSpeed = this.option.speed;
+          this.selectedDistance = this.option.distance;
+          this.selectedCurrency = this.option.currency;
+  
+          /* Load the product image */
+          const imageLoadPromise = new Promise((resolve, reject) => {
+            const img = new Image();
+            img.src = this.getImageUrl(this.product!.name);
+            img.onload = resolve;
+            img.onerror = reject;
           });
-
-
-        // TODO: Integrate the following code into the forkJoin
-        // check reservation info (only once we have scooter info)
-        this.bookingService.getUserReservation().subscribe({
-          next: (value) => {
-            // got a reservation? (user has a reservation)
-            this.canCancel = value.reservation.scooter_id === this.scooter!.id; // user can cancel the reservation if their reservation was on this scooter
-            this.canRent = (this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null) || this.canCancel; // user can rent this scooter if they can cancel or if scooter is neither reserved nor rented
-            this.canReserve = false; // user can't reserve this scooter (already reserved)
-          },
-          error: (err) => {
-            // didn't get a reservation?
-            if(err.status === 404) { // 404 means no reservation found
-              this.canCancel = false; // user can't cancel reservation on this scooter
-              this.canReserve = this.canRent = this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null; // user can reserve or rent this scooter if it isn't otherwise reserved or rented
+          imageLoadPromise
+            .then(() => {
+              this.loadingScooter = false;
+  
+              /* Animate the scooter status circles */
+              this.animateScooterStatusCircles();
+            })
+            .catch(error => {
+              console.error('Image failed to load:', error);
+  
+              this.loadingScooter = false;
+  
+              /* Animate the scooter status circles */
+              this.animateScooterStatusCircles();
+            });
+  
+  
+          // TODO: Integrate the following code into the forkJoin
+          // check reservation info (only once we have scooter info)
+          this.bookingService.getUserReservation().subscribe({
+            next: (value) => {
+              // got a reservation? (user has a reservation)
+              this.canCancel = value.reservation.scooter_id === this.scooter!.id; // user can cancel the reservation if their reservation was on this scooter
+              this.canRent = (this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null) || this.canCancel; // user can rent this scooter if they can cancel or if scooter is neither reserved nor rented
+              this.canReserve = false; // user can't reserve this scooter (already reserved)
+            },
+            error: (err) => {
+              // didn't get a reservation?
+              if(err.status === 404) { // 404 means no reservation found
+                this.canCancel = false; // user can't cancel reservation on this scooter
+                this.canReserve = this.canRent = this.scooter!.reservation_id === null && this.scooter!.active_rental_id === null; // user can reserve or rent this scooter if it isn't otherwise reserved or rented
+              }
+              else { // other errors mean something unexpected
+                this.errorMessage = err.message;
+                console.error(err);
+              }
             }
-            else { // other errors mean something unexpected
-              this.errorMessage = err.message;
-              console.error(err);
-            }
-          }
-        });
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingScooter = false;
-        this.scooterNotFound = true;
-        console.log(err);
-      }
+          });
+        },
+        error: (err) => {
+          this.errorMessage = err.error.message;
+          this.loadingScooter = false;
+          this.scooterNotFound = true;
+          console.log(err);
+        }
+      });
     });
   }
 
