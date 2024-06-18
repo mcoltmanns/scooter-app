@@ -19,6 +19,12 @@ export class Filters {
      */
     static filterDate(startAfter: string, endBefore: string, rentals: Rental[]) : Rental[] {
         const filteredRentals: Rental[] = [];
+        if(startAfter === ''){
+            startAfter = '01-01-2000';
+        }
+        if(endBefore === ''){
+            endBefore = '01-01-3000';
+        }
         const begin = this.stringToDate(startAfter);
         const end = this.stringToDate(endBefore);
         rentals.forEach(rental => {
