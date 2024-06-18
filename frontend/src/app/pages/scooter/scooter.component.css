@@ -201,7 +201,7 @@
     margin-left: 2px;
 }
 
-/* container for Scooter Buchen button */
+/* Container for the available buttons */
 .bottom {
     display: flex;
     flex-direction: column;
@@ -211,12 +211,19 @@
     padding: 0px;
     margin-top: 30px; /* Add an upper spacing */
     margin-bottom: 30px;
+    min-width: min-content;
 }
 
-/* scooter Buchen button */
-.scooterBook-btn {
+/* Customize the buttons */
+.scooter-btn {
     width: 50%;
-    min-width: min-content;
+    min-width: 230px;
+    max-width: 400px;
+}
+@media only screen and (max-width: 250px) {
+  .scooter-btn {
+    min-width: 162px;
+  }
 }
 
 /* green line */

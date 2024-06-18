@@ -72,13 +72,13 @@
             </div>
 
             <div class="bottom">
-                <app-button color="primary" type="submit" class="scooterBook-btn" (click)="onBook()" [disabled]="disableButtons">
+                <app-button color="primary" type="submit" class="scooter-btn" (click)="onBook()" [disabled]="disableButtons">
                     Scooter buchen
                 </app-button>
                 <app-button 
                     [color]="userReservedThisScooter ? 'warn' : 'primary'" 
                     type="submit" 
-                    class="scooterBook-btn" 
+                    class="scooter-btn" 
                     (click)="userReservedThisScooter ? onEndReservation() : onReserve()" 
                     [disabled]="disableButtons">
                     {{ processingReservation ? 'Lade...' : (userReservedThisScooter ? 'Reservierung beenden' : 'Scooter reservieren') }}

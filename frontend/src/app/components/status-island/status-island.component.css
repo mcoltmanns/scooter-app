@@ -44,6 +44,8 @@
 }
 
 .status-island-text {
+  font-family: Roboto;
+  font-size: 13px;
   padding-top: 2px;
   padding-bottom: 2px;
   white-space: nowrap;
