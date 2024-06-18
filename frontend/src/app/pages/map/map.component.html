@@ -29,6 +29,7 @@
 
   <!-- QR Icon -->
   <div class="qr-container" (click)="startQrCodeScanner()">
+    <video #videoElement class="video-preview" autoplay></video>
     <svg
       class="qr-icon"
       width="50"

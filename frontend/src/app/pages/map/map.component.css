@@ -86,3 +86,8 @@
   right: 0px;
   cursor: pointer;
 }
+
+.video-preview {
+  width: 100%;
+  height: auto;
+}

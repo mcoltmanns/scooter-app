@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
  
 
@@ -44,6 +44,8 @@ export class MapComponent implements OnInit, OnDestroy {
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
+  @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
+  
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
    */
@@ -151,6 +153,7 @@ export class MapComponent implements OnInit, OnDestroy {
   startQrCodeScanner(): void {
     if (this.qrReader) {
       console.log('QR-Button pressed');
+      this.qrActive = true;
       this.qrReader
         .start(
           { facingMode: 'environment' },
@@ -161,7 +164,6 @@ export class MapComponent implements OnInit, OnDestroy {
           (decodedText) => {
             console.log(`QR Code gescannt: ${decodedText}`);
             console.log(decodedText);
-            this.qrActive = true;
             window.location.href = decodedText; // Hier wird der Benutzer zur gescannten URL weitergeleitet
             this.qrReader?.stop(); // QR-Code-Scanner stoppen
           },
@@ -172,6 +174,17 @@ export class MapComponent implements OnInit, OnDestroy {
         .catch((err) => {
           console.error(`Kamera konnte nicht gestartet werden: ${err}`);
         });
+
+        // Zugriff auf das Video-Element und Anzeige der Kameravorschau
+        if (this.videoElement && this.videoElement.nativeElement) {
+          navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+              this.videoElement.nativeElement.srcObject = stream;
+            })
+            .catch(err => {
+              console.error('Kamerazugriff verweigert:', err);
+        });
+      }
     }
   }
 
