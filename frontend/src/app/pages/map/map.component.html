@@ -28,7 +28,7 @@
   <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
 
   <!-- QR Icon -->
-  <div class="qr-container" (click)="toggleListView()">
+  <div class="qr-container" (click)="startQrCodeScanner()">
     <svg
       class="qr-icon"
       width="50"
@@ -42,4 +42,5 @@
       />
     </svg>
   </div>
+  <div id="qr-reader"></div>
 </div>

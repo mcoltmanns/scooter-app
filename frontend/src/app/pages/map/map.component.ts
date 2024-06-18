@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
  
 
@@ -15,6 +15,8 @@ import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+
+import { Html5Qrcode } from 'html5-qrcode';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -32,11 +34,13 @@ const defaultIcon = Leaflet.icon({
   styleUrls: ['./map.component.css'],
 })
 
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnDestroy {
   public scooters: Scooter[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
+  private qrReader: Html5Qrcode | null = null;
+  private qrActive = false;
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
@@ -132,6 +136,8 @@ export class MapComponent implements OnInit {
         console.log(e);
       });
     }*/
+
+    this.qrReader = new Html5Qrcode('qr-reader');
   }
 
   toggleListView(): void {
@@ -140,5 +146,43 @@ export class MapComponent implements OnInit {
       this.listScrollPosition = null;
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
+  }
+
+  startQrCodeScanner(): void {
+    if (this.qrReader) {
+      console.log('QR-Button pressed');
+      this.qrReader
+        .start(
+          { facingMode: 'environment' },
+          {
+            fps: 10,
+            qrbox: 250,
+          },
+          (decodedText) => {
+            console.log(`QR Code gescannt: ${decodedText}`);
+            console.log(decodedText);
+            this.qrActive = true;
+            window.location.href = decodedText; // Hier wird der Benutzer zur gescannten URL weitergeleitet
+            this.qrReader?.stop(); // QR-Code-Scanner stoppen
+          },
+          (errorMessage) => {
+            console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
+          }
+        )
+        .catch((err) => {
+          console.error(`Kamera konnte nicht gestartet werden: ${err}`);
+        });
+    }
+  }
+
+  ngOnDestroy(): void {
+    // Beim Verlassen der Komponente den QR-Code-Scanner stoppen, um Ressourcen freizugeben
+    if (this.qrReader && this.qrActive === true) {
+      this.qrReader.stop().then(() => {
+        console.log('QR-Code-Scanner gestoppt');
+      }).catch((err) => {
+        console.error('Fehler beim Stoppen des QR-Code-Scanners:', err);
+      });
+    }
   }
 }
