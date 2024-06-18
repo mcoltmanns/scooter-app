@@ -1,6 +1,7 @@
 import { PDFDocument, rgb, StandardFonts} from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
+import QRCode from 'qrcode';
 
 /**
  * creates a invoice pdf for a scooter booking
@@ -187,6 +188,21 @@ export class CreateInvoice {
             font: timesRomanFont,
             color: rgb(0, 0, 0),
         });
+
+        // generate QR Code
+        const qrCodeDataUrl = await QRCode.toDataURL('http://localhost:4200/booking');
+        const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
+        const qrDims = qrImage.scale(0.5);
+
+        // add QR Code to PDF
+        firstPage.drawImage(qrImage, {
+            x: firstPage.getWidth() - qrDims.width - 50,
+            y: height - currentYPosition - lineHeight - 230,
+            width: qrDims.width,
+            height: qrDims.height,
+        });
+
+
         return await pdfDoc.save(); // Save the edited pdf file
     }
 
