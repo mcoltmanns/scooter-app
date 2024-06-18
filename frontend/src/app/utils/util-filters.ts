@@ -80,7 +80,7 @@ export class Filters {
         }
         //check if price per hour of the scooter is in the wanted range, then add to output
         scooters.forEach(scooter => {
-            const cost = products.find(p => String (p.id) === scooter.product_id)?.price_per_hour;
+            const cost = products.find(p => p.name === scooter.product_id)?.price_per_hour;
             if ( (!(cost === undefined))&&( cost >= Number(minPrice)) && ( cost <= Number(maxPrice))){
                 filteredScooters.push(scooter);
             }
@@ -107,7 +107,7 @@ export class Filters {
         }
         //if scooter has a remaining reach in the desired range, then add to output
         scooters.forEach(scooter => {
-            const maxReach = products.find(p => p.id === Number (scooter.product_id))?.max_reach;
+            const maxReach = products.find(p => p.name === scooter.product_id)?.max_reach;
             if ( (!(maxReach === undefined)) && (Math.ceil(scooter.battery / 100 * maxReach) >= Number (minRange)) && (Math.ceil(scooter.battery / 100 * maxReach) <= Number (maxRange))){
                 filteredScooters.push(scooter);
             }
@@ -159,7 +159,7 @@ export class Filters {
         }
         //if scooters speed in the range of input values, add to output
         scooters.forEach(scooter => {
-            const speed = products.find(p => p.id === Number(scooter.product_id))?.max_speed;
+            const speed = products.find(p => p.name === scooter.product_id)?.max_speed;
             if ( (!(speed === undefined)) && (speed >= Number (minSpeed)) && (speed <= Number (maxSpeed))){
                 filteredScooters.push(scooter);
             }
