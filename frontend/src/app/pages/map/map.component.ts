@@ -141,6 +141,7 @@ export class MapComponent implements OnInit, OnDestroy {
       });
     }*/
 
+    // Initializes the QR code scanner with the video element 'qr-reader'.
     this.qrReader = new Html5Qrcode('qr-reader');
   }
 
@@ -154,11 +155,13 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /* if we click on an QR Code */
   startQrCodeScanner(): void {
+    // Button pressed to stop QR Code scanning
     if(this.qrButtonpressed === true){
       this.stopQrCodeScanner();
       this.qrButtonpressed = false;
       return;
     }
+    // Button pressed to start QR Code scanning
     if(this.qrButtonpressed === false){
       this.qrButtonpressed = true;
     }
@@ -226,24 +229,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /* if the we change the page */
   ngOnDestroy(): void {
-    if (this.qrReader && this.qrActive === true) {
-      this.qrReader.stop().then(() => {
-        console.log('QR-Code-Scanner gestoppt');
-      }).catch((err) => {
-        console.error('Fehler beim Stoppen des QR-Code-Scanners:', err);
-      });
-    }
-
-    // Kamera stoppen, wenn sie noch aktiv ist
-    if (this.videoElement && this.videoElement.nativeElement.srcObject) {
-      const stream = this.videoElement.nativeElement.srcObject as MediaStream;
-      if (stream) {
-        const tracks = stream.getTracks();
-        tracks.forEach(track => {
-          track.stop();
-        });
-        this.videoElement.nativeElement.srcObject = null;
-      }
-    }
+    this.startQrCodeScanner();
   }
 }
