@@ -45,7 +45,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
-  
+
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
    */
@@ -196,6 +196,18 @@ export class MapComponent implements OnInit, OnDestroy {
       }).catch((err) => {
         console.error('Fehler beim Stoppen des QR-Code-Scanners:', err);
       });
+    }
+
+    // Kamera stoppen, wenn sie noch aktiv ist
+    if (this.videoElement && this.videoElement.nativeElement.srcObject) {
+      const stream = this.videoElement.nativeElement.srcObject as MediaStream;
+      if (stream) {
+        const tracks = stream.getTracks();
+        tracks.forEach(track => {
+          track.stop();
+        });
+        this.videoElement.nativeElement.srcObject = null;
+      }
     }
   }
 }
