@@ -18,6 +18,8 @@ import { Router } from '@angular/router';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
+import { Filters } from 'src/app/utils/util-filters';
+import { Product } from 'src/app/models/product';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -37,15 +39,20 @@ const defaultIcon = Leaflet.icon({
 
 export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
+  public products: Product[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
   public scooterFilterForm!: FormGroup;
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder) 
-  {this.scooterFilterForm = this.fb.group({
-    lower: ['', Validators.required],
-    upper: ['', Validators.required]
+  {this.scooterFilterForm = this.fb.group({ 
+    minPrice: ['', Validators.required],
+    maxPrice: ['', Validators.required],
+    minRange: ['', Validators.required],
+    maxRange: ['', Validators.required],
+    minBty: ['', Validators.required],
+    maxBty: ['', Validators.required],
   });}
 
   /**
@@ -130,6 +137,21 @@ export class MapComponent implements OnInit {
         console.log(e);
       });
     }*/
+
+    this.loadProducts();
+  }
+
+  loadProducts(): void {
+    this.mapService.getProductInfo().subscribe({
+      next: (value) => {
+        this.products = value;
+      },
+
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        console.log(err);
+      }
+    });
   }
 
   loadScooters(): void{
@@ -155,10 +177,15 @@ export class MapComponent implements OnInit {
   }
 
   filterMenuVisible = false;
-  
-  public lower = '';
-  public upper = '';
 
+  public minPrice = '';
+  public maxPrice = '';
+  public minRange = '';
+  public maxRange = '';
+  public minBty = '';
+  public maxBty = '';
+  public minSpeed = '';
+  public maxSpeed = '';
 
 
   toggleFilterView(): void {
@@ -166,11 +193,25 @@ export class MapComponent implements OnInit {
   }
 
   onSubmit(): void {
-
+    //map does not reload after this clear of the layers, still need to work this out (unless my filters do something wild and just remove all from list)
+    this.layers = [];
+    this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
+    this.maxPrice = this.scooterFilterForm.get('maxPrice')?.value;
+    this.scooters = Filters.filterPrice(this.minPrice, this.maxPrice, this.scooters, this.products);
+    this.minRange = this.scooterFilterForm.get('minRange')?.value;
+    this.maxRange = this.scooterFilterForm.get('maxRange')?.value;
+    this.scooters = Filters.filterRange(this.minRange, this.maxRange, this.scooters, this.products);
+    this.minBty = this.scooterFilterForm.get('minBty')?.value;
+    this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
+    this.scooters = Filters.filterBattery(this.minBty, this.maxBty, this.scooters);
+    this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
+    this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
+    this.scooters = Filters.filterSpeed(this.minSpeed, this.maxSpeed, this.scooters, this.products);
+    this.addScootersToMap();
   }
 
   onCancel(): void {
-   
+    this.loadScooters();
   }
   
 }

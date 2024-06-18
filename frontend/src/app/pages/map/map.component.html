@@ -29,20 +29,20 @@
       <div class="form-container">
         <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
           <div class="filter-row">
-            <app-user-input label="Mindestpreis" [(text)]="lower" formControlName="lower"></app-user-input>
-            <app-user-input label="Maximalpreis" [(text)]="upper" formControlName="upper"></app-user-input>
+            <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice"></app-user-input>
+            <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice"></app-user-input>
           </div>
           <div class="filter-row">
-            <app-user-input label="Mindestreichweite" [(text)]="lower" formControlName="lower"></app-user-input>
-            <app-user-input label="Maximalreichweite" [(text)]="upper" formControlName="upper"></app-user-input>
+            <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange"></app-user-input>
+            <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange"></app-user-input>
           </div>
           <div class="filter-row">
-            <app-user-input label="min. Batteriestand" [(text)]="lower" formControlName="lower"></app-user-input>
-            <app-user-input label="max. Batteriestand" [(text)]="upper" formControlName="upper"></app-user-input>
+            <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty"></app-user-input>
+            <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty"></app-user-input>
           </div>
           <div class="filter-row">
-            <app-user-input label="min. Speed" [(text)]="lower" formControlName="lower"></app-user-input>
-            <app-user-input label="max. Speed" [(text)]="upper" formControlName="upper"></app-user-input>
+            <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed"></app-user-input>
+            <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed"></app-user-input>
           </div>
         </form>
       </div>
