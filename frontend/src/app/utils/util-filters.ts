@@ -57,6 +57,11 @@ export class Filters {
 //------------------------------------------------------------------------------------------------------------
 
 
+
+
+
+//"Memory" of the scooter filters ---------------------------------------------------------------------------
+
 //functions to delete the global var's for the scooter filters; var's exist, so there is no reset when switching map/list
 private static minPrice = '';
 private static  maxPrice = '';
@@ -103,7 +108,11 @@ static resetBounds():void{
     this.maxSpeed = '';
 }
 
+
 //------------------------------------------------------------------------------------------------------------
+
+
+
 
 
 //Filters for scooter-map and scooter-list -------------------------------------------------------------------
