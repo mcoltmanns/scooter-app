@@ -178,8 +178,14 @@ export class MapComponent implements OnInit, OnDestroy {
           (decodedText) => {
             console.log(`QR Code gescannt: ${decodedText}`);
             console.log(decodedText);
-            window.location.href = decodedText;
-            this.qrReader?.stop(); // Stop QR code scanner
+
+            // Check whether the link begins with "http://localhost:4200/"
+            if (decodedText.startsWith('http://localhost:4200/')) {
+              window.location.href = decodedText;
+              this.qrReader?.stop(); // Stop QR code scanner
+            } else {
+              console.log('Der Link entspricht nicht den Anforderungen und wird nicht geladen.');
+            }
           },
           () => {  //(errorMessage)
             //console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
