@@ -61,7 +61,7 @@ export class BookingsController {
         try {
             const reservation = await ReservationManager.getReservationFromUser(userId);
             if(!reservation) {
-                response.status(404).json({ code: 404, message: 'Keine Reservierung gefunden.' });
+                response.status(404).json({ code: 404, message: 'Keine Reservierung gefunden.', hasReservation: false });
                 return;
             }
             await ReservationManager.endReservation(reservation);

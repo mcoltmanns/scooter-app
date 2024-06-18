@@ -7,9 +7,7 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-import { BookingService } from 'src/app/services/booking.service';
 import { Router } from '@angular/router';
-import { Reservation } from 'src/app/models/reservation';
 
 @Component({
   selector: 'app-rentals',
@@ -19,16 +17,14 @@ import { Reservation } from 'src/app/models/reservation';
   styleUrl: './rentals.component.css'
 })
 export class RentalsComponent implements OnInit {
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private bookingService: BookingService, private router: Router) {}
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private router: Router) {}
 
   // Variables for storing all rentals and the product information
   public loadingDataScooter = true;
   public loadingDataProduct = true;
   public loadingDataOption = true;
-  public loadingDataReservation = true;
   public rentals: Rental[] = [];
   public products: Product[] = [];
-  public reservation: Reservation | null = null;
   public errorMessage = '';
 
   // User Units variables
@@ -78,22 +74,6 @@ export class RentalsComponent implements OnInit {
         this.errorMessage = err.message;
         this.loadingDataOption = false;
         console.error(err);
-      }
-    });
-
-    // get the user's reservation info
-    this.bookingService.getUserReservation().subscribe({
-      next: (value) => {
-        this.reservation = value.reservation;
-        this.loadingDataReservation = false;
-      },
-      error: (err) => {
-        this.reservation = null;
-        if(err.code !== 404) { // if the error was anything other than there being no reservation
-          this.errorMessage = err.message;
-          console.error(err);
-        }
-        this.loadingDataReservation = false;
       }
     });
   }

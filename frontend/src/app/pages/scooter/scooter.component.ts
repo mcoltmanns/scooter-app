@@ -250,6 +250,7 @@ export class ScooterComponent implements OnInit {
         this.toastComponentError.showToast();
 
         this.processingReservation = false;
+
       }
     });
   }
@@ -328,6 +329,11 @@ export class ScooterComponent implements OnInit {
         console.error(err);
         this.errorMessage = err.error.message;
         this.toastComponentError.showToast();
+
+        if (err.error.hasReservation === false) {
+          this.userHasReservation = false;
+          this.userReservedThisScooter = false;
+        }
 
         this.processingReservation = false;
       }
