@@ -53,6 +53,8 @@ export class MapComponent implements OnInit {
     maxRange: ['', Validators.required],
     minBty: ['', Validators.required],
     maxBty: ['', Validators.required],
+    minSpeed: ['', Validators.required],
+    maxSpeed: ['', Validators.required],
   });}
 
   /**
@@ -193,21 +195,27 @@ export class MapComponent implements OnInit {
   }
 
   onSubmit(): void {
-    //map does not reload after this clear of the layers, still need to work this out (unless my filters do something wild and just remove all from list)
+    //console.log for debugging/inspection, to be removed once issue is resolved
     this.layers = [];
+    console.log(this.scooters.length);
     this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
     this.maxPrice = this.scooterFilterForm.get('maxPrice')?.value;
     this.scooters = Filters.filterPrice(this.minPrice, this.maxPrice, this.scooters, this.products);
+    console.log(this.scooters.length);
     this.minRange = this.scooterFilterForm.get('minRange')?.value;
     this.maxRange = this.scooterFilterForm.get('maxRange')?.value;
     this.scooters = Filters.filterRange(this.minRange, this.maxRange, this.scooters, this.products);
+    console.log(this.scooters.length);
     this.minBty = this.scooterFilterForm.get('minBty')?.value;
     this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
     this.scooters = Filters.filterBattery(this.minBty, this.maxBty, this.scooters);
+    console.log(this.scooters.length);
     this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
     this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
     this.scooters = Filters.filterSpeed(this.minSpeed, this.maxSpeed, this.scooters, this.products);
+    console.log(this.scooters.length);
     this.addScootersToMap();
+    console.log('layers:' + this.layers.length);
   }
 
   onCancel(): void {

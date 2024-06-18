@@ -9,7 +9,7 @@ import { parse, isAfter, isBefore, isEqual } from 'date-fns';
  */
 export class Filters {
 
-//filter for the Booking component ---------------------------------------------------------------------------
+//filter for the Booking component --------------------------------------------------------------------------- (WORKING)
     /**
      * Filters the given list of rentals wrt to a date frame given by lower and upper
      * @param startAfter is the lower bound date of the filter
@@ -59,7 +59,7 @@ export class Filters {
 
 
 
-//Filters for scooter-map and scooter-list -------------------------------------------------------------------
+//Filters for scooter-map and scooter-list ------------------------------------------------------------------- (NOT WORKING)
 
     /**
      * Filters the given scooter list by the price parameter wrt to lower and upper
