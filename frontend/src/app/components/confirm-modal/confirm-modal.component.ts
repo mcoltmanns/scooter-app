@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { ButtonComponent } from '../button/button.component';
+import { trigger, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-confirm-modal',
@@ -9,6 +10,14 @@ import { ButtonComponent } from '../button/button.component';
   templateUrl: './confirm-modal.component.html',
   styleUrl: 'confirm-modal.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: [
+    trigger('modalAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate('0.3s ease-out', style({ opacity: 1, transform: 'scale(1)' }))
+      ])
+    ])
+  ]
 })
 export class ConfirmModalComponent {
   @Input() public showModal = false;

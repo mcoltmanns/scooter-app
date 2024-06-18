@@ -14,9 +14,7 @@ export class BackButtonComponent {
 
   constructor(private location: Location, private router: Router) {}
 
-  back(): void {
-    console.log('Back button clicked:', this.path);
-    
+  back(): void {    
     /* If no path is provided, go back to the previous page. */
     if (!this.path) {
       this.location.back();

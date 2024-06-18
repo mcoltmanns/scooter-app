@@ -1,14 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, HostListener, AfterViewChecked } from '@angular/core';
+import { Component, Input, OnDestroy, HostListener, AfterViewChecked, ViewChild } from '@angular/core';
 import { trigger, state, style, animate, transition } from '@angular/animations';
 import { Router } from '@angular/router';
 import { ChangeDetectorRef } from '@angular/core';
 import { BookingService } from 'src/app/services/booking.service';
+import { ToastComponent } from '../toast/toast.component';
+import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-status-island',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ToastComponent, ConfirmModalComponent],
   templateUrl: './status-island.component.html',
   styleUrl: './status-island.component.css',
   animations: [
@@ -31,14 +33,30 @@ import { BookingService } from 'src/app/services/booking.service';
   ]
 })
 export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
+
   public onDOM = false;
   public isVisible = false;
+  public errorMessage = 'Da ist etwas schiefgelaufen. Bitte versuche es erneut.';
+
+  public showCancellationConfirmModal = false;
+  public processingCancellation = false;
+  public cancellationConfirmModalTitle = 'Bestätigung';
+  public cancellationConfirmModalText = 'Bist du sicher, dass du diese Aktion durchführen willst?';
+  public processingCancellationMsg = 'Beende...';
+
   @Input() public showCountdown = true;
   @Input() public showDuration = 10000;
   @Input() public imgPath: string | null = null;
   @Input() public redirectPath: string | null = null;
   @Input() public title: string | null = null;
   @Input() public content: string | null = null;  // A secondary text besides the title
+  @Input() public showCancelButton = false;
+  @Input() cancel: () => void = () => {
+    // This is a default function that does nothing.
+    // It will be replaced by a function from the parent component.
+  };
+
   private titleMinLength = 6;
   public showContent = false;
   private animationDuration = 300;  // Match this with your animation duration, e.g. 0.3s = 300ms
@@ -50,13 +68,42 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   private showTimeout: ReturnType<typeof setTimeout> | null = null;
   private hideTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  constructor(private router: Router, private cdRef: ChangeDetectorRef, private bookingService: BookingService) { 
-    /* The status island will be used to display a users reservation. Therefore, we subscribe to the scooterReserved event. */
+  constructor(private router: Router, private cdRef: ChangeDetectorRef, private bookingService: BookingService) {
+    /* By using bind(this), we ensure that these methods always refer to the StatusIslandComponent instance. */
+    this.onConfirmCancellationConfirmModal = this.onConfirmCancellationConfirmModal.bind(this);
+    this.onCancelCancellationConfirmModal = this.onCancelCancellationConfirmModal.bind(this);
+
+    /* SUBSCRIPTION: The status island will be used to display a users reservation. Therefore, we subscribe to the scooterReserved event. */
     this.bookingService.scooterReserved.subscribe(reservation => {
+      /* Configure the status island with the information from the reservation */
       this.imgPath = reservation.imagePath;
       this.redirectPath = reservation.redirectPath;
       this.title = reservation.scooterName;
       this.content = 'reserviert:';
+      this.showCancelButton = true;
+      this.cancellationConfirmModalTitle = 'Reservierung aufheben';
+      this.cancellationConfirmModalText = 'Bist du sicher, dass du die aktuell laufende Reservierung beenden möchtest?';
+      this.processingCancellationMsg = 'Beende Reservierung...';
+
+      /* Configure the cancel function, that will be called when the user confirms the cancellation */
+      this.cancel = (): void => {
+        /* End the reservation for this user */
+        this.processingCancellation = true;
+        this.bookingService.endReservation().subscribe({
+          next: () => {
+            /* Destroy the reservation island */
+            this.bookingService.destroyReservationIsland();
+          },
+          error: (err) => {
+            console.error(err);
+            if(err.error.message) {
+              this.errorMessage = err.error.message;
+            }
+            this.toastComponentError.showToast();
+            this.processingCancellation = false;
+          }
+        });
+      };
 
       /* Calculate the remaining time until the reservation ends */
       const reservationEnd = new Date(reservation.reservationEnd);
@@ -68,10 +115,12 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
       this.showAndHide();
     });
 
-    /* If the scooterUnreserved event is emitted, the status island will be destroyed. */
+    /* SUBSCRIPTION: If the scooterUnreserved event is emitted, the status island will be destroyed. */
     this.bookingService.scooterUnreserved.subscribe(() => {
       this.destroyIsland();
     });
+
+    // Other SUBSCRIPTIONS (the status island can be used for other purposes as well)...
    }
 
   ngAfterViewChecked(): void {
@@ -94,7 +143,8 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     this.hideTimeout = setTimeout(() => {
       this.onDOM = false;
       this.resetTimer();
-    }, this.animationDuration); // match this with your animation duration
+      this.processingCancellation = false;
+    }, this.animationDuration);
   }
 
   resetTimer(): void {
@@ -145,16 +195,21 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   adjustElementsToWindow(): void {
     this.showContent = true;
     const screenWidth = window.innerWidth;
-    if (screenWidth > 550) {
+    if (screenWidth > 575) {
       this.titleMinLength = 50;
-    } else if (screenWidth > 400) {
+    } else if (screenWidth > 425) {
       this.titleMinLength = 30;
-    } else if (screenWidth > 320) {
+    } else if (screenWidth > 345) {
       this.titleMinLength = 20;
-    } else if (screenWidth > 240) {
+    } else if (screenWidth > 265) {
       this.titleMinLength = 8;
-    } else {
+    } else if (screenWidth > 250) {
       this.titleMinLength = 6;
+    } else if (screenWidth > 200) {
+      this.titleMinLength = 8;
+      this.showContent = false;
+    } else {
+      this.titleMinLength = 2;
       this.showContent = false;
     }
   }
@@ -193,5 +248,18 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
          state: originState
        });
     }
+  }
+
+  onConfirmCancellationConfirmModal(): void {
+    this.showCancellationConfirmModal = false;
+    this.cancel();
+  }
+
+  onCancelCancellationConfirmModal(): void {
+    this.showCancellationConfirmModal = false;
+  }
+
+  onCancelClick(): void {
+    this.showCancellationConfirmModal = true;
   }
 }
