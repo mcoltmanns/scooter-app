@@ -4,7 +4,6 @@
       <span class="material-icons icon-outlined" style="cursor: pointer;">{{ view === "map" ? "view_kanban" : "map" }}</span>
     </span>
     <h1 class="title logo">SCOOTER</h1>
-
     <input
       type="text"
       *ngIf="view === 'list'"
@@ -27,4 +26,20 @@
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
   <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
+
+  <!-- QR Icon -->
+  <div class="qr-container" (click)="toggleListView()">
+    <svg
+      class="qr-icon"
+      width="50"
+      height="50"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M2 2H10V10H2V2ZM4 4V8H8V4H4ZM14 2H22V10H14V2ZM16 4V8H20V4H16ZM2 14H10V22H2V14ZM4 16V20H8V16H4ZM14 14H16V16H14V14ZM18 14H22V16H20V18H22V22H18V20H16V22H14V18H18V14ZM16 18H18V16H16V18Z"
+        fill="black"
+      />
+    </svg>
+  </div>
 </div>
