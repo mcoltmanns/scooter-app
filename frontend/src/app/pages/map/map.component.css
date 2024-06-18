@@ -82,12 +82,19 @@
 
 .qr-container {
   position: absolute;
+  width: 30px;
+  height: 30px;
   top: 0px;
   right: 0px;
   cursor: pointer;
 }
 
-.video-preview {
+#video-preview {
   width: 100%;
-  height: auto;
+  height: calc(100% - var(--logo-title-height) - var(--header-padding-top) - var(--header-padding)); 
+  object-fit: cover;
+  background-color: #26627C;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

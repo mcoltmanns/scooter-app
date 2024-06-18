@@ -39,8 +39,10 @@ export class MapComponent implements OnInit, OnDestroy {
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
+  /* variables for QR-Code */
   private qrReader: Html5Qrcode | null = null;
   private qrActive = false;
+  public qrButtonpressed = false;
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
@@ -150,7 +152,16 @@ export class MapComponent implements OnInit, OnDestroy {
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
 
+  /* if we click on an QR Code */
   startQrCodeScanner(): void {
+    if(this.qrButtonpressed === true){
+      this.stopQrCodeScanner();
+      this.qrButtonpressed = false;
+      return;
+    }
+    if(this.qrButtonpressed === false){
+      this.qrButtonpressed = true;
+    }
     if (this.qrReader) {
       console.log('QR-Button pressed');
       this.qrActive = true;
@@ -164,18 +175,19 @@ export class MapComponent implements OnInit, OnDestroy {
           (decodedText) => {
             console.log(`QR Code gescannt: ${decodedText}`);
             console.log(decodedText);
-            window.location.href = decodedText; // Hier wird der Benutzer zur gescannten URL weitergeleitet
-            this.qrReader?.stop(); // QR-Code-Scanner stoppen
+            window.location.href = decodedText;
+            this.qrReader?.stop(); // Stop QR code scanner
           },
           (errorMessage) => {
-            console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
+            //console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
           }
         )
         .catch((err) => {
           console.error(`Kamera konnte nicht gestartet werden: ${err}`);
         });
 
-        // Zugriff auf das Video-Element und Anzeige der Kameravorschau
+        
+        // Access to the video element and display of the camera preview
         if (this.videoElement && this.videoElement.nativeElement) {
           navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then(stream => {
@@ -188,8 +200,32 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   }
 
+  /* stops QR Code scanning */
+  stopQrCodeScanner(): void {
+    if (this.qrReader && this.qrActive) {
+      this.qrReader.stop()
+        .then(() => {
+          this.qrActive = false;
+          console.log('QR-Code-Scanner gestoppt');
+        })
+        .catch((err) => {
+          console.error('Fehler beim Stoppen des QR-Code-Scanners:', err);
+        });
+    }
+  
+    if (this.videoElement.nativeElement.srcObject) {
+      const stream = this.videoElement.nativeElement.srcObject as MediaStream;
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
+        this.videoElement.nativeElement.srcObject = null;
+      }
+    }
+  }
+
+  /* if the we change the page */
   ngOnDestroy(): void {
-    // Beim Verlassen der Komponente den QR-Code-Scanner stoppen, um Ressourcen freizugeben
     if (this.qrReader && this.qrActive === true) {
       this.qrReader.stop().then(() => {
         console.log('QR-Code-Scanner gestoppt');

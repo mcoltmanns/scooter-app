@@ -16,7 +16,7 @@
   <!-- Diese Komponente wird durch das "leaflet" Attribut mit der "Leaflet" Bibliothek initialisiert -->
   <!-- Bitte Dokumentation lesen: https://github.com/bluehalo/ngx-leaflet -->
   <div
-    *ngIf="view === 'map'"
+    *ngIf="view === 'map' && qrButtonpressed === false"
     class="map"
     leaflet
     [leafletOptions]="options"
@@ -25,11 +25,10 @@
   ></div>
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
-  <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
+  <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
 
   <!-- QR Icon -->
   <div class="qr-container" (click)="startQrCodeScanner()">
-    <video #videoElement class="video-preview" autoplay></video>
     <svg
       class="qr-icon"
       width="50"
@@ -43,5 +42,8 @@
       />
     </svg>
   </div>
+
+  <video #videoElement id="video-preview" autoplay></video>
   <div id="qr-reader"></div>
+  
 </div>
