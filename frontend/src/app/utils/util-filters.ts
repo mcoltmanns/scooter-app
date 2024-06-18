@@ -9,7 +9,7 @@ import { parse, isAfter, isBefore, isEqual } from 'date-fns';
  */
 export class Filters {
 
-//filter for the Booking component ---------------------------------------------------------------------------
+//filter for the Booking component --------------------------------------------------------------------------- (WORKING)
     /**
      * Filters the given list of rentals wrt to a date frame given by lower and upper
      * @param startAfter is the lower bound date of the filter
@@ -59,29 +59,83 @@ export class Filters {
 
 
 
+
+//"Memory" of the scooter filters ---------------------------------------------------------------------------
+
+//functions to delete the global var's for the scooter filters; var's exist, so there is no reset when switching map/list
+private static minPrice = '';
+private static  maxPrice = '';
+private static minRange = '';
+private static maxRange = '';
+private static minBattery = '';
+private static maxBattery = '';
+private static minSpeed = '';
+private static maxSpeed = '';
+
+/**
+ * this function is to update the stored variables when a new filter is set
+ * @param minPrice 
+ * @param maxPrice 
+ * @param minRange 
+ * @param maxRange 
+ * @param minBty 
+ * @param maxBty 
+ * @param minSpeed 
+ * @param maxSpeed 
+ */
+static setBounds(minPrice: string, maxPrice: string, minRange: string, maxRange: string, minBty: string, maxBty: string, minSpeed: string, maxSpeed: string):void{
+    this.minPrice = minPrice;
+    this.maxPrice = maxPrice;
+    this.minRange = minRange;
+    this.maxRange = maxRange;
+    this.minBattery = minBty;
+    this.maxBattery = maxBty;
+    this.minSpeed = minSpeed;
+    this.maxSpeed = maxSpeed;
+}
+
+/**
+ * this function resets the "memory" variables of the filter to default/empty values
+ */
+static resetBounds():void{
+    this.minPrice = '';
+    this.maxPrice = '';
+    this.minRange = '';
+    this.maxRange = '';
+    this.minBattery = '';
+    this.maxBattery = '';
+    this.minSpeed = '';
+    this.maxSpeed = '';
+}
+
+
+//------------------------------------------------------------------------------------------------------------
+
+
+
+
+
 //Filters for scooter-map and scooter-list -------------------------------------------------------------------
 
     /**
-     * Filters the given scooter list by the price parameter wrt to lower and upper
-     * @param minPrice lower bound for cost 
-     * @param maxPrice upper bound for cost
+     * Filters the given scooter list by the price parameter wrt to lower and upper bounds
      * @param scooters list of scooters in List/map
      * @param products list of products corresponding to scooters in list/map
      * @returns 
      */
-    static filterPrice(minPrice: string, maxPrice: string, scooters: Scooter[], products: Product[]) : Scooter[]{
+    static filterPrice(scooters: Scooter[], products: Product[]) : Scooter[]{
         const filteredScooters: Scooter[] = [];
         //default values in case field was left empty
-        if(minPrice === ''){
-            minPrice = '0';
+        if(this.minPrice === ''){
+            this.minPrice = '0';
         }
-        if(maxPrice===''){
-            maxPrice = '1000.00';
+        if(this.maxPrice===''){
+            this.maxPrice = '1000.00';
         }
         //check if price per hour of the scooter is in the wanted range, then add to output
         scooters.forEach(scooter => {
-            const cost = products.find(p => String (p.id) === scooter.product_id)?.price_per_hour;
-            if ( (!(cost === undefined))&&( cost >= Number(minPrice)) && ( cost <= Number(maxPrice))){
+            const cost = products.find(p => p.name === scooter.product_id)?.price_per_hour;
+            if ( (!(cost === undefined))&&( cost >= Number(this.minPrice)) && ( cost <= Number(this.maxPrice))){
                 filteredScooters.push(scooter);
             }
         });
@@ -90,25 +144,23 @@ export class Filters {
 
     /**
      * Filters the given scooter list by the remaining range of the scooter
-     * @param minRange lower bound for the range of the scooters
-     * @param maxRange upper bound for the range of the scooters
      * @param scooters list of scooters to be filtered 
      * @param products list of products corresponding to the list of scooters that is to be filtered
      * @returns list of scooters that fit the requirements of the given range 
      */
-    static filterRange(minRange: string, maxRange: string, scooters: Scooter[], products: Product[]): Scooter[]{
+    static filterRange(scooters: Scooter[], products: Product[]): Scooter[]{
         const filteredScooters: Scooter[] = [];
         //default values in case field(s) have been left empty
-        if(minRange ===''){
-            minRange = '0';
+        if(this.minRange ===''){
+            this.minRange = '0';
         }
-        if(maxRange===''){
-            maxRange = '10000.000';
+        if(this.maxRange===''){
+            this.maxRange = '10000.000';
         }
         //if scooter has a remaining reach in the desired range, then add to output
         scooters.forEach(scooter => {
-            const maxReach = products.find(p => p.id === Number (scooter.product_id))?.max_reach;
-            if ( (!(maxReach === undefined)) && (Math.ceil(scooter.battery / 100 * maxReach) >= Number (minRange)) && (Math.ceil(scooter.battery / 100 * maxReach) <= Number (maxRange))){
+            const maxReach = products.find(p => p.name === scooter.product_id)?.max_reach;
+            if ( (!(maxReach === undefined)) && (Math.ceil(scooter.battery / 100 * maxReach) >= Number (this.minRange)) && (Math.ceil(scooter.battery / 100 * maxReach) <= Number (this.maxRange))){
                 filteredScooters.push(scooter);
             }
         });
@@ -117,23 +169,21 @@ export class Filters {
 
     /**
      * Filters the given list of scooters by battery "percentage"
-     * @param minBattery minimal allowed battery percentage
-     * @param maxBattery maximal allowed battery percentage
      * @param scooters list of scooters to be filtered
      * @returns list of scooters that fit the bill wrt battery percentage
      */
-    static filterBattery(minBattery: string, maxBattery: string, scooters: Scooter[]): Scooter[]{
+    static filterBattery(scooters: Scooter[]): Scooter[]{
         const filteredScooters: Scooter[] = [];
         //default values in case of empty input
-        if(minBattery ===''){
-            minBattery = '0';
+        if(this.minBattery ===''){
+            this.minBattery = '0';
         }
-        if(maxBattery ===''){
-            maxBattery = '100';
+        if(this.maxBattery ===''){
+            this.maxBattery = '100';
         }
         //if battery in range of input add to output
         scooters.forEach(scooter => {
-            if( (scooter.battery >= Number (minBattery)) && (scooter.battery <= Number (maxBattery))){
+            if( (scooter.battery >= Number (this.minBattery)) && (scooter.battery <= Number (this.maxBattery))){
                 filteredScooters.push(scooter);
             }
         });
@@ -142,25 +192,23 @@ export class Filters {
 
     /**
      * Filters the given list of scooters by maximal speed
-     * @param minSpeed minimal speed that the scooter is supposed to have
-     * @param maxSpeed maximal speed that the scooter is allowed to have
      * @param scooters list of scooters that is to be filtered
      * @param products list of products corresponding to the list of scooters
      * @returns list of scooters that have a speed in the desired interval
      */
-    static filterSpeed(minSpeed: string, maxSpeed: string, scooters: Scooter[], products: Product[]): Scooter[]{
+    static filterSpeed(scooters: Scooter[], products: Product[]): Scooter[]{
         const filteredScooters: Scooter[] = [];
         //default values in case fields are empty
-        if(minSpeed ===''){
-            minSpeed = '0';
+        if(this.minSpeed ===''){
+            this.minSpeed = '0';
         }
-        if(maxSpeed ===''){
-            maxSpeed = '10000.00';
+        if(this.maxSpeed ===''){
+            this.maxSpeed = '10000.00';
         }
         //if scooters speed in the range of input values, add to output
         scooters.forEach(scooter => {
-            const speed = products.find(p => p.id === Number(scooter.product_id))?.max_speed;
-            if ( (!(speed === undefined)) && (speed >= Number (minSpeed)) && (speed <= Number (maxSpeed))){
+            const speed = products.find(p => p.name === scooter.product_id)?.max_speed;
+            if ( (!(speed === undefined)) && (speed >= Number (this.minSpeed)) && (speed <= Number (this.maxSpeed))){
                 filteredScooters.push(scooter);
             }
         });

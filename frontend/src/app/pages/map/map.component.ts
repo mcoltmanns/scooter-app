@@ -53,6 +53,8 @@ export class MapComponent implements OnInit {
     maxRange: ['', Validators.required],
     minBty: ['', Validators.required],
     maxBty: ['', Validators.required],
+    minSpeed: ['', Validators.required],
+    maxSpeed: ['', Validators.required],
   });}
 
   /**
@@ -139,6 +141,10 @@ export class MapComponent implements OnInit {
     }*/
 
     this.loadProducts();
+
+
+
+    this.filterUpdates();
   }
 
   loadProducts(): void {
@@ -193,24 +199,37 @@ export class MapComponent implements OnInit {
   }
 
   onSubmit(): void {
-    //map does not reload after this clear of the layers, still need to work this out (unless my filters do something wild and just remove all from list)
-    this.layers = [];
+    //get the values from the form
     this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
     this.maxPrice = this.scooterFilterForm.get('maxPrice')?.value;
-    this.scooters = Filters.filterPrice(this.minPrice, this.maxPrice, this.scooters, this.products);
     this.minRange = this.scooterFilterForm.get('minRange')?.value;
     this.maxRange = this.scooterFilterForm.get('maxRange')?.value;
-    this.scooters = Filters.filterRange(this.minRange, this.maxRange, this.scooters, this.products);
     this.minBty = this.scooterFilterForm.get('minBty')?.value;
     this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
-    this.scooters = Filters.filterBattery(this.minBty, this.maxBty, this.scooters);
     this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
     this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
-    this.scooters = Filters.filterSpeed(this.minSpeed, this.maxSpeed, this.scooters, this.products);
+    //update the memory values in the filter util file
+    Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
+    //then apply the filters
+    this.filterUpdates();
+  }
+
+  /**
+   * applies the filters to the list 
+   */
+  filterUpdates(): void{
+    this.scooters = Filters.filterPrice(this.scooters, this.products);
+    this.scooters = Filters.filterRange(this.scooters, this.products);
+    this.scooters = Filters.filterBattery(this.scooters);
+    this.scooters = Filters.filterSpeed(this.scooters, this.products);
+    //empty out all previously set scooters
+    this.layers = [];
+    //add the new selection of scooters to the map
     this.addScootersToMap();
   }
 
   onCancel(): void {
+    Filters.resetBounds();
     this.loadScooters();
   }
   
