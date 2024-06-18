@@ -181,7 +181,7 @@ export class MapComponent implements OnInit, OnDestroy {
             window.location.href = decodedText;
             this.qrReader?.stop(); // Stop QR code scanner
           },
-          (errorMessage) => {
+          () => {  //(errorMessage)
             //console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
           }
         )
