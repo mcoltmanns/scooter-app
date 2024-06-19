@@ -37,12 +37,12 @@ abstract class ReservationManager {
             if(!scooter) throw new Error('SCOOTER_DOES_NOT_EXIST');
 
             // can't reserve if scooter is reserved or rented
-            if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await this.getReservationFromScooter(scooterId) !== null) {
+            if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await ReservationManager.getReservationFromScooter(scooterId) !== null) {
                 throw new Error('SCOOTER_UNAVAILABLE');
             }
 
             // can't reserve if user already has reservation
-            if(await this.getReservationFromUser(userId)) {
+            if(await ReservationManager.getReservationFromUser(userId)) {
                 throw new Error('USER_HAS_RESERVATION');
             }
 
@@ -55,7 +55,7 @@ abstract class ReservationManager {
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
             // dispatch a job to delete the reservation when it expires
-            this.scheduleReservationEnding(reservation);
+            ReservationManager.scheduleReservationEnding(reservation);
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error('RESERVATION_FAILED');
@@ -92,14 +92,14 @@ abstract class ReservationManager {
     public static scheduleReservationEnding(reservation: Model): Job {
         const expiration: Date = reservation.getDataValue('endsAt');
         console.log(`scheduling reservation ending at ${expiration}`);
-        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, async function(reservation: Model): Promise<void> {
+        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, (async (reservation: Model): Promise<void> => {
             try {
-                await this.endReservation(reservation);
+                await ReservationManager.endReservation(reservation);
                 console.log('ended reservation');
             } catch (error) {
                 console.error(`could not end reservation at scheduled time!\n${error}`);
             }
-        }.bind(reservation)); // have to bind in in case of data change
+        }).bind(reservation)); // have to bind in in case of data change
         return j;
     }
 }

@@ -7,7 +7,7 @@ import { scheduleJob } from 'node-schedule';
 import { TransactionManager } from './payment/transaction-manager';
 
 const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // how long between rental extension checks?
-const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
+//const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
 
 abstract class RentalManager {
     // get all rentals associated with a scooter (active and ended)
@@ -73,7 +73,8 @@ abstract class RentalManager {
         try {
             const rental = await ActiveRental.findByPk(rentalId, { transaction: transaction });
             if(!rental) return; // do nothing if rental not found
-            await PastRental.create({ endedAt: new Date(Date.now()), total_price: 0, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId }, { transaction: transaction }); // move rental to the past rentals
+            const total_price = rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60) ;
+            await PastRental.create({ endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
             await rental.destroy({ transaction: transaction }); // deactivate the rental
             if(!transactionExtern) await transaction.commit();
         } catch (error) {
