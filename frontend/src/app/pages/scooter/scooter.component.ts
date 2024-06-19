@@ -161,6 +161,7 @@ export class ScooterComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    /* Unsubscribe from all subscriptions */
     this.scooterUnreservedSubscription.unsubscribe();
   }
 
