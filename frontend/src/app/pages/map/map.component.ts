@@ -235,6 +235,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /* if the we change the page */
   ngOnDestroy(): void {
-    this.startQrCodeScanner();
+    this.stopQrCodeScanner();
   }
 }
