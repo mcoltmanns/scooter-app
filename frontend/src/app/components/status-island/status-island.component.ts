@@ -86,7 +86,6 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
 
     /* SUBSCRIPTION: The status island will be used to display a users reservation. Therefore, we subscribe to the scooterReserved event. */
     this.scooterReservedSubscription = this.bookingService.scooterReserved.subscribe(reservation => {
-      console.log('scooterReserved event received');
       /* Configure the status island with the information from the reservation */
       this.imgPath = reservation.imagePath;
       this.redirectPath = reservation.redirectPath;
