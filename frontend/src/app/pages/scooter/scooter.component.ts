@@ -346,12 +346,10 @@ export class ScooterComponent implements OnInit {
   }
 
   onCancelCancellationConfirmModal(): void {
-    console.log('cancel Cancellation confirm modal');
     this.showCancellationConfirmModal = false;
   }
 
   onConfirmCancellationConfirmModal(): void {
-    console.log('confirm Cancellation confirm modal');
     this.showCancellationConfirmModal = false;
     this.endReservation();
   }
