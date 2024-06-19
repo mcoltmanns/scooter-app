@@ -43,6 +43,8 @@ export class ScooterComponent implements OnInit {
     /* By using bind(this), we ensure that these methods always refer to the ScooterComponent instance. */
     this.onCancelReservationConfirmModal = this.onCancelReservationConfirmModal.bind(this);
     this.onConfirmReservationConfirmModal = this.onConfirmReservationConfirmModal.bind(this);
+    this.onCancelCancellationConfirmModal = this.onCancelCancellationConfirmModal.bind(this);
+    this.onConfirmCancellationConfirmModal = this.onConfirmCancellationConfirmModal.bind(this);
   }
 
   /* Variables for the scooter information */
@@ -64,6 +66,7 @@ export class ScooterComponent implements OnInit {
   public processingReservation = false;
   public disableButtons = false;
   public showReservationConfirmModal = false;
+  public showCancellationConfirmModal = false;
 
   options: Leaflet.MapOptions = {
     layers: [
@@ -216,12 +219,10 @@ export class ScooterComponent implements OnInit {
   }
 
   onCancelReservationConfirmModal(): void {
-    console.log('cancel reservation confirm modal');
     this.showReservationConfirmModal = false;
   }
 
   onConfirmReservationConfirmModal(): void {
-    console.log('Confirmed reservation cancelation');
     this.showReservationConfirmModal = false;
 
     /* End the reservation for the other scooter. Then start the reservation for this scooter. */
@@ -306,8 +307,12 @@ export class ScooterComponent implements OnInit {
     this.reserveScooter();
   }
 
-  // if "Reservierung beenden" is pressed
   onEndReservation(): void {
+    this.showCancellationConfirmModal = true;
+  }
+
+  // if "Reservierung beenden" is pressed
+  endReservation(): void {
     /* Prevent clicking the button again while waiting for the response for the first click */
     if (this.processingReservation) {
       return;
@@ -338,6 +343,17 @@ export class ScooterComponent implements OnInit {
         this.processingReservation = false;
       }
     });
+  }
+
+  onCancelCancellationConfirmModal(): void {
+    console.log('cancel Cancellation confirm modal');
+    this.showCancellationConfirmModal = false;
+  }
+
+  onConfirmCancellationConfirmModal(): void {
+    console.log('confirm Cancellation confirm modal');
+    this.showCancellationConfirmModal = false;
+    this.endReservation();
   }
 
   // Method to calculate the range of the scooter
