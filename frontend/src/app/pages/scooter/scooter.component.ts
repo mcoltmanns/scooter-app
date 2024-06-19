@@ -77,6 +77,7 @@ export class ScooterComponent implements OnInit, OnDestroy {
   public disableButtons = false;
   public showReservationConfirmModal = false;
   public showCancellationConfirmModal = false;
+  private replaceReservationTimeout?: ReturnType<typeof setTimeout>;
 
   options: Leaflet.MapOptions = {
     layers: [
@@ -164,6 +165,11 @@ export class ScooterComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     /* Unsubscribe from all subscriptions */
     this.scooterUnreservedSubscription.unsubscribe();
+
+    /* Clear all timeouts */
+    if (this.replaceReservationTimeout !== undefined) {
+      clearTimeout(this.replaceReservationTimeout);
+    }
   }
 
   public get processingReservation(): boolean {
@@ -264,10 +270,13 @@ export class ScooterComponent implements OnInit, OnDestroy {
         /* Destroy the reservation island */
         this.bookingService.destroyReservationIsland();
 
-        this.userHasReservation = false;
-        this.userReservedThisScooter = false;
-
-        this.reserveScooter();
+        /* Start the new reservation with a delay to give the old reservation island time to disappear */
+        this.replaceReservationTimeout = setTimeout(() => {
+          this.userHasReservation = false;
+          this.userReservedThisScooter = false;
+          this.reserveScooter();
+        }, 300);
+        
       },
       error: (err) => {
         console.error(err);
