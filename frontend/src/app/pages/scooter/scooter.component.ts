@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -12,7 +12,7 @@ import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
 import { BookingService } from 'src/app/services/booking.service';
-import { forkJoin } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
@@ -29,7 +29,7 @@ const defaultIcon = Leaflet.icon({
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })
-export class ScooterComponent implements OnInit {
+export class ScooterComponent implements OnInit, OnDestroy {
   @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
 
   public backButtonPath: string | null = '/search';  // Path for the back button
@@ -39,12 +39,21 @@ export class ScooterComponent implements OnInit {
   public rangeStatus = 0;
   public speedStatus = 0;
 
+  /* Variables for subscriptions */
+  private scooterUnreservedSubscription: Subscription;
+
   public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) { 
     /* By using bind(this), we ensure that these methods always refer to the ScooterComponent instance. */
     this.onCancelReservationConfirmModal = this.onCancelReservationConfirmModal.bind(this);
     this.onConfirmReservationConfirmModal = this.onConfirmReservationConfirmModal.bind(this);
     this.onCancelCancellationConfirmModal = this.onCancelCancellationConfirmModal.bind(this);
     this.onConfirmCancellationConfirmModal = this.onConfirmCancellationConfirmModal.bind(this);
+
+    /* Subscribe to the event when a scooter gets unreserved. */
+    this.scooterUnreservedSubscription = this.bookingService.scooterUnreserved.subscribe(() => {
+      this.userHasReservation = false;
+      this.userReservedThisScooter = false;
+    });
   }
 
   /* Variables for the scooter information */
@@ -149,6 +158,10 @@ export class ScooterComponent implements OnInit {
         }
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.scooterUnreservedSubscription.unsubscribe();
   }
 
   processRoutingState(): void {

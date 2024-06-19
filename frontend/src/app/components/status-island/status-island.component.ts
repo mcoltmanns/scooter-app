@@ -6,6 +6,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { BookingService } from 'src/app/services/booking.service';
 import { ToastComponent } from '../toast/toast.component';
 import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-status-island',
@@ -35,16 +36,20 @@ import { ConfirmModalComponent } from '../confirm-modal/confirm-modal.component'
 export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
 
+  /* Variables for subscriptions */
+  private scooterReservedSubscription: Subscription;
+  private scooterUnreservedSubscription: Subscription;
+
+  /* Core variables to control the status island */
   public onDOM = false;
   public isVisible = false;
   public errorMessage = 'Da ist etwas schiefgelaufen. Bitte versuche es erneut.';
 
+  /* Variables to control the cancellation confirm modal */
   public showCancellationConfirmModal = false;
   public processingCancellation = false;
-  public cancellationConfirmModalTitle = 'Bestätigung';
-  public cancellationConfirmModalText = 'Bist du sicher, dass du diese Aktion durchführen willst?';
-  public processingCancellationMsg = 'Beende...';
 
+  /* Input variables that can be set by the the person setting up the status island */
   @Input() public showCountdown = true;
   @Input() public showDuration = 10000;
   @Input() public imgPath: string | null = null;
@@ -52,18 +57,24 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   @Input() public title: string | null = null;
   @Input() public content: string | null = null;  // A secondary text besides the title
   @Input() public showCancelButton = false;
+  @Input() public cancellationConfirmModalTitle = 'Bestätigung';
+  @Input() public cancellationConfirmModalText = 'Bist du sicher, dass du diese Aktion durchführen willst?';
+  @Input() public processingCancellationMsg = 'Beende...';
   @Input() cancel: () => void = () => {
     // This is a default function that does nothing.
     // It will be replaced by a function from the parent component.
   };
 
+  /* Variables for controlling the length and visibility of all texts on the status island */
   private titleMinLength = 6;
   public showContent = false;
-  private animationDuration = 300;  // Match this with your animation duration, e.g. 0.3s = 300ms
 
+  /* Variables for controlling the animation and the countdown */  
+  private animationDuration = 300;  // Has to match the animation duration of the animation in @Component, e.g. 0.3s = 300ms
   public remainingDuration: number = this.showDuration;
-  private countdownInterval: ReturnType<typeof setInterval> | null = null;
 
+  /* Variables for controlling the countdown interval and timeouts */
+  private countdownInterval: ReturnType<typeof setInterval> | null = null;
   private islandTimeout: ReturnType<typeof setTimeout> | null = null;
   private showTimeout: ReturnType<typeof setTimeout> | null = null;
   private hideTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -74,7 +85,8 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     this.onCancelCancellationConfirmModal = this.onCancelCancellationConfirmModal.bind(this);
 
     /* SUBSCRIPTION: The status island will be used to display a users reservation. Therefore, we subscribe to the scooterReserved event. */
-    this.bookingService.scooterReserved.subscribe(reservation => {
+    this.scooterReservedSubscription = this.bookingService.scooterReserved.subscribe(reservation => {
+      console.log('scooterReserved event received');
       /* Configure the status island with the information from the reservation */
       this.imgPath = reservation.imagePath;
       this.redirectPath = reservation.redirectPath;
@@ -116,7 +128,7 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     });
 
     /* SUBSCRIPTION: If the scooterUnreserved event is emitted, the status island will be destroyed. */
-    this.bookingService.scooterUnreserved.subscribe(() => {
+    this.scooterUnreservedSubscription = this.bookingService.scooterUnreserved.subscribe(() => {
       this.destroyIsland();
     });
 
@@ -129,6 +141,10 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
 
   ngOnDestroy(): void {
     this.resetTimer();
+
+    /* Unsubscribe from all subscriptions */
+    this.scooterReservedSubscription.unsubscribe();
+    this.scooterUnreservedSubscription.unsubscribe();
   }
 
   show(): void {
