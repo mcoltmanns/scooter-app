@@ -54,7 +54,7 @@ class Server {
       console.log(`unhooked references to ${rentals.length} expired rentals.\nscheduling endings of remaining rentals...`);
       rentals = await Rental.findAll({ where: { endedAt: { [Op.gte]: now } } });
       for (const rental of rentals) {
-        RentalManager.scheduleRentalEnding(rental);
+        RentalManager.scheduleRentalEnding(rental, new Date(rental.dataValues.endedAt));
       }
       console.log(`scheduled endings for ${rentals.length} active rentals`);
 
