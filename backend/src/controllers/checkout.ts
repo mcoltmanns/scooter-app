@@ -54,7 +54,7 @@ export class CheckoutController {
 
       /* Start the rental */
       const rental_duration_ms = duration * 60 * 60 * 1000;  // Convert hours to milliseconds
-      const rental = await RentalManager.startRentalStatic(userId, scooterId, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
+      const rental = await RentalManager.startRental(userId, scooterId, paymentMethodId, pricePerHour, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
       // also ends associated reservation, if there was one
 
       endTimestamp = rental.getDataValue('endedAt');  // Get the end timestamp of the rental to return it to the user

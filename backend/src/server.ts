@@ -7,7 +7,7 @@ import Database from './database';
 import SourceMap from 'source-map-support';
 import { UsersSession } from './models/user';
 import { Op } from 'sequelize';
-import { Rental, Reservation } from './models/rental';
+import { ActiveRental, Rental, Reservation } from './models/rental';
 import ReservationManager from './services/reservation-manager';
 import RentalManager from './services/rental-manager';
 SourceMap.install();
@@ -45,18 +45,11 @@ class Server {
       }
       console.log(`scheduled deletion for ${reservations.length} active reservations`);
 
-      /* Purge all expired rentals */
-      console.log('unhooking references to expired rentals...');
-      let rentals = await Rental.findAll({ where: { endedAt: { [Op.lt]: now } } });
-      for (const rental of rentals) {
-        await RentalManager.endRental(rental);
+      // reschedule rental checks
+      const rentals = await ActiveRental.findAll();
+      for(const rental of rentals) {
+        RentalManager.scheduleRentalCheck(rental.dataValues.id, new Date(rental.dataValues.nextActionTime));
       }
-      console.log(`unhooked references to ${rentals.length} expired rentals.\nscheduling endings of remaining rentals...`);
-      rentals = await Rental.findAll({ where: { endedAt: { [Op.gte]: now } } });
-      for (const rental of rentals) {
-        RentalManager.scheduleRentalEnding(rental, new Date(rental.dataValues.endedAt));
-      }
-      console.log(`scheduled endings for ${rentals.length} active rentals`);
 
       /* Start the server */
       app.listen(this.port, () => {
