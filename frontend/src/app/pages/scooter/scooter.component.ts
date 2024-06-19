@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -42,7 +42,7 @@ export class ScooterComponent implements OnInit, OnDestroy {
   /* Variables for subscriptions */
   private scooterUnreservedSubscription: Subscription;
 
-  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService) { 
+  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService, private renderer: Renderer2, private el: ElementRef) { 
     /* By using bind(this), we ensure that these methods always refer to the ScooterComponent instance. */
     this.onCancelReservationConfirmModal = this.onCancelReservationConfirmModal.bind(this);
     this.onConfirmReservationConfirmModal = this.onConfirmReservationConfirmModal.bind(this);
@@ -72,7 +72,8 @@ export class ScooterComponent implements OnInit, OnDestroy {
   /* Reservation variables */
   public userHasReservation = false;
   public userReservedThisScooter = false;
-  public processingReservation = false;
+  private _processingReservation = false;
+  public processingReservationChanged = false;
   public disableButtons = false;
   public showReservationConfirmModal = false;
   public showCancellationConfirmModal = false;
@@ -163,6 +164,15 @@ export class ScooterComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     /* Unsubscribe from all subscriptions */
     this.scooterUnreservedSubscription.unsubscribe();
+  }
+
+  public get processingReservation(): boolean {
+    return this._processingReservation;
+  }
+  
+  public set processingReservation(value: boolean) {
+    this._processingReservation = value;
+    this.processingReservationChanged = true;
   }
 
   processRoutingState(): void {

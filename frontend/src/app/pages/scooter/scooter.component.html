@@ -77,7 +77,7 @@
 
             <div class="bottom">
                 <app-button color="primary" type="submit" class="scooter-btn" (click)="onBook()" [disabled]="disableButtons">
-                    <span class="fade-in">Scooter buchen</span>
+                    Scooter buchen
                 </app-button>
                 <app-button 
                     [color]="userReservedThisScooter ? 'warn' : 'primary'" 
@@ -85,9 +85,9 @@
                     class="scooter-btn" 
                     (click)="userReservedThisScooter ? onEndReservation() : onReserve()" 
                     [disabled]="disableButtons">
-                    <span *ngIf="processingReservation" class="fade-in">Lade...</span>
-                    <span *ngIf="!processingReservation && userReservedThisScooter" class="fade-in">Reservierung beenden</span>
-                    <span *ngIf="!processingReservation && !userReservedThisScooter" class="fade-in">Scooter reservieren</span>
+                    <span *ngIf="processingReservation" [ngClass]="{'fade-in': processingReservationChanged}">Lade...</span>
+                    <span *ngIf="!processingReservation && userReservedThisScooter" [ngClass]="{'fade-in': processingReservationChanged}">Reservierung beenden</span>
+                    <span *ngIf="!processingReservation && !userReservedThisScooter" [ngClass]="{'fade-in': processingReservationChanged}">Scooter reservieren</span>
                 </app-button>
             </div>
 
