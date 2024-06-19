@@ -180,7 +180,8 @@ export class MapComponent implements OnInit, OnDestroy {
             console.log(decodedText);
 
             // Check whether the link begins with "http://localhost:4200/"
-            if (decodedText.startsWith('http://localhost:4200/')) {
+            const baseURL = `${window.location.protocol}//${window.location.host}`;
+            if (decodedText.startsWith(baseURL)) {
               window.location.href = decodedText;
               this.qrReader?.stop(); // Stop QR code scanner
             } else {
