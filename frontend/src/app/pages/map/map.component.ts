@@ -122,7 +122,7 @@ export class MapComponent implements OnInit {
 
     // check if browser supports geolocation
     if ('geolocation' in navigator) {
-      navigator.geolocation.getCurrentPosition(
+      navigator.geolocation.watchPosition(
         (position) => {
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
@@ -130,7 +130,6 @@ export class MapComponent implements OnInit {
           const userMarker = Leaflet.marker([latitude, longitude], { icon: userIcon }); // display user via gps
           this.layers.push(userMarker);
           this.options.center = new Leaflet.LatLng(latitude, longitude); // change center of the map according to user position
-          
         },
         (error) => {
           console.error('Fehler beim Abrufen der Position', error);
