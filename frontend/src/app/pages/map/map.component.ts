@@ -13,6 +13,8 @@ import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { GetUserPosition } from 'src/app/utils/getUserposition';
+import { PositionService } from 'src/app/utils/position.service';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -41,7 +43,7 @@ export class MapComponent implements OnInit {
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
 
-  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private positionService: PositionService) {}
 
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
@@ -53,7 +55,7 @@ export class MapComponent implements OnInit {
       ),
     ],
     zoom: 16,
-    center: new Leaflet.LatLng(47.663557, 9.175365),
+    center: new Leaflet.LatLng(this.positionService.latitude, this.positionService.longitude),
     attributionControl: false,
   };
 
@@ -121,7 +123,9 @@ export class MapComponent implements OnInit {
     });
 
     // check if browser supports geolocation
+    /*
     if ('geolocation' in navigator) {
+      console.log('geolocation');
       navigator.geolocation.watchPosition(
         (position) => {
           const latitude = position.coords.latitude;
@@ -141,6 +145,11 @@ export class MapComponent implements OnInit {
     } else {
       console.error('Geolocation wird von diesem Browser nicht unterstützt');
     }
+    */
+    console.log('test' + GetUserPosition.getUserPosition(this.positionService));
+    GetUserPosition.userPosition(this.positionService);
+    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps
+    this.layers.push(userMarker);
   }
   
   toggleListView(): void {

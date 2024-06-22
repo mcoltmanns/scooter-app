@@ -7,6 +7,8 @@ import { ValidationErrors } from 'src/app/models/validation-errors';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
+import { GetUserPosition } from 'src/app/utils/getUserposition';
+import { PositionService } from 'src/app/utils/position.service';
 
 @Component({
   standalone: true,
@@ -38,7 +40,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   constructor(
     private router: Router,
     private authService: AuthService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private positionService: PositionService
   ) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.loginForm = this.fb.group({
@@ -52,6 +55,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginFormValueChangesSubscription = this.loginForm.valueChanges.subscribe(() => {
       this.updateErrorMessages();
     });
+
+    GetUserPosition.userPosition(this.positionService);
   }
 
   ngOnDestroy(): void {
