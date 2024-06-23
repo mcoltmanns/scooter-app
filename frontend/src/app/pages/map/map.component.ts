@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 /**
@@ -37,11 +37,12 @@ const userIcon = Leaflet.icon({
   styleUrls: ['./map.component.css'],
 })
 
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnDestroy {
   public scooters: Scooter[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
+  private intervalId: ReturnType<typeof setInterval> | undefined;
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private positionService: PositionService) {}
 
@@ -146,10 +147,13 @@ export class MapComponent implements OnInit {
       console.error('Geolocation wird von diesem Browser nicht unterstützt');
     }
     */
-    console.log('test' + GetUserPosition.getUserPosition(this.positionService));
-    GetUserPosition.userPosition(this.positionService);
-    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps
-    this.layers.push(userMarker);
+
+    this.updateUserPosition();
+    
+    // Start the interval to update the user position
+    this.intervalId = setInterval(() => {
+      this.updateUserPosition();
+    }, 5000); // Update every 5 seconds
   }
   
   toggleListView(): void {
@@ -158,5 +162,19 @@ export class MapComponent implements OnInit {
       this.listScrollPosition = null;
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
+  }
+
+  updateUserPosition(): void {
+    GetUserPosition.userPosition(this.positionService);
+    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps
+    console.log('test');
+    this.layers.push(userMarker);
+  }
+
+  ngOnDestroy(): void {
+    // Clear the interval when the component is destroyed
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 }

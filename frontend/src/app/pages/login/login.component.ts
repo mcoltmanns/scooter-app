@@ -55,8 +55,6 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginFormValueChangesSubscription = this.loginForm.valueChanges.subscribe(() => {
       this.updateErrorMessages();
     });
-
-    GetUserPosition.userPosition(this.positionService);
   }
 
   ngOnDestroy(): void {
@@ -136,6 +134,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.updateErrorMessages();
       return; // Form submission canceled
     }
+
+    GetUserPosition.userPosition(this.positionService);
 
     /* Send the login request to the backend */
     this.authService.login(this.email, this.password).subscribe({

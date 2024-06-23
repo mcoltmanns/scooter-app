@@ -12,9 +12,6 @@ export class GetUserPosition {
               (error) => {
                 console.error('Fehler beim Abrufen der Position', error);
               },
-              {
-                enableHighAccuracy: true,
-              }
             );
         } else {
             console.error('Geolocation wird von diesem Browser nicht unterstützt');
