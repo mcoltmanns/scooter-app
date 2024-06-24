@@ -39,6 +39,7 @@ const defaultIcon = Leaflet.icon({
 
 export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
+  public filteredScooters: Scooter[] = [];
   public products: Product[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
@@ -101,7 +102,7 @@ export class MapComponent implements OnInit {
    * This method adds a marker on the map for every scooter in this.scooters
    */
   addScootersToMap(): void {
-    for(const scooter of this.scooters) {
+    for(const scooter of this.filteredScooters) {
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
         {icon: defaultIcon}
       ).on('click', ()=> {
@@ -122,10 +123,12 @@ export class MapComponent implements OnInit {
       this.listScrollPosition = history.state.originState.listScrollPosition;
     }
 
-    // Using mapService to get the data about scooters from backend
-    // and add markers on the map using addScootersToMap()-method
-    this.loadScooters();
+    this.loadProducts();
 
+
+  
+  
+    this.loadScooters();
     /*for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
       // auch direkt in Typescript hinzugefügt werden
@@ -139,14 +142,45 @@ export class MapComponent implements OnInit {
         console.log(e);
       });
     }*/
-
-    this.loadProducts();
-
-
-
-    this.filterUpdates();
+   
+      this.mapService.getProductInfo().subscribe({
+        next: (value) => {
+          this.products = value;
+          this.mapService.getScooterInfo().subscribe({
+            next: (value) => {
+              this.scooters = value;
+              this.filteredScooters = Filters.onReload(this.scooters, this.products);
+              this.addScootersToMap();
+            },
+      
+            error: (err) => {
+              this.errorMessage = err.error.message;
+              console.log(err);
+            }
+          });
+    
+        },
+  
+        error: (err) => {
+          this.errorMessage = err.error.message;
+          console.log(err);
+        }
+      });
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+   // Using mapService to get the data about products from backend
   loadProducts(): void {
     this.mapService.getProductInfo().subscribe({
       next: (value) => {
@@ -160,11 +194,11 @@ export class MapComponent implements OnInit {
     });
   }
 
+   // Using mapService to get the data about scooters from backend
   loadScooters(): void{
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
-        this.addScootersToMap();
       },
 
       error: (err) => {
@@ -218,19 +252,21 @@ export class MapComponent implements OnInit {
    * applies the filters to the list 
    */
   filterUpdates(): void{
-    this.scooters = Filters.filterPrice(this.scooters, this.products);
-    this.scooters = Filters.filterRange(this.scooters, this.products);
-    this.scooters = Filters.filterBattery(this.scooters);
-    this.scooters = Filters.filterSpeed(this.scooters, this.products);
-    //empty out all previously set scooters
-    this.layers = [];
+    console.log(this.scooters);
+    this.layers=[];
+    this.filteredScooters = Filters.filterPrice(this.scooters, this.products);
+    this.filteredScooters = Filters.filterRange(this.filteredScooters, this.products);
+    this.filteredScooters = Filters.filterBattery(this.filteredScooters);
+    this.filteredScooters = Filters.filterSpeed(this.filteredScooters, this.products);
     //add the new selection of scooters to the map
     this.addScootersToMap();
   }
 
   onCancel(): void {
     Filters.resetBounds();
-    this.loadScooters();
+    this.filteredScooters = this.scooters;
+    this.layers=[];
+    this.addScootersToMap();
   }
   
 }
