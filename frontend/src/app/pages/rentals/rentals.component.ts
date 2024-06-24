@@ -311,7 +311,7 @@ dateValidator(control: FormControl): { [key: string]: Boolean } | null {
   return null;
 }
 
-  /*auto formats the input to the form dd-mm-yyyy */
+  /*auto formats the input to the german standard form of dd.mm.yyyy, as the app is for use in german language space */
   autoFormatDate(event: Event, controlName: string): void {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
