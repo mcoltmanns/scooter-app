@@ -27,6 +27,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   @Input() searchTerm = ''; // Input property to receive the search term
   @Input() scrollPosition: string | null = null; // Input property to receive the scroll position
+  @Input() mapScooters: Scooter[] = [];
   public scooters: Scooter[] = [];
   public products: Product[] = [];
   public filteredScooters: Scooter[] = [];
@@ -96,7 +97,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   /* Filters the scooters for the "search scooter" input field */
   filterScooters(): void {
-    this.filteredScooters = this.scooters.filter(scooter =>
+    this.filteredScooters = this.mapScooters.filter(scooter =>
       scooter.product_id.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
@@ -150,7 +151,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
   levenshteinFilterScooters(): void {
     const threshold = 2; // threshold for simularity
     const len = this.searchTerm.length;
-    this.levenshteinFilteredScooters= this.scooters.filter(scooter => 
+    this.levenshteinFilteredScooters= this.mapScooters.filter(scooter => 
       Levenshtein.levenshteinMethod(scooter.product_id.substring(0, len).toLowerCase(), this.searchTerm.toLowerCase()) <= threshold
     );
     console.log(this.filterScooters.length);
