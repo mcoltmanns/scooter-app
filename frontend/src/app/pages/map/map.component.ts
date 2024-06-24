@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone, OnDestroy } from '@angular/core';
+import { Component, OnInit, NgZone} from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 /**
@@ -37,12 +37,11 @@ const userIcon = Leaflet.icon({
   styleUrls: ['./map.component.css'],
 })
 
-export class MapComponent implements OnInit, OnDestroy {
+export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
-  private intervalId: ReturnType<typeof setInterval> | undefined;
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private positionService: PositionService) {}
 
@@ -124,6 +123,7 @@ export class MapComponent implements OnInit, OnDestroy {
     });
 
     // check if browser supports geolocation
+    /*
     if ('geolocation' in navigator) {
       console.log('geolocation');
       navigator.geolocation.getCurrentPosition(
@@ -145,16 +145,9 @@ export class MapComponent implements OnInit, OnDestroy {
     } else {
       console.error('Geolocation wird von diesem Browser nicht unterstützt');
     }
-
-    //this.updateUserPosition();
-    
-    // Start the interval to update the user position
-    /*
-    this.intervalId = setInterval(() => {
-      console.log(this.layers);
-      this.updateUserPosition();
-    }, 5000); // Update every 5 seconds
     */
+
+    this.updateUserPosition();
   }
   
   toggleListView(): void {
@@ -165,17 +158,11 @@ export class MapComponent implements OnInit, OnDestroy {
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
 
-  
+
+  /* update the user position and put a user icon on the map */
   updateUserPosition(): void {;
     GetUserPosition.userPosition(this.positionService);
     const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps
     this.layers.push(userMarker);
-  }
-
-  ngOnDestroy(): void {
-    // Clear the interval when the component is destroyed
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-    }
   }
 }
