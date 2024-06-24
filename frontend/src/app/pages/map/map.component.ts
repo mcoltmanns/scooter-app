@@ -152,6 +152,7 @@ export class MapComponent implements OnInit, OnDestroy {
     
     // Start the interval to update the user position
     this.intervalId = setInterval(() => {
+      console.log(this.layers);
       this.updateUserPosition();
     }, 5000); // Update every 5 seconds
   }
@@ -164,10 +165,9 @@ export class MapComponent implements OnInit, OnDestroy {
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
 
-  updateUserPosition(): void {
+  updateUserPosition(): void {;
     GetUserPosition.userPosition(this.positionService);
     const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps
-    console.log('test');
     this.layers.push(userMarker);
   }
 
