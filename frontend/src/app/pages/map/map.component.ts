@@ -143,6 +143,7 @@ export class MapComponent implements OnInit {
       });
     }*/
    
+      //has to be done in this somewhat not nice form to ensure all the data is there when the functions run
       this.mapService.getProductInfo().subscribe({
         next: (value) => {
           this.products = value;
@@ -167,16 +168,6 @@ export class MapComponent implements OnInit {
         }
       });
   }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -215,6 +206,9 @@ export class MapComponent implements OnInit {
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
+
+
+//things necessary for the filter
 
   filterMenuVisible = false;
 
