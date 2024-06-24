@@ -290,7 +290,7 @@ export class RentalsComponent implements OnInit {
 
 //validator and auto formatter
 
-dateValidator(control: FormControl): { [key: string]: any } | null {
+dateValidator(control: FormControl): { [key: string]: Boolean } | null {
   const value = control.value;
   if (value === '') {
     return null;  // Allow empty input
