@@ -26,6 +26,14 @@ export class CheckoutController {
 
     const { scooterId, paymentMethodId, duration } = request.body;
 
+    const dynamic = !duration; // If no duration is provided, a checkout for a dynamic rental is requested
+
+    if (dynamic) {
+      console.log('Dynamic booking requested');
+      response.status(200).json({ code: 200, message: 'Dynamic booking requested' });
+      return;
+    }
+
     let endTimestamp;
 
     let paymentToken: string | null = null;
@@ -47,17 +55,19 @@ export class CheckoutController {
       const pricePerHour = scooter.product.price_per_hour;
       const totalPrice = pricePerHour * duration;  // For now always in €
 
-      /* If we reach this point, the payment was successful */
+      /* Process the payment transaction */
       const transactionInfo = await TransactionManager.doTransaction(paymentMethodId, userId, totalPrice, transaction);   // Save the payment token in case we need to rollback the transaction
       paymentToken = transactionInfo.token;
       paymentService = transactionInfo.serviceUsed;
+      /* If we reach this point, the payment was successful */
 
       /* Start the rental */
       const rental_duration_ms = duration * 60 * 60 * 1000;  // Convert hours to milliseconds
       const rental = await RentalManager.startRental(userId, scooterId, paymentMethodId, pricePerHour, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
       // also ends associated reservation, if there was one
 
-      endTimestamp = rental.getDataValue('endedAt');  // Get the end timestamp of the rental to return it to the user
+      endTimestamp = rental.getDataValue('nextActionTime');  // Get the end timestamp of the rental to return it to the user
+      console.log(new Date(rental.getDataValue('nextActionTime')).toString());
 
       await transaction.commit();
     } catch (error) {
@@ -101,7 +111,14 @@ export class CheckoutController {
       return;
     }
 
-    response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: { endTimestamp: endTimestamp } });
+    let responseBookingObject;
+    if (!dynamic) {
+      responseBookingObject = { isDynamic: false, endTimestamp: endTimestamp };
+    } else {
+      responseBookingObject = { isDynamic: true };
+    }
+
+    response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: responseBookingObject });
     return;
   }
 }

@@ -158,7 +158,7 @@ export class Validator {
     const checks = [
       check('scooterId').trim().escape().notEmpty().withMessage('Bitte eine Scooter-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Scooter ID.'),
       check('paymentMethodId').trim().escape().notEmpty().withMessage('Bitte eine Zahlungsmethode angeben.').bail().isInt({min: 0}).withMessage('Die ID der Zahlungsmethode ist ungültig.'),
-      check('duration').trim().escape().notEmpty().withMessage('Bitte eine Buchungsdauer angeben (in Stunden).').bail().isNumeric().withMessage('Bitte die Buchungsdauer als Zahl angeben.').bail().isInt({ min: 1, max: 48 }).withMessage('Die Buchungsdauer muss zwischen 1 und 48 Stunden liegen.'),
+      check('duration').optional().trim().escape().notEmpty().withMessage('Bitte eine Buchungsdauer angeben (in Stunden).').bail().isNumeric().withMessage('Bitte die Buchungsdauer als Zahl angeben.').bail().isInt({ min: 1, max: 48 }).withMessage('Die Buchungsdauer muss zwischen 1 und 48 Stunden liegen.'),
     ];
 
     /* Run all checks */
