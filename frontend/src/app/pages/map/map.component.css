@@ -5,6 +5,12 @@
   --logo-title-height: 60px;
 }
 
+.wrapper {
+  position: fixed; 
+  width: 100%;
+  top: 14%;
+  z-index: 9998;
+}
 .logo.title {
   /* "Lokale" Styles können "Globale" Styles überschreiben */
   font-size: 38px;

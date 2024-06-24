@@ -240,6 +240,7 @@ export class MapComponent implements OnInit {
     Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
     //then apply the filters
     this.filterUpdates();
+    this.toggleFilterView();
   }
 
   /**
@@ -261,6 +262,7 @@ export class MapComponent implements OnInit {
     this.filteredScooters = this.scooters;
     this.layers=[];
     this.addScootersToMap();
+    this.toggleFilterView();
   }
   
 }
