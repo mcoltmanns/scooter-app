@@ -30,8 +30,8 @@
 
   <div class="scrollable-container">
     <div class="rentals-container" *ngIf="!loadingDataScooter && !loadingDataProduct && !loadingDataOption; else loading">
-      <ul *ngIf="rentals.length > 0; else noRentals">
-        <li *ngFor="let rental of rentals">
+      <ul *ngIf="filteredRentals.length > 0; else noRentals">
+        <li *ngFor="let rental of filteredRentals">
           <div class="scooter-container">
             <img class="picture" [src]="getPictureByScooterId(rental.scooter_id)" />
             <div class="scooter-details">

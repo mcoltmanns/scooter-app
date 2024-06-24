@@ -36,6 +36,7 @@ export class RentalsComponent implements OnInit {
   public loadingDataProduct = true;
   public loadingDataOption = true;
   public rentals: Rental[] = [];
+  public filteredRentals: Rental[] = [];
   public products: ProductWithScooterId[] = [];
   public errorMessage = '';
 
@@ -84,6 +85,7 @@ export class RentalsComponent implements OnInit {
     this.rentalService.getRentalInfo().subscribe({
       next: (value) => {
         this.rentals = value;
+        this.filteredRentals = value;
         this.loadingDataScooter = false;
       },
       error: (err) => {
@@ -92,6 +94,7 @@ export class RentalsComponent implements OnInit {
         console.log(err);
       }
     });
+    this.filteredRentals = this.rentals;
   }
 
   /* how long a user booked the scooter */
@@ -269,11 +272,11 @@ export class RentalsComponent implements OnInit {
     this.lower = this.bookingFilterForm.get('lower')?.value;
     this.upper = this.bookingFilterForm.get('upper')?.value;
 
-    this.rentals = Filters.filterDate(this.lower, this.upper, this.rentals);
+    this.filteredRentals = Filters.filterDate(this.lower, this.upper, this.rentals);
   }
 
   onCancel(): void {
-    this.loadRentalInfo();
+    this.filteredRentals = this.rentals;
   }
     
 }
