@@ -1,4 +1,4 @@
-import { Model, Transaction } from 'sequelize';
+import { Model, Op, Transaction } from 'sequelize';
 import { ActiveRental, PastRental, Rental } from '../models/rental';
 import ReservationManager from './reservation-manager';
 import { Scooter } from '../models/scooter';
@@ -18,6 +18,42 @@ abstract class RentalManager {
     // get all rentals associated with a user
     public static async getRentalsFromUser(userId: number): Promise<[Model[], Model[]]> {
         return [await ActiveRental.findAll({ where: { userId: userId } }), await PastRental.findAll({ where: { userId: userId }})];
+    }
+
+    private static deg2rad(deg: number): number {
+        return deg * Math.PI / 180;
+    }
+
+    // get all active rentals within a certain radius of a scooter
+    // returns a list of scooters and a list of distances in km
+    public static async getRentalsInRadius(scooterId: number, radiusKm: number): Promise<[Model[], number[]]> {
+        const center = await ActiveRental.findOne({ where: { scooterId: scooterId }});
+        const others = await ActiveRental.findAll( { where: { scooterId: { [Op.not]: scooterId }}});
+ 
+        const hits: Model[] = [];
+        const dists: number[] = [];
+
+        const earthRadiusKm = 6371;
+
+        others.forEach(other => {
+            const dLat = this.deg2rad(other.dataValues.coordinates_lat - center.dataValues.coordinates_lat);
+            const dLong = this.deg2rad(other.dataValues.coordinates_lng - center.dataValues.coordinates_lng);
+
+            const cLat = this.deg2rad(center.dataValues.coordinates_lat);
+            const oLat = this.deg2rad(center.dataValues.coordinates_lat);
+
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.sin(dLong / 2) * Math.sin(dLong / 2) * Math.cos(cLat) * Math.cos(oLat);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const dist = Math.abs(earthRadiusKm * c);
+
+            if(dist <= radiusKm) {
+                hits.push(other);
+                dists.push(dist);
+            }
+        });
+
+        return [hits, dists];
     }
 
     // get all active rentals associated with a scooter

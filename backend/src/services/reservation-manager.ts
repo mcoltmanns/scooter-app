@@ -1,4 +1,4 @@
-import { Model, Transaction } from 'sequelize';
+import { Model, Op, Transaction } from 'sequelize';
 import { RESERVATION_LIFETIME, Reservation } from '../models/rental';
 import database from '../database';
 import { Scooter } from '../models/scooter';
@@ -101,6 +101,42 @@ abstract class ReservationManager {
             }
         }).bind(reservation)); // have to bind in in case of data change
         return j;
+    }
+
+    private static deg2rad(deg: number): number {
+        return deg * Math.PI / 180;
+    }
+
+    // get all active reservations within a certain radius of a scooter
+    // returns a list of scooters and a list of distances in km
+    public static async getReservationsInRadius(scooterId: number, radiusKm: number): Promise<[Model[], number[]]> {
+        const center = await Reservation.findOne({ where: { scooterId: scooterId }});
+        const others = await Reservation.findAll( { where: { scooterId: { [Op.not]: scooterId }}});
+
+        const hits: Model[] = [];
+        const dists: number[] = [];
+
+        const earthRadiusKm = 6371;
+
+        others.forEach(other => {
+            const dLat = this.deg2rad(other.dataValues.coordinates_lat - center.dataValues.coordinates_lat);
+            const dLong = this.deg2rad(other.dataValues.coordinates_lng - center.dataValues.coordinates_lng);
+
+            const cLat = this.deg2rad(center.dataValues.coordinates_lat);
+            const oLat = this.deg2rad(center.dataValues.coordinates_lat);
+
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                        Math.sin(dLong / 2) * Math.sin(dLong / 2) * Math.cos(cLat) * Math.cos(oLat);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const dist = Math.abs(earthRadiusKm * c);
+
+            if(dist <= radiusKm) {
+                hits.push(other);
+                dists.push(dist);
+            }
+        });
+
+        return [hits, dists];
     }
 }
 
