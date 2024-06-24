@@ -124,10 +124,9 @@ export class MapComponent implements OnInit, OnDestroy {
     });
 
     // check if browser supports geolocation
-    /*
     if ('geolocation' in navigator) {
       console.log('geolocation');
-      navigator.geolocation.watchPosition(
+      navigator.geolocation.getCurrentPosition(
         (position) => {
           const latitude = position.coords.latitude;
           const longitude = position.coords.longitude;
@@ -146,15 +145,16 @@ export class MapComponent implements OnInit, OnDestroy {
     } else {
       console.error('Geolocation wird von diesem Browser nicht unterstützt');
     }
-    */
 
-    this.updateUserPosition();
+    //this.updateUserPosition();
     
     // Start the interval to update the user position
+    /*
     this.intervalId = setInterval(() => {
       console.log(this.layers);
       this.updateUserPosition();
     }, 5000); // Update every 5 seconds
+    */
   }
   
   toggleListView(): void {
@@ -165,6 +165,7 @@ export class MapComponent implements OnInit, OnDestroy {
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
 
+  
   updateUserPosition(): void {;
     GetUserPosition.userPosition(this.positionService);
     const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps

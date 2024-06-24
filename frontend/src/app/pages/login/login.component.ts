@@ -55,6 +55,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginFormValueChangesSubscription = this.loginForm.valueChanges.subscribe(() => {
       this.updateErrorMessages();
     });
+
+    GetUserPosition.userPosition(this.positionService);
   }
 
   ngOnDestroy(): void {
