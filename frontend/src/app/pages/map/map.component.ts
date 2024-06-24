@@ -16,7 +16,9 @@ import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
+// QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -29,7 +31,7 @@ const defaultIcon = Leaflet.icon({
 
 @Component({
   standalone: true,
-  imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule],
+  imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, LoadingOverlayComponent],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
@@ -43,6 +45,7 @@ export class MapComponent implements OnInit, OnDestroy {
   private qrReader: Html5Qrcode | null = null;
   private qrActive = false;
   public qrButtonpressed = false;
+  public isLoading = false; // camera loading variable
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
 
@@ -127,20 +130,6 @@ export class MapComponent implements OnInit, OnDestroy {
       }
     });
 
-    /*for (const layer of this.layers) {
-      // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
-      // auch direkt in Typescript hinzugefügt werden
-      layer.on('click', (e: Leaflet.LeafletMouseEvent) => {
-        // Mittels der (im Browser eingebauten) alert() Methode wird ein
-        // Browser Pop-up Fenster geöffnet
-        alert('Marker was clicked!');
-
-        // In der Konsole können die Events genauer angeschaut werden,
-        // was die Entwicklung erleichtern kann
-        console.log(e);
-      });
-    }*/
-
     // Initializes the QR code scanner with the video element 'qr-reader'.
     this.qrReader = new Html5Qrcode('qr-reader');
   }
@@ -153,7 +142,7 @@ export class MapComponent implements OnInit, OnDestroy {
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
 
-  /* if we click on an QR Code */
+  /* click on the QR Code Button */
   startQrCodeScanner(): void {
     // Button pressed to stop QR Code scanning
     if(this.qrButtonpressed === true){
@@ -164,9 +153,10 @@ export class MapComponent implements OnInit, OnDestroy {
     // Button pressed to start QR Code scanning
     if(this.qrButtonpressed === false){
       this.qrButtonpressed = true;
+      this.isLoading = true; 
     }
+    // reads the qrCode
     if (this.qrReader) {
-      console.log('QR-Button pressed');
       this.qrActive = true;
       this.qrReader
         .start(
@@ -183,16 +173,18 @@ export class MapComponent implements OnInit, OnDestroy {
             const baseURL = `${window.location.protocol}//${window.location.host}`;
             if (decodedText.startsWith(baseURL)) {
               window.location.href = decodedText;
-              this.qrReader?.stop(); // Stop QR code scanner
+              this.qrReader?.stop();
             } else {
               console.log('Der Link entspricht nicht den Anforderungen und wird nicht geladen.');
             }
           },
           () => {  //(errorMessage)
+            this.isLoading = false;
             //console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
           }
         )
         .catch((err) => {
+          this.isLoading = false;
           console.error(`Kamera konnte nicht gestartet werden: ${err}`);
         });
 
@@ -201,9 +193,11 @@ export class MapComponent implements OnInit, OnDestroy {
         if (this.videoElement && this.videoElement.nativeElement) {
           navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then(stream => {
+              this.isLoading = false;
               this.videoElement.nativeElement.srcObject = stream;
             })
             .catch(err => {
+              this.isLoading = false;
               console.error('Kamerazugriff verweigert:', err);
         });
       }
@@ -212,6 +206,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /* stops QR Code scanning */
   stopQrCodeScanner(): void {
+    // stops the QR Code reader
     if (this.qrReader && this.qrActive) {
       this.qrReader.stop()
         .then(() => {
@@ -223,6 +218,7 @@ export class MapComponent implements OnInit, OnDestroy {
         });
     }
   
+    // stops the video live stream
     if (this.videoElement.nativeElement.srcObject) {
       const stream = this.videoElement.nativeElement.srcObject as MediaStream;
       if (stream) {
