@@ -21,6 +21,9 @@ export class Filters {
         const filteredRentals: Rental[] = [];
         //if one of the fields was empty use a default value; hardcoding of upper value is risky, but in this case no issue, as the app will
         // not be used beyond this summer
+        if(startAfter === '' && endBefore === ''){
+            return rentals;
+        }
         if(startAfter === ''){
             startAfter = '01-01-2000';
         }

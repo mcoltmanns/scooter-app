@@ -10,7 +10,7 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
 
 @Component({
@@ -27,8 +27,8 @@ export class RentalsComponent implements OnInit {
 
   public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder) 
   {this.bookingFilterForm = this.fb.group({
-    lower: ['', Validators.required],
-    upper: ['', Validators.required]
+      lower: ['', this.dateValidator],
+      upper: ['', this.dateValidator]
   });}
 
   // Variables for storing all rentals and the product information
@@ -269,14 +269,62 @@ export class RentalsComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.lower = this.bookingFilterForm.get('lower')?.value;
-    this.upper = this.bookingFilterForm.get('upper')?.value;
+    if (this.bookingFilterForm.valid) {
+      console.log('Form Submitted');
+      this.lower = this.bookingFilterForm.get('lower')?.value;
+      this.upper = this.bookingFilterForm.get('upper')?.value;
 
-    this.filteredRentals = Filters.filterDate(this.lower, this.upper, this.rentals);
+      this.filteredRentals = Filters.filterDate(this.lower.replace('.', '-').replace('.', '-'), this.upper.replace('.', '-').replace('.', '-'), this.rentals);
+    } 
+    else {
+      console.log('Form is invalid');
+    }
   }
 
   onCancel(): void {
     this.filteredRentals = this.rentals;
+    this.lower='';
+    this.upper='';
+  }
+
+
+//validator and auto formatter
+
+dateValidator(control: FormControl): { [key: string]: any } | null {
+  const value = control.value;
+  if (value === '') {
+    return null;  // Allow empty input
+  }
+  const dateRegex = /^\d{2}.\d{2}.\d{4}$/;
+  if (!dateRegex.test(value)) {
+    return { 'invalidDate': true };
+  }
+  const [day, month, year] = value.split('.').map(Number);
+  const date = new Date(year, month - 1, day);
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() + 1 !== month ||
+    date.getDate() !== day
+  ) {
+    return { 'invalidDate': true };
+  }
+  return null;
+}
+
+  /*auto formats the input to the form dd-mm-yyyy */
+  autoFormatDate(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/\D/g, '');
+    if (value.length > 2) {
+      value = value.slice(0, 2) + '.' + value.slice(2);
+    }
+    if (value.length > 5) {
+      value = value.slice(0, 5) + '.' + value.slice(5);
+    }
+    if(value.length > 10){
+      value = value.slice(0,10);
+    }
+    this.bookingFilterForm.controls[controlName].setValue(value, { emitEvent: false });
   }
     
 }

@@ -20,8 +20,8 @@
         <div class="form-container">
           <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
             <div class="filter-row">
-              <app-user-input label="Gebucht nach" [(text)]="lower" formControlName="lower"></app-user-input>
-              <app-user-input label="Beendet vor" [(text)]="upper" formControlName="upper"></app-user-input>
+              <app-user-input label="Gebucht nach" [(text)]="lower" formControlName="lower"(input)="autoFormatDate($event, 'lower')"></app-user-input>
+              <app-user-input label="Beendet vor" [(text)]="upper" formControlName="upper"(input)="autoFormatDate($event, 'upper')"></app-user-input>
             </div>
           </form>
         </div>
