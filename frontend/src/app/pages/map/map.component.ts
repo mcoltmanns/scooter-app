@@ -13,7 +13,7 @@ import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { GetUserPosition } from 'src/app/utils/getUserposition';
+import { GetUserPosition } from 'src/app/utils/getUserPosition';
 import { PositionService } from 'src/app/utils/position.service';
 
 /**
@@ -25,6 +25,9 @@ const defaultIcon = Leaflet.icon({
   iconUrl: '/assets/marker.png',
 });
 
+/**
+ * Icon for the user -> is displayed on the map
+ */
 const userIcon = Leaflet.icon({
   iconSize: [40, 40],
   iconUrl: '/assets/person.png',
@@ -122,34 +125,10 @@ export class MapComponent implements OnInit {
       }
     });
 
-    // check if browser supports geolocation
-    /*
-    if ('geolocation' in navigator) {
-      console.log('geolocation');
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const latitude = position.coords.latitude;
-          const longitude = position.coords.longitude;
-          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
-          const userMarker = Leaflet.marker([latitude, longitude], { icon: userIcon }); // display user via gps
-          this.layers.push(userMarker);
-          this.options.center = new Leaflet.LatLng(latitude, longitude); // change center of the map according to user position
-        },
-        (error) => {
-          console.error('Fehler beim Abrufen der Position', error);
-        },
-        {
-          enableHighAccuracy: true, // Enable high accuracy to get a more precise location
-        }
-      );
-    } else {
-      console.error('Geolocation wird von diesem Browser nicht unterstützt');
-    }
-    */
-
-    this.updateUserPosition();
+    this.updateUserPosition(); // call method to update user Position
   }
   
+  // toggle for scooter list and map
   toggleListView(): void {
     this.view = this.view === 'map' ? 'list' : 'map';
     if (this.view === 'map') {
@@ -161,8 +140,8 @@ export class MapComponent implements OnInit {
 
   /* update the user position and put a user icon on the map */
   updateUserPosition(): void {;
-    GetUserPosition.userPosition(this.positionService);
-    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon }); // display user via gps
-    this.layers.push(userMarker);
+    GetUserPosition.setUserPosition(this.positionService); // get user position from utils method
+    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+    this.layers.push(userMarker); // place the user icon on the map
   }
 }
