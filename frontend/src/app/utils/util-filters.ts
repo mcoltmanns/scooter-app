@@ -109,12 +109,10 @@ static resetBounds():void{
 }
 
 /**
- * to reload the previously filtered list of scooters by rebuilding
+ * to reload the previously filtered list of scooters by rebuilding it
  */
 private static filteredScooters: Scooter[]=[];
 static onReload(scooters: Scooter[], products: Product[]):Scooter[]{
-    console.log('we are rebuilding the filtered scooters');
-    console.log(scooters.length);
     this.filteredScooters = [];
     this.filteredScooters = this.filterPrice(scooters,products);
     this.filteredScooters = this.filterRange(this.filteredScooters,products);

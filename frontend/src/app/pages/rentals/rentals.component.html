@@ -6,17 +6,9 @@
   
 
   <div *ngIf="filterMenuVisible" class="filter-menu-container">
-    <div class="top">
-      <app-button class="btn" type="submit" (click)="onSubmit()">
-        Anwenden
-      </app-button>
-      <app-button color="accent" class="btn" (click)="onCancel()">
-        Zurücksetzten
-      </app-button>
-    </div>
     <div class="info">Format des Inputs: dd-MM-yyyy</div>
     <div class="filter-content">
-      <h3 class="o-title">Filter Options</h3>
+      <h3 class="o-title">Filter Menü</h3>
       <div class="form-container">
         <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
           <div class="filter-row">
@@ -25,6 +17,14 @@
           </div>
         </form>
       </div>
+    </div>
+    <div class="top">
+      <app-button class="btn" type="submit" (click)="onSubmit()">
+        Filtern
+      </app-button>
+      <app-button color="accent" class="btn" (click)="onCancel()">
+        Löschen
+      </app-button>
     </div>
   </div>
 
