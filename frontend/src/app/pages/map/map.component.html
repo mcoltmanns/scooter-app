@@ -13,37 +13,39 @@
       placeholder="Suchen"
       [(ngModel)]="searchTerm"
     />
-    <div *ngIf="filterMenuVisible && view === 'list'" class="filter-menu-container">
-      <div class="top">
-        <app-button class="btn" type="submit" (click)="onSubmit()">
-          Anwenden
-        </app-button>
-        <app-button color="accent" class="btn" (click)="onCancel()">
-          Zurücksetzten
-        </app-button>
-      </div>
-      <div class="info">Format des Inputs: ?</div>
-      <div class="filter-content">
-        <h3 class="o-title">Filter Options</h3>
-        <div class="form-container">
-          <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
-            <div class="filter-row">
-              <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice"></app-user-input>
-              <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice"></app-user-input>
-            </div>
-            <div class="filter-row">
-              <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange"></app-user-input>
-              <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange"></app-user-input>
-            </div>
-            <div class="filter-row">
-              <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty"></app-user-input>
-              <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty"></app-user-input>
-            </div>
-            <div class="filter-row">
-              <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed"></app-user-input>
-              <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed"></app-user-input>
-            </div>
-          </form>
+    <div class="headWrapper">
+      <div *ngIf="filterMenuVisible && view === 'list'" class="filter-menu-container">
+        <div class="top">
+          <app-button class="btn" type="submit" (click)="onSubmit()">
+            Anwenden
+          </app-button>
+          <app-button color="accent" class="btn" (click)="onCancel()">
+            Zurücksetzten
+          </app-button>
+        </div>
+        <div class="info"></div>
+        <div class="filter-content">
+          <h3 class="o-title">Filter Menü</h3>
+          <div class="form-container">
+            <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
+              <div class="filter-row">
+                <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice"></app-user-input>
+                <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice"></app-user-input>
+              </div>
+              <div class="filter-row">
+                <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange"></app-user-input>
+                <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange"></app-user-input>
+              </div>
+              <div class="filter-row">
+                <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty"></app-user-input>
+                <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty"></app-user-input>
+              </div>
+              <div class="filter-row">
+                <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed"></app-user-input>
+                <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed"></app-user-input>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
@@ -69,9 +71,9 @@
           Zurücksetzten
         </app-button>
       </div>
-      <div class="info">Format des Inputs: ?</div>
+      <div class="info"></div>
       <div class="filter-content">
-        <h3 class="o-title">Filter Options</h3>
+        <h3 class="o-title">Filter Menü</h3>
         <div class="form-container">
           <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
             <div class="filter-row">

@@ -4,27 +4,28 @@
     <h1 class="title">Meine Buchungen</h1>
   </div>
   
-
-  <div *ngIf="filterMenuVisible" class="filter-menu-container">
-    <div class="info">Format des Inputs: dd-MM-yyyy</div>
-    <div class="filter-content">
-      <h3 class="o-title">Filter Menü</h3>
-      <div class="form-container">
-        <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
-          <div class="filter-row">
-            <app-user-input label="Gebucht nach" [(text)]="lower" formControlName="lower"></app-user-input>
-            <app-user-input label="Beendet vor" [(text)]="upper" formControlName="upper"></app-user-input>
-          </div>
-        </form>
+  <div class="wrapper">
+    <div *ngIf="filterMenuVisible" class="filter-menu-container">
+      <div class="top">
+        <app-button class="btn" type="submit" (click)="onSubmit()">
+          Anwenden
+        </app-button>
+        <app-button color="accent" class="btn" (click)="onCancel()">
+          Zurücksetzten
+        </app-button>
       </div>
-    </div>
-    <div class="top">
-      <app-button class="btn" type="submit" (click)="onSubmit()">
-        Filtern
-      </app-button>
-      <app-button color="accent" class="btn" (click)="onCancel()">
-        Löschen
-      </app-button>
+      <div class="info"></div>
+      <div class="filter-content">
+        <h3 class="o-title">Filter Menü</h3>
+        <div class="form-container">
+          <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
+            <div class="filter-row">
+              <app-user-input label="Gebucht nach" [(text)]="lower" formControlName="lower"></app-user-input>
+              <app-user-input label="Beendet vor" [(text)]="upper" formControlName="upper"></app-user-input>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
