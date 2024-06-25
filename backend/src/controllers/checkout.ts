@@ -7,6 +7,8 @@ import RentalManager from '../services/rental-manager';
 import { TransactionManager } from '../services/payment/transaction-manager';
 import { PaymentService } from '../interfaces/payment-service.interface';
 
+const DYNAMIC_EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (in milliseconds) between rental extension checks
+
 interface ProductInstance extends Model {
   price_per_hour: number;
 }
@@ -26,12 +28,14 @@ export class CheckoutController {
 
     const { scooterId, paymentMethodId, duration } = request.body;
 
-    const dynamic = !duration; // If no duration is provided, a checkout for a dynamic rental is requested
-
-    if (dynamic) {
+    const isDynamic = !duration; // If no duration is provided, a checkout for a dynamic rental is requested
+    
+    let rentalDuration;
+    if (isDynamic) {
       console.log('Dynamic booking requested');
-      response.status(200).json({ code: 200, message: 'Dynamic booking requested' });
-      return;
+      rentalDuration = DYNAMIC_EXTENSION_INTERVAL_MS;
+    } else {
+      rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
     }
 
     let endTimestamp;
@@ -53,7 +57,7 @@ export class CheckoutController {
 
       /* Calculate the total price */
       const pricePerHour = scooter.product.price_per_hour;
-      const totalPrice = pricePerHour * duration;  // For now always in €
+      const totalPrice = pricePerHour * (rentalDuration / (1000 * 60 * 60));  // Price for now always in €, convert milliseconds to hours
 
       /* Process the payment transaction */
       const transactionInfo = await TransactionManager.doTransaction(paymentMethodId, userId, totalPrice, transaction);   // Save the payment token in case we need to rollback the transaction
@@ -62,8 +66,7 @@ export class CheckoutController {
       /* If we reach this point, the payment was successful */
 
       /* Start the rental */
-      const rental_duration_ms = duration * 60 * 60 * 1000;  // Convert hours to milliseconds
-      const rental = await RentalManager.startRental(userId, scooterId, paymentMethodId, pricePerHour, rental_duration_ms, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
+      const rental = await RentalManager.startRental(userId, scooterId, paymentMethodId, pricePerHour, rentalDuration, isDynamic, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
       // also ends associated reservation, if there was one
 
       endTimestamp = rental.getDataValue('nextActionTime');  // Get the end timestamp of the rental to return it to the user
@@ -112,7 +115,7 @@ export class CheckoutController {
     }
 
     let responseBookingObject;
-    if (!dynamic) {
+    if (!isDynamic) {
       responseBookingObject = { isDynamic: false, endTimestamp: endTimestamp };
     } else {
       responseBookingObject = { isDynamic: true };

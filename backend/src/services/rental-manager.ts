@@ -6,7 +6,7 @@ import database from '../database';
 import { scheduleJob } from 'node-schedule';
 import { TransactionManager } from './payment/transaction-manager';
 
-const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // how long between rental extension checks?
+const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
 //const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
 
 abstract class RentalManager {
@@ -28,16 +28,14 @@ abstract class RentalManager {
     // start a dynamic or prepaid rental
     // assumes payment has already gone through
     // checks if scooter is available
-    public static async startRental(userId: number, scooterId: number, paymentMethodId: number, price_per_hour: number, rental_duration_ms?: number, transaction?: Transaction, scooter?: Model): Promise<Model> {
+    public static async startRental(userId: number, scooterId: number, paymentMethodId: number, price_per_hour: number, rental_duration_ms: number, isDynamic: boolean, transaction?: Transaction, scooter?: Model): Promise<Model> {
         let rental: Model;
         const transactionExtern: boolean = transaction !== undefined;
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
 
-        let nextCheck: Date; // when should we schedule the next check on RentalManager rental?
-        const dynamic: boolean = rental_duration_ms === undefined; // if caller doesn't provide a duration, they must want a dynamic rental
-        if(!dynamic) nextCheck = new Date(Date.now() + rental_duration_ms); // if rental isn't dynamic, use rental duration
-        else nextCheck = new Date(Date.now() + EXTENSION_INTERVAL_MS); // if rental is dynamic, use check interval
-
+        /* After the rental_duration_ms, we will check if the rental should be extended or ended (dynamic rentals will be extended, prepaid rentals will be ended) */
+        const nextCheck = new Date(Date.now() + rental_duration_ms);
+        
         try {
             /* Fetch the scooter if it wasn't provided */
             if (!scooter) {
@@ -55,7 +53,7 @@ abstract class RentalManager {
             // all good?
             // start the new rental
             if(reservation) await ReservationManager.endReservation(reservation, transaction, scooter); // if there was a reservation, end it
-            rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, nextActionTime: nextCheck, price_per_hour: price_per_hour, renew: dynamic }, { transaction: transaction }); // create the entry in the rentals table
+            rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, nextActionTime: nextCheck, price_per_hour: price_per_hour, renew: isDynamic }, { transaction: transaction }); // create the entry in the rentals table
 
             RentalManager.scheduleRentalCheck(rental.dataValues.id, nextCheck); // schedule the check
             if(!transactionExtern) await transaction.commit();
