@@ -275,6 +275,7 @@ export class RentalsComponent implements OnInit {
       this.upper = this.bookingFilterForm.get('upper')?.value;
 
       this.filteredRentals = Filters.filterDate(this.lower.replace('.', '-').replace('.', '-'), this.upper.replace('.', '-').replace('.', '-'), this.rentals);
+      this.toggle();
     } 
     else {
       console.log('Form is invalid');
@@ -285,6 +286,7 @@ export class RentalsComponent implements OnInit {
     this.filteredRentals = this.rentals;
     this.lower='';
     this.upper='';
+    this.toggle();
   }
 
 
