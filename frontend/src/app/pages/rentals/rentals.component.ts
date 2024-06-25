@@ -6,7 +6,6 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-//import { CreateInvoice } from 'src/app/utils/createInvoice'; // imports PDF Generation from the frontend
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -174,87 +173,43 @@ export class RentalsComponent implements OnInit {
 
   /* This method should retrieve the invoice pdf from the backend */
   displayInvoice(rentalId: number, scooterId: number, createdAt : string, endedAt: string): void {
-    console.log('dowload pressed');
+    // variables for the invoice pdf
     const scooterName = this.getNameByScooterId(scooterId);
     let total = this.getTotalPrice(scooterId, createdAt, endedAt);
     total = this.convertCurrencyUnits(total, this.selectedCurrency);
     const duration = this.rentalDuration(createdAt, endedAt);
     let pricePerHour = this.getPriceByScooterId(scooterId);
     pricePerHour = parseFloat(this.convertCurrencyUnits(pricePerHour?.toString(), this.selectedCurrency));
+
+    // check if an attribut is not defined
     if(scooterName === undefined || total === undefined || pricePerHour === undefined){
       console.log('Error - An Attribute is not defined');
       return;
     }
+
+    // send a request to the backend to generate the file
     this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, this.selectedCurrency).subscribe(
       
+      // read and interpret the Blob from the backend 
       (pdfBlob: Blob) => {
-        console.log(pdfBlob);
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
-        console.log(blob);
         const url = window.URL.createObjectURL(blob);
-        console.log(url);
-        /* This does not work ! */
-        /*
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        window.open(blobUrl);
-        */
-        //const fileName = 'InvoiceScooter';
-        //const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
-        /*
+        //window.open(url, '_blank'); // used for debugging pdf file 
+        
+        // download invoice pdf:
+        const fileName = 'InvoiceScooter'; // pdf file name
         const link = document.createElement('a');
         link.href = url;
-        link.download = `${fileName}.pdf`;
+        link.download = `${fileName}.pdf`; // name of the invoice pdf file
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        */
-
-        window.open(url, '_blank');
       },
       (error) => {
         console.error('Fehler beim Herunterladen der Rechnung:', error);
       }
     );
   }
-
-  // AB hier alles alte Methdoden die für die Generierung im Frontend verwendet wurden
-  /*
-  //creates an invoice for a scooter
-  async createAndDownloadInvoice(): Promise<void> {
-    try {
-      const editedPdfBytes = await CreateInvoice.editPdf();
-      CreateInvoice.download(editedPdfBytes, 'bearbeiteteRechnung.pdf');
-      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt.');
-    } catch (error) {
-      console.error('Error editing PDF:', error);
-    }
-  }
-
-  //Previews a invoice pdf
-  //METHODE WIRD IM MOMENT NICHT AKTIV IN DER APP GENUTZT -> ZUM DEBUGGEN DER PDF HILFREICH
-  //KÖNNTE MAN ABER NOCH BENUTZEN
-  async createAndPreviewInvoice(): Promise<void> {
-    try {
-      const editedPdfBytes = await CreateInvoice.editPdf();
-      const blob = new Blob([editedPdfBytes], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-  
-      // PDF im neuen Tab oder in einem iframe anzeigen
-      window.open(url);
-  
-      // Optional: Eine Schaltfläche zum Herunterladen hinzufügen
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = 'bearbeiteteRechnung.pdf';
-      downloadLink.textContent = 'PDF herunterladen';
-      document.body.appendChild(downloadLink);
-      
-      console.log('bearbeiteteRechnung.pdf wurde erfolgreich erstellt und wird im Browser angezeigt.');
-    } catch (error) {
-      console.error('Error editing PDF:', error);
-    }
-  }
-  */
 
   //functionalities for the filters
 

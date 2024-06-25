@@ -21,13 +21,10 @@ export class RentalService{
         return this.http.get<ProductWithScooterId[]>('/api/bookScooterProducts');
     }
 
-    private apiUrl = '/api/bookings/generateInvoice';
-
-
-    /* Somewhere here is a problem -> PDFs are retrieved over static backend folder at the moment */
-    
+    /* request to the backend to generate an invoice for one specific scooter  */
     generateInvoicePdf(rentalId: number, createdAt : string, endedAt: string, scooterName: string, total: string, duration: string, pricePerHour: number, selectedCurrency: string): Observable<Blob> {
-        return this.http.post<Blob>(this.apiUrl, { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency}, {
+        const apiUrl = '/api/bookings/generateInvoice';
+        return this.http.post<Blob>(apiUrl, { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency}, {
           responseType: 'blob' as 'json',
         });
     }

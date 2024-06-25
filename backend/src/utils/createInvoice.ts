@@ -35,9 +35,9 @@ export class CreateInvoice {
         /* create date when the invoice is created */
         const today = new Date();
         const year = today.getFullYear();
-        const month = today.getMonth() + 1; // +1 because getMonth() is zero based
-        const day = today.getDate();
-        const currentDate =  day + '.' + month + '.' + year;
+        const month = String(today.getMonth() + 1).padStart(2, '0'); // +1 because getMonth() is zero based and pad with leading zero if needed
+        const day = String(today.getDate()).padStart(2, '0'); // pad with leading zero if needed
+        const currentDate = `${day}.${month}.${year}`;
 
         /* get first pdf page */
         const firstPage = pdfDoc.getPage(0);
@@ -196,8 +196,8 @@ export class CreateInvoice {
 
         // add QR Code to PDF
         firstPage.drawImage(qrImage, {
-            x: firstPage.getWidth() - qrDims.width - 80,
-            y: height - currentYPosition - lineHeight - 230,
+            x: firstPage.getWidth() - qrDims.width - 83,
+            y: height - currentYPosition - lineHeight - 223,
             width: qrDims.width,
             height: qrDims.height,
         });
@@ -206,7 +206,7 @@ export class CreateInvoice {
         return await pdfDoc.save(); // Save the edited pdf file
     }
 
-    /* Formats date time */
+    /* Format the date time */
     private static formatDateTime(dateString: string): string {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, '0');
@@ -214,7 +214,7 @@ export class CreateInvoice {
         const year = String(date.getFullYear()).slice(-2);
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${day}.${month}.${year}  ${hours}:${minutes} Uhr`;
+        return `${day}.${month}.20${year}  ${hours}:${minutes} Uhr`;
     }
 
     /* calculates netto value of price */
