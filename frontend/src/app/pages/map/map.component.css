@@ -161,3 +161,18 @@
 .info{
   color: black;
 }
+
+
+.sort-btn {
+  position: absolute;
+  top: 40%;
+  left: 75%;
+  color: var(--icon-color);
+}
+
+.sort-wrapper {
+  position: fixed; 
+  width: 100%;
+  top: 15%;
+  z-index: 9998;
+}
