@@ -92,14 +92,14 @@ abstract class ReservationManager {
     public static scheduleReservationEnding(reservation: Model): Job {
         const expiration: Date = reservation.getDataValue('endsAt');
         console.log(`scheduling reservation ending at ${expiration}`);
-        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, (async (reservation: Model): Promise<void> => {
+        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, (async (): Promise<void> => {
             try {
                 await ReservationManager.endReservation(reservation);
                 console.log('ended reservation');
             } catch (error) {
                 console.error(`could not end reservation at scheduled time!\n${error}`);
             }
-        }).bind(reservation)); // have to bind in in case of data change
+        }));
         return j;
     }
 }
