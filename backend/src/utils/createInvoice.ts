@@ -196,7 +196,7 @@ export class CreateInvoice {
 
         // add QR Code to PDF
         firstPage.drawImage(qrImage, {
-            x: firstPage.getWidth() - qrDims.width - 50,
+            x: firstPage.getWidth() - qrDims.width - 80,
             y: height - currentYPosition - lineHeight - 230,
             width: qrDims.width,
             height: qrDims.height,

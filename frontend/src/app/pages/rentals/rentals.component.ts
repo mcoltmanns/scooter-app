@@ -188,8 +188,9 @@ export class RentalsComponent implements OnInit {
     this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, this.selectedCurrency).subscribe(
       
       (pdfBlob: Blob) => {
+        console.log(pdfBlob);
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
-        //console.log(blob)
+        console.log(blob);
         const url = window.URL.createObjectURL(blob);
         console.log(url);
         /* This does not work ! */
@@ -197,8 +198,8 @@ export class RentalsComponent implements OnInit {
         const blobUrl = URL.createObjectURL(pdfBlob);
         window.open(blobUrl);
         */
-        const fileName = 'InvoiceScooter';
-        const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
+        //const fileName = 'InvoiceScooter';
+        //const pdfUrl = `http://localhost:8000/img/pdf/${fileName}.pdf`;
         /*
         const link = document.createElement('a');
         link.href = url;
@@ -208,7 +209,7 @@ export class RentalsComponent implements OnInit {
         document.body.removeChild(link);
         */
 
-        window.open(pdfUrl, '_blank');
+        window.open(url, '_blank');
       },
       (error) => {
         console.error('Fehler beim Herunterladen der Rechnung:', error);
