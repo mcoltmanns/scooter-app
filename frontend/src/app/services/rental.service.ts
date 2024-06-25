@@ -25,6 +25,7 @@ export class RentalService{
 
 
     /* Somewhere here is a problem -> PDFs are retrieved over static backend folder at the moment */
+    
     generateInvoicePdf(rentalId: number, createdAt : string, endedAt: string, scooterName: string, total: string, duration: string, pricePerHour: number, selectedCurrency: string): Observable<Blob> {
         return this.http.post<Blob>(this.apiUrl, { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency}, {
           responseType: 'blob' as 'json',

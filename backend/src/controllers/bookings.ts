@@ -80,6 +80,7 @@ export class BookingsController {
     /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
         const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
+        console.log(request.body);
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -121,7 +122,11 @@ export class BookingsController {
             // send PDF as an answer
             response.setHeader('Content-Type', 'application/pdf');
             response.setHeader('Content-Disposition', 'inline; filename="InvoiceScooter.pdf"');
+            /*
+            console.log(pdfBytes);
             response.send(pdfBytes);
+            */
+           response.end(pdfBytes, 'binary');
 
         } catch (error) {
             console.error(error);
