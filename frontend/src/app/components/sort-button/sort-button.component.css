@@ -1,0 +1,24 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0;
+}
+
+.sort-icon {
+    width: 30px;
+    height: 60px;
+    cursor: pointer;
+}
+
+svg {
+    fill: black;
+}
+
+svg .up {
+    fill: black;
+}
+
+svg .down {
+    fill: black;
+}

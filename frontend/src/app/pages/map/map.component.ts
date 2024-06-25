@@ -20,6 +20,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { Filters } from 'src/app/utils/util-filters';
 import { Product } from 'src/app/models/product';
+import { SortButtonComponent} from '../../components/sort-button/sort-button.component';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -34,7 +35,7 @@ const defaultIcon = Leaflet.icon({
     standalone: true,
     templateUrl: './map.component.html',
     styleUrls: ['./map.component.css'],
-    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent]
+    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent]
 })
 
 export class MapComponent implements OnInit {
@@ -304,6 +305,13 @@ numberStringValidator(min: number, max: number): ValidatorFn {
     }
     return null;
   };
+}
+
+sortMenuVisible = false;
+
+toggleSortView(): void {
+  console.log('clicked');
+  this.sortMenuVisible = !this.sortMenuVisible;
 }
 
 }

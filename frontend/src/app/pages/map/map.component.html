@@ -26,6 +26,13 @@
         <div class="info"></div>
         <div class="filter-content">
           <h3 class="o-title">Filter Menü</h3>
+          <app-sort-button class="sort-btn" (toggleSort)="toggleSortView()"></app-sort-button>
+          <div *ngIf="sortMenuVisible" class="sort-menu">
+            
+
+
+            
+          </div>
           <div class="form-container">
             <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
               <div class="filter-row">
