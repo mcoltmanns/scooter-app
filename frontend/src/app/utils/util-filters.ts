@@ -21,6 +21,9 @@ export class Filters {
         const filteredRentals: Rental[] = [];
         //if one of the fields was empty use a default value; hardcoding of upper value is risky, but in this case no issue, as the app will
         // not be used beyond this summer
+        if(startAfter === '' && endBefore === ''){
+            return rentals;
+        }
         if(startAfter === ''){
             startAfter = '01-01-2000';
         }
@@ -64,7 +67,7 @@ export class Filters {
 
 //functions to delete the global var's for the scooter filters; var's exist, so there is no reset when switching map/list
 private static minPrice = '';
-private static  maxPrice = '';
+private static maxPrice = '';
 private static minRange = '';
 private static maxRange = '';
 private static minBattery = '';
@@ -108,6 +111,18 @@ static resetBounds():void{
     this.maxSpeed = '';
 }
 
+/**
+ * to reload the previously filtered list of scooters by rebuilding it
+ */
+private static filteredScooters: Scooter[]=[];
+static onReload(scooters: Scooter[], products: Product[]):Scooter[]{
+    this.filteredScooters = [];
+    this.filteredScooters = this.filterPrice(scooters,products);
+    this.filteredScooters = this.filterRange(this.filteredScooters,products);
+    this.filteredScooters = this.filterBattery(this.filteredScooters);
+    this.filteredScooters = this.filterSpeed(this.filteredScooters,products);
+    return this.filteredScooters;
+}
 
 //------------------------------------------------------------------------------------------------------------
 
@@ -130,7 +145,7 @@ static resetBounds():void{
             this.minPrice = '0';
         }
         if(this.maxPrice===''){
-            this.maxPrice = '1000.00';
+            this.maxPrice = '10000';
         }
         //check if price per hour of the scooter is in the wanted range, then add to output
         scooters.forEach(scooter => {
@@ -155,7 +170,7 @@ static resetBounds():void{
             this.minRange = '0';
         }
         if(this.maxRange===''){
-            this.maxRange = '10000.000';
+            this.maxRange = '10000000';
         }
         //if scooter has a remaining reach in the desired range, then add to output
         scooters.forEach(scooter => {
@@ -203,7 +218,7 @@ static resetBounds():void{
             this.minSpeed = '0';
         }
         if(this.maxSpeed ===''){
-            this.maxSpeed = '10000.00';
+            this.maxSpeed = '10000000';
         }
         //if scooters speed in the range of input values, add to output
         scooters.forEach(scooter => {

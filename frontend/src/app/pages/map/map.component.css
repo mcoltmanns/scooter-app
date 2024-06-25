@@ -5,6 +5,19 @@
   --logo-title-height: 60px;
 }
 
+.headWrapper{ 
+  width: 100%;
+  left: 0%;
+  margin-top: 12pt;
+}
+
+.wrapper {
+  position: fixed; 
+  width: 100%;
+  top: 15%;
+  z-index: 9998;
+}
+
 .logo.title {
   /* "Lokale" Styles können "Globale" Styles überschreiben */
   font-size: 38px;
@@ -79,7 +92,7 @@
 }
 
 .filter-menu-container {
-  width: 80%;
+  width: 90%;
   margin: 0 auto;
   background-color: #fff;
   border: 2px solid #4a4242;
@@ -142,6 +155,7 @@
 .o-title{
   color: black;
   text-align: center;
+  font-size: 12pt;
 }
 
 .info{

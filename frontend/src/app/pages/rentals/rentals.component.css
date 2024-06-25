@@ -125,7 +125,7 @@
 }
 
 .filter-menu-container {
-    width: 80%;
+    width: 90%;
     margin: 0 auto;
     background-color: #fff;
     border: 2px solid #4a4242;
@@ -167,7 +167,7 @@
   }
 
   .top {
-    margin-top: 10px;
+    margin-top: 5pt;
     display: flex;
   }
 
@@ -188,8 +188,15 @@
   .o-title{
     color: black;
     text-align: center;
+    font-size: 12pt;
   }
 
   .info{
     color: black;
   }
+
+  .headWrapper{
+  width: 100%;
+  left: 0%;
+  top: 20%;  
+}

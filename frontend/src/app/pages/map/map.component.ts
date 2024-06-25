@@ -13,7 +13,7 @@ import * as Leaflet from 'leaflet';
 import { MapService } from 'src/app/services/map.service';
 import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -39,6 +39,7 @@ const defaultIcon = Leaflet.icon({
 
 export class MapComponent implements OnInit {
   public scooters: Scooter[] = [];
+  public filteredScooters: Scooter[] = [];
   public products: Product[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
@@ -47,14 +48,14 @@ export class MapComponent implements OnInit {
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder) 
   {this.scooterFilterForm = this.fb.group({ 
-    minPrice: ['', Validators.required],
-    maxPrice: ['', Validators.required],
-    minRange: ['', Validators.required],
-    maxRange: ['', Validators.required],
-    minBty: ['', Validators.required],
-    maxBty: ['', Validators.required],
-    minSpeed: ['', Validators.required],
-    maxSpeed: ['', Validators.required],
+    minPrice: ['', [this.numberStringValidator(0, 99999)]],
+      maxPrice: ['', [this.numberStringValidator(0, 99999)]],
+      minRange: ['', [this.numberStringValidator(0, 99999)]],
+      maxRange: ['', [this.numberStringValidator(0, 99999)]],
+      minBty: ['', [this.numberStringValidator(0, 100)]],
+      maxBty: ['', [this.numberStringValidator(0, 100)]],
+      minSpeed: ['', [this.numberStringValidator(0, 99999)]],
+      maxSpeed: ['', [this.numberStringValidator(0, 99999)]]
   });}
 
   /**
@@ -101,7 +102,7 @@ export class MapComponent implements OnInit {
    * This method adds a marker on the map for every scooter in this.scooters
    */
   addScootersToMap(): void {
-    for(const scooter of this.scooters) {
+    for(const scooter of this.filteredScooters) {
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
         {icon: defaultIcon}
       ).on('click', ()=> {
@@ -122,10 +123,12 @@ export class MapComponent implements OnInit {
       this.listScrollPosition = history.state.originState.listScrollPosition;
     }
 
-    // Using mapService to get the data about scooters from backend
-    // and add markers on the map using addScootersToMap()-method
-    this.loadScooters();
+    this.loadProducts();
 
+
+  
+  
+    this.loadScooters();
     /*for (const layer of this.layers) {
       // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
       // auch direkt in Typescript hinzugefügt werden
@@ -139,14 +142,36 @@ export class MapComponent implements OnInit {
         console.log(e);
       });
     }*/
-
-    this.loadProducts();
-
-
-
-    this.filterUpdates();
+   
+      //has to be done in this somewhat not nice form to ensure all the data is there when the functions run
+      this.mapService.getProductInfo().subscribe({
+        next: (value) => {
+          this.products = value;
+          this.mapService.getScooterInfo().subscribe({
+            next: (value) => {
+              this.scooters = value;
+              this.filteredScooters = Filters.onReload(this.scooters, this.products);
+              this.addScootersToMap();
+            },
+      
+            error: (err) => {
+              this.errorMessage = err.error.message;
+              console.log(err);
+            }
+          });
+    
+        },
+  
+        error: (err) => {
+          this.errorMessage = err.error.message;
+          console.log(err);
+        }
+      });
   }
 
+
+
+   // Using mapService to get the data about products from backend
   loadProducts(): void {
     this.mapService.getProductInfo().subscribe({
       next: (value) => {
@@ -160,11 +185,11 @@ export class MapComponent implements OnInit {
     });
   }
 
+   // Using mapService to get the data about scooters from backend
   loadScooters(): void{
     this.mapService.getScooterInfo().subscribe({
       next: (value) => {
         this.scooters = value;
-        this.addScootersToMap();
       },
 
       error: (err) => {
@@ -181,6 +206,9 @@ export class MapComponent implements OnInit {
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
+
+
+//things necessary for the filter
 
   filterMenuVisible = false;
 
@@ -199,38 +227,83 @@ export class MapComponent implements OnInit {
   }
 
   onSubmit(): void {
-    //get the values from the form
-    this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
-    this.maxPrice = this.scooterFilterForm.get('maxPrice')?.value;
-    this.minRange = this.scooterFilterForm.get('minRange')?.value;
-    this.maxRange = this.scooterFilterForm.get('maxRange')?.value;
-    this.minBty = this.scooterFilterForm.get('minBty')?.value;
-    this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
-    this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
-    this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
-    //update the memory values in the filter util file
-    Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
-    //then apply the filters
-    this.filterUpdates();
+    if (this.scooterFilterForm.valid) {
+      //get the values from the form
+      this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
+      this.maxPrice = this.scooterFilterForm.get('maxPrice')?.value;
+      this.minRange = this.scooterFilterForm.get('minRange')?.value;
+      this.maxRange = this.scooterFilterForm.get('maxRange')?.value;
+      this.minBty = this.scooterFilterForm.get('minBty')?.value;
+      this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
+      this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
+      this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
+      //update the memory values in the filter util file
+      Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
+      //then apply the filters
+      this.filterUpdates();
+      this.toggleFilterView();
+    }
   }
 
   /**
    * applies the filters to the list 
    */
   filterUpdates(): void{
-    this.scooters = Filters.filterPrice(this.scooters, this.products);
-    this.scooters = Filters.filterRange(this.scooters, this.products);
-    this.scooters = Filters.filterBattery(this.scooters);
-    this.scooters = Filters.filterSpeed(this.scooters, this.products);
-    //empty out all previously set scooters
-    this.layers = [];
+    this.layers=[];
+    this.filteredScooters = Filters.filterPrice(this.scooters, this.products);
+    this.filteredScooters = Filters.filterRange(this.filteredScooters, this.products);
+    this.filteredScooters = Filters.filterBattery(this.filteredScooters);
+    this.filteredScooters = Filters.filterSpeed(this.filteredScooters, this.products);
     //add the new selection of scooters to the map
     this.addScootersToMap();
   }
 
   onCancel(): void {
     Filters.resetBounds();
-    this.loadScooters();
+    this.filteredScooters = this.scooters;
+    this.layers=[];
+    this.addScootersToMap();
+    this.toggleFilterView();
+    this.minPrice = '';
+    this.maxPrice = '';
+    this.minRange = '';
+    this.maxRange = '';
+    this.minBty = '';
+    this.maxBty = '';
+    this.minSpeed = '';
+    this.maxSpeed = '';
   }
   
+ //auto formatter to enforce only numbers in filter input
+ autoFormatNumber(event: Event, controlName: string): void {
+  const input = event.target as HTMLInputElement;
+  let value = input.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
+  if (value.length > 5) {
+    value = value.slice(0, 5);
+  }
+
+  this.scooterFilterForm.controls[controlName].setValue(value, { emitEvent: false });
+}
+
+
+//validator to ensure the data given is somewhat sensible, allows no input
+
+numberStringValidator(min: number, max: number): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value === '') {
+      // Allow empty input
+      return null;
+    }
+    if (!/^\d*$/.test(value)) {
+      return { notNumber: true };
+    }
+    const numValue = Number(value);
+    if (numValue < min || numValue > max) {
+      return { outOfRange: true };
+    }
+    return null;
+  };
+}
+
 }
