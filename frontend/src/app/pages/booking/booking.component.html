@@ -58,7 +58,7 @@
               <p>Feste Dauer</p>
             </div>
 
-            <div *ngIf="!isDynamic" class="duration-container">
+            <div *ngIf="!isDynamic" [ngClass]="['duration-container', durationInputClasses]">
               <label class="form-label">Für wie viele Stunden?</label>
     
               <div class="input-container">

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BackButtonComponent } from 'src/app/components/back-button/back-button.component';
 import { Product } from 'src/app/models/product';
 import { Scooter } from 'src/app/models/scooter';
@@ -34,7 +34,7 @@ interface SwitchChangeEvent {
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
-export class BookingComponent implements OnInit, AfterViewInit {
+export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   /* Manage the state of the success toast */
   @ViewChild('toastComponentPaymentAdded') toastComponentPaymentAdded!: ToastComponent; // Get references to the toast component
   @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
@@ -43,8 +43,10 @@ export class BookingComponent implements OnInit, AfterViewInit {
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public checkoutForm!: FormGroup;
 
-  /* Variable to control the state of the booking form (dynamic or prepaid) */
+  /* Variables to control the state of the booking form (dynamic or prepaid) */
   public isDynamic = true;
+  public durationInputClasses = '';
+  private toggleDurationInputTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /* Variable to control the state of the loading overlay */
   public isLoading = false;
@@ -187,6 +189,11 @@ export class BookingComponent implements OnInit, AfterViewInit {
     }
   }
 
+  ngOnDestroy(): void {
+    /* Clear timeouts if still running */
+    this.clearTimeouts();
+  }
+
   /* Get Picture from the product list*/
   getPictureByProductId(img: String | undefined): String{
     return `http://localhost:8000/img/products/${img}.jpg`;
@@ -291,9 +298,36 @@ export class BookingComponent implements OnInit, AfterViewInit {
     return str;
   }
 
+  clearTimeouts(): void {
+    if (this.toggleDurationInputTimeout) {
+      clearTimeout(this.toggleDurationInputTimeout);
+      this.toggleDurationInputTimeout = null;
+    }
+  }
+
   handleSwitchChange(event: SwitchChangeEvent): void {
-    console.log('Switch toggled:', event.checked);
-    this.isDynamic = !event.checked;
+    /* Clear all timeouts before setting new ones */
+    this.clearTimeouts();
+    
+    /* If the switch is checked, show the duration input field */
+    if (event.checked) {
+      this.isDynamic = false; // Set the state to not dynamic which adds the duration input field to the DOM
+
+      this.toggleDurationInputTimeout = setTimeout(() => {
+        this.durationInputClasses = 'visible-div';
+      }, 0);
+      this.toggleDurationInputTimeout = setTimeout(() => {
+        this.durationInputClasses = 'visible-div animate-in';
+      }, 200);
+    } else { // If the switch is unchecked, hide the duration input field
+      this.durationInputClasses = 'visible-div animate-out';
+      this.toggleDurationInputTimeout = setTimeout(() => {
+        this.durationInputClasses = 'hidden-div';
+      }, 200);
+      this.toggleDurationInputTimeout = setTimeout(() => {
+        this.isDynamic = true; // Set the state back to dynamic which removes the duration input field from the DOM
+      }, 400);
+    }
   }
 
   /* if plus button is clicked */
