@@ -20,10 +20,10 @@ import { Router } from '@angular/router';
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
  * innerhalb der ganzen Klasse verfügbar.
  */
-const defaultIcon = Leaflet.icon({
+/**const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
   iconUrl: '/assets/marker.png',
-});
+});*/
 
 @Component({
   standalone: true,
@@ -85,8 +85,48 @@ export class MapComponent implements OnInit {
    */
   addScootersToMap(): void {
     for(const scooter of this.scooters) {
+      
+      const pieStyle = `
+        position: relative;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: conic-gradient(
+          #4caf50 calc(var(--percentage) * 1%), 
+          #e0e0e0 calc(var(--percentage) * 1%)
+        );
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        --percentage: 50;
+        `;
+
+      const innerPieStyle =`
+        content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
+            border-radius: 50%;
+      `;
+      const percentageStyle = ` 
+        .percentage {
+            position: relative;
+            font-size: 2em;
+            color: #4caf50;
+            font-weight: bold;
+        }
+      `;
+      
+      const icon = Leaflet.divIcon({
+        className: 'marker',
+        html: `<div style="${pieStyle}"><div style="${innerPieStyle}"> Hallo</div> </div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42] 
+      });
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
-        {icon: defaultIcon}
+        {icon: icon}
       ).on('click', ()=> {
         console.log(`${scooter.id} wurde angeklickt!`);
         this.buttonToScooter(scooter.id);
