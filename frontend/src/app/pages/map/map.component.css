@@ -173,6 +173,36 @@
 .sort-wrapper {
   position: fixed; 
   width: 100%;
-  top: 15%;
+  left: 0;
+  top: 35%;
   z-index: 9999;
+}
+
+.sort-menu-cont {
+  width: 90%;
+  margin: 0 auto;
+  background-color: #fff;
+  border: 2px solid #4a4242;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.corresponding {
+  margin-top: 10px;
+  display: flex;
+}
+
+.corresponding app-button{
+  flex:1;
+  margin-right: 5px
+}
+
+.corresponding app-button:first-child{
+  flex: 1;
+}
+
+.corresponding app-button:last-child{
+  flex: 1;
+  
 }
