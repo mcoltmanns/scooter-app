@@ -52,10 +52,10 @@
                 </div>
                 <div class="corresponding">
                   <app-button class="btn" type="submit" (click)="sortBty(true)">
-                    Batteriestand absteigend
+                    Batteriestand aufsteigend
                   </app-button>
                   <app-button class="btn" type="submit" (click)="sortBty(false)">
-                    Batteriestand aufsteigend
+                    Batteriestand absteigend
                   </app-button>
                 </div>
                 <div class="corresponding">
@@ -145,5 +145,5 @@
   </div></div>
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
-  <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm" [mapScooters]="filteredScooters" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
+  <app-scooter-list *ngIf="view === 'list'" [searchTerm]="searchTerm" [mapScooters]="sortedScooters" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
 </div>

@@ -27,7 +27,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   @Input() searchTerm = ''; // Input property to receive the search term
   @Input() scrollPosition: string | null = null; // Input property to receive the scroll position
-  @Input() mapScooters: Scooter[] = [];
+  @Input() mapScooters: Scooter[] = []; //Input property to get the filtered and sorted Scooter[] from the map
   public scooters: Scooter[] = [];
   public products: Product[] = [];
   public filteredScooters: Scooter[] = [];

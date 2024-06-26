@@ -9,7 +9,7 @@ import { parse, isAfter, isBefore, isEqual } from 'date-fns';
  */
 export class Filters {
 
-//filter for the Booking component --------------------------------------------------------------------------- (WORKING)
+//filter for the Booking component ---------------------------------------------------------------------------
     /**
      * Filters the given list of rentals wrt to a date frame given by lower and upper
      * @param startAfter is the lower bound date of the filter
@@ -44,12 +44,20 @@ export class Filters {
         return filteredRentals;
     }
 
-    //turns a string of the format dd-MM-yyyy into a date
+    /**
+     * turns a string of the format dd-MM-yyyy into a date
+     * @param input string of the format 'dd-MM-yyyy'
+     * @returns a Date corresponding to the input string version of a date
+     */
     static stringToDate(input:string): Date{
         return parse(input, 'dd-MM-yyyy', new Date());
     }
 
-    //takes the date from rentals and formats it into the same format as the input
+    /**
+     * takes the date from rentals and formats it into the same format as the input
+     * @param dateString takes a string in the backend format
+     * @returns a string of the date format 'dd-MM-yyyy'
+     */
     static backendToDate(dateString: string): string {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, '0');
