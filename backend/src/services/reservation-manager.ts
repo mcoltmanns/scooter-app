@@ -2,7 +2,8 @@ import { Model, Transaction } from 'sequelize';
 import { RESERVATION_LIFETIME, Reservation } from '../models/rental';
 import database from '../database';
 import { Scooter } from '../models/scooter';
-import { CronJob } from 'cron';
+import { Job, scheduleJob } from 'node-schedule';
+import jobManager from './job-manager';
 import { Product } from '../models/product';
 
 abstract class ReservationManager {
@@ -69,12 +70,12 @@ abstract class ReservationManager {
             if(!scooter) throw new Error('SCOOTER_DOES_NOT_EXIST');
 
             // can't reserve if scooter is reserved or rented
-            if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await this.getReservationFromScooter(scooterId) !== null) {
+            if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await ReservationManager.getReservationFromScooter(scooterId) !== null) {
                 throw new Error('SCOOTER_UNAVAILABLE');
             }
 
             // can't reserve if user already has reservation
-            if(await this.getReservationFromUser(userId)) {
+            if(await ReservationManager.getReservationFromUser(userId)) {
                 throw new Error('USER_HAS_RESERVATION');
             }
 
@@ -87,7 +88,7 @@ abstract class ReservationManager {
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
             // dispatch a job to delete the reservation when it expires
-            this.scheduleReservationEnding(reservation);
+            ReservationManager.scheduleReservationEnding(reservation);
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error(error.message);
@@ -118,6 +119,7 @@ abstract class ReservationManager {
             scooter.setDataValue('reservation_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
+            jobManager.removeJob(`reservation${reservation.getDataValue('id')}`); // remove yourself when done
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error(error.message);
@@ -125,30 +127,26 @@ abstract class ReservationManager {
         return;
     }
 
-    public static scheduleReservationEnding(reservation: Model): void {
+    // job id will be 'reservation${reservation.id}'
+    public static scheduleReservationEnding(reservation: Model): Job {
         const expiration: Date = reservation.getDataValue('endsAt');
 
-        /* If the expiration is not in the future, don't schedule a CronJob */
+        /* If the expiration is not in the future, don't schedule a Job */
         const now = new Date();
         if (expiration <= now) {
             return;
         }
 
         console.log(`scheduling reservation ending at ${expiration}`);
-
-        new CronJob(
-            expiration,
-            async () => {
-                try {
-                    await this.endReservation(reservation);
-                    console.log('ended reservation');
-                } catch (error) {
-                    console.error(`could not end reservation at scheduled time!\n${error}`);
-                }
-            },
-            null,
-            true // start now
-        );
+        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, (async (): Promise<void> => {
+            try {
+                await ReservationManager.endReservation(reservation);
+                console.log('ended reservation');
+            } catch (error) {
+                console.error(`could not end reservation at scheduled time!\n${error}`);
+            }
+        }));
+        return j;
     }
 }
 

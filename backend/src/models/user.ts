@@ -1,6 +1,6 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
-import { Rental, Reservation } from './rental';
+import { ActiveRental, PastRental, Rental, Reservation } from './rental';
 
 export const SESSION_LIFETIME = 60 * 60 * 1000; // sessions expire after 1 hour
 
@@ -109,6 +109,31 @@ UsersAuth.hasOne(Reservation, {
   }
 });
 // users table doesn't need to track rentals
+
+UsersAuth.hasMany(ActiveRental, { // every rental has a user
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
+}); // users can have many rentals
+ActiveRental.belongsTo(UsersAuth, { // every rental has a user
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
+});
+UsersAuth.hasMany(PastRental, { // every rental has a user
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
+}); // same idea as above
+PastRental.belongsTo(UsersAuth, {
+  foreignKey: {
+    name: 'userId',
+    allowNull: false
+  }
+});
 
 export const UserPreferences = Database.getSequelize().define('userPreferences', {
   id: {

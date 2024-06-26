@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Rental } from '../models/rental';
+import { ActiveRental, PastRental } from '../models/rental';
 
 interface RentalsResponse {
   code: number;
-  rentals: Rental[];
+  activeRentals: ActiveRental[];
+  pastRentals: PastRental[];
 }
 
 @Injectable({

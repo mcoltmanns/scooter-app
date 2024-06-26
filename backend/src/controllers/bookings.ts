@@ -4,7 +4,7 @@ import RentalManager from '../services/rental-manager';
 
 // manages information about rentals and reservations
 export class BookingsController {
-    /* Method that returns all entries from the Rentals table for a specific User_Id */
+    /* Method that returns all current and past rentals for a specific User_Id */
     public async getUserRentals(request: Request, response: Response): Promise<void> {
         const userId = response.locals.userId; // get userID from session cookie
         if (!userId) {
@@ -13,14 +13,14 @@ export class BookingsController {
         }
 
         try {
-            const rentals = await RentalManager.getRentalsFromUser(userId);
+            const rentals = await RentalManager.getRentalsFromUser(userId); // rentals[0] is active rentals, rentals[1] is past rentals
 
-            if (rentals.length === 0) {
+            if (rentals[0].length === 0 && rentals[1].length === 0) {
                 response.status(404).json({ code: 404, message: 'Keine Buchungen gefunden.' });
                 return;
             }
 
-            response.status(200).json({ code: 200, rentals: rentals });
+            response.status(200).json({ code: 200, activeRentals: rentals[0], pastRentals: rentals[1] });
         } catch (error) {
             console.error(error);
             response.status(500).json({ code: 500, message: 'Fehler beim Abrufen der Buchungen.' });

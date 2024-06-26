@@ -1,7 +1,7 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { Product } from './product';
-import { Rental, Reservation } from './rental';
+import { ActiveRental, PastRental, Rental, Reservation } from './rental';
 
 /**
  * model of an actual instance of a scooter - these scooters really exist!
@@ -61,6 +61,31 @@ Rental.hasOne(Scooter, { // every rental can have a scooter - if a scooter's act
         name: 'active_rental_id',
         allowNull: true // scooters don't need to always be rented
     },
+});
+
+Scooter.hasMany(PastRental, { // past rentals belong to one scooter
+    foreignKey: {
+        name: 'scooterId',
+        allowNull: false
+    }
+}); // scooters can have many past rentals
+PastRental.belongsTo(Scooter, { // past rentals belong to one scooter
+    foreignKey: {
+        name: 'scooterId',
+        allowNull: false
+    }
+});
+Scooter.hasOne(ActiveRental, { // past rentals belong to one scooter
+    foreignKey: {
+        name: 'scooterId',
+        allowNull: false
+    }
+}); // scooters can have one active rental
+ActiveRental.belongsTo(Scooter, { // active rentals belong to one scooter
+    foreignKey: {
+        name: 'scooterId',
+        allowNull: false
+    }
 });
 
 Reservation.hasOne(Scooter, {

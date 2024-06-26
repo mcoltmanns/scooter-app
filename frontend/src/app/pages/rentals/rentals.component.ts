@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Rental } from 'src/app/models/rental';
+import { ActiveRental, PastRental } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
 import { Product } from 'src/app/models/product';
@@ -23,7 +23,8 @@ export class RentalsComponent implements OnInit {
   public loadingDataScooter = true;
   public loadingDataProduct = true;
   public loadingDataOption = true;
-  public rentals: Rental[] = [];
+  public activeRentals: ActiveRental[] = [];
+  public pastRentals: PastRental[] = [];
   public products: Product[] = [];
   public errorMessage = '';
 
@@ -37,9 +38,10 @@ export class RentalsComponent implements OnInit {
     /* Get all scooter bookings for the User from the backend*/
     this.rentalService.getRentalInfo().subscribe({
       next: (value) => {
-        this.rentals = value.rentals;
+        this.activeRentals = value.activeRentals;
+        this.pastRentals = value.pastRentals;
         this.loadingDataScooter = false;
-        console.log(this.rentals);
+        console.log(this.activeRentals, this.pastRentals);
       },
       error: (err) => {
         this.errorMessage = err.error.message;

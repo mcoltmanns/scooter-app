@@ -1,9 +1,13 @@
 import { Model, Transaction } from 'sequelize';
-import { Rental } from '../models/rental';
+import { ActiveRental, PastRental, Rental } from '../models/rental';
 import ReservationManager from './reservation-manager';
 import { Scooter } from '../models/scooter';
 import database from '../database';
-import { CronJob } from 'cron';
+import { scheduleJob } from 'node-schedule';
+import { TransactionManager } from './payment/transaction-manager';
+
+const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
+//const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
 
 abstract class RentalManager {
     // get all rentals associated with a scooter (active and ended)
@@ -12,38 +16,44 @@ abstract class RentalManager {
     }
 
     // get all rentals associated with a user
-    public static async getRentalsFromUser(userId: number): Promise<Model[]> {
-        return await Rental.findAll({ where: { user_id: userId } });
+    public static async getRentalsFromUser(userId: number): Promise<[Model[], Model[]]> {
+        return [await ActiveRental.findAll({ where: { userId: userId } }), await PastRental.findAll({ where: { userId: userId }})];
     }
 
-    // set a scooter as rented for a user, if possible (scooter is free)
-    // if caller provides a transaction, use that and don't commit/rollback. otherwise, checkout and manage a new transaction
-    public static async startRental(userId: number, scooterId: number, rental_duration_ms: number, transaction?: Transaction, scooter?: Model): Promise<Model> {
+    // get all active rentals associated with a scooter
+    public static async getActiveRentalsFromScooter(scooterId: number): Promise<Model[]> {
+        return await ActiveRental.findAll({ where: { scooterId: scooterId }});
+    }
+
+    // start a dynamic or prepaid rental
+    // assumes payment has already gone through
+    // checks if scooter is available
+    public static async startRental(userId: number, scooterId: number, paymentMethodId: number, price_per_hour: number, rental_duration_ms: number, isDynamic: boolean, transaction?: Transaction, scooter?: Model): Promise<Model> {
         let rental: Model;
-        let expiration: Date;
         const transactionExtern: boolean = transaction !== undefined;
-        
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
+
+        /* After the rental_duration_ms, we will check if the rental should be extended or ended (dynamic rentals will be extended, prepaid rentals will be ended) */
+        const nextCheck = new Date(Date.now() + rental_duration_ms);
         
         try {
             /* Fetch the scooter if it wasn't provided */
             if (!scooter) {
-              scooter = await Scooter.findByPk(scooterId, { transaction: transaction });
+                scooter = await Scooter.findByPk(scooterId, { transaction: transaction });
             }
             if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
 
             // can't book if scooter is reserved by someone else or rented
             const scooterReservation = await ReservationManager.getReservationFromScooter(scooterId, transaction);
-            if(scooter.getDataValue('active_rental_id') !== null || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
+            const rentals = await RentalManager.getActiveRentalsFromScooter(scooterId);
+            // if(scooter.getDataValue('active_rental_id') !== null || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
+            if(rentals.length > 0 || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
                 throw new Error('SCOOTER_UNAVAILABLE');
             }
 
             // all good?
             // start the new rental
-            expiration = new Date(Date.now() + rental_duration_ms);
-            rental = await Rental.create({ user_id: userId, scooter_id: scooterId, endedAt: expiration }, { transaction: transaction });
-            scooter.setDataValue('active_rental_id', rental.dataValues.id);
-            await scooter.save({transaction: transaction});
+            // rental = await Rental.create({ user_id: userId, scooter_id: scooterId, endedAt: nextCheck }, { transaction: transaction });
 
             /* End the reservation for the user if it exists (even if it's for another scooter) */
             const userReservation = await ReservationManager.getReservationFromUser(userId, transaction);
@@ -55,62 +65,85 @@ abstract class RentalManager {
                 await ReservationManager.endReservation(userReservation, transaction);
               }
             }
-            
-            if(!transactionExtern) await transaction.commit();
+            rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, nextActionTime: nextCheck, price_per_hour: price_per_hour, renew: isDynamic }, { transaction: transaction }); // create the entry in the rentals table
+            scooter.setDataValue('active_rental_id', rental.dataValues.id);
+            await scooter.save({ transaction: transaction });
 
+            RentalManager.scheduleRentalCheck(rental.dataValues.id, nextCheck); // schedule the check
+            if(!transactionExtern) await transaction.commit();
+            /* Left here temporarily as reference of the old way using Cron */
             // Dispatch a job to end the rental when it expires
-            this.scheduleRentalEnding(rental);
+            // this.scheduleRentalEnding(rental);
         } catch (error) {
-            console.log(error);
+            console.log(`could not start rental!\n${error}`);
             if(!transactionExtern) await transaction.rollback();
             throw new Error(error.message);
         }
         return rental;
     }
 
-    // end a rental, freeing the scooter
-    // if caller provides a transaction, use that and don't commit/rollback. otherwise, checkout and manage a new transaction
-    public static async endRental(rental: Model, transaction?: Transaction): Promise<void> {
+    public static async endRental(rentalId: number, transaction?: Transaction): Promise<void> {
         const transactionExtern: boolean = transaction !== undefined;
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
-            const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'));
-            // await rental.destroy({transaction: transaction}); // this will be needed when we start booking dynamically!
+            const rental = await ActiveRental.findByPk(rentalId, { transaction: transaction });
+            if(!rental) return; // do nothing if rental not found
+
+            /* Create a past rental entry with the total price */
+            const total_price = rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60) ;
+            await PastRental.create({ endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
+            
+            /* End the active rental */
+            await rental.destroy({ transaction: transaction });
+
+            /* End the active rental entry in the scooters table as well */
+            const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'), { transaction: transaction });
             scooter.setDataValue('active_rental_id', null);
-            await scooter.save({transaction: transaction});
+            await scooter.save({ transaction: transaction });
+
             if(!transactionExtern) await transaction.commit();
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error('END_RENTAL_FAILED');
         }
-        return;
     }
 
-    // given a rental, schedule a cronjob to end it at its expiration
-    public static scheduleRentalEnding(rental: Model): void {
-        const expiration: Date = rental.getDataValue('endedAt');
+    public static scheduleRentalCheck(rentalId: number, time: Date): void {
+        console.log(`scheduling rental check at ${time} for rental ${rentalId}`);
+        scheduleJob(`rental${rentalId}`, time, RentalManager.checkRental.bind(rentalId, rentalId)); // schedule the check
+    }
 
-        /* If the expiration is not in the future, don't schedule a CronJob */
-        const now = new Date();
-        if (expiration <= now) {
-            return;
-        }
+    public static async checkRental(rentalId: number): Promise<void> {
+        console.log(`checking rental ${rentalId}`);
+        const transaction = await database.getSequelize().transaction();
+        try {
+            // find the rental we want to check
+            const rental = await ActiveRental.findByPk(rentalId, { transaction: transaction });
+            if(!rental) return; // do nothing if no rental found
 
-        console.log(`scheduling rental ending at ${expiration}`);
-
-        new CronJob(
-            expiration,
-            async () => {
+            if(rental.dataValues.renew) { // rental is dynamic and should be renewed
+                console.log(`renewing rental ${rentalId}`);
+                // try to pay for the next block
+                const nextTime = Date.now() + EXTENSION_INTERVAL_MS;
+                const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * EXTENSION_INTERVAL_MS;
                 try {
-                    await this.endRental(rental);
-                    console.log('ended rental');
-                } catch (error) {
-                    console.error(`could not end rental at scheduled time!\n${error}`);
+                    await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice); // try pay for next block
+                    // schedule the next check
+                    RentalManager.scheduleRentalCheck(rentalId, new Date(nextTime));
+                } catch (error) { // cancel if unable
+                    console.log(`could not extend rental ${rental.dataValues.id} - unable to pay for next block\n${error}`);
+                    await RentalManager.endRental(rentalId, transaction);
                 }
-            },
-            null,
-            true // start now
-        );
+            }
+            else { // rental is prepaid and should be ended
+                console.log(`ending rental ${rentalId}`);
+                await RentalManager.endRental(rentalId, transaction);
+            }
+            await transaction.commit();
+        } catch (error) {
+            await transaction.rollback();
+            console.log(`check on rental ${rentalId} failed!\n${error}`);
+        }
     }
 }
 

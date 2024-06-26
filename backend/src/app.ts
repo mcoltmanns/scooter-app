@@ -80,6 +80,8 @@ const option = new OptionController();
 const bookings = new BookingsController();
 const checkout = new CheckoutController();
 
+app.get('/api', api.getInfo); // DEBUG testing route
+
 /* ROUTES WITHOUT AUTHENTICATION */
 app.post('/api/register', validator.validateRegister, auth.register.bind(auth));
 app.post('/api/login', validator.validateLogin, auth.login.bind(auth));
@@ -118,8 +120,6 @@ app.post('/api/reserve', validator.validateReservation, bookings.reserveScooter)
 app.get('/api/reserve', bookings.getUserReservation); // get a user's active reservation
 app.delete('/api/reserve', bookings.endUserReservation); // end a user's active reservation
 app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);
-
-app.get('/api', api.getInfo); // DEBUG testing session validator
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {

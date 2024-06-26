@@ -1,7 +1,21 @@
-export interface Rental {
+export interface ActiveRental {
     id: number;
-    endedAt: string;
+    nextActionTime: Date;
+    renew: boolean;
+    price_per_hour: number;
     createdAt: string;
-    user_id: number;
-    scooter_id: number;
+    updatedAt: string;
+    userId: number;
+    scooterId: number;
+    paymentMethodId: number;
+}
+
+export interface PastRental {
+    id: number;
+    total_price: number;
+    createdAt: string;
+    endedAt: string;
+    userId: number;
+    scooterId: number;
+    paymentMethodId: number;
 }

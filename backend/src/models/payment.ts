@@ -1,6 +1,7 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { UsersAuth } from './user';
+import { ActiveRental, PastRental } from './rental';
 
 export const PaymentMethod = Database.getSequelize().define('usersPaymentMethods', {
     id: {
@@ -38,5 +39,30 @@ PaymentMethod.belongsTo(UsersAuth, {
   foreignKey: {
     name: 'usersAuthId',
     allowNull: false,
+  }
+});
+
+PaymentMethod.hasMany(PastRental, { // every rental uses one payment method
+  foreignKey: {
+    name: 'paymentMethodId',
+    allowNull: false
+  }
+}); // payment methods can be used on multiple rentals
+PastRental.belongsTo(PaymentMethod, { // every rental uses one payment method
+  foreignKey: {
+    name: 'paymentMethodId',
+    allowNull: false
+  }
+});
+PaymentMethod.hasMany(ActiveRental, { // every rental uses one payment method
+  foreignKey: {
+    name: 'paymentMethodId',
+    allowNull: false
+  }
+});
+ActiveRental.belongsTo(PaymentMethod, {
+  foreignKey: {
+    name: 'paymentMethodId',
+    allowNull: false
   }
 });
