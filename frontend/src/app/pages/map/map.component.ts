@@ -86,6 +86,7 @@ export class MapComponent implements OnInit {
   addScootersToMap(): void {
     for(const scooter of this.scooters) {
       
+      // Decide what color does the marker have.
       let batteryColor = '#4df353';
       
       if (scooter.battery <= 20) {
@@ -93,7 +94,9 @@ export class MapComponent implements OnInit {
       } else if (scooter.battery <= 50 && scooter.battery >= 20) {
         batteryColor = '#fad609';
       }
-      const pieStyle = `
+
+      // This part contains all css styles for the scooter marker.
+      const batteryPieStyle = `
         position: relative;
         width: 50px;
         height: 50px;
@@ -110,8 +113,7 @@ export class MapComponent implements OnInit {
         --percentage: ${scooter.battery};
         `;
 
-      const innerPieStyle =`
-        content: '';
+      const batteryInnerPieStyle =`
         position: absolute;
         width: 30px;
         height: 30px;
@@ -120,12 +122,15 @@ export class MapComponent implements OnInit {
         border-radius: 50%;
       `;
       
+      // Define the marker icon.
       const icon = Leaflet.divIcon({
         className: 'marker',
-        html: `<div style="${pieStyle}"><div style="${innerPieStyle}"></div></div>`,
+        html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
         iconSize: [30, 42],
         iconAnchor: [15, 42] 
       });
+
+      // Add markers to the map.
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
         {icon: icon}
       ).on('click', ()=> {
