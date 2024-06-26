@@ -66,8 +66,8 @@ abstract class RentalManager {
               }
             }
             rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, nextActionTime: nextCheck, price_per_hour: price_per_hour, renew: isDynamic }, { transaction: transaction }); // create the entry in the rentals table
-            scooter.setDataValue('active_rental_id', rental.dataValues.id);
-            await scooter.save({ transaction: transaction });
+            // scooter.setDataValue('active_rental_id', rental.dataValues.id);
+            // await scooter.save({ transaction: transaction });
 
             RentalManager.scheduleRentalCheck(rental.dataValues.id, nextCheck); // schedule the check
             if(!transactionExtern) await transaction.commit();
@@ -97,9 +97,9 @@ abstract class RentalManager {
             await rental.destroy({ transaction: transaction });
 
             /* End the active rental entry in the scooters table as well */
-            const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'), { transaction: transaction });
-            scooter.setDataValue('active_rental_id', null);
-            await scooter.save({ transaction: transaction });
+            // const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'), { transaction: transaction });
+            // scooter.setDataValue('active_rental_id', null);
+            // await scooter.save({ transaction: transaction });
 
             if(!transactionExtern) await transaction.commit();
         } catch (error) {
