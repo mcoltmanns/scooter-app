@@ -43,6 +43,9 @@ export class BookingComponent implements OnInit, AfterViewInit {
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public checkoutForm!: FormGroup;
 
+  /* Variable to control the state of the booking form (dynamic or prepaid) */
+  public isDynamic = true;
+
   /* Variable to control the state of the loading overlay */
   public isLoading = false;
 
@@ -290,6 +293,7 @@ export class BookingComponent implements OnInit, AfterViewInit {
 
   handleSwitchChange(event: SwitchChangeEvent): void {
     console.log('Switch toggled:', event.checked);
+    this.isDynamic = !event.checked;
   }
 
   /* if plus button is clicked */
