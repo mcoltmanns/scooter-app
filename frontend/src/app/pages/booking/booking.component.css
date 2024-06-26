@@ -244,3 +244,65 @@ app-button {
 .noScooterpicture {
   width: 100%;
 }
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch {
+    width: 3.5rem;
+    height: 1.75rem;
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch.p-inputswitch-checked
+    .p-inputswitch-slider::before {
+    transform: translateX(1.75rem);
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch
+    .p-inputswitch-slider {
+    background: #ffffff;
+}
+
+:host ::ng-deep .custom-switch
+    .p-inputswitch:hover 
+    .p-inputswitch-slider {
+    background: #dfe4eb;
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch.p-inputswitch-checked 
+    .p-inputswitch-slider {
+    background: var(--highlight, #97fb64);
+}
+
+:host ::ng-deep .custom-switch
+    .p-inputswitch.p-inputswitch-checked:hover 
+    .p-inputswitch-slider {
+      background: #88ea57;
+}
+ 
+:host ::ng-deep .custom-switch 
+    .p-inputswitch-slider::before {
+    height: 1.6rem;
+    width: 1.6rem;
+    left: 0.015rem;
+    margin-top: -0.795rem;
+}
+
+:host ::ng-deep .custom-switch
+    .p-inputswitch.p-focus
+    .p-inputswitch-slider {
+    box-shadow: 0 0 0 0 transparent;
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch-slider::before {
+    background: var(--background, #26627c);;
+}
+ 
+:host ::ng-deep .custom-switch 
+    .p-inputswitch-checked
+    .p-inputswitch-slider::before {
+    /* background: var(--highlight, #97fb64); */
+    background: var(--Highlights-Stroke, #123800);
+}

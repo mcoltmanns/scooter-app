@@ -5,8 +5,9 @@ import { Scooter } from '../models/scooter';
 import database from '../database';
 import { scheduleJob } from 'node-schedule';
 import { TransactionManager } from './payment/transaction-manager';
+import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
 
-const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
+// const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
 //const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
 
 abstract class RentalManager {
@@ -124,8 +125,8 @@ abstract class RentalManager {
             if(rental.dataValues.renew) { // rental is dynamic and should be renewed
                 console.log(`renewing rental ${rentalId}`);
                 // try to pay for the next block
-                const nextTime = Date.now() + EXTENSION_INTERVAL_MS;
-                const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * EXTENSION_INTERVAL_MS;
+                const nextTime = Date.now() + DYNAMIC_EXTENSION_INTERVAL_MS;
+                const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * DYNAMIC_EXTENSION_INTERVAL_MS;
                 try {
                     await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice); // try pay for next block
                     // schedule the next check

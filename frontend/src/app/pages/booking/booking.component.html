@@ -52,6 +52,9 @@
     
         <div class="form-container">
           <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
+
+            <p-inputSwitch class="custom-switch" (onChange)="handleSwitchChange($event)" />
+
             <label class="form-label">Für wie viele Stunden?</label>
     
             <div class="input-container">

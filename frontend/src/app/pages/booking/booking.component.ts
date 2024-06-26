@@ -21,11 +21,16 @@ import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CheckoutObject } from 'src/app/models/booking';
+import { InputSwitchModule } from 'primeng/inputswitch';
+
+interface SwitchChangeEvent {
+  checked: boolean;
+}
 
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent, LoadingOverlayComponent],
+  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent, LoadingOverlayComponent, InputSwitchModule],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
@@ -281,6 +286,10 @@ export class BookingComponent implements OnInit, AfterViewInit {
       str = value.toString() + ' €';
     }
     return str;
+  }
+
+  handleSwitchChange(event: SwitchChangeEvent): void {
+    console.log('Switch toggled:', event.checked);
   }
 
   /* if plus button is clicked */
