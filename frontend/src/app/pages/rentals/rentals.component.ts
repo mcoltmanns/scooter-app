@@ -25,7 +25,8 @@ export class RentalsComponent implements OnInit {
   public bookingFilterForm!: FormGroup;
 
   public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder) 
-  {this.bookingFilterForm = this.fb.group({
+  {//form group for the booking filter
+    this.bookingFilterForm = this.fb.group({
       lower: ['', this.dateValidator],
       upper: ['', this.dateValidator]
   });}
@@ -35,7 +36,6 @@ export class RentalsComponent implements OnInit {
   public loadingDataProduct = true;
   public loadingDataOption = true;
   public rentals: Rental[] = [];
-  public filteredRentals: Rental[] = [];
   public products: ProductWithScooterId[] = [];
   public errorMessage = '';
 
@@ -44,6 +44,17 @@ export class RentalsComponent implements OnInit {
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
+
+  //variables for the filters----------------------
+
+  public filteredRentals: Rental[] = []; //filtered version of the Rental[]
+  
+  filterMenuVisible = false;//visibility variable of filter menu
+  //filter form input variables
+  public lower = '';
+  public upper = '';
+
+  //-----------------------------------------------
 
   ngOnInit(): void {
     /* Get all scooter bookings for the User from the backend*/
@@ -211,19 +222,19 @@ export class RentalsComponent implements OnInit {
     );
   }
 
-  //functionalities for the filters
+  //functionalities for the filters-----------------------------------------------------------------
 
-  filterMenuVisible = false;
-  
-  public lower = '';
-  public upper = '';
-
-
-
+  /**
+   * change visibility of the filter menu page
+   */
   toggle(): void {
     this.filterMenuVisible = !this.filterMenuVisible;
   }
 
+  /**
+   * when pressing the "Anwenden"-Button, this is called
+   * it will apply the filter if the user did provide correct input else do not do anything
+   */
   onSubmit(): void {
     if (this.bookingFilterForm.valid) {
       console.log('Form Submitted');
@@ -238,6 +249,10 @@ export class RentalsComponent implements OnInit {
     }
   }
 
+  /**
+   * is called when we press the "Zurücksetzen"-button, 
+   * removes upper and lower bound an shows all rentals again
+   */
   onCancel(): void {
     this.filteredRentals = this.rentals;
     this.lower='';
@@ -248,6 +263,11 @@ export class RentalsComponent implements OnInit {
 
 //validator and auto formatter
 
+/**
+ * checks whether the input is a correctly formatted date or not
+ * @param control 
+ * @returns null if it is a correct date
+ */
 dateValidator(control: FormControl): { [key: string]: Boolean } | null {
   const value = control.value;
   if (value === '') {
@@ -269,7 +289,10 @@ dateValidator(control: FormControl): { [key: string]: Boolean } | null {
   return null;
 }
 
-  /*auto formats the input to the german standard form of dd.mm.yyyy, as the app is for use in german language space */
+  /**
+   * auto formats the input to the german standard form of dd.mm.yyyy, as the app is for use in german language space 
+   * also ensures the user just can provide numerics as input, by not not writing any non-numeric input
+   */
   autoFormatDate(event: Event, controlName: string): void {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/\D/g, '');
