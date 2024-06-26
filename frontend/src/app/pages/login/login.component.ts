@@ -7,7 +7,7 @@ import { ValidationErrors } from 'src/app/models/validation-errors';
 import { AuthService } from 'src/app/services/auth.service';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
-import { GetUserPosition } from 'src/app/utils/getUserPosition';
+import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
 
 @Component({
@@ -56,7 +56,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.updateErrorMessages();
     });
 
-    GetUserPosition.setUserPosition(this.positionService); // update User position
+    UserPosition.setUserPosition(this.positionService); // update User position
   }
 
   ngOnDestroy(): void {
@@ -137,7 +137,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       return; // Form submission canceled
     }
 
-    GetUserPosition.setUserPosition(this.positionService); // update user position
+    UserPosition.setUserPosition(this.positionService); // update user position
 
     /* Send the login request to the backend */
     this.authService.login(this.email, this.password).subscribe({

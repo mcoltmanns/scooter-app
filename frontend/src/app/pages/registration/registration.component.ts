@@ -7,7 +7,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { GetUserPosition } from 'src/app/utils/getUserPosition';
+import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
 
 @Component({
@@ -75,7 +75,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       this.registerForm.get('password2')?.updateValueAndValidity();
     });
 
-    GetUserPosition.setUserPosition(this.positionService); // update User position
+    UserPosition.setUserPosition(this.positionService); // update User position
   }
 
   ngOnDestroy(): void {
@@ -235,7 +235,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       return; // registration canceled
     }
 
-    GetUserPosition.setUserPosition(this.positionService); // update User position
+    UserPosition.setUserPosition(this.positionService); // update User position
 
     this.authService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
       next: () => {

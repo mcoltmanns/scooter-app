@@ -1,6 +1,6 @@
 import { PositionService } from './position.service';
 
-export class GetUserPosition {
+export class UserPosition {
     /**
      * get current latitude and longitude from the user position
      * @param positionService 

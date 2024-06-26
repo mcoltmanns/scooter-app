@@ -13,7 +13,7 @@ import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { GetUserPosition } from 'src/app/utils/getUserPosition';
+import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
 
 /**
@@ -140,7 +140,7 @@ export class MapComponent implements OnInit {
 
   /* update the user position and put a user icon on the map */
   updateUserPosition(): void {;
-    GetUserPosition.setUserPosition(this.positionService); // get user position from utils method
+    UserPosition.setUserPosition(this.positionService); // get user position from utils method
     const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
     this.layers.push(userMarker); // place the user icon on the map
   }
