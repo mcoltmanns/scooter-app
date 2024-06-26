@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
  
 
@@ -16,6 +16,10 @@ import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
+// QR-Code imports:
+import { Html5Qrcode } from 'html5-qrcode';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
  * innerhalb der ganzen Klasse verfügbar.
@@ -27,18 +31,25 @@ const defaultIcon = Leaflet.icon({
 
 @Component({
   standalone: true,
-  imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule],
+  imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, LoadingOverlayComponent],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css'],
 })
 
-export class MapComponent implements OnInit {
+export class MapComponent implements OnInit, OnDestroy {
   public scooters: Scooter[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
+  /* variables for QR-Code */
+  private qrReader: Html5Qrcode | null = null;
+  private qrActive = false;
+  public qrButtonpressed = false;
+  public isLoading = false; // camera loading variable
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
+
+  @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
 
   /**
    * Bitte Dokumentation durchlesen: https://github.com/bluehalo/ngx-leaflet
@@ -119,19 +130,8 @@ export class MapComponent implements OnInit {
       }
     });
 
-    /*for (const layer of this.layers) {
-      // Eventhandler (z.B. wenn der Benutzer auf den Marker klickt) können
-      // auch direkt in Typescript hinzugefügt werden
-      layer.on('click', (e: Leaflet.LeafletMouseEvent) => {
-        // Mittels der (im Browser eingebauten) alert() Methode wird ein
-        // Browser Pop-up Fenster geöffnet
-        alert('Marker was clicked!');
-
-        // In der Konsole können die Events genauer angeschaut werden,
-        // was die Entwicklung erleichtern kann
-        console.log(e);
-      });
-    }*/
+    // Initializes the QR code scanner with the video element 'qr-reader'.
+    this.qrReader = new Html5Qrcode('qr-reader');
   }
 
   toggleListView(): void {
@@ -140,5 +140,98 @@ export class MapComponent implements OnInit {
       this.listScrollPosition = null;
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
+  }
+
+  /* click on the QR Code Button */
+  startQrCodeScanner(): void {
+    // Button pressed to stop QR Code scanning
+    if(this.qrButtonpressed === true){
+      this.stopQrCodeScanner();
+      this.qrButtonpressed = false;
+      return;
+    }
+    // Button pressed to start QR Code scanning
+    if(this.qrButtonpressed === false){
+      this.qrButtonpressed = true;
+      this.isLoading = true; 
+    }
+    // reads the qrCode
+    if (this.qrReader) {
+      this.qrActive = true;
+      this.qrReader
+        .start(
+          { facingMode: 'environment' },
+          {
+            fps: 10,
+            qrbox: 250,
+          },
+          (decodedText) => {
+            console.log(`QR Code gescannt: ${decodedText}`);
+            console.log(decodedText);
+
+            // Check whether the link begins with "http://localhost:4200/"
+            const baseURL = `${window.location.protocol}//${window.location.host}`;
+            if (decodedText.startsWith(baseURL)) {
+              window.location.href = decodedText;
+              this.qrReader?.stop();
+            } else {
+              console.log('Der Link entspricht nicht den Anforderungen und wird nicht geladen.');
+            }
+          },
+          () => {  //(errorMessage)
+            this.isLoading = false;
+            //console.warn(`Scan fehlgeschlagen: ${errorMessage}`);
+          }
+        )
+        .catch((err) => {
+          this.isLoading = false;
+          console.error(`Kamera konnte nicht gestartet werden: ${err}`);
+        });
+
+        
+        // Access to the video element and display of the camera preview
+        if (this.videoElement && this.videoElement.nativeElement) {
+          navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(stream => {
+              this.isLoading = false;
+              this.videoElement.nativeElement.srcObject = stream;
+            })
+            .catch(err => {
+              this.isLoading = false;
+              console.error('Kamerazugriff verweigert:', err);
+        });
+      }
+    }
+  }
+
+  /* stops QR Code scanning */
+  stopQrCodeScanner(): void {
+    // stops the QR Code reader
+    if (this.qrReader && this.qrActive) {
+      this.qrReader.stop()
+        .then(() => {
+          this.qrActive = false;
+          console.log('QR-Code-Scanner gestoppt');
+        })
+        .catch((err) => {
+          console.error('Fehler beim Stoppen des QR-Code-Scanners:', err);
+        });
+    }
+  
+    // stops the video live stream
+    if (this.videoElement.nativeElement.srcObject) {
+      const stream = this.videoElement.nativeElement.srcObject as MediaStream;
+      if (stream) {
+        stream.getTracks().forEach(track => {
+          track.stop();
+        });
+        this.videoElement.nativeElement.srcObject = null;
+      }
+    }
+  }
+
+  /* if the we change the page */
+  ngOnDestroy(): void {
+    this.stopQrCodeScanner();
   }
 }
