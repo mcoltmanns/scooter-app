@@ -314,4 +314,34 @@ toggleSortView(): void {
   this.sortMenuVisible = !this.sortMenuVisible;
 }
 
+
+
+
+//sort functionalities ---------------------------------------------------------------------------------
+
+sortCancel(): void{
+
+  this.sortMenuVisible = !this.sortMenuVisible;
+}
+
+sortPrice(asc: boolean):void{
+
+  this.sortMenuVisible = !this.sortMenuVisible;
+}
+
+sortRange(asc: boolean):void{
+  
+  this.sortMenuVisible = !this.sortMenuVisible;
+}
+
+sortBty(asc: boolean):void{
+  
+  this.sortMenuVisible = !this.sortMenuVisible;
+}
+
+sortSpeed(asc: boolean):void{
+  
+  this.sortMenuVisible = !this.sortMenuVisible;
+}
+
 }

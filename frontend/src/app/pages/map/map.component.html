@@ -26,12 +26,51 @@
         <div class="info"></div>
         <div class="filter-content">
           <h3 class="o-title">Filter Menü</h3>
-          <app-sort-button class="sort-btn" (toggleSort)="toggleSortView()"></app-sort-button>
-          <div *ngIf="sortMenuVisible" class="sort-menu">
-            
+          <app-sort-button class="sort-btn" (click)="toggleSortView()"></app-sort-button>
+          <div class="sort-wrapper">
+            <div *ngIf="sortMenuVisible" class="sort-menu">
+              <div class="sort-menu-cont">
+                <h3 class="o-title">Sortier-Otionen</h3>
+                <app-button color="accent" class="btn" type="submit" (click)="sortCancel()">
+                  Sortierung zurücksetzten
+                </app-button>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortPrice(true)">
+                    Preis aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortPrice(false)">
+                    Preis absteigend
+                  </app-button>
+                </div>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortRange(true)">
+                    Reichweite aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortRange(false)">
+                    Reichweite absteigend
+                  </app-button>
+                </div>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortBty(true)">
+                    Batteriestand absteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortBty(false)">
+                    Batteriestand aufsteigend
+                  </app-button>
+                </div>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortSpeed(true)">
+                    Speed aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortSpeed(false)">
+                    Speed absteigend
+                  </app-button>
+                </div>
+              </div>
 
 
-            
+              
+            </div>
           </div>
           <div class="form-container">
             <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
