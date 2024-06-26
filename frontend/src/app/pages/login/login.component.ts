@@ -8,6 +8,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { BookingService } from 'src/app/services/booking.service';
+import { UserPosition } from 'src/app/utils/userPosition';
+import { PositionService } from 'src/app/utils/position.service';
 
 @Component({
   standalone: true,
@@ -40,7 +42,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private fb: FormBuilder,
-    private bookingService: BookingService
+    private bookingService: BookingService,
+    private positionService: PositionService
   ) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.loginForm = this.fb.group({
@@ -54,6 +57,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginFormValueChangesSubscription = this.loginForm.valueChanges.subscribe(() => {
       this.updateErrorMessages();
     });
+
+    UserPosition.setUserPosition(this.positionService); // update User position
   }
 
   ngOnDestroy(): void {
@@ -133,6 +138,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       this.updateErrorMessages();
       return; // Form submission canceled
     }
+
+    UserPosition.setUserPosition(this.positionService); // update user position
 
     /* Send the login request to the backend */
     this.authService.login(this.email, this.password).subscribe({

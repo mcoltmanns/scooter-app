@@ -1,8 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
- 
-
 
 /**
  * Typescript erlaub es uns, auch einen ganzen Namespace zu importieren statt einzelne Komponenten.
@@ -15,6 +13,8 @@ import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UserPosition } from 'src/app/utils/userPosition'; // get methods from utils folder 
+import { PositionService } from 'src/app/utils/position.service';
 
 // QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
@@ -27,6 +27,14 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
   iconUrl: '/assets/marker.png',
+});
+
+/**
+ * Icon for the user -> is displayed on the map
+ */
+const userIcon = Leaflet.icon({
+  iconSize: [40, 40],
+  iconUrl: '/assets/person.png',
 });
 
 @Component({
@@ -47,7 +55,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public qrButtonpressed = false;
   public isLoading = false; // camera loading variable
 
-  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone) {}
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private positionService: PositionService) {}
 
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
 
@@ -61,7 +69,7 @@ export class MapComponent implements OnInit, OnDestroy {
       ),
     ],
     zoom: 16,
-    center: new Leaflet.LatLng(47.663557, 9.175365),
+    center: new Leaflet.LatLng(this.positionService.latitude, this.positionService.longitude),
     attributionControl: false,
   };
 
@@ -87,8 +95,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
   buttonToScooter(scooterId: number): void {
     this.ngZone.run(() => this.router.navigate(['search/scooter', scooterId]));
-    //this.router.navigate(['/scooter', scooterId]);
-    
   }
 
   /**
@@ -129,11 +135,12 @@ export class MapComponent implements OnInit, OnDestroy {
         console.log(err);
       }
     });
-
     // Initializes the QR code scanner with the video element 'qr-reader'.
     this.qrReader = new Html5Qrcode('qr-reader');
+    this.updateUserPosition(); // call method to update user Position
   }
-
+  
+  // toggle for scooter list and map
   toggleListView(): void {
     this.view = this.view === 'map' ? 'list' : 'map';
     if (this.view === 'map') {
@@ -233,5 +240,12 @@ export class MapComponent implements OnInit, OnDestroy {
   /* if the we change the page */
   ngOnDestroy(): void {
     this.stopQrCodeScanner();
+  }
+
+  /* update the user position and put a user icon on the map */
+  updateUserPosition(): void {
+    UserPosition.setUserPosition(this.positionService); // get user position from utils method
+    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+    this.layers.push(userMarker); // place the user icon on the map
   }
 }

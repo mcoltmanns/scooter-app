@@ -7,6 +7,8 @@ import { AuthService } from 'src/app/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { UserPosition } from 'src/app/utils/userPosition';
+import { PositionService } from 'src/app/utils/position.service';
 
 @Component({
   selector: 'app-registration',
@@ -45,7 +47,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   public errorPassword2Message = '';// error for the second password input field
   public errorMessage = ''; // general Error Message from the backend
 
-  constructor(private router: Router, private authService: AuthService, private fb: FormBuilder) {
+  constructor(private router: Router, private authService: AuthService, private fb: FormBuilder, private positionService: PositionService) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.registerForm = this.fb.group({
       name: ['', Validators.required],
@@ -73,7 +75,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       this.registerForm.get('password2')?.updateValueAndValidity();
     });
 
-    console.log('Registration Page intialized');
+    UserPosition.setUserPosition(this.positionService); // update User position
   }
 
   ngOnDestroy(): void {
@@ -232,6 +234,8 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       this.updateErrorMessages();
       return; // registration canceled
     }
+
+    UserPosition.setUserPosition(this.positionService); // update User position
 
     this.authService.register(this.name, this.street, this.houseNumber, this.zipCode, this.city, this.email, this.password1).subscribe({
       next: () => {
