@@ -13,7 +13,7 @@ import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { UserPosition } from 'src/app/utils/userPosition'; // get methods from utils folder 
+import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
 
 /**
