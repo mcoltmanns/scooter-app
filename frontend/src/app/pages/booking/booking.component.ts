@@ -86,8 +86,6 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    console.log(history.state);
-
     /* Handle the state of the previous page */
     const historyState = history.state;
 

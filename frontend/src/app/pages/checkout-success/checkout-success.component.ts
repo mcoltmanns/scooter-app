@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { trigger, style, transition, animate } from '@angular/animations';
@@ -6,7 +7,7 @@ import { trigger, style, transition, animate } from '@angular/animations';
 @Component({
   selector: 'app-checkout-success',
   standalone: true,
-  imports: [ButtonComponent],
+  imports: [ButtonComponent, CommonModule],
   templateUrl: './checkout-success.component.html',
   styleUrl: './checkout-success.component.css',
   animations: [
@@ -21,13 +22,21 @@ import { trigger, style, transition, animate } from '@angular/animations';
 export class CheckoutSuccessComponent implements OnInit {
   public dateTimeString = 'Rückgabezeitpunkt';
 
+  public isDynamic = false;
+
   constructor(private router: Router) { }
 
   ngOnInit(): void {
+    console.log(history.state);
+
     /* Redirect to search if there is no booking object in the history state */
     if (!history.state.booking) {
       this.router.navigate(['/search']);
       return;
+    }
+
+    if (history.state.booking.isDynamic) {
+      this.isDynamic = true;
     }
 
     /* Extract the endTimestamp from the booking object in the history state */

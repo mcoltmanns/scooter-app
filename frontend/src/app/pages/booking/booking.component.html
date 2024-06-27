@@ -1,11 +1,11 @@
 <app-info-modal [showModal]="showInfoModal" [close]="onCloseInfoModal" title="Spare bei Vorauszahlung">
-  Buche den Scooter für eine feste Dauer, wenn du weißt, wie lange du ihn brauchst und ihn an den Abholort zurückbringen kannst. Das erleichtert die Wartung für uns. Im Gegenzug erhältst du 10&nbsp;% Rabatt.
+  Buche den Scooter für eine feste Dauer, wenn du weißt, wie lange du ihn brauchst und ihn an den Abholort zurückbringen kannst. Das erleichtert uns die Wartung. Im Gegenzug erhältst du 10&nbsp;% Rabatt.
 </app-info-modal>
 
 <app-loading-overlay [isLoading]="isLoading"></app-loading-overlay>
 
 <app-toast #toastComponentPaymentAdded [showDuration]=2500 type="success">Zahlungsmethode hinzugefügt!</app-toast>
-<app-toast #toastComponentError [showDuration]=2500 type="error">{{errorMessage}}</app-toast>
+<app-toast #toastComponentError [showDuration]=10000 type="error">{{errorMessage}}</app-toast>
 
 <ng-container *ngIf="!loadingPage && !loadingOptions && !loadingOptions else loading">
   <div *ngIf="product && scooter && option; else noScooters1" class="page-container">
@@ -116,7 +116,7 @@
             <div *ngIf="radioButtonErrors" class="error" style="margin-top:10px; text-align: center;">{{ radioButtonErrors }}</div>
     
             <div class="bottom">
-              <div style="text-align: center;" class="error">{{errorMessage}}</div>
+              <!-- <div style="text-align: center;" class="error">{{errorMessage}}</div> -->
 
               <app-button class="btn" type="submit" [disabled]="checkoutForm.invalid">
                 Buchung bestätigen
