@@ -66,6 +66,7 @@ abstract class RentalManager {
                 await ReservationManager.endReservation(userReservation, transaction);
               }
             }
+
             rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, nextActionTime: nextCheck, price_per_hour: price_per_hour, renew: isDynamic }, { transaction: transaction }); // create the entry in the rentals table
             // scooter.setDataValue('active_rental_id', rental.dataValues.id);
             // await scooter.save({ transaction: transaction });
@@ -128,7 +129,8 @@ abstract class RentalManager {
                 const nextTime = Date.now() + DYNAMIC_EXTENSION_INTERVAL_MS;
                 const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * DYNAMIC_EXTENSION_INTERVAL_MS;
                 try {
-                    await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice); // try pay for next block
+                    await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice, transaction); // try pay for next block
+
                     // schedule the next check
                     RentalManager.scheduleRentalCheck(rentalId, new Date(nextTime));
                 } catch (error) { // cancel if unable
