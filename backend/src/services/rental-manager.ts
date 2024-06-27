@@ -11,6 +11,17 @@ import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
 //const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
 
 abstract class RentalManager {
+    // Get a past rental entry for a specific rentalId
+    public static async getPastRentalForRentalId(rentalId: number): Promise<Model | null> {
+        try {
+            const pastRental = await PastRental.findOne({ where: { id: rentalId } });
+            return pastRental;
+        } catch (error) {
+            console.error(`Error fetching past rental for rentalId ${rentalId}:`, error);
+            throw new Error('FETCH_PAST_RENTAL_FAILED');
+        }
+    }
+    
     // get all rentals associated with a scooter (active and ended)
     public static async getRentalsFromScooter(scooterId: number): Promise<Model[]> {
         return await Rental.findAll({ where: { scooter_id: scooterId } });

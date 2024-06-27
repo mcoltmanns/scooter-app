@@ -178,7 +178,8 @@ export class BookingsController {
         try {
 
             // search for a rental agreement using the rentalId
-            const rental = await Rental.findOne({ where: { id: rentalId } });
+            const rental = await RentalManager.getPastRentalForRentalId(rentalId);
+            console.log(rental);
 
             if (!rental) {
                 response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
