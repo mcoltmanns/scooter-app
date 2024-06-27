@@ -166,28 +166,12 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   /* Converts the distances */
   convertDistanceUnits(value: number, unit: string): string {
-    let str = '';
-    if(unit === 'mi'){
-      value = UnitConverter.convertDistance(value, 'km', unit);
-      str = value.toFixed(0) + ' mi'; // toFixed(0) shows no decimal places
-    } 
-    else{
-      str = value.toString() + ' km';
-    }
-    return str;
+    return UnitConverter.convertDistanceUnits(value, unit);
   }
 
   /* Convert the currencies */
   convertCurrencyUnits(value: number, unit: string): string {
-    let str = '';
-    if(unit === '$'){
-      value = UnitConverter.convertCurrency(value, unit, '$');
-      str = value.toFixed(2) + ' $/H'; // toFixed(2) only shows the last two decimal place
-    }
-    else{
-      str = value.toString() + ' €/H';
-    }
-    return str;
+    return UnitConverter.convertCurrencyUnits(value, unit);
   }
 
   jumpToPosition(id: string | null): void {
