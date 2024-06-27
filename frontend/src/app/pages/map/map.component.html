@@ -3,7 +3,9 @@
     <span class="switch-btn" (click)="toggleListView()">
       <span class="material-icons icon-outlined" style="cursor: pointer;">{{ view === "map" ? "view_kanban" : "map" }}</span>
     </span>
+    <app-filter-button class="filter-btn" (filterToggle)="toggleFilterView()"></app-filter-button>
     <h1 class="title logo">SCOOTER</h1>
+    
     <input
       type="text"
       *ngIf="view === 'list'"
@@ -11,6 +13,88 @@
       placeholder="Suchen"
       [(ngModel)]="searchTerm"
     />
+    <div class="headWrapper">
+      <div *ngIf="filterMenuVisible && view === 'list'" class="filter-menu-container">
+        <div class="top">
+          <app-button class="btn" type="submit" (click)="onSubmit()">
+            Anwenden
+          </app-button>
+          <app-button color="accent" class="btn" (click)="onCancel()">
+            Zurücksetzten
+          </app-button>
+        </div>
+        <div class="info"></div>
+        <div class="filter-content">
+          <h3 class="o-title">Filter Menü</h3>
+          <app-sort-button class="sort-btn" (click)="toggleSortView()"></app-sort-button>
+          <div class="sort-wrapper">
+            <div *ngIf="sortMenuVisible" class="sort-menu">
+              <div class="sort-menu-cont">
+                <h3 class="o-title">Sortier-Otionen</h3>
+                <app-button color="accent" class="btn" type="submit" (click)="sortCancel()">
+                  Sortierung zurücksetzten
+                </app-button>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortPrice(true)">
+                    Preis aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortPrice(false)">
+                    Preis absteigend
+                  </app-button>
+                </div>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortRange(true)">
+                    Reichweite aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortRange(false)">
+                    Reichweite absteigend
+                  </app-button>
+                </div>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortBty(true)">
+                    Batteriestand aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortBty(false)">
+                    Batteriestand absteigend
+                  </app-button>
+                </div>
+                <div class="corresponding">
+                  <app-button class="btn" type="submit" (click)="sortSpeed(true)">
+                    Speed aufsteigend
+                  </app-button>
+                  <app-button class="btn" type="submit" (click)="sortSpeed(false)">
+                    Speed absteigend
+                  </app-button>
+                </div>
+              </div>
+
+
+              
+            </div>
+          </div>
+          <div class="form-container">
+            <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
+              <div class="filter-row">
+                <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatNumber($event, 'minPrice')"></app-user-input>
+                <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatNumber($event, 'maxPrice')"></app-user-input>
+              </div>
+              <div class="filter-row">
+                <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange" (input)="autoFormatNumber($event, 'minRange')"></app-user-input>
+                <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange" (input)="autoFormatNumber($event, 'maxRange')"></app-user-input>
+              </div>
+              <div class="filter-row">
+                <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty" (input)="autoFormatNumber($event, 'minBty')"></app-user-input>
+                <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty" (input)="autoFormatNumber($event, 'maxBty')"></app-user-input>
+              </div>
+              <div class="filter-row">
+                <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatNumber($event, 'minSpeed')"></app-user-input>
+                <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatNumber($event, 'maxSpeed')"></app-user-input>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Diese Komponente wird durch das "leaflet" Attribut mit der "Leaflet" Bibliothek initialisiert -->
@@ -22,10 +106,46 @@
     [leafletOptions]="options"
     [leafletLayers]="layers"
     (leafletClick)="onMapClick($event)" 
-  ></div>
+  >
+  <div class="wrapper">
+    <div *ngIf="filterMenuVisible && view ==='map'" class="filter-menu-container">
+      <div class="top">
+        <app-button class="btn" type="submit" (click)="onSubmit()">
+          Anwenden
+        </app-button>
+        <app-button color="accent" class="btn" (click)="onCancel()">
+          Zurücksetzten
+        </app-button>
+      </div>
+      <div class="info"></div>
+      <div class="filter-content">
+        <h3 class="o-title">Filter Menü</h3>
+        <div class="form-container">
+          <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
+            <div class="filter-row">
+              <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatNumber($event, 'minPrice')"></app-user-input>
+              <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatNumber($event, 'maxPrice')"></app-user-input>
+            </div>
+            <div class="filter-row">
+              <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange" (input)="autoFormatNumber($event, 'minRange')"></app-user-input>
+              <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange" (input)="autoFormatNumber($event, 'maxRange')"></app-user-input>
+            </div>
+            <div class="filter-row">
+              <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty" (input)="autoFormatNumber($event, 'minBty')"></app-user-input>
+              <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty" (input)="autoFormatNumber($event, 'maxBty')"></app-user-input>
+            </div>
+            <div class="filter-row">
+              <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatNumber($event, 'minSpeed')"></app-user-input>
+              <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatNumber($event, 'maxSpeed')"></app-user-input>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div></div>
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
-  <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
+  <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" [mapScooters]="sortedScooters" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
 
   <!-- QR Icon -->
   <div class="qr-container" (click)="startQrCodeScanner()">

@@ -173,6 +173,11 @@
     margin-left: -10px;
 }
 
+.suggestion-text {
+    font-size: 0.9em; /* Adjust font size for better visibility */
+}
+  
+
 .no-scooter-container {
     display: flex;
     flex-direction: column;

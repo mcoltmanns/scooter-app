@@ -5,6 +5,19 @@
   --logo-title-height: 60px;
 }
 
+.headWrapper{ 
+  width: 100%;
+  left: 0%;
+  margin-top: 12pt;
+}
+
+.wrapper {
+  position: fixed; 
+  width: 100%;
+  top: 15%;
+  z-index: 9998;
+}
+
 .logo.title {
   /* "Lokale" Styles können "Globale" Styles überschreiben */
   font-size: 38px;
@@ -107,4 +120,129 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+
+
+.filter-btn {
+  position: absolute;
+  top: 50px;
+  left: 85%;
+  color: var(--icon-color);
+}
+
+.filter-menu-container {
+  width: 90%;
+  margin: 0 auto;
+  background-color: #fff;
+  border: 2px solid #4a4242;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-menu {
+  max-height: 400px; /* Adjust this as needed */
+  overflow-y: auto;
+}
+
+.filter-menu-container .filter-content{
+  color: black;
+}
+
+.filter-row {
+  display: flex; /* Verwende Flexbox */
+}
+
+.app-user-input {
+  margin-bottom: 10px; /* Add a vertical space between the elements */
+  flex: 1; /* Let the app-user-input components grow flexibly */
+}
+
+.filter-row app-user-input {
+  flex: 1; /* Let the app-user-input components in the line grow flexibly */
+  margin-right: 10px; /* Add a horizontal space between the elements */
+}
+
+.filter-row app-user-input:first-child {
+  flex: 1; /* Change the flex property of the first app-user-input element */
+}
+
+.filter-row app-user-input:last-child {
+  flex: 1; /* Change the flex property of the last app-user-input element */
+  margin-right: 0;
+}
+
+.top {
+  margin-top: 10px;
+  display: flex;
+}
+
+.top app-button{
+  flex:1;
+  margin-right: 5px
+}
+
+.top app-button:first-child{
+  flex: 1;
+}
+
+.top app-button:last-child{
+  flex: 1;
+  
+}
+
+.o-title{
+  color: black;
+  text-align: center;
+  font-size: 12pt;
+}
+
+.info{
+  color: black;
+}
+
+
+.sort-btn {
+  position: absolute;
+  top: 40%;
+  left: 75%;
+  color: var(--icon-color);
+}
+
+.sort-wrapper {
+  position: fixed; 
+  width: 100%;
+  left: 0;
+  top: 35%;
+  z-index: 9999;
+}
+
+.sort-menu-cont {
+  width: 90%;
+  margin: 0 auto;
+  background-color: #fff;
+  border: 2px solid #4a4242;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.corresponding {
+  margin-top: 10px;
+  display: flex;
+}
+
+.corresponding app-button{
+  flex:1;
+  margin-right: 5px
+}
+
+.corresponding app-button:first-child{
+  flex: 1;
+}
+
+.corresponding app-button:last-child{
+  flex: 1;
+  
 }

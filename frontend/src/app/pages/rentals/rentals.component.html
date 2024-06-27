@@ -1,4 +1,34 @@
 <div class="page-container">
+  <div class="header">
+    <app-filter-button (filterToggle)="toggle()"></app-filter-button>
+    <h1 class="title">Meine Buchungen</h1>
+  </div>
+  
+  <div class="wrapper">
+    <div *ngIf="filterMenuVisible" class="filter-menu-container">
+      <div class="top">
+        <app-button class="btn" type="submit" (click)="onSubmit()">
+          Anwenden
+        </app-button>
+        <app-button color="accent" class="btn" (click)="onCancel()">
+          Zurücksetzten
+        </app-button>
+      </div>
+      <div class="info"></div>
+      <div class="filter-content">
+        <h3 class="o-title">Filter Menü</h3>
+        <div class="form-container">
+          <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
+            <div class="filter-row">
+              <app-user-input label="Gebucht nach" [(text)]="lower" formControlName="lower"(input)="autoFormatDate($event, 'lower')"></app-user-input>
+              <app-user-input label="Beendet vor" [(text)]="upper" formControlName="upper"(input)="autoFormatDate($event, 'upper')"></app-user-input>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="scrollable-container">
 
     <div class="rentals-container" *ngIf="!loadingDataScooter && !loadingDataProduct && !loadingDataOption; else loading">
