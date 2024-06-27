@@ -7,7 +7,7 @@ import Database from './database';
 import SourceMap from 'source-map-support';
 import { UsersSession } from './models/user';
 import { Op } from 'sequelize';
-import { ActiveRental, Rental, Reservation } from './models/rental';
+import { ActiveRental, Reservation } from './models/rental';
 import ReservationManager from './services/reservation-manager';
 import RentalManager from './services/rental-manager';
 SourceMap.install();
@@ -24,30 +24,33 @@ class Server {
       /* Connect to the database */
       await Database.connect();
 
-      const now = new Date;
-
       /* Purge all expired sessions */
       console.log('purging expired sessions...');
-      const purgedSessions = await UsersSession.destroy({ where: { expires: { [Op.lt]: now } } });
+      const purgedSessions = await UsersSession.destroy({ where: { expires: { [Op.lt]: (new Date) } } });
       console.log(`purged ${purgedSessions} expired sessions.`);
 
-      // FIXME: these are really hacky! What really needs to be done is define database relationships in such a way that these null setting operations are done automatically
       /* Purge all expired reservations */
       console.log('deleting and dereferencing expired reservations...');
-      let reservations = await Reservation.findAll({ where: { endsAt: { [Op.lt]: now } } });
+      let reservations = await Reservation.findAll({ where: { endsAt: { [Op.lt]: (new Date) } } });
       for (const reservation of reservations) {
         await ReservationManager.endReservation(reservation);
       }
       console.log(`deleted and dereferenced ${reservations.length} expired reservations.\nscheduling deletion and dereferencing of remaining reservations...`);
-      reservations = await Reservation.findAll({ where: { endsAt: { [Op.gte]: now } } });
+      reservations = await Reservation.findAll({ where: { endsAt: { [Op.gte]: (new Date) } } });
       for (const reservation of reservations) {
         ReservationManager.scheduleReservationEnding(reservation);
       }
       console.log(`scheduled deletion for ${reservations.length} active reservations`);
 
-      // reschedule rental checks
+      // Reschedule or end all active rentals
       const rentals = await ActiveRental.findAll();
       for(const rental of rentals) {
+        if (new Date(rental.dataValues.nextActionTime) < (new Date)) {
+          /* End the active rental if it is expired */
+          console.log('End active rental', rental.dataValues.id, '(expired:', new Date(rental.dataValues.nextActionTime) + ')');
+          await RentalManager.endRental(rental.dataValues.id);
+          return;
+        }
         RentalManager.scheduleRentalCheck(rental.dataValues.id, new Date(rental.dataValues.nextActionTime));
       }
 

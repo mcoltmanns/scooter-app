@@ -92,7 +92,7 @@ abstract class RentalManager {
             if(!rental) return; // do nothing if rental not found
 
             /* Create a past rental entry with the total price */
-            const total_price = rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60) ;
+            const total_price = parseFloat((rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60)).toFixed(2));
             await PastRental.create({ endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
             
             /* End the active rental */
@@ -111,6 +111,11 @@ abstract class RentalManager {
     }
 
     public static scheduleRentalCheck(rentalId: number, time: Date): void {
+        if (time.getTime() < Date.now()) {
+          console.log(`SCHEDULER: ${time} is in the past, cannot schedule rental ${rentalId}!`);
+          return; // don't schedule if time is in the past
+        }
+
         console.log(`scheduling rental check at ${time} for rental ${rentalId}`);
         scheduleJob(`rental${rentalId}`, time, RentalManager.checkRental.bind(rentalId, rentalId)); // schedule the check
     }
@@ -130,6 +135,10 @@ abstract class RentalManager {
                 const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * DYNAMIC_EXTENSION_INTERVAL_MS;
                 try {
                     await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice, transaction); // try pay for next block
+
+                    /* Update the rental with the new nextActionTime */
+                    rental.setDataValue('nextActionTime', new Date(nextTime));
+                    await rental.save({ transaction: transaction });
 
                     // schedule the next check
                     RentalManager.scheduleRentalCheck(rentalId, new Date(nextTime));
