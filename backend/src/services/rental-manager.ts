@@ -104,7 +104,7 @@ abstract class RentalManager {
 
             /* Create a past rental entry with the total price */
             const total_price = parseFloat((rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60)).toFixed(2));
-            await PastRental.create({ endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
+            await PastRental.create({ id: rental.dataValues.id, endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
             
             /* End the active rental */
             await rental.destroy({ transaction: transaction });

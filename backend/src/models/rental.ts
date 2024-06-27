@@ -11,6 +11,12 @@ export const Rental = Database.getSequelize().define('rentals', {
 
 // table for rentals currently going on
 export const ActiveRental = Database.getSequelize().define('activeRentals', {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      autoIncrement: true
+    },
     nextActionTime: {
         type: DataTypes.DATE,
         allowNull: false
@@ -30,6 +36,12 @@ export const ActiveRental = Database.getSequelize().define('activeRentals', {
 
 // table for finished/closed out rentals
 export const PastRental = Database.getSequelize().define('pastRentals', {
+    id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      primaryKey: true,
+      // Do not autoIncrement here since the ID should be carried over from ActiveRental
+    },
     endedAt: {
         type: DataTypes.DATE,
         allowNull: false
