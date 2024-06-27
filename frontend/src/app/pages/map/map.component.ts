@@ -209,6 +209,11 @@ export class MapComponent implements OnInit, OnDestroy {
     this.updateUserPosition(); // call method to update user Position
   }
 
+  /* if the we change the page */
+  ngOnDestroy(): void {
+    this.stopQrCodeScanner();
+  }
+
   toggleListView(): void {
     this.view = this.view === 'map' ? 'list' : 'map';
     if (this.view === 'map') {
@@ -303,11 +308,6 @@ export class MapComponent implements OnInit, OnDestroy {
         this.videoElement.nativeElement.srcObject = null;
       }
     }
-  }
-
-  /* if the we change the page */
-  ngOnDestroy(): void {
-    this.stopQrCodeScanner();
   }
 
   /* update the user position and put a user icon on the map */
