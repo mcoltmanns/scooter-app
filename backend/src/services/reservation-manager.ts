@@ -1,10 +1,11 @@
 import { Model, Transaction } from 'sequelize';
-import { RESERVATION_LIFETIME, Reservation } from '../models/rental';
+import { Reservation } from '../models/rental';
 import database from '../database';
 import { Scooter } from '../models/scooter';
 import { Job, scheduleJob } from 'node-schedule';
 import jobManager from './job-manager';
 import { Product } from '../models/product';
+import { RESERVATION_LIFETIME_MS } from '../static-data/global-variables';
 
 abstract class ReservationManager {
     /* check if a scooter is reserved */
@@ -81,7 +82,7 @@ abstract class ReservationManager {
 
             // all good?
             // create the new reservation
-            expiration = new Date(Date.now() + RESERVATION_LIFETIME);
+            expiration = new Date(Date.now() + RESERVATION_LIFETIME_MS);
             reservation = await Reservation.create({ user_id: userId, scooter_id: scooterId, endsAt: expiration }, {transaction: transaction});
             // update scooters table
             scooter.setDataValue('reservation_id', reservation.dataValues.id);
@@ -90,6 +91,9 @@ abstract class ReservationManager {
             // dispatch a job to delete the reservation when it expires
             ReservationManager.scheduleReservationEnding(reservation);
         } catch (error) {
+
+          console.log(error);
+          console.log('Have I been called?');
             if(!transactionExtern) await transaction.rollback();
             throw new Error(error.message);
         }

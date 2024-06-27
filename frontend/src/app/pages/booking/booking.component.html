@@ -1,7 +1,11 @@
+<app-info-modal [showModal]="showInfoModal" [close]="onCloseInfoModal" title="Spare bei Vorauszahlung">
+  Buche den Scooter für eine feste Dauer, wenn du weißt, wie lange du ihn brauchst und ihn an den Abholort zurückbringen kannst. Das erleichtert uns die Wartung. Im Gegenzug erhältst du 10&nbsp;% Rabatt.
+</app-info-modal>
+
 <app-loading-overlay [isLoading]="isLoading"></app-loading-overlay>
 
 <app-toast #toastComponentPaymentAdded [showDuration]=2500 type="success">Zahlungsmethode hinzugefügt!</app-toast>
-<app-toast #toastComponentError [showDuration]=2500 type="error">{{errorMessage}}</app-toast>
+<app-toast #toastComponentError [showDuration]=10000 type="error">{{errorMessage}}</app-toast>
 
 <ng-container *ngIf="!loadingPage && !loadingOptions && !loadingOptions else loading">
   <div *ngIf="product && scooter && option; else noScooters1" class="page-container">
@@ -52,39 +56,41 @@
     
         <div class="form-container">
           <form [formGroup]="checkoutForm" (ngSubmit)="onSubmit()">
-            <label class="form-label">Für wie viele Stunden?</label>
-    
-            <div class="input-container">
-              <app-user-input 
-                [center]="true"
-                formControlName="duration"
-              ></app-user-input>
 
-              <p>Stunden</p>
-              <div class="input-controls">
-                <div class="svg-container" (click)="handlePlusClick()">
-                  <svg class="svg1" xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" fill="none">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M14.9371 0C6.69183 0 0 6.69183 0 14.9371C0 23.1824 6.69183 29.8742 14.9371 29.8742C23.1824 29.8742 29.8742 23.1824 29.8742 14.9371C29.8742 6.69183 23.1824 0 14.9371 0ZM14.8148 27.4074C7.85741 27.4074 2.22222 21.7722 2.22222 14.8148C2.22222 7.85741 7.85741 2.22222 14.8148 2.22222C21.7722 2.22222 27.4074 7.85741 27.4074 14.8148C27.4074 21.7722 21.7722 27.4074 14.8148 27.4074Z" fill="white"/>
-                  </svg>
-                  <svg class="svg2" xmlns="http://www.w3.org/2000/svg" width="27" height="27" viewBox="0 0 27 27" fill="none">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M21.3981 14.6388H14.8981V21.1388H12.7315V14.6388H6.23148V12.4722H12.7315V5.97217H14.8981V12.4722H21.3981V14.6388Z" fill="white"/>
-                  </svg>
-                </div>
-    
-                <div class="svg-container" (click)="handleMinusClick()">
-                  <svg class="svg3" xmlns="http://www.w3.org/2000/svg" width="31" height="30" viewBox="0 0 31 30" fill="none">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M15.8114 0C7.56607 0 0.874237 6.69183 0.874237 14.9371C0.874237 23.1824 7.56607 29.8742 15.8114 29.8742C24.0567 29.8742 30.7485 23.1824 30.7485 14.9371C30.7485 6.69183 24.0567 0 15.8114 0ZM15.6891 27.4074C8.73164 27.4074 3.09646 21.7722 3.09646 14.8148C3.09646 7.85741 8.73164 2.22222 15.6891 2.22222C22.6465 2.22222 28.2816 7.85741 28.2816 14.8148C28.2816 21.7722 22.6465 27.4074 15.6891 27.4074Z" fill="white"/>
-                  </svg>
-                  <svg class="svg4" xmlns="http://www.w3.org/2000/svg" width="17" height="3" viewBox="0 0 17 3" fill="none">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M16.8683 2.25352H0.854462V0.290039H16.8683V2.25352Z" fill="white"/>
-                  </svg>
-                </div>
+            <div class="switch-container">
+              <p-inputSwitch class="custom-switch" formControlName="checked" (onChange)="handleSwitchChange($event)" />
+              <p>Feste Dauer (Vorauszahlung)</p>
+              <div class="info-button" (click)="onInfoClick()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
               </div>
-
             </div>
-            <div *ngIf="durationErrors" class="error">{{ durationErrors }}</div>
+
+            <div *ngIf="!isDynamic" [ngClass]="['duration-container', durationInputClasses]">
+              <label class="form-label">Für wie viele Stunden?</label>
     
-            <div class="price">Gesamtpreis: {{calcPrice(product.price_per_hour)}}</div>
+              <div class="input-container">
+                <app-user-input 
+                  [center]="true"
+                  formControlName="duration"
+                ></app-user-input>
+
+                <p>Stunden</p>
+                <div class="input-controls">
+                  <div class="svg-container" (click)="handlePlusClick()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="35px" fill="#FFFFFF"><path d="M440-280h80v-160h160v-80H520v-160h-80v160H280v80h160v160Zm40 200q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                  </div>
+      
+                  <div class="svg-container" (click)="handleMinusClick()">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="35px" fill="#FFFFFF"><path d="M280-440h400v-80H280v80ZM480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z"/></svg>
+                  </div>
+                </div>
+
+              </div>
+              <div *ngIf="durationErrors" class="error">{{ durationErrors }}</div>
+      
+              <div class="price">Gesamtpreis:<div style="margin-left: 8px;" class="price-line-through">{{calcPrice(product.price_per_hour)}}</div><span style="margin-left: 8px;">{{calcPrice(((product.price_per_hour)/100)*90)}}</span></div>
+            </div>
+            
     
             <label class="form-label">Zahlungsmethoden</label>
     
@@ -110,7 +116,7 @@
             <div *ngIf="radioButtonErrors" class="error" style="margin-top:10px; text-align: center;">{{ radioButtonErrors }}</div>
     
             <div class="bottom">
-              <div style="text-align: center;" class="error">{{errorMessage}}</div>
+              <!-- <div style="text-align: center;" class="error">{{errorMessage}}</div> -->
 
               <app-button class="btn" type="submit" [disabled]="checkoutForm.invalid">
                 Buchung bestätigen

@@ -5,11 +5,17 @@
         <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#123800"/>
       </svg>
     </div>
-    <div class="title">
+    <div *ngIf="!isDynamic" class="title">
       Scooter erfolgreich gebucht!
     </div>
-    <div class="text">
+    <div *ngIf="!isDynamic" class="text">
       Bitte den Scooter bis zum {{dateTimeString}} wieder an den Ursprungsort bringen.
+    </div>
+    <div *ngIf="isDynamic" class="title">
+      Buchung läuft!
+    </div>
+    <div *ngIf="isDynamic" class="text">
+      Vergiss nicht, die Buchung zu beenden, sobald du den Scooter nicht mehr benötigst. Solange die Buchung läuft, erzeugt sie Kosten.
     </div>
     <div class="buttons">
       <app-button design="thin" (click)="onNavigate('booking')">Buchung anschauen</app-button>

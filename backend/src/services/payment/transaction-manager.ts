@@ -1,6 +1,5 @@
 import { Transaction } from 'sequelize';
 import { PaymentMethod } from '../../models/payment';
-import database from '../../database';
 import { BachelorCardData, SwpSafeData, HciPalData, PaymentService } from '../../interfaces/payment-service.interface';
 import BachelorCard from './bachelorcard';
 import HciPal from './hcipal';
@@ -11,14 +10,11 @@ export class TransactionManager {
     // does the heavy lifting for mapping payment method ids to the right services and making the requests
     // on success returns a rollbackable payment token and the payment service used to perform the transaction
     public static async doTransaction(paymentMethodId: number, userId: number, amount: number, transaction?: Transaction): Promise<{ token: string, serviceUsed: PaymentService }> {
-        const transactionExtern: boolean = transaction !== undefined;
-        if(!transactionExtern) transaction = await database.getSequelize().transaction();
-
         let paymentService: PaymentService | null = null;
         
         const paymentMethod = await PaymentMethod.findOne({ 
             where: { id: paymentMethodId, usersAuthId: userId },
-            transaction 
+            transaction: transaction || undefined
         });
             if (!paymentMethod) {
             throw new Error('PAYMENT_METHOD_NOT_FOUND');

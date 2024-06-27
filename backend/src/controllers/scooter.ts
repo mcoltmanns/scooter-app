@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { Op } from 'sequelize';
-import { Reservation } from '..//models/rental';
+import { ActiveRental, Reservation } from '..//models/rental';
 
 export class ScooterController {
     // get scooters that aren't rented
@@ -17,6 +17,24 @@ export class ScooterController {
         let scooters = [];
         try {
             /* Find all scooters that are not rented and not reserved by someone else (reservation by the user himself is fine) */
+            // scooters = (await Scooter.findAll({
+            //   where: { 
+            //     active_rental_id: null,
+            //     [Op.or]: [
+            //       { reservation_id: null },
+            //       { '$reservation.user_id$': userId }
+            //     ]
+            //   },
+            //   include: [{
+            //     model: Reservation,
+            //     as: 'reservation',
+            //     attributes: ['id', 'user_id']
+            //   }]
+            // })).map((scooterModel) => {
+            //   const scooter = scooterModel.get();
+            //   delete scooter.reservation;
+            //   return scooter;
+            // });
             scooters = (await Scooter.findAll({
               where: { 
                 active_rental_id: null,
@@ -28,13 +46,23 @@ export class ScooterController {
               include: [{
                 model: Reservation,
                 as: 'reservation',
-                attributes: ['id', 'user_id']
-              }]
-            })).map((scooterModel) => {
+                attributes: ['id', 'user_id'],
+                required: false // Perform a left outer join
+              }, {
+                model: ActiveRental,
+                as: 'activeRental',
+                attributes: ['id'],
+                required: false, // Perform a left outer join
+              }],
+            })).reduce((filteredScooters, scooterModel) => {
               const scooter = scooterModel.get();
-              delete scooter.reservation;
-              return scooter;
-            });
+              if (scooter.activeRental === null) {
+                delete scooter.reservation; // Delete the reservation object (was only needed for the query)
+                delete scooter.activeRental; // Delete the activeRental object (was only needed for the query)
+                filteredScooters.push(scooter); // Add the modified scooter to the result array
+              }
+              return filteredScooters;
+            }, []);
         } catch (error) {
             console.log(error);
             response.status(500).json('Datenbank Fehler');
@@ -58,6 +86,7 @@ export class ScooterController {
         try {
             // find the scooter with the matching ID and check if active_rental_id is null
             // const scooter = await Scooter.findOne({ where: { id: scooterId, active_rental_id: null } });
+            
             const scooter = await Scooter.findByPk(scooterId);
 
             if (!scooter) {
@@ -65,7 +94,9 @@ export class ScooterController {
               return;
             }
 
-            if (scooter.getDataValue('active_rental_id') !== null) {
+            const activeRental = await ActiveRental.findOne({ where: { scooterId: scooterId } });
+
+            if (scooter.getDataValue('active_rental_id') !== null || activeRental !== null) {
               response.status(400).json({ code: 400, message: 'Scooter ist derzeit vermietet.' });
               return;
             }

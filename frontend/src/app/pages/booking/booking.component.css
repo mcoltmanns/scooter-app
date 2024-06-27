@@ -89,7 +89,6 @@
 .form-container {
   margin-top: 20px;
   min-width: min-content;
-  /* height: 100%; */
 }
 
 .form-container form {
@@ -130,8 +129,9 @@
 .input-controls {
   display: flex;
   justify-content: space-between;
-  gap: 7px;
+  gap: 2px;
   margin-left: auto;
+  margin-right: -1px;
 }
 
 .svg-container {
@@ -139,34 +139,6 @@
   justify-items: center;
   align-items: center;
   cursor: pointer;
-}
-
-.svg-container svg {
-  grid-area: 1 / 1 / 2 / 2;
-}
-
-.svg-container .svg1 {
-  width: 30px;
-  height: 30px;
-  z-index: 1;
-}
-
-.svg-container .svg2 {
-  width: 27px;
-  height: 27px;
-  z-index: 2;
-}
-
-.svg-container .svg3 {
-  width: 31px;
-  height: 30px;
-  z-index: 1;
-}
-
-.svg-container .svg4 {
-  width: 17px;
-  height: 3px;
-  z-index: 2;
 }
 
 .form-label {
@@ -179,6 +151,29 @@
 .price {
   width: 100%;
   text-align: left;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.price-line-through {
+  position: relative;
+  display: inline-block;
+  padding-top: 0;
+  height: 22px;
+  line-height: 1;
+}
+
+.price-line-through::after {
+  content: '';
+  position: absolute;
+  left: -1px;
+  top: 2px;
+  width: 106%;
+  border-radius: 3px;
+  height: 3px;
+  background-color: red;
+  transform: rotate(10deg);
+  transform-origin: left center;
 }
 
 app-add-button {
@@ -208,20 +203,16 @@ app-add-button {
 
 .bottom {
   margin-top: 30px;
-  width: 100%;
   min-width: min-content;
   height: 100%;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 15px;
+  display: relative;
   margin-bottom:20px;
 }
 
 app-button {
-  min-width: 210px;
+  margin-top: 15px;
+  /* min-width: 210px; */
+  width: 212px;
 }
 
 .status-message {
@@ -243,4 +234,160 @@ app-button {
 /* no Scooter picture  */
 .noScooterpicture {
   width: 100%;
+}
+
+.switch-container {
+  margin-top: 20px;
+  /* width: 100%; */
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+}
+
+.info-button {
+  margin: 0;
+  margin-top: 2px;
+  margin-left: -2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.switch-container p {
+  margin: 0;
+  margin-top: 2px;
+  font-family: Roboto;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 200;
+  line-height: 21px;
+}
+
+.custom-switch {
+  margin: 0;
+  padding: 0;
+  height: 1.75rem;
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch {
+    width: 3.5rem;
+    height: 1.75rem;
+    border-radius: 30px;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch.p-inputswitch-checked
+    .p-inputswitch-slider::before {
+    transform: translateX(1.70rem);
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch
+    .p-inputswitch-slider {
+    background: #ffffff;
+}
+
+:host ::ng-deep .custom-switch
+    .p-inputswitch:hover 
+    .p-inputswitch-slider {
+    background: #dfe4eb;
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch.p-inputswitch-checked 
+    .p-inputswitch-slider {
+    background: var(--highlight, #97fb64);
+}
+
+:host ::ng-deep .custom-switch
+    .p-inputswitch.p-inputswitch-checked:hover 
+    .p-inputswitch-slider {
+      background: #88ea57;
+}
+ 
+:host ::ng-deep .custom-switch 
+    .p-inputswitch-slider::before {
+    height: 1.5rem;
+    width: 1.5rem;
+    left: 0.1rem;
+    margin-top: -0.745rem;
+}
+
+:host ::ng-deep .custom-switch
+    .p-inputswitch.p-focus
+    .p-inputswitch-slider {
+    box-shadow: 0 0 0 0 transparent;
+}
+
+:host ::ng-deep .custom-switch 
+    .p-inputswitch-slider::before {
+    background: #00363D;
+}
+ 
+:host ::ng-deep .custom-switch 
+    .p-inputswitch-checked
+    .p-inputswitch-slider::before {
+    background: var(--Highlights-Stroke, #123800);
+}
+
+@keyframes squeezeIn {
+  from { height: 0; }
+  to { height: 100%; }
+}
+
+@keyframes squeezeOut {
+  from { height: 100%; }
+  to { height: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0;  }
+  to { opacity: 1;  }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1;  }
+  to { opacity: 0;  }
+}
+
+.duration-container {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.visible-div {
+  height: 100%;
+  animation: squeezeIn 0.2s ease-out;
+}
+
+.hidden-div {
+  height: 0;
+  animation: squeezeOut 0.2s ease-in;
+}
+
+.statically-visible {
+  height: 100%;
+  opacity: 1;
+}
+
+.animate-in {
+  opacity: 1;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-out {
+  opacity: 0;
+  animation: fadeOut 0.2s ease-in;
 }

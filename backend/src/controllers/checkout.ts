@@ -6,8 +6,7 @@ import { Model } from 'sequelize';
 import RentalManager from '../services/rental-manager';
 import { TransactionManager } from '../services/payment/transaction-manager';
 import { PaymentService } from '../interfaces/payment-service.interface';
-
-const DYNAMIC_EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes (in milliseconds) between rental extension checks
+import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
 
 interface ProductInstance extends Model {
   price_per_hour: number;
@@ -35,7 +34,8 @@ export class CheckoutController {
       console.log('Dynamic booking requested');
       rentalDuration = DYNAMIC_EXTENSION_INTERVAL_MS;
     } else {
-      rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      // rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      rentalDuration = 40000;
     }
 
     let endTimestamp;

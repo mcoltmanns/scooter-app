@@ -5,8 +5,9 @@ import { Scooter } from '../models/scooter';
 import database from '../database';
 import { scheduleJob } from 'node-schedule';
 import { TransactionManager } from './payment/transaction-manager';
+import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
 
-const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
+// const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
 //const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
 
 abstract class RentalManager {
@@ -65,6 +66,7 @@ abstract class RentalManager {
                 await ReservationManager.endReservation(userReservation, transaction);
               }
             }
+
             rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, nextActionTime: nextCheck, price_per_hour: price_per_hour, renew: isDynamic }, { transaction: transaction }); // create the entry in the rentals table
             // scooter.setDataValue('active_rental_id', rental.dataValues.id);
             // await scooter.save({ transaction: transaction });
@@ -90,7 +92,7 @@ abstract class RentalManager {
             if(!rental) return; // do nothing if rental not found
 
             /* Create a past rental entry with the total price */
-            const total_price = rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60) ;
+            const total_price = parseFloat((rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60)).toFixed(2));
             await PastRental.create({ endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
             
             /* End the active rental */
@@ -109,6 +111,11 @@ abstract class RentalManager {
     }
 
     public static scheduleRentalCheck(rentalId: number, time: Date): void {
+        if (time.getTime() < Date.now()) {
+          console.log(`SCHEDULER: ${time} is in the past, cannot schedule rental ${rentalId}!`);
+          return; // don't schedule if time is in the past
+        }
+
         console.log(`scheduling rental check at ${time} for rental ${rentalId}`);
         scheduleJob(`rental${rentalId}`, time, RentalManager.checkRental.bind(rentalId, rentalId)); // schedule the check
     }
@@ -124,10 +131,15 @@ abstract class RentalManager {
             if(rental.dataValues.renew) { // rental is dynamic and should be renewed
                 console.log(`renewing rental ${rentalId}`);
                 // try to pay for the next block
-                const nextTime = Date.now() + EXTENSION_INTERVAL_MS;
-                const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * EXTENSION_INTERVAL_MS;
+                const nextTime = Date.now() + DYNAMIC_EXTENSION_INTERVAL_MS;
+                const nextBlockPrice = rental.dataValues.price_per_hour / 60 / 60 / 1000 * DYNAMIC_EXTENSION_INTERVAL_MS;
                 try {
-                    await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice); // try pay for next block
+                    await TransactionManager.doTransaction(rental.dataValues.paymentMethodId, rental.dataValues.userId, nextBlockPrice, transaction); // try pay for next block
+
+                    /* Update the rental with the new nextActionTime */
+                    rental.setDataValue('nextActionTime', new Date(nextTime));
+                    await rental.save({ transaction: transaction });
+
                     // schedule the next check
                     RentalManager.scheduleRentalCheck(rentalId, new Date(nextTime));
                 } catch (error) { // cancel if unable
