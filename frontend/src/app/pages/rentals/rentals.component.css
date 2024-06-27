@@ -64,10 +64,10 @@
 }
 
 .scooter-details .date-text {
-    font-size: 14px;
+    font-size: 13px;
     font-family: Roboto;
     font-style: normal;
-    margin-top: -10px;
+    margin-top: -7px;
     margin-left: 10px;
     padding: 0;
 }
@@ -101,7 +101,7 @@
 }
 
 .extra-space {
-    padding-left: 27px;
+    padding-left: 38px;
 }
 
 .no-scooter-container {
