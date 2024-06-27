@@ -22,6 +22,7 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 import { HttpErrorResponse } from '@angular/common/http';
 import { CheckoutObject } from 'src/app/models/booking';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { InfoModalComponent } from 'src/app/components/info-modal/info-modal.component';
 
 interface SwitchChangeEvent {
   checked: boolean;
@@ -30,7 +31,7 @@ interface SwitchChangeEvent {
 @Component({
   selector: 'app-booking',
   standalone: true,
-  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent, LoadingOverlayComponent, InputSwitchModule],
+  imports: [BackButtonComponent, CommonModule, ReactiveFormsModule, UserInputComponent, ButtonComponent, PaymentMethodCardComponent, AddButtonComponent, ToastComponent, LoadingOverlayComponent, InputSwitchModule, InfoModalComponent],
   templateUrl: './booking.component.html',
   styleUrl: './booking.component.css'
 })
@@ -47,6 +48,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   public isDynamic = true;
   public durationInputClasses = '';
   private toggleDurationInputTimeout: ReturnType<typeof setTimeout> | null = null;
+  public showInfoModal = false;
 
   /* Variable to control the state of the loading overlay */
   public isLoading = false;
@@ -74,9 +76,13 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   public constructor(private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private paymentService: PaymentService, private router: Router, private bookingService: BookingService) {
     /* Create a FormGroup instance with all input fields and their validators */
     this.checkoutForm = this.fb.group({
+      checked: [false],
       duration: ['1', [Validators.required, CustomValidators.inInterval(1, 48) ]],
       radioButtonChoice: ['', [Validators.required]]
     });
+
+    /* Bind Information Modal to this instance */
+    this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
   }
 
   ngOnInit(): void {
@@ -88,6 +94,15 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     /* Set the duration state if it was passed from the previous page */
     if (historyState.originState && historyState.originState.duration) {
       this.checkoutForm.get('duration')!.setValue(historyState.originState.duration);
+    }
+
+    /* Set the dynamic state if it was passed from the previous page */
+    if (historyState && historyState.originState && 'isDynamic' in historyState.originState) {
+      this.isDynamic = historyState.originState.isDynamic;
+      this.checkoutForm.get('checked')!.setValue(!this.isDynamic);
+      if (!this.isDynamic) {
+        this.durationInputClasses = 'statically-visible';
+      }
     }
 
     /* If a payment method was added show the success toast */
@@ -305,6 +320,21 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  updateOriginState(): void {
+    const historyState = history.state;
+
+    /* If originState is present, update the isDynamic value */
+    if (historyState && historyState.originState) {
+      historyState.originState.isDynamic = this.isDynamic;
+    }
+    /* If originState is not present, create a new object and assign the isDynamic value */
+    else {
+      historyState.originState = { isDynamic: this.isDynamic };
+    }
+
+    history.replaceState(historyState, '');   // Update the router state
+  }
+
   handleSwitchChange(event: SwitchChangeEvent): void {
     /* Clear all timeouts before setting new ones */
     this.clearTimeouts();
@@ -312,6 +342,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     /* If the switch is checked, show the duration input field */
     if (event.checked) {
       this.isDynamic = false; // Set the state to not dynamic which adds the duration input field to the DOM
+      this.updateOriginState();
 
       this.toggleDurationInputTimeout = setTimeout(() => {
         this.durationInputClasses = 'visible-div';
@@ -326,6 +357,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       }, 200);
       this.toggleDurationInputTimeout = setTimeout(() => {
         this.isDynamic = true; // Set the state back to dynamic which removes the duration input field from the DOM
+        this.updateOriginState();
       }, 400);
     }
   }
@@ -427,11 +459,14 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       return; // Form submission canceled
     }
 
-    const finalForm = {
+    const finalForm: { scooterId: number; duration?: number; paymentMethodId?: number } = {
       scooterId: this.scooter!.id,
-      duration: Number(this.checkoutForm.value.duration),
       paymentMethodId: this.checkoutForm.value.radioButtonChoice ? Number(this.checkoutForm.value.radioButtonChoice) : undefined
     };
+
+    if (!this.isDynamic) {
+      finalForm.duration = Number(this.checkoutForm.value.duration);
+    }
 
     /* Send the form data to the backend */
     this.isLoading = true;
@@ -475,5 +510,13 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigateByUrl(`search/scooter/${this.scooter?.id}`, {
       state: originState
     });
+  }
+
+  onCloseInfoModal(): void {
+    this.showInfoModal = false;
+  }
+
+  onInfoClick(): void {
+    this.showInfoModal = true;
   }
 }
