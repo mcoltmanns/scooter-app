@@ -6,11 +6,10 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-import { Router } from '@angular/router';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
 
 @Component({
@@ -102,7 +101,6 @@ export class RentalsComponent implements OnInit {
         this.activeRentals = value.activeRentals;
         this.pastRentals = value.pastRentals;
         this.loadingDataScooter = false;
-        console.log(this.activeRentals, this.pastRentals);
       },
       error: (err) => {
         this.errorMessage = err.error.message;
