@@ -117,7 +117,7 @@ export class ProfileComponent implements OnInit, OnDestroy{
     const nameErrMsg = 'Bitte geben Sie einen Namen ein.';
     const streetErrMsg = 'Bitte geben Sie eine Straße ein.';
     let houseNumberErrMsg = 'Bitte geben Sie eine Hausnummer ein.';
-    let zipCodeErrMsg = 'Bitte geben Sie eine Postleitzahl ein.';
+    let zipCodeErrMsg = 'Bitte geben Sie eine 5-stellige Postleitzahl ein.';
     const cityErrMsg = 'Bitte geben Sie einen Ort ein.';
     let emailErrMsg = 'Bitte geben Sie eine E-Mail-Adresse ein.';
     let password1ErrMsg = 'Bitte geben Sie ein Passwort ein.';
@@ -170,7 +170,7 @@ export class ProfileComponent implements OnInit, OnDestroy{
   /* Custom Validator to check whether an input is a house number */
   checkHouseNumber(control: FormControl): { [key: string]: unknown } | null {
     const re = /^[0-9]+(([A-Za-z])|([-/.]([0-9]|[A-Za-z])))?$/; // start of line followed by at least one digit followed by ((any upper or lower case) or (a separator followed by (a digit or an upper case or lower case letter))) 0 or 1 times followed by end of line
-  
+
     if (!re.test(control.value)) {
       return { 'invalidHouseNumberInput': true }; // error message if the input is not a house number
     }

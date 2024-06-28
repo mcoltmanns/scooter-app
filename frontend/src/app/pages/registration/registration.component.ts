@@ -94,7 +94,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     const nameErrMsg = 'Bitte geben Sie einen Namen ein.';
     const streetErrMsg = 'Bitte geben Sie eine Straße ein.';
     let houseNumberErrMsg = 'Bitte geben Sie eine Hausnummer ein.';
-    let zipCodeErrMsg = 'Bitte geben Sie eine Postleitzahl ein.';
+    let zipCodeErrMsg = 'Bitte geben Sie eine 5-stellige Postleitzahl ein.';
     const cityErrMsg = 'Bitte geben Sie einen Ort ein.';
     let emailErrMsg = 'Bitte geben Sie eine E-Mail-Adresse ein.';
     let password1ErrMsg = 'Bitte geben Sie ein Passwort ein.';
