@@ -7,16 +7,72 @@ import { scheduleJob } from 'node-schedule';
 import { TransactionManager } from './payment/transaction-manager';
 import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
 
-// const EXTENSION_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes between rental extension checks
-//const MAX_RENTAL_DURATION_MS = 12 * 60 * 60 * 1000; // how long can a dynamic rental go before it's forced to end?
+interface ActiveRentalObject {
+    id: number;
+    nextActionTime: Date;
+    renew: boolean;
+    price_per_hour: number;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: number;
+    scooterId: number;
+    paymentMethodId: number;
+}
+
+interface PastRentalObject {
+    id: number;
+    endedAt: Date;
+    total_price: number;
+    createdAt: Date;
+    userId: number;
+    scooterId: number;
+    paymentMethodId: number;
+}
 
 abstract class RentalManager {
-    // Get a past rental entry for a specific rentalId
-    public static async getPastRentalForRentalId(rentalId: number): Promise<Model | null> {
+    /* Transform a prepaid ActiveRental object to look like a PastRental object */
+    private static transformPaidActiveToPastRental(activeRental: ActiveRentalObject): PastRentalObject {
+      const nextActionTime = new Date(activeRental.nextActionTime);
+      const createdAt = new Date(activeRental.createdAt);
+      const totalPrice = parseFloat((activeRental.price_per_hour * ((nextActionTime.getTime() - createdAt.getTime()) / 1000 / 60 / 60)).toFixed(2));
+
+      return {
+          id: activeRental.id,
+          endedAt: activeRental.nextActionTime,
+          total_price: totalPrice,
+          createdAt: activeRental.createdAt,
+          userId: activeRental.userId,
+          scooterId: activeRental.scooterId,
+          paymentMethodId: activeRental.paymentMethodId
+      };
+    }
+
+    /* Get all rentals that are already fully paid (that includes all past rentals and prepaid active rentals but not dynamic active rentals) */
+    public static async getFullyPaidRentalByRentalId(rentalId: number, transaction?: Transaction): Promise<PastRentalObject | null> {
+        const transactionExtern: boolean = transaction !== undefined;
+        if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
-            const pastRental = await PastRental.findOne({ where: { id: rentalId } });
-            return pastRental;
+            let foundRental: PastRentalObject | null = null;
+            const activeRental = await ActiveRental.findOne({
+              where: {
+                id: rentalId,
+                renew: false
+              },
+              transaction
+            });
+
+            if (activeRental) {
+              foundRental = RentalManager.transformPaidActiveToPastRental(activeRental.toJSON());
+            } else {
+              const pastRental = await PastRental.findOne({ where: { id: rentalId }, transaction });
+              foundRental = pastRental ? pastRental.toJSON() : null;
+            }
+
+            if(!transactionExtern) await transaction.commit();
+
+            return foundRental;
         } catch (error) {
+            if(!transactionExtern) await transaction.rollback();
             console.error(`Error fetching past rental for rentalId ${rentalId}:`, error);
             throw new Error('FETCH_PAST_RENTAL_FAILED');
         }

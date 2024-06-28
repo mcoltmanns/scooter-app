@@ -168,7 +168,7 @@ export class BookingsController {
     // TODO: check if a manager is possible
     public async generateInvoice(request: Request, response: Response): Promise<void> {
         const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
-        console.log(request.body);
+        // console.log(request.body);
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -178,7 +178,7 @@ export class BookingsController {
         try {
 
             // search for a rental agreement using the rentalId
-            const rental = await RentalManager.getPastRentalForRentalId(rentalId);
+            const rental = await RentalManager.getFullyPaidRentalByRentalId(rentalId);
             console.log(rental);
 
             if (!rental) {
