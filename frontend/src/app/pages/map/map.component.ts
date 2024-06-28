@@ -296,6 +296,8 @@ export class MapComponent implements OnInit, OnDestroy {
         )
         .catch((err) => {
           this.isLoading = false;
+          this.qrButtonpressed = false;
+          this.qrActive = false;
           console.error(`Kamera konnte nicht gestartet werden: ${err}`);
         });
 
@@ -309,6 +311,7 @@ export class MapComponent implements OnInit, OnDestroy {
             })
             .catch(err => {
               this.isLoading = false;
+              this.qrButtonpressed = false;
               console.error('Kamerazugriff verweigert:', err);
         });
       }
@@ -522,5 +525,4 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sortedScooters = Sorts.sortSpeed(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
   }
-
 }

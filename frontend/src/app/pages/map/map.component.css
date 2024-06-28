@@ -83,23 +83,25 @@
   border: 1px solid black;
 }
 
-.qr-icon {
-  position: absolute;
-  top: -47px;
-  right: 0px;
-  width: 30px;
-  height: 30px;
-  cursor: pointer;
-  margin-top: 45px;
-}
-
 .qr-container {
   position: absolute;
+  z-index: 9997;
   width: 30px;
   height: 30px;
-  top: 55px;
-  right: 20px;
+  top: 140px;
+  right: 30px;
   cursor: pointer;
+}
+
+.qr-icon {
+  position: absolute;
+  z-index: 9997;
+  top: -50px;
+  right: 5px;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  margin-top: 45px;
 }
 
 .video-preview {
