@@ -145,7 +145,7 @@
   </div></div>
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
-  <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" [mapScooters]="sortedScooters" scrollPosition="{{listScrollPosition}}"></app-scooter-list>
+  <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" [mapScooters]="sortedScooters" scrollPosition="{{listScrollPosition}}" (finishedLoadingAndPositioning)="adjustPageHeight()"></app-scooter-list>
 
   <!-- QR Icon -->
   <div class="qr-container" (click)="startQrCodeScanner()">

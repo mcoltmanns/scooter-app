@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnChanges, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { Scooter } from 'src/app/models/scooter';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -39,6 +39,8 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
+
+  @Output() finishedLoadingAndPositioning = new EventEmitter<void>();
   
   ngOnInit(): void {
     /* Get all scooters from backend */
@@ -107,6 +109,12 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
     if (this.scrollPosition) {
       this.elementsRef.changes.pipe(take(1)).subscribe(() => {
         this.jumpToPosition(this.scrollPosition);
+
+        /* Scroll to the top of the page with a timeout of 0ms to ensure that the scroll is done after the view is rendered */
+        // setTimeout(() => {
+        //   window.scrollTo(0, 0);
+        // }, 0);
+        this.finishedLoadingAndPositioning.emit();
       });
     }
   }

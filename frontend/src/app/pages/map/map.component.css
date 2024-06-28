@@ -74,6 +74,12 @@
   padding: 0;
 }
 
+/* app-scooter-list {
+  position: absolute;
+  width: 100%;
+  background-color: red;
+} */
+
 .search-input {
   border-radius: 15px;
   padding: 10px;

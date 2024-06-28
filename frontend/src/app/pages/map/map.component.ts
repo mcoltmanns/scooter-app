@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild, Renderer2 } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 /**
@@ -11,7 +11,7 @@ import * as Leaflet from 'leaflet';
 import { MapService } from 'src/app/services/map.service';
 import { Scooter } from 'src/app/models/scooter';
 import { ScooterListComponent } from '../scooter-list/scooter-list.component';
-import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -56,6 +56,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
+  private scrollTimeout: ReturnType<typeof setTimeout> | null = null;
   /* variables for QR-Code */
   private qrReader: Html5Qrcode | null = null;
   public qrActive = false;
@@ -96,7 +97,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public asc = true;
 //---------------------------------------------
 
-  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService) 
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef) 
   { //form group for the input on the scooter-filters
     this.scooterFilterForm = this.fb.group({ 
     minPrice: ['', [this.numberStringValidator(0, 99999)]],
@@ -212,12 +213,48 @@ export class MapComponent implements OnInit, OnDestroy {
   /* if the we change the page */
   ngOnDestroy(): void {
     this.stopQrCodeScanner();
+
+    /* Reset the page height to the app default */
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'height', '100%');
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'height', '100%');
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'overflow', 'auto');
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'overflow', 'auto');
+
+    /* Clear all timeouts */
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
+      this.scrollTimeout = null;
+    }
+  }
+
+  adjustPageHeight(): void {
+    if (this.view !== 'list') {
+      /* Reset the page height to the app default if the view is not list */
+      this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'height', '100%');
+      this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'height', '100%');
+      this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'overflow', 'auto');
+      this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'overflow', 'auto');
+      return;
+    }
+
+    /* Set the page height to auto to prevent a content overflow bug */
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'height', 'auto');
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'height', 'auto');
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.body, 'overflow', 'hidden');
+    this.renderer.setStyle(this.el.nativeElement.ownerDocument.documentElement, 'overflow', 'hidden');
+
+    /* Scroll to the top of the page with a timeout of 0ms to ensure that the scroll is done after the view is rendered */
+    window.scrollTo(0, 0);
+    this.scrollTimeout = setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
   }
 
   toggleListView(): void {
     this.view = this.view === 'map' ? 'list' : 'map';
     if (this.view === 'map') {
       this.listScrollPosition = null;
+      this.adjustPageHeight();
     }
     history.replaceState({ originState: { searchToggle: this.view } }, '');
   }
