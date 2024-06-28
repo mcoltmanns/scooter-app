@@ -166,7 +166,7 @@ export class BookingsController {
 
     /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
-        const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
+        const { rentalId, selectedCurrency } = request.body;
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -175,7 +175,7 @@ export class BookingsController {
 
         try {
 
-            // search for a rental agreement using the rentalId
+            // Search for a rental agreement using the rentalId
             const rental = await RentalManager.getFullyPaidRentalByRentalId(rentalId);
             console.log(rental);
 
@@ -190,11 +190,17 @@ export class BookingsController {
               return;
             }
 
-            /* get the name for a scooterID*/
-            const product = await this.getProductIdForScooter(rental.scooterId);
-            console.log(product);
-            if (!product) {
+            /* Get the name for a scooterID*/
+            const scooterName = await this.getProductIdForScooter(rental.scooterId);
+            if (!scooterName) {
                 response.status(404).json({ code: 404, message: 'Produkt nicht gefunden.' });
+                return;
+            }
+
+            /* Get the price for a specific scooter */
+            const pricePerHour = await this.getPricePerHourByScooterName(scooterName);
+            if (!pricePerHour) {
+                response.status(404).json({ code: 404, message: 'Keinen Preis für den Scooter gefunden.' });
                 return;
             }
 
@@ -207,7 +213,7 @@ export class BookingsController {
              }
 
             // Create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rental.id, userData.email, userData.name, userData.street, scooterName, rental.total_price.toString(), duration, pricePerHour, rental.createdAt.toDateString(), rental.endedAt.toDateString(), selectedCurrency);
+            const pdfBytes = await CreateInvoice.editPdf(rental.id, userData.email, userData.name, userData.street, scooterName.toString(), rental.total_price.toString(), pricePerHour.toString(), rental.createdAt.toString(), rental.endedAt.toString(), selectedCurrency);
 
             // Specify path to save the file
             const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
@@ -223,11 +229,7 @@ export class BookingsController {
             // Send PDF binary as an answer
             response.setHeader('Content-Type', 'application/pdf');
             response.setHeader('Content-Disposition', 'inline; filename="InvoiceScooter.pdf"');
-            /*
-            console.log(pdfBytes);
-            response.send(pdfBytes);
-            */
-           response.end(pdfBytes, 'binary');
+            response.end(pdfBytes, 'binary');
 
         } catch (error) {
             console.error(error);
@@ -256,7 +258,7 @@ export class BookingsController {
         }
     }
 
-    /* returns the scooter name for a specific scooterId*/
+    /* Returns the scooter name for a specific scooterId*/
     private async getProductIdForScooter(scooterId: number): Promise<unknown> {
         try {
             const scooter = await Scooter.findOne({
@@ -274,6 +276,35 @@ export class BookingsController {
         } catch (error) {
             console.error(`Error fetching product ID for scooter ID ${scooterId}:`, error);
             throw error;
+        }
+    }
+
+
+    /* Get for a scooter name the price_per_hour  */
+    public async getPricePerHourByScooterName(scooterName: unknown): Promise<number> {
+        if (!scooterName) {
+            throw new Error('Kein Scooter-Name angegeben.');
+        }
+    
+        try {
+            // Fetch product data based on the scooter name
+            const product = await Product.findOne({
+                where: {
+                    name: scooterName
+                },
+                attributes: ['price_per_hour']
+            });
+    
+            if (!product) {
+                throw new Error('Product not found.');
+            }
+    
+            // Extract the price per hour
+            const pricePerHour = product.get('price_per_hour') as number;
+            return pricePerHour;
+        } catch (error) {
+            console.error('Error when retrieving the hourly rate:', error);
+            throw new Error('Error when retrieving the hourly rate.');
         }
     }
 }

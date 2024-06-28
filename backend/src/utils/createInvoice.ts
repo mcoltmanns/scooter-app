@@ -23,7 +23,7 @@ export class CreateInvoice {
      * @param selectedCurrency
      * @returns 
      */
-    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total: string, rentalDuration: string, price_per_hour: string, createdAt: string, endedAt: string, selectedCurrency: string): Promise<Uint8Array> {
+    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total: string, price_per_hour: string, createdAt: string, endedAt: string, selectedCurrency: string): Promise<Uint8Array> {
         
         // path to get prefilled pdf
         const pdfPath = path.resolve(process.cwd(), 'img', 'pdf', 'Rechnung.pdf');
@@ -32,12 +32,17 @@ export class CreateInvoice {
         const existingPdfBytes = fs.readFileSync(pdfPath);
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
+        /* Convert Currency */
+
         /* create date when the invoice is created */
         const today = new Date();
         const year = today.getFullYear();
         const month = String(today.getMonth() + 1).padStart(2, '0'); // +1 because getMonth() is zero based and pad with leading zero if needed
         const day = String(today.getDate()).padStart(2, '0'); // pad with leading zero if needed
         const currentDate = `${day}.${month}.${year}`;
+
+        /* calculate the rental duration */
+        const duration = this.calculateDuration(createdAt, endedAt);
 
         /* get first pdf page */
         const firstPage = pdfDoc.getPage(0);
@@ -142,9 +147,8 @@ export class CreateInvoice {
         });
 
         // add rental duartion into the pdf
-        rentalDuration = rentalDuration + 'h';
-        firstPage.drawText(rentalDuration.toString(), {
-            x: 387,
+        firstPage.drawText(duration.toString(), {
+            x: 380,
             y: height - currentYPosition - lineHeight - 25, // Positionierung von oben nach unten
             size: fontSize,
             font: timesRomanFont,
@@ -229,4 +233,22 @@ export class CreateInvoice {
         const mwstValue = total - netValue; 
         return mwstValue.toFixed(2); 
     }
+
+    /**
+     * Calculates the duration between two date-time strings in hours and minutes
+     * @param createdAt - The start date-time string (e.g., '2024-06-10T15:53:51.998Z')
+     * @param endedAt - The end date-time string
+     * @returns The duration in hours and minutes as a string (e.g., '2h 30m')
+     */
+    private static calculateDuration(createdAt: string, endedAt: string): string {
+        const startDate = new Date(createdAt);
+        const endDate = new Date(endedAt);
+
+        const diffMs = endDate.getTime() - startDate.getTime();
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        return `${diffHours}h ${diffMinutes}min`;
+    }
+
 }
