@@ -58,7 +58,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public listScrollPosition: string | null = null;
   /* variables for QR-Code */
   private qrReader: Html5Qrcode | null = null;
-  private qrActive = false;
+  public qrActive = false;
   public qrButtonpressed = false;
   public isLoading = false; // camera loading variable
 
@@ -299,7 +299,7 @@ export class MapComponent implements OnInit, OnDestroy {
     }
   
     // stops the video live stream
-    if (this.videoElement.nativeElement.srcObject) {
+    if (this.videoElement && this.videoElement.nativeElement && this.videoElement.nativeElement.srcObject) {
       const stream = this.videoElement.nativeElement.srcObject as MediaStream;
       if (stream) {
         stream.getTracks().forEach(track => {

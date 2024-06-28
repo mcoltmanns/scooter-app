@@ -5,7 +5,7 @@
   --logo-title-height: 60px;
 }
 
-.headWrapper{ 
+.headWrapper { 
   width: 100%;
   left: 0%;
   margin-top: 12pt;
@@ -102,14 +102,21 @@
   cursor: pointer;
 }
 
-#video-preview {
+.video-preview {
   width: 100%;
-  height: calc(100% - var(--logo-title-height) - var(--header-padding-top) - var(--header-padding)); 
   object-fit: cover;
   background-color: #26627C;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.video-visible {
+  height: calc(100% - var(--logo-title-height) - var(--header-padding-top) - var(--header-padding));
+}
+
+.video-hidden {
+  height: 0; 
 }
 
 .loading-container {

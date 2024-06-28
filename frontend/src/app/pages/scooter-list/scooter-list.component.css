@@ -1,6 +1,6 @@
 .scrollable-container {
-    max-height: 80vh; /* 80% of the screen height */
-    overflow-y: auto; /* Activate vertical scrolling */
+    max-height: 80vh;
+    overflow-y: auto;
     padding-top: 0;
 }
 

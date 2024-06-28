@@ -13,7 +13,7 @@
       placeholder="Suchen"
       [(ngModel)]="searchTerm"
     />
-    <div class="headWrapper">
+    <div *ngIf="filterMenuVisible && view === 'list'" class="headWrapper">
       <div *ngIf="filterMenuVisible && view === 'list'" class="filter-menu-container">
         <div class="top">
           <app-button class="btn" type="submit" (click)="onSubmit()">
@@ -107,7 +107,7 @@
     [leafletLayers]="layers"
     (leafletClick)="onMapClick($event)" 
   >
-  <div class="wrapper">
+  <div *ngIf="filterMenuVisible && view ==='map'" class="wrapper">
     <div *ngIf="filterMenuVisible && view ==='map'" class="filter-menu-container">
       <div class="top">
         <app-button class="btn" type="submit" (click)="onSubmit()">
@@ -165,7 +165,8 @@
     </div>
   </div>
 
-  <video #videoElement id="video-preview" autoplay></video>
+
+  <video #videoElement [ngClass]="['video-preview', qrActive ? 'video-visible' : 'video-hidden']" autoplay></video>
   <div id="qr-reader"></div>
 
   <!-- if camera is loading -->
