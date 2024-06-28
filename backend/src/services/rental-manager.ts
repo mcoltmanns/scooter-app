@@ -83,6 +83,20 @@ abstract class RentalManager {
         return await Rental.findAll({ where: { scooter_id: scooterId } });
     }
 
+    public static async getAllRentalsByUserId(userId: number): Promise<{id: number, userId: number, scooterId: number, paymentMethodId: number}[]> {
+      const activeRentals = await ActiveRental.findAll({
+        where: { userId },
+        attributes: ['id', 'userId', 'scooterId', 'paymentMethodId']
+      });
+      const pastRentals = await PastRental.findAll({
+        where: { userId },
+        attributes: ['id', 'userId', 'scooterId', 'paymentMethodId']
+      });
+
+      const combinedRentals = activeRentals.map(rental => rental.toJSON()).concat(pastRentals.map(rental => rental.toJSON()));
+      return combinedRentals;
+    }
+
     // get all rentals associated with a user
     public static async getRentalsFromUser(userId: number): Promise<[Model[], Model[]]> {
         return [await ActiveRental.findAll({ where: { userId: userId } }), await PastRental.findAll({ where: { userId: userId }})];

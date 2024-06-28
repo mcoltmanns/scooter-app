@@ -12,13 +12,16 @@
     <app-back-button [path]="'search/scooter/' + scooter.id"></app-back-button>
     <h1 class="title">Scooter buchen</h1>
       <div class="scrollable-container">
+      <div class="width-limiter">
 
         <div class="scooter-box">
             <img class="picture" src="http://localhost:8000/img/products/{{ product.name }}.jpg">
             <div class="scooter-details">
                 <p class="scooter-name">{{ scooter.product_id }}</p>
                 <div class="scooter-stats">
-                    <div class="scooter-stats-row">
+
+                  <div class="scooter-stats-pair">
+                    <div class="scooter-stat">
                         <div class="scooter-attribute">
                             <p>Batteriestand:</p>
                         </div>
@@ -26,7 +29,7 @@
                             <p>{{ scooter.battery.toFixed(0) }}%</p>
                         </div>
                     </div>
-                    <div class="scooter-stats-row">
+                    <div class="scooter-stat">
                         <div class="scooter-attribute">
                             <p>Reichweite:</p>
                         </div>
@@ -34,7 +37,10 @@
                             <p>{{ convertDistanceUnits(calcRange(product.max_reach, scooter.battery), this.selectedDistance) }}</p>
                         </div>
                     </div>
-                    <div class="scooter-stats-row">
+                  </div>
+                    
+                  <div class="scooter-stats-pair">
+                    <div class="scooter-stat">
                         <div class="scooter-attribute">
                             <p>Geschwindigkeit:</p>
                         </div>
@@ -42,7 +48,7 @@
                             <p>{{ convertSpeedUnits(product.max_speed, this.selectedSpeed) }}</p>
                         </div>
                     </div>
-                    <div class="scooter-stats-row">
+                    <div class="scooter-stat">
                         <div class="scooter-attribute">
                             <p>Preis pro Stunde:</p>
                         </div>
@@ -50,6 +56,8 @@
                             <p>{{ convertCurrencyUnits(product.price_per_hour, this.selectedCurrency) }}</p>
                         </div>
                     </div>
+                  </div>
+
                 </div>
             </div>
         </div>
@@ -127,7 +135,8 @@
             </div>
           </form>
         </div>
-
+        
+      </div>
     </div>
   </div>
 </ng-container>
