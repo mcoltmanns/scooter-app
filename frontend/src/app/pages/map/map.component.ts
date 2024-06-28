@@ -21,6 +21,7 @@ import { Product } from 'src/app/models/product';
 import { SortButtonComponent} from '../../components/sort-button/sort-button.component';
 import { UserPosition } from 'src/app/utils/userPosition'; // get methods from utils folder 
 import { PositionService } from 'src/app/utils/position.service';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 // QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
@@ -48,7 +49,7 @@ const userIcon = Leaflet.icon({
     standalone: true,
     templateUrl: './map.component.html',
     styleUrls: ['./map.component.css'],
-    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent]
+    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent, ToastComponent]
 })
 
 export class MapComponent implements OnInit, OnDestroy {
@@ -63,6 +64,11 @@ export class MapComponent implements OnInit, OnDestroy {
   public qrActive = false;
   public qrButtonpressed = false;
   public isLoading = false; // camera loading variable
+  /* variables for the qr Code toast */
+  @ViewChild('toastComponent') toastComponent!: ToastComponent;
+  public showToast = false;
+  public toastMessage = 'Kamerazugriff verweigert!';
+  public toastType: 'success' | 'error' = 'error';
 
 
   public scooterFilterForm!: FormGroup;
@@ -298,6 +304,9 @@ export class MapComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.qrButtonpressed = false;
           this.qrActive = false;
+          this.showToast = true;
+          this.toastComponent.showToast();
+          this.showToast = false; // Reset the state to prevent the toast from showing again
           console.error(`Kamera konnte nicht gestartet werden: ${err}`);
         });
 

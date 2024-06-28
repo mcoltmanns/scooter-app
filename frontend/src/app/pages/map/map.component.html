@@ -1,3 +1,6 @@
+<app-toast #toastComponent [showDuration]=2500 [type]="toastType" style="z-index: 9997;">
+  {{toastMessage}}
+</app-toast>
 <div class="map-container">
   <div class="map-header">
     <span class="switch-btn" (click)="toggleListView()">
@@ -164,7 +167,6 @@
      </svg>
     </div>
   </div>
-
 
   <video #videoElement [ngClass]="['video-preview', qrActive ? 'video-visible' : 'video-hidden']" autoplay></video>
   <div id="qr-reader"></div>
