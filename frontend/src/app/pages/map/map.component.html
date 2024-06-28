@@ -17,10 +17,10 @@
       <div *ngIf="filterMenuVisible && view === 'list'" class="filter-menu-container">
         <div class="top">
           <app-button class="btn" type="submit" (click)="onSubmit()">
-            Anwenden
+            Filter & Sortierung Anwenden
           </app-button>
           <app-button color="accent" class="btn" (click)="onCancel()">
-            Zurücksetzten
+            Filter & Sortierung Zurücksetzten
           </app-button>
         </div>
         <div class="info"></div>
@@ -30,7 +30,7 @@
           <div class="sort-wrapper">
             <div *ngIf="sortMenuVisible" class="sort-menu">
               <div class="sort-menu-cont">
-                <h3 class="o-title">Sortier-Otionen</h3>
+                <h3 class="o-title">Sortier Optionen</h3>
                 <app-button color="accent" class="btn" type="submit" (click)="sortCancel()">
                   Sortierung zurücksetzten
                 </app-button>

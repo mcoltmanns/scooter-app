@@ -411,7 +411,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.maxBty = '';
     this.minSpeed = '';
     this.maxSpeed = '';
-    this.sortFiltered();
+    this.sortCancel();
   }
   
   /**
@@ -481,7 +481,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
     this.sortedScooters = this.filteredScooters;
     this.sortMenuVisible = !this.sortMenuVisible;
-    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -492,7 +491,6 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sortedScooters = this.filteredScooters;
     this.sortedScooters = Sorts.sortPrice(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
-    //this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -503,7 +501,6 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sortedScooters = this.filteredScooters;
     this.sortedScooters = Sorts.sortRange(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
-    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -514,7 +511,6 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sortedScooters = this.filteredScooters;
     this.sortedScooters = Sorts.sortBty(asc, this.sortedScooters);
     this.sortMenuVisible = !this.sortMenuVisible;
-    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -525,7 +521,6 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sortedScooters = this.filteredScooters;
     this.sortedScooters = Sorts.sortSpeed(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
-    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
 }
