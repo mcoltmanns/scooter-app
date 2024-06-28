@@ -8,8 +8,6 @@ import { Op } from 'sequelize';
 import { CreateInvoice } from '../utils/createInvoice'; 
 import { UsersAuth } from '../models/user';
 import { UsersData } from '../models/user';
-import fs from 'fs';
-import path from 'path';
 
 // manages information about rentals and reservations
 export class BookingsController {
@@ -213,19 +211,8 @@ export class BookingsController {
              }
 
             // Create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rental.id, userData.email, userData.name, userData.street, scooterName.toString(), rental.total_price.toString(), pricePerHour.toString(), rental.createdAt.toString(), rental.endedAt.toString(), selectedCurrency);
+            const pdfBytes = await CreateInvoice.editPdf(rental.id, userData.email, userData.name, userData.street, scooterName.toString(), rental.total_price, pricePerHour, rental.createdAt.toString(), rental.endedAt.toString(), selectedCurrency);
 
-            // Specify path to save the file
-            const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
-
-            // Write PDF to a new file
-            fs.writeFile(filePath, pdfBytes, (err) => {
-                if (err) {
-                    console.error('Fehler beim Speichern der PDF-Datei:', err);
-                    response.status(500).json({ code: 500, message: 'Fehler beim Speichern der PDF-Datei.' });
-                    return;
-                }
-            });
             // Send PDF binary as an answer
             response.setHeader('Content-Type', 'application/pdf');
             response.setHeader('Content-Disposition', 'inline; filename="InvoiceScooter.pdf"');

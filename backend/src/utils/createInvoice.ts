@@ -2,6 +2,7 @@ import { PDFDocument, rgb, StandardFonts} from 'pdf-lib';
 import fs from 'fs';
 import path from 'path';
 import QRCode from 'qrcode';
+import { UnitConverter } from './unit-converter';
 
 /**
  * creates a invoice pdf for a scooter booking
@@ -23,16 +24,18 @@ export class CreateInvoice {
      * @param selectedCurrency
      * @returns 
      */
-    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total: string, price_per_hour: string, createdAt: string, endedAt: string, selectedCurrency: string): Promise<Uint8Array> {
+    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total_price: number, pricePerHour: number, createdAt: string, endedAt: string, selectedCurrency: string): Promise<Uint8Array> {
         
         // path to get prefilled pdf
-        const pdfPath = path.resolve(process.cwd(), 'img', 'pdf', 'Rechnung.pdf');
+        const pdfPath = path.resolve(process.cwd(), 'src', 'utils', 'pdf', 'Rechnung.pdf');
 
         // read and load th pdf file 
         const existingPdfBytes = fs.readFileSync(pdfPath);
         const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
         /* Convert Currency */
+        const total = UnitConverter.convertCurrencyUnits(total_price, selectedCurrency).toString();
+        const price_per_hour = UnitConverter.convertCurrencyUnits(pricePerHour, selectedCurrency).toString();
 
         /* create date when the invoice is created */
         const today = new Date();
@@ -138,7 +141,7 @@ export class CreateInvoice {
         });
 
         // add price_per_hour into the pdf
-        firstPage.drawText((price_per_hour.toString() + selectedCurrency), {
+        firstPage.drawText((price_per_hour.toString()), {
             x: 250,
             y: height - currentYPosition - lineHeight - 25,
             size: fontSize,
