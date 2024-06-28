@@ -104,7 +104,7 @@ app.get('/api/product', scooter.getAllProducts.bind(auth)); // get all product i
 app.get('/api/productInfo/:scooterId', scooter.getProductByScooterId); //get for a specific scooter the products info
 app.get('/api/bookScooterHistory', bookings.getUserRentals); // get all the rentals for a specific user
 app.get('/api/bookScooterProducts', bookings.getRentalProducts); // get all products + scooterId for all bookings
-app.post('/api/bookings/generateInvoice', bookings.generateInvoice); // geneartes the invoice pdf in the backend
+app.post('/api/bookings/generateInvoice',validator.validateInvoice, bookings.generateInvoice); // geneartes the invoice pdf in the backend
 
 /* Routes to manage payment methods */
 app.get('/api/payment', payment.getAllPaymentMethods);

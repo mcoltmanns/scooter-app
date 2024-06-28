@@ -165,10 +165,8 @@ export class BookingsController {
     }
 
     /* method to get the information for the invoice pdf */
-    // TODO: check if a manager is possible
     public async generateInvoice(request: Request, response: Response): Promise<void> {
         const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
-        // console.log(request.body);
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -192,6 +190,14 @@ export class BookingsController {
               return;
             }
 
+            /* get the name for a scooterID*/
+            const product = await this.getProductIdForScooter(rental.scooterId);
+            console.log(product);
+            if (!product) {
+                response.status(404).json({ code: 404, message: 'Produkt nicht gefunden.' });
+                return;
+            }
+
              // Fetch user data
              const userId = response.locals.userId;
              const userData = await this.fetchUserData(userId);
@@ -200,13 +206,13 @@ export class BookingsController {
                  return;
              }
 
-            // create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street, scooterName, total, duration, pricePerHour, createdAt, endedAt, selectedCurrency);
+            // Create PDF
+            const pdfBytes = await CreateInvoice.editPdf(rental.id, userData.email, userData.name, userData.street, scooterName, rental.total_price.toString(), duration, pricePerHour, rental.createdAt.toDateString(), rental.endedAt.toDateString(), selectedCurrency);
 
-            // specify path to save the file
+            // Specify path to save the file
             const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
 
-            // write PDF to a new file
+            // Write PDF to a new file
             fs.writeFile(filePath, pdfBytes, (err) => {
                 if (err) {
                     console.error('Fehler beim Speichern der PDF-Datei:', err);
@@ -214,7 +220,7 @@ export class BookingsController {
                     return;
                 }
             });
-            // send PDF as an answer
+            // Send PDF binary as an answer
             response.setHeader('Content-Type', 'application/pdf');
             response.setHeader('Content-Disposition', 'inline; filename="InvoiceScooter.pdf"');
             /*
@@ -246,6 +252,27 @@ export class BookingsController {
             };
         } catch (error) {
             console.error('Error fetching user data:', error);
+            throw error;
+        }
+    }
+
+    /* returns the scooter name for a specific scooterId*/
+    private async getProductIdForScooter(scooterId: number): Promise<unknown> {
+        try {
+            const scooter = await Scooter.findOne({
+                where: {
+                    id: scooterId
+                },
+                attributes: ['product_id']
+            });
+
+            if (!scooter) {
+                throw new Error(`Scooter with ID ${scooterId} not found`);
+            }
+
+            return scooter.get('product_id');
+        } catch (error) {
+            console.error(`Error fetching product ID for scooter ID ${scooterId}:`, error);
             throw error;
         }
     }
