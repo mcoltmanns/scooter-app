@@ -186,6 +186,12 @@ export class BookingsController {
                 return;
             }
 
+            if (rental.userId !== response.locals.userId) {
+              /* Not athorized, user is not the owner of the rental */
+              response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
+              return;
+            }
+
              // Fetch user data
              const userId = response.locals.userId;
              const userData = await this.fetchUserData(userId);
