@@ -41,7 +41,7 @@ export const UsersData = Database.getSequelize().define('usersDatas', {
     allowNull: false,
   },
   houseNumber: { 
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING, // because we allow values like 12a
     allowNull: false,
   },
   zipCode: {
