@@ -185,11 +185,11 @@
 
 .top app-button{
   flex:1;
-  margin-right: 5px
 }
 
 .top app-button:first-child{
   flex: 1;
+  margin-right: 10px
 }
 
 .top app-button:last-child{
@@ -236,18 +236,18 @@
 .corresponding {
   margin-top: 10px;
   display: flex;
+  align-items: center;
 }
 
 .corresponding app-button{
   flex:1;
-  margin-right: 5px
 }
 
 .corresponding app-button:first-child{
   flex: 1;
+  margin-right: 10px;
 }
 
 .corresponding app-button:last-child{
   flex: 1;
-  
 }
