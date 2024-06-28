@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { Rental } from '../models/rental';
 import ReservationManager from '../services/reservation-manager';
 import RentalManager from '../services/rental-manager';
 import { Scooter } from '../models/scooter';
@@ -16,7 +15,7 @@ export class BookingsController {
 
     constructor() {
         this.getUserRentals = this.getUserRentals.bind(this);
-        this.getRentalProducts = this.getRentalProducts.bind(this);
+        this.getProductsByRentals = this.getProductsByRentals.bind(this);
         this.generateInvoice = this.generateInvoice.bind(this);
         this.fetchUserData = this.fetchUserData.bind(this);
     }
@@ -126,19 +125,16 @@ export class BookingsController {
         }
     }
 
-    // TODO: getRentalProducts should use according managers (and rename more descriptively, e.g. getProductsByRentals)!
-    // FIX ME: Rentals table is not used anymore -> use activeRentals and pastRentals via rental manager
     /* Method that return for all bookings the product + the scooterId from the scooter table */
-    public async getRentalProducts(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId; // get userID from session cooki
+    public async getProductsByRentals(request: Request, response: Response): Promise<void> {
+        const userId = response.locals.userId; // get userID from session cookie
 
         try {
             // Get all rental contracts of the user
-            const rentals = await Rental.findAll({ where: { user_id: userId } });
+            const allRentals = await RentalManager.getAllRentalsByUserId(userId);
 
             // / Extract the scooter IDs from the rental agreements
-            const scooterIds = rentals.map(rental => rental.get('scooter_id'));
-
+            const scooterIds = [...new Set(allRentals.map(rental => rental.scooterId))];  // Use a Set to remove duplicates
             
             // Search for the names of the scooters using their IDs in the scooter table
             const scooters = await Scooter.findAll({ 
@@ -165,7 +161,6 @@ export class BookingsController {
     }
 
     /* method to get the information for the invoice pdf */
-    // TODO: check if a manager is possible
     public async generateInvoice(request: Request, response: Response): Promise<void> {
         const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
         // console.log(request.body);

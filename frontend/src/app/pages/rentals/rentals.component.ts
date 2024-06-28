@@ -66,6 +66,7 @@ export class RentalsComponent implements OnInit {
     /* Get all scooters from backend */
     this.rentalService.getRentalProduct().subscribe({
       next: (value) => {
+        console.log(value);
         this.products = value;
         this.loadingDataProduct = false;
       },
