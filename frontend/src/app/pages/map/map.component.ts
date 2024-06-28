@@ -25,6 +25,7 @@ import { PositionService } from 'src/app/utils/position.service';
 // QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { Sorts } from 'src/app/utils/util-sorts';
 
 /**
  * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
@@ -88,13 +89,6 @@ export class MapComponent implements OnInit, OnDestroy {
 
 //Variables for the sorting--------------------
   sortMenuVisible = false;
-  //variables that say what is to be filtered by
-  public price = false;
-  public range = false;
-  public bty = false;
-  public speed = false;
-  //variable for ascending filtered or not
-  public asc = true;
 //---------------------------------------------
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef) 
@@ -474,19 +468,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * is called after we change the @filteredScooters array due to new filters to maintain the sorting if it existed
    */
   sortFiltered(): void {
-    //check what the last category filtered by and do the right sorting
-    if(this.price){
-      this.sortPrice(this.asc);
-    } else if(this.range) {
-      this.sortRange(this.asc);
-      return;
-    } else if(this.bty){
-      this.sortBty(this.asc);
-    } else if(this.speed){
-      this.sortSpeed(this.asc);
-    } else{
-      this.sortedScooters = this.filteredScooters;
-    }
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.redoSort(this.sortedScooters, this.products);
   }
 
   /**
@@ -494,15 +477,11 @@ export class MapComponent implements OnInit, OnDestroy {
    * same value they are initialized with
    */
   sortCancel(): void{
-    //reset to default values
-    this.asc= true;
-    this.price = false;
-    this.range = false;
-    this.bty = false;
-    this.speed = false;
+    Sorts.sortCancel();
 
     this.sortedScooters = this.filteredScooters;
     this.sortMenuVisible = !this.sortMenuVisible;
+    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -510,40 +489,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortPrice(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = true;
-    this.range = false;
-    this.bty = false;
-    this.speed = false;
-    this.sortedScooters = this.sortedScooters.sort((a,b) => {
-      //get the price of the scooters being compared
-    const priceA = this.products.find(p => p.name === a.product_id)?.price_per_hour;
-    const priceB = this.products.find(p => p.name === b.product_id)?.price_per_hour;
-    if(asc){//compare prices ascending
-      if(!(priceA === undefined) && !(priceB === undefined)){
-        const c = priceA - priceB;
-        //if equal in price sort by id of scooter, always ascending per default
-        if(c === 0){
-          return a.id -b.id;
-        }
-        return c;
-      }
-    } else{//compare prices descending
-      if(!(priceA === undefined) && !(priceB === undefined)){
-        const c = priceB-priceA;
-        //if equal in price sort by id, always ascending per default
-        if(c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    }
-    return 0;
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortPrice(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
+    //this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -551,41 +500,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortRange(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = false;
-    this.range = true;
-    this.bty = false;
-    this.speed = false;
-    this.sortedScooters = [];
-    this.sortedScooters = this.filteredScooters.sort((a,b) => {
-    let rangeA = this.products.find(p => p.name === a.product_id)?.max_reach;
-    let rangeB = this.products.find(p => p.name === b.product_id)?.max_reach;
-    if(!(rangeA === undefined)&&!(rangeB === undefined)){
-      rangeA = (a.battery/100 * rangeA);
-      rangeB = (b.battery/100 * rangeB);
-      if(asc){//compare ascending
-        const c = rangeA - rangeB;
-        //if equal in range sort by id of scooter, always ascending per default
-        if(c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      } else{//compare descending
-        const c =  rangeB - rangeA;
-        //if equal in range, sort by id, always ascending per default
-        if (c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    }
-    return 0;
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
-    
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortRange(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
+    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -593,34 +511,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortBty(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = false;
-    this.range = false;
-    this.bty = true;
-    this.speed = false;
-    this.sortedScooters = [];
-    this.sortedScooters = this.filteredScooters.sort((a,b) => {
-    if(asc){//compare ascending
-      const c = a.battery - b.battery;
-      //if equal in price sort by id of scooter, always ascending per default
-      if(c === 0){
-        return a.id - b.id;
-      }
-      return c;
-    } else{//compare descending
-      const c =  b.battery - a.battery;
-      //if equal in battery, sort by id, always ascending per default
-      if (c === 0){
-        return a.id - b.id;
-      }
-      return c;
-    }
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
-    
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortBty(asc, this.sortedScooters);
     this.sortMenuVisible = !this.sortMenuVisible;
+    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
   /**
@@ -628,42 +522,10 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortSpeed(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = false;
-    this.range = false;
-    this.bty = false;
-    this.speed = true;
-    this.sortedScooters = [];
-    this.sortedScooters = this.filteredScooters.sort((a,b) => {
-      //get the speed of the scooters being compared
-    const speedA = this.products.find(p => p.name === a.product_id)?.max_speed;
-    const speedB = this.products.find(p => p.name === b.product_id)?.max_speed;
-    if(asc){ //compare ascending
-      if(!(speedA === undefined) && !(speedB === undefined)){
-        const c = speedA - speedB;
-        //if equal in speed, sort by id, always ascending per default
-        if (c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    } else{//compare descending
-      if(!(speedA === undefined) && !(speedB === undefined)){
-        const c = speedB-speedA;
-        //if equal in speed, sort by id, always ascending per default
-        if(c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    }
-    return 0;
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
-    
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortSpeed(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
+    this.filterMenuVisible = !this.filterMenuVisible;
   }
 
 }
