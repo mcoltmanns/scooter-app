@@ -62,7 +62,7 @@ export class PositionService {
    * and a given position.
    * @param lat2  latitude in deg.
    * @param lon2  longitude in deg.
-   * @returns the distance as a string in km.
+   * @returns the distance as a string in km or mi.
    */
   public calcDistances(lat2: number | undefined, lon2: number | undefined, unit: string | undefined): string {
     if (lat2 === undefined || lon2 === undefined || unit === undefined) {

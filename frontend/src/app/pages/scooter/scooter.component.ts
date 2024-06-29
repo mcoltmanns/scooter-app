@@ -16,6 +16,8 @@ import { Subscription, forkJoin } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
+import { PositionService } from 'src/app/utils/position.service';
+
 
 const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
@@ -42,7 +44,7 @@ export class ScooterComponent implements OnInit, OnDestroy {
   /* Variables for subscriptions */
   private scooterUnreservedSubscription: Subscription;
 
-  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService, private renderer: Renderer2, private el: ElementRef) { 
+  public constructor(private route: ActivatedRoute, private mapService: MapService, private router: Router, private optionService: OptionService, private bookingService: BookingService, private renderer: Renderer2, private el: ElementRef, private positionService: PositionService) { 
     /* By using bind(this), we ensure that these methods always refer to the ScooterComponent instance. */
     this.onCancelReservationConfirmModal = this.onCancelReservationConfirmModal.bind(this);
     this.onConfirmReservationConfirmModal = this.onConfirmReservationConfirmModal.bind(this);
@@ -62,6 +64,7 @@ export class ScooterComponent implements OnInit, OnDestroy {
   public loadingScooter = true;
   public product: Product | null = null;
   public scooter: Scooter | null = null;
+  public distance: string = '';
 
   /* User Units variables */
   public selectedSpeed = ''; 
@@ -151,6 +154,10 @@ export class ScooterComponent implements OnInit, OnDestroy {
               /* Animate the scooter status circles */
               this.animateScooterStatusCircles();
             });
+
+            /* Calculate the distance to the current position */
+            this.distance = this.positionService.calcDistances(this.scooter.coordinates_lat,
+              this.scooter.coordinates_lng, this.selectedDistance);
         },
         error: (err) => {
           this.errorMessage = err.error.message;
