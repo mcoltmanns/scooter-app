@@ -1,5 +1,5 @@
 .page-container {
-    padding: 5px;
+    padding: 0px;
 }
 
 .title {
@@ -11,16 +11,28 @@
 
 .subtitle {
     text-align: center;
-    font-size: 1em;
+    font-size: 1.1em;
     color: #fff;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .scrollable-container {
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-width: min-content;
+}
+
+.width-limiter {
+  width: 100%;
+  max-width: 550px;
 }
 
 .rentals-container ul {
-    list-style-type: none; /* Removes the bullet points */
+    list-style-type: none;
     padding: 0;
     margin: 0;
 }
@@ -30,92 +42,191 @@
 }
 
 .scooter-container {
-    padding: 20px 20px 10px 20px;
+    padding: 15px;
     border: 2px solid #4a4242;
     border-radius: 10px;
     background-color: #fff;
     display: flex;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: 10px;
+    min-width: min-content;
+    cursor: pointer;
 }
 
 .picture {
     width: 90px;
     height: auto;
     display: block;
+    border-radius: 10px;
 }
 
 .scooter-details {
-    flex-grow: 1;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .scooter-details p {
-    margin: 5px 0;
     color: #4a4242;
 }
 
 .scooter-details .scooter-name {
     font-size: 1.2em;
     font-weight: bold;
-    margin-top: -15px; /* Adjust this to move the name further up */
-    margin-bottom: 10px; /* Adjust the spacing below the name */
-    margin-left: 10px;
-    line-height: 20px;
+    text-align: left;
+    margin: 0;
+    line-height: 1;
 }
 
-.scooter-details .date-text {
+.text-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+}
+
+.text-row {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 5px;
+}
+
+.text-item {
+    margin: 0;
+    padding: 0;
+    width: auto;
     font-size: 13px;
+    line-height: 1.2;
     font-family: Roboto;
     font-style: normal;
-    margin-top: -7px;
-    margin-left: 10px;
-    padding: 0;
+    width: fit-content;
+    text-align: left;
+}
+
+.static-text-width {
+    width: 115px;
 }
 
 .green-boxes {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
     gap: 10px;
-    margin-left: 20px;
+    margin-top: 3px;
 }
 
 .green-box {
-    width: 85px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
     height: 30px;
     border-radius: 15px;
     border: 1.5px solid var(--Highlights-Stroke, #123800);
     background: var(--Highlights, #97FB64);
-    margin-top: 10px;
-}
-
-.green-box svg {
-    margin-left: 5px;
-    margin-top: 2px;
+    padding-right: 7px;
+    padding-left: 6px;
 }
 
 .green-box p {
-    font-size: 0.8em; /* Smaller font size */
+    font-size: 0.8em;
     font-family: Roboto;
-    margin-left: 30px;
-    margin-top: -30px;
-    letter-spacing: 0.5px; /* Adjust letter spacing */
+    margin: 0;
+    padding: 0;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    white-space: nowrap;
 }
 
-.download-button {
+.download-button, .download-button-static {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 30px;
+    gap: 4px;
+    width: fit-content;
     height: 30px;
-    background-color: #0091ffbd;
-    padding: 2px;
-    border-radius: 50%;
+    /* background-color: #0091ffbd; */
+    background-color: var(--accent-bg, #9af0ff);
+    border: solid 1.5px var(--accent-fg, #2a1800);
+    border-radius: 15px;
     cursor: pointer;
-    margin-left: 4px;
-    margin-top: 10px;
+    box-sizing: border-box;
+    transform: scale(1);
+    padding-right: 7px;
+    padding-left: 6px;
 }
 
-.extra-space {
-    padding-left: 38px;
+.download-button:active, .download-button-static:active {
+  transform: scale(0.95);
+}
+
+.download-button svg, .download-button-static svg {
+  margin-top: -1px;
+}
+
+.download-button p, .download-button-static p {
+    display: block;
+    font-size: 0.8em;
+    font-family: Roboto;
+    margin: 0;
+    padding: 0;
+    letter-spacing: 0.5px;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+@media only screen and (max-width: 500px) {
+  .download-button {
+    gap: 0px;
+    width: 30px;
+    border-radius: 50%;
+    padding-right: 0px;
+    padding-left: 0px;
+  }
+  .download-button svg {
+    margin-top: -3px;
+  }
+  .download-button p {
+    display: none;
+}
+}
+@media only screen and (max-width: 380px) {
+  .scooter-container {
+      flex-direction: column;
+  }
+  .scooter-details {
+      margin: 0 0;
+  }
+  .scooter-details .scooter-name {
+      text-align: center;
+  }
+  .text-row {
+      justify-content: center;
+  }
+  .green-boxes {
+      justify-content: center;
+  }
+}
+@media only screen and (max-width: 285px) {
+  .text-container {
+      gap: 2px;
+  }
+  .text-row {
+      flex-direction: column;
+      gap: 0px;
+  }
+  .text-item {
+      width: 100%;
+      text-align: center;
+  }
+  .static-text-width {
+      width: auto;
+  }
 }
 
 .no-scooter-container {
@@ -128,6 +239,7 @@
 
 .noScooterpicture {
     width: 100%;
+    max-width: 400px;
 }
 
 .filter-menu-container {
