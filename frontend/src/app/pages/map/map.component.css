@@ -88,16 +88,20 @@
   z-index: 9997;
   width: 30px;
   height: 30px;
-  top: 140px;
-  right: 30px;
+  top: 130px;
+  right: 15px;
   cursor: pointer;
+  border-radius: 15px;
+  border: 1.5px solid var(--Highlights-Stroke, #123800);
+  background: var(--Highlights, #97FB64);
+  padding: 1.3em;
 }
 
 .qr-icon {
   position: absolute;
   z-index: 9997;
-  top: -50px;
-  right: 5px;
+  top: -40px;
+  right: 6px;
   width: 35px;
   height: 35px;
   cursor: pointer;
@@ -134,7 +138,7 @@
 .filter-btn {
   position: absolute;
   top: 50px;
-  left: 85%;
+  left: 89%;
   color: var(--icon-color);
 }
 
