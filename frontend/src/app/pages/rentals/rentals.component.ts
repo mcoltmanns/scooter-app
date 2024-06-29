@@ -195,7 +195,9 @@ export class RentalsComponent implements OnInit {
 
   /* Convert the currencies values */
   convertCurrencyUnits(value: string | undefined, unit: string): string {
-    return UnitConverter.convertCurrencyUnits(value, unit);
+    const convertedValue = UnitConverter.convertCurrencyUnits(value, unit);
+    console.log('convertedValue:', convertedValue);
+    return convertedValue;
   }
 
 

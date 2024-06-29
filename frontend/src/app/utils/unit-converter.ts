@@ -79,11 +79,12 @@ export class UnitConverter {
         console.error('Currency unit converting went wrong!');
         return 'error';
       }
-      let intValue = parseInt(value);
+      // let valueAsNumber = parseInt(value);   // parseInt() is not working with floating point numbers
+      let valueAsNumber = Number(value);
       let str = '';
       if(unit === '$'){
-        intValue = UnitConverter.convertCurrency(intValue, unit, '$');
-        str = intValue.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
+        valueAsNumber = UnitConverter.convertCurrency(valueAsNumber, unit, '$');
+        str = valueAsNumber.toFixed(2).toString() + ' $'; // toFixed(2) only shows the last two decimal place
       }
       else{
         str = Number(value).toFixed(2).toString() + ' €';
