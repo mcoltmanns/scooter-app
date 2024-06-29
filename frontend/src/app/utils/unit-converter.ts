@@ -40,7 +40,10 @@ export class UnitConverter {
     }
 
     /* Converts the distances */
-    static convertDistanceUnits(value: number, unit: string): string {
+    static convertDistanceUnits(value: number |undefined, unit: string | undefined): string {
+      if(unit === undefined || value === undefined){
+        return 'error';
+      }
       let str = '';
       if(unit === 'mi'){
         value = UnitConverter.convertDistance(value, 'km', unit);
@@ -53,7 +56,10 @@ export class UnitConverter {
     }
 
     /* Convert the currencies */
-    static convertCurrencyUnits(value: number, unit: string): string {
+    static convertCurrencyUnits(value: number, unit: string|undefined): string {
+      if(unit === undefined){
+        return 'error';
+      }
       let str = '';
       if(unit === '$'){
         value = UnitConverter.convertCurrency(value, unit, '$');
@@ -61,6 +67,21 @@ export class UnitConverter {
       }
       else{
         str = value.toString() + ' €/H';
+      }
+      return str;
+    }
+
+    static convertSpeedUnits(value: number|undefined, unit: string|undefined): string{
+      if(unit === undefined || value === undefined){
+        return 'error';
+      }
+      let str = '';
+      if(unit === 'mp/h'){
+        value = UnitConverter.convertSpeed(value, 'km/h', unit);
+        str = value.toFixed(1) + ' mp/h'; // toFixed(1) only shows the last decimal place
+      }
+      else{
+        str = value.toString() + ' km/h';
       }
       return str;
     }
