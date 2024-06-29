@@ -62,6 +62,8 @@ export class RentalsComponent implements OnInit {
   public infoModalCreatedAt = '';
   public infoModalEndedAt = '';
   public infoModalTotalPrice = 0;
+  public infoModalRenew = false;
+  public infoModalIsActive = false;
 
   //variables for the filters----------------------
 
@@ -125,6 +127,14 @@ export class RentalsComponent implements OnInit {
       }
     });
     this.filteredRentals = this.rentals;
+  }
+
+  getExactRentalDurationInHours(begin: string, end: string): number {
+    const date1 = new Date(begin);
+    const date2 = new Date(end);
+
+    const diffMs = date2.getTime() - date1.getTime();
+    return diffMs / (1000 * 60 * 60); // Convert milliseconds to hours
   }
 
   /* how long a user booked the scooter */
@@ -237,6 +247,34 @@ export class RentalsComponent implements OnInit {
       this.infoModalCreatedAt = rental.createdAt;
       this.infoModalEndedAt = rental.endedAt;
       this.infoModalTotalPrice = rental.total_price;
+      this.infoModalIsActive = false;
+      this.infoModalRenew = false;
+      this.showInfoModal = true;
+    }
+    if (type === 'prepaid') {
+      console.log('Prepaid booking clicked');
+      rental = rental as ActiveRental;
+      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModalRentalId = rental.id;
+      this.infoModalScooterId = rental.scooterId;
+      this.infoModalCreatedAt = rental.createdAt;
+      this.infoModalEndedAt = rental.nextActionTime.toString();
+      this.infoModalTotalPrice = rental.price_per_hour;
+      this.infoModalIsActive = true;
+      this.infoModalRenew = rental.renew;
+      this.showInfoModal = true;
+    }
+    if (type === 'dynamic') {
+      console.log('Dynamic booking clicked');
+      rental = rental as ActiveRental;
+      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModalRentalId = rental.id;
+      this.infoModalScooterId = rental.scooterId;
+      this.infoModalCreatedAt = rental.createdAt;
+      this.infoModalEndedAt = rental.nextActionTime.toString();
+      this.infoModalTotalPrice = rental.price_per_hour;
+      this.infoModalIsActive = true;
+      this.infoModalRenew = rental.renew;
       this.showInfoModal = true;
     }
   }

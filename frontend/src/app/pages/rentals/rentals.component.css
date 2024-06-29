@@ -11,7 +11,7 @@
 
 .subtitle {
     text-align: center;
-    font-size: 1.1em;
+    font-size: 1.05em;
     color: #fff;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -49,8 +49,8 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
+    justify-content: flex-start;
+    gap: 10%;
     min-width: min-content;
     cursor: pointer;
 }
@@ -63,7 +63,6 @@
 }
 
 .scooter-details {
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -180,7 +179,7 @@
     white-space: nowrap;
 }
 
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 490px) {
   .download-button {
     gap: 0px;
     width: 30px;
@@ -193,14 +192,16 @@
   }
   .download-button p {
     display: none;
+  }
 }
+@media only screen and (max-width: 420px) {
+  .scooter-container {
+    gap: 15px;
+  }
 }
-@media only screen and (max-width: 380px) {
+@media only screen and (max-width: 390px) {
   .scooter-container {
       flex-direction: column;
-  }
-  .scooter-details {
-      margin: 0 0;
   }
   .scooter-details .scooter-name {
       text-align: center;
@@ -227,6 +228,10 @@
   .static-text-width {
       width: auto;
   }
+}
+
+.top-space {
+    margin-top: 40px;
 }
 
 .no-scooter-container {
