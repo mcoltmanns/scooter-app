@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { UnitConverter } from 'src/app/utils/unit-converter';
+
 
 @Injectable({
   providedIn: 'root'
@@ -54,4 +56,45 @@ export class PositionService {
     };
     localStorage.setItem(this.localStorageKey, JSON.stringify(position));
   }
+
+  /**
+   * This method calculates the distance in km and mi between the current
+   * and a given position.
+   * @param lat2  latitude in deg.
+   * @param lon2  longitude in deg.
+   * @returns the distance as a string in km.
+   */
+  public calcDistances(lat2: number | undefined, lon2: number | undefined, unit: string | undefined): string {
+    if (lat2 === undefined || lon2 === undefined || unit === undefined) {
+      return 'Error';
+    }
+    const lat1 = this.latitude;
+    const lon1 = this.longitude;
+   
+    const lat = (lat1 + lat2) / 2 * 0.01745;
+
+    const dx  = 111.3 * Math.cos(lat) * (lon1 - lon2);
+    const dy = 111.3 * (lat1 - lat2);
+
+    let value =  Math.sqrt(dx * dx + dy * dy);
+    let str = '';
+
+    if(unit === 'mi'){
+      value = UnitConverter.convertDistance(value, 'km', unit);
+      if (value < 1) {
+        str = (value * 1760).toFixed(0) + ' yd';
+      } else {
+        str = value.toFixed(2)  + ' mi';
+      }
+    } else {
+      if (value < 1) {
+        str = (value * 1000).toFixed(0) + ' m ';
+      } else {  
+        str = value.toFixed(2)  + ' km';
+      }
+    }
+
+    return str;
+  }
 }
+
