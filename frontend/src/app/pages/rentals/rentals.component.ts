@@ -193,7 +193,7 @@ export class RentalsComponent implements OnInit {
     return `${day}.${month}.${year} ${hours}:${minutes}`;
   }
 
-  /* Convert the currencies */
+  /* Convert the currencies values */
   convertCurrencyUnits(value: string | undefined, unit: string): string {
     return UnitConverter.convertCurrencyUnits(value, unit);
   }
