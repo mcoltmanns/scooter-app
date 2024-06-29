@@ -98,7 +98,7 @@
             </div>
           </li>
         </ul>
-        <h2 class="subtitle">Beendete Buchungen</h2>
+        <h2 *ngIf="pastRentals.length > 0" class="subtitle">Beendete Buchungen</h2>
         <ul *ngIf="pastRentals.length > 0">
           <li *ngFor="let rental of pastRentals">
             <div class="scooter-container" (click)="onClickRental(rental, 'past')">
