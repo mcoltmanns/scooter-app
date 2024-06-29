@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient} from '@angular/common/http';
 import { Observable} from 'rxjs';
-import { ActiveRental, PastRental, ProductWithScooterId, Rental } from '../models/rental';
+import { ActiveRental, PastRental, ProductWithScooterId } from '../models/rental';
 
 interface RentalsResponse {
   code: number;
@@ -35,9 +35,9 @@ export class RentalService{
     }
 
     /* request to the backend to generate an invoice for one specific scooter  */
-    generateInvoicePdf(rentalId: number, createdAt : string, endedAt: string, scooterName: string, total: string, duration: string, pricePerHour: number, selectedCurrency: string): Observable<Blob> {
+    generateInvoicePdf(rentalId: number, selectedCurrency: string): Observable<Blob> {
         const apiUrl = '/api/bookings/generateInvoice';
-        return this.http.post<Blob>(apiUrl, { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency}, {
+        return this.http.post<Blob>(apiUrl, { rentalId, selectedCurrency }, {
           responseType: 'blob' as 'json',
         });
     }

@@ -267,6 +267,7 @@ hr.solid {
 /* no Scooter picture  */
 .noScooterpicture {
     width: 100%;
+    max-width: 400px;
 }
 
 

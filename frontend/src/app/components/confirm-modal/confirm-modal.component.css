@@ -49,6 +49,14 @@
 
 .buttons {
   display: flex;
-  justify-content: right;
+  align-items: center;
   gap: 8px;
+}
+
+.controls-right {
+  justify-content: right;
+}
+
+.controls-centered {
+  justify-content: center;
 }

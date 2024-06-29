@@ -195,6 +195,7 @@ export class Validator {
   public async validateInvoice(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
       check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Rental-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Rental-ID.'),
+      check('selectedCurrency').optional().trim().escape().notEmpty().withMessage('Bitte eine Währung angeben.').bail().isIn(['€', '$']).withMessage('Ungültige Währung.')
     ];
 
     await Validator.runAllChecks(400, checks, request, response, next);
