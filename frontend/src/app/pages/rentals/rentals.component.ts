@@ -195,20 +195,7 @@ export class RentalsComponent implements OnInit {
 
   /* Convert the currencies */
   convertCurrencyUnits(value: string | undefined, unit: string): string {
-    if (value === undefined){
-      console.log('Something went wrong while converting Currency Units...');
-      return '';
-    }
-    let intValue = parseInt(value);
-    let str = '';
-    if(unit === '$'){
-      intValue = UnitConverter.convertCurrency(intValue, unit, '$');
-      str = intValue.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
-    }
-    else{
-      str = Number(value).toFixed(2).toString() + ' €';
-    }
-    return str;
+    return UnitConverter.convertCurrencyUnits(value, unit);
   }
 
 

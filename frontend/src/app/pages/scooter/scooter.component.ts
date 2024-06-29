@@ -414,6 +414,6 @@ export class ScooterComponent implements OnInit, OnDestroy {
 
   /* Convert the currencies */
   convertCurrencyUnits(value: number, unit: string |undefined): string {
-    return UnitConverter.convertCurrencyUnits(value, unit);
+    return UnitConverter.convertCurrencyPerHourUnits(value, unit);
   }
 }

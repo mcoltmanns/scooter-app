@@ -42,6 +42,7 @@ export class UnitConverter {
     /* Converts the distances */
     static convertDistanceUnits(value: number |undefined, unit: string | undefined): string {
       if(unit === undefined || value === undefined){
+        console.error('Distance unit converting went wrong!');
         return 'error';
       }
       let str = '';
@@ -55,9 +56,10 @@ export class UnitConverter {
       return str;
     }
 
-    /* Convert the currencies */
-    static convertCurrencyUnits(value: number, unit: string|undefined): string {
+    /* Convert the currencies per hour value */
+    static convertCurrencyPerHourUnits(value: number, unit: string|undefined): string {
       if(unit === undefined){
+        console.error('Currency unit converting went wrong!');
         return 'error';
       }
       let str = '';
@@ -71,8 +73,28 @@ export class UnitConverter {
       return str;
     }
 
+    /* Converts single currency value */
+    static convertCurrencyUnits(value: string | undefined, unit: string): string {
+      if (value === undefined){
+        console.error('Currency unit converting went wrong!');
+        return 'error';
+      }
+      let intValue = parseInt(value);
+      let str = '';
+      if(unit === '$'){
+        intValue = UnitConverter.convertCurrency(intValue, unit, '$');
+        str = intValue.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
+      }
+      else{
+        str = Number(value).toFixed(2).toString() + ' €';
+      }
+      return str;
+    }
+
+    /* Converts a speed units  */
     static convertSpeedUnits(value: number|undefined, unit: string|undefined): string{
       if(unit === undefined || value === undefined){
+        console.error('Speed unit converting went wrong!');
         return 'error';
       }
       let str = '';
