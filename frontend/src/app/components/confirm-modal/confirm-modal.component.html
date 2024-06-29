@@ -14,8 +14,12 @@
         Bist du sicher, dass du diese Aktion durchführen willst?
       </ng-container>
     </div>
-    <div class="buttons">
+    <div *ngIf="!reverseControls" [ngClass]="['buttons', centerControls ? 'controls-centered' : 'controls-right']">
       <app-button design="thin" color="accent" (click)="onCancel()">{{cancelText}}</app-button>
       <app-button design="thin" (click)="onConfirm()">{{confirmText}}</app-button>
-  </div>
+    </div>
+    <div *ngIf="reverseControls" [ngClass]="['buttons', centerControls ? 'controls-centered' : 'controls-right']">
+      <app-button design="thin" (click)="onConfirm()">{{confirmText}}</app-button>
+      <app-button design="thin" color="accent" (click)="onCancel()">{{cancelText}}</app-button>
+    </div>
 </div>

@@ -24,7 +24,7 @@ export class CreateInvoice {
      * @param selectedCurrency
      * @returns 
      */
-    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total_price: number, pricePerHour: number, createdAt: string, endedAt: string, selectedCurrency: string): Promise<Uint8Array> {
+    static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total_price: number, pricePerHour: number, createdAt: string, endedAt: string, selectedCurrency: '€' | '$'): Promise<Uint8Array> {
         
         // path to get prefilled pdf
         const pdfPath = path.resolve(process.cwd(), 'src', 'utils', 'pdf', 'Rechnung.pdf');

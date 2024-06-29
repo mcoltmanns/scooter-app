@@ -160,7 +160,12 @@ export class BookingsController {
 
     /* method to get the information for the invoice pdf */
     public async generateInvoice(request: Request, response: Response): Promise<void> {
-        const { rentalId, selectedCurrency } = request.body;
+        const { rentalId } = request.body;
+        let selectedCurrency = request.body.selectedCurrency;
+
+        if (!selectedCurrency) {
+            selectedCurrency = '€'; // Default currency
+        }
 
         if (!rentalId) {
             response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
@@ -171,7 +176,6 @@ export class BookingsController {
 
             // Search for a rental agreement using the rentalId
             const rental = await RentalManager.getFullyPaidRentalByRentalId(rentalId);
-            console.log(rental);
 
             if (!rental) {
                 response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });

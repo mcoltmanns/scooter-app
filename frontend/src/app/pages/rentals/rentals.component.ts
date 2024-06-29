@@ -11,25 +11,32 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { FormGroup, FormBuilder, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
+import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-rentals',
     standalone: true,
     templateUrl: './rentals.component.html',
     styleUrl: './rentals.component.css',
-    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule]
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, ConfirmModalComponent]
 })
 export class RentalsComponent implements OnInit {
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
 
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder) 
-  {//form group for the booking filter
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router) {
+    //form group for the booking filter
     this.bookingFilterForm = this.fb.group({
       lower: ['', this.dateValidator],
       upper: ['', this.dateValidator]
-  });}
+    });
+
+    /* Bind Information Modal to this instance */
+    this.onNavigateToScooter = this.onNavigateToScooter.bind(this);
+    this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
+  }
 
   // Variables for storing all rentals and the product information
   public loadingDataScooter = true;
@@ -46,6 +53,17 @@ export class RentalsComponent implements OnInit {
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
+
+  // Info modal configuration
+  public showInfoModal = false;
+  public infoModalTitle = 'Buchungsdetails';
+  public infoModalRentalId = 0;
+  public infoModalScooterId = 0;
+  public infoModalCreatedAt = '';
+  public infoModalEndedAt = '';
+  public infoModalTotalPrice = 0;
+  public infoModalRenew = false;
+  public infoModalIsActive = false;
 
   //variables for the filters----------------------
 
@@ -109,6 +127,14 @@ export class RentalsComponent implements OnInit {
       }
     });
     this.filteredRentals = this.rentals;
+  }
+
+  getExactRentalDurationInHours(begin: string, end: string): number {
+    const date1 = new Date(begin);
+    const date2 = new Date(end);
+
+    const diffMs = date2.getTime() - date1.getTime();
+    return diffMs / (1000 * 60 * 60); // Convert milliseconds to hours
   }
 
   /* how long a user booked the scooter */
@@ -180,30 +206,16 @@ export class RentalsComponent implements OnInit {
       str = intValue.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
     }
     else{
-      str = value.toString() + ' €';
+      str = Number(value).toFixed(2).toString() + ' €';
     }
     return str;
   }
 
 
   /* This method should retrieve the invoice pdf from the backend */
-  displayInvoice(rentalId: number, scooterId: number, createdAt : string, endedAt: string): void {
-    // variables for the invoice pdf
-    const scooterName = this.getNameByScooterId(scooterId);
-    let total = this.getTotalPrice(scooterId, createdAt, endedAt);
-    total = this.convertCurrencyUnits(total, this.selectedCurrency);
-    const duration = this.rentalDuration(createdAt, endedAt);
-    let pricePerHour = this.getPriceByScooterId(scooterId);
-    pricePerHour = parseFloat(this.convertCurrencyUnits(pricePerHour?.toString(), this.selectedCurrency));
-
-    // check if an attribut is not defined
-    if(scooterName === undefined || total === undefined || pricePerHour === undefined){
-      console.log('Error - An Attribute is not defined');
-      return;
-    }
-
+  displayInvoice(rentalId: number): void {
     // send a request to the backend to generate the file
-    this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, this.selectedCurrency).subscribe(
+    this.rentalService.generateInvoicePdf(rentalId, this.selectedCurrency).subscribe(
       
       // read and interpret the Blob from the backend 
       (pdfBlob: Blob) => {
@@ -224,6 +236,63 @@ export class RentalsComponent implements OnInit {
         console.error('Fehler beim Herunterladen der Rechnung:', error);
       }
     );
+  }
+
+  onClickRental(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
+    if (type === 'past') {
+      rental = rental as PastRental;
+      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModalRentalId = rental.id;
+      this.infoModalScooterId = rental.scooterId;
+      this.infoModalCreatedAt = rental.createdAt;
+      this.infoModalEndedAt = rental.endedAt;
+      this.infoModalTotalPrice = rental.total_price;
+      this.infoModalIsActive = false;
+      this.infoModalRenew = false;
+      this.showInfoModal = true;
+    }
+    if (type === 'prepaid') {
+      console.log('Prepaid booking clicked');
+      rental = rental as ActiveRental;
+      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModalRentalId = rental.id;
+      this.infoModalScooterId = rental.scooterId;
+      this.infoModalCreatedAt = rental.createdAt;
+      this.infoModalEndedAt = rental.nextActionTime.toString();
+      this.infoModalTotalPrice = rental.price_per_hour;
+      this.infoModalIsActive = true;
+      this.infoModalRenew = rental.renew;
+      this.showInfoModal = true;
+    }
+    if (type === 'dynamic') {
+      console.log('Dynamic booking clicked');
+      rental = rental as ActiveRental;
+      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModalRentalId = rental.id;
+      this.infoModalScooterId = rental.scooterId;
+      this.infoModalCreatedAt = rental.createdAt;
+      this.infoModalEndedAt = rental.nextActionTime.toString();
+      this.infoModalTotalPrice = rental.price_per_hour;
+      this.infoModalIsActive = true;
+      this.infoModalRenew = rental.renew;
+      this.showInfoModal = true;
+    }
+  }
+
+  onCloseInfoModal(): void {
+    this.showInfoModal = false;
+  }
+
+  onNavigateToScooter(): void {
+    this.showInfoModal = false;
+
+    /* Navigate to the scooter page including the island state because then the scooter page will treat the back button as history back */
+       const originState = history.state.originState
+        ? { originState: { ...history.state.originState, island: true } }
+        : { originState: { island: true } };
+       this.router.navigate(['search/scooter', this.infoModalScooterId], { 
+         state: originState
+       });
   }
 
   //functionalities for the filters-----------------------------------------------------------------
