@@ -31,11 +31,10 @@ export class CheckoutController {
     
     let rentalDuration;
     if (isDynamic) {
-      console.log('Dynamic booking requested');
       rentalDuration = DYNAMIC_EXTENSION_INTERVAL_MS;
     } else {
       // rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
-      rentalDuration = 40000; // For testing/debugging purposes, set the duration to 40 seconds
+      rentalDuration = 80000; // For testing/debugging purposes, set the duration to 40 seconds
     }
 
     let endTimestamp;

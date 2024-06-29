@@ -25,7 +25,7 @@ export class CreateInvoice {
      * @returns 
      */
     static async editPdf(rentalId : number, email: string, name:string, street: string, scooterName: string, total_price: number, pricePerHour: number, createdAt: string, endedAt: string, selectedCurrency: '€' | '$'): Promise<Uint8Array> {
-        
+
         // path to get prefilled pdf
         const pdfPath = path.resolve(process.cwd(), 'src', 'utils', 'pdf', 'Rechnung.pdf');
 
@@ -151,7 +151,7 @@ export class CreateInvoice {
 
         // add rental duartion into the pdf
         firstPage.drawText(duration.toString(), {
-            x: 380,
+            x: 371,
             y: height - currentYPosition - lineHeight - 25, // Positionierung von oben nach unten
             size: fontSize,
             font: timesRomanFont,
@@ -250,8 +250,9 @@ export class CreateInvoice {
         const diffMs = endDate.getTime() - startDate.getTime();
         const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
         const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const diffSeconds = Math.floor((diffMs / 1000) % 60);
 
-        return `${diffHours}h ${diffMinutes}min`;
+        return `${diffHours}h ${diffMinutes}min ${diffSeconds}s`;
     }
 
 }
