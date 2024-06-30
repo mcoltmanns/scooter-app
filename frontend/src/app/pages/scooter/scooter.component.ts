@@ -17,11 +17,18 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
 import { PositionService } from 'src/app/utils/position.service';
+import { UserPosition } from 'src/app/utils/userPosition';
 
-
+/* Icon for the scooters */
 const defaultIcon = Leaflet.icon({
   iconSize: [40, 40],
   iconUrl: '/assets/marker.png',
+});
+
+/*  Icon for the user -> is displayed on the map */
+const userIcon = Leaflet.icon({
+  iconSize: [40, 40],
+  iconUrl: '/assets/person.png',
 });
 
 @Component({
@@ -64,7 +71,7 @@ export class ScooterComponent implements OnInit, OnDestroy {
   public loadingScooter = true;
   public product: Product | null = null;
   public scooter: Scooter | null = null;
-  public distance: string = '';
+  public distance = '';
 
   /* User Units variables */
   public selectedSpeed = ''; 
@@ -167,6 +174,8 @@ export class ScooterComponent implements OnInit, OnDestroy {
         }
       });
     });
+
+    this.updateUserPosition(); // set user icon on the map
   }
 
   ngOnDestroy(): void {
@@ -392,6 +401,13 @@ export class ScooterComponent implements OnInit, OnDestroy {
   onConfirmCancellationConfirmModal(): void {
     this.showCancellationConfirmModal = false;
     this.endReservation();
+  }
+
+  /* update the user position and put a user icon on the map */
+  updateUserPosition(): void {
+    UserPosition.setUserPosition(this.positionService); // get user position from utils method
+    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+    this.layers.push(userMarker); // place the user icon on the map
   }
 
   // Method to calculate the range of the scooter
