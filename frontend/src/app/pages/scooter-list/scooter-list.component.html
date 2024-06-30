@@ -40,7 +40,7 @@
     <ng-template #noScooters>
       <div *ngIf="levenshteinFilteredScooters.length > 0; else noScooters1">
         <ul class="scooter-list">
-          <p class="suggestion-text">Meinen sie eventuell einen der folgenden Scooter?</p>
+          <p class="suggestion-text">Meinen Sie eventuell einen der folgenden Scooter?</p>
           <li *ngFor="let scooter of levenshteinFilteredScooters" class="scooter-item" [id]="scooter.id" #elementRef>
             <div class="top-box" (click)="buttonToScooter(scooter.id)">
               <div class="scooter-name">
