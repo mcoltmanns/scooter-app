@@ -1,6 +1,6 @@
-<app-confirm-modal [showModal]="showInfoModal" [confirm]="onNavigateToScooter" [cancel]="onCloseInfoModal" [title]="infoModalTitle" [showIcon]="false" confirmText="Zum Scooter" cancelText="Schließen" [reverseControls]="true" [centerControls]="true">
+<app-info-modal [showModal]="showInfoModal" [action]="onNavigateToScooter" [close]="onCloseInfoModal" [title]="infoModalTitle" [showIcon]="false" [showActionButton]="true" actionText="Zum Scooter" cancelText="Schließen" [centerControls]="true">
   <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 0.75em;">
-    <img class="picture" [src]="getPictureByScooterId(infoModalScooterId)" style="width: 60px;" />
+    <img *ngIf="getPictureByScooterId(infoModalScooterId)" (load)="onImageLoad(infoModalScooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[infoModalScooterId]}" [src]="getPictureByScooterId(infoModalScooterId)" style="width: 60px;" />
   </div>
   <div class="green-boxes" style="justify-content: center; margin-bottom: 0.75em;">
     <div class="green-box">
@@ -34,11 +34,11 @@
       <p class="text-item" style="width: 100%; text-align: center;">{{ infoModalIsActive ? 'Rückgabezeitpunkt:' : 'Zurückgegeben am:' }}</p><p class="text-item" style="width: 100%; text-align: center;">{{ formatDateTime(infoModalEndedAt) }}</p>
     </div>
   </div>
-</app-confirm-modal>
+</app-info-modal>
 
 <div class="page-container">
   <div class="header">
-    <app-filter-button (filterToggle)="toggle()"></app-filter-button>
+    <app-filter-button (filterToggle)="toggle()" class="filter-btn"></app-filter-button>
     <h1 class="title">Meine Buchungen</h1>
   </div>
   
@@ -70,12 +70,12 @@
   <div class="scrollable-container">
   <div class="width-limiter">
 
-    <div class="rentals-container" *ngIf="!loadingDataScooter && !loadingDataProduct && !loadingDataOption; else loading">
+    <div class="rentals-container" *ngIf="!isLoading; else loading">
       <div *ngIf="(activeRentals.length > 0 || pastRentals.length > 0); else noRentals">
         <ul *ngIf="activeRentals.length > 0">
           <li *ngFor="let rental of activeRentals">
-            <div class="scooter-container" (click)="onClickRental(rental, (rental.renew ? 'dynamic' : 'prepaid'))">
-              <img class="picture" [src]="getPictureByScooterId(rental.scooterId)" />
+            <div class="scooter-container" (click)="onClickRental(rental.id)">
+              <img *ngIf="getPictureByScooterId(rental.scooterId)" (load)="onImageLoad(rental.scooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[rental.scooterId]}" [src]="getPictureByScooterId(rental.scooterId)" />
               <div class="scooter-details">
                 <p class="scooter-name">{{ getNameByScooterId(rental.scooterId) }}</p>
                 <div class="text-container">
@@ -114,8 +114,8 @@
         <h2 *ngIf="pastRentals.length > 0" [ngClass]="['subtitle', (activeRentals.length > 0) ? 'top-space' : '']">Beendete Buchungen</h2>
         <ul *ngIf="pastRentals.length > 0">
           <li *ngFor="let rental of pastRentals">
-            <div class="scooter-container" (click)="onClickRental(rental, 'past')">
-              <img class="picture" [src]="getPictureByScooterId(rental.scooterId)" />
+            <div class="scooter-container" (click)="onClickRental(rental.id)">
+              <img *ngIf="getPictureByScooterId(rental.scooterId)" (load)="onImageLoad(rental.scooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[rental.scooterId]}" [src]="getPictureByScooterId(rental.scooterId)" />
               <div class="scooter-details">
                 <p class="scooter-name">{{ getNameByScooterId(rental.scooterId) }}</p>
                 <div class="text-container">
@@ -160,7 +160,9 @@
         </div>
       </ng-template>
     </div>
-    <ng-template #loading> </ng-template>
+    <ng-template #loading>
+      <app-loading-overlay [isLoading]="true" type="inline"></app-loading-overlay>
+    </ng-template>
 
   </div>
   </div>

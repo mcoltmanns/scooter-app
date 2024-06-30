@@ -22,12 +22,23 @@ import { trigger, style, transition, animate } from '@angular/animations';
 export class InfoModalComponent {
   @Input() public showModal = false;
   @Input() public showIcon = true;
+  @Input() public showActionButton = false;
+  @Input() public centerControls = false;
   @Input() public title = 'Hinweis';
+  @Input() public actionText = 'Aktion';
   @Input() public closeText = 'Schließen';
+  @Input() action: () => void = () => {
+    // This is a default function that does nothing.
+    // It will be replaced by a function from the parent component.
+  };
   @Input() close: () => void = () => {
     // This is a default function that does nothing.
     // It will be replaced by a function from the parent component.
   };
+
+  onAction(): void {
+    this.action();
+  }
 
   onClose(): void {
     this.close();

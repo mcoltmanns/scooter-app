@@ -37,6 +37,8 @@ export class CheckoutController {
       rentalDuration = 80000; // For testing/debugging purposes, set the duration to 40 seconds
     }
 
+    let rental: Model | null = null;
+
     let endTimestamp;
 
     let paymentToken: string | null = null;
@@ -65,7 +67,7 @@ export class CheckoutController {
       /* If we reach this point, the payment was successful */
 
       /* Start the rental */
-      const rental = await RentalManager.startRental(userId, scooterId, paymentMethodId, pricePerHour, rentalDuration, isDynamic, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
+      rental = await RentalManager.startRental(userId, scooterId, paymentMethodId, pricePerHour, rentalDuration, isDynamic, transaction, scooter); // ask the rental manager for a rental - check scooter existance and availability, update scooter, reservation, and rental tables
       // also ends associated reservation, if there was one
 
       endTimestamp = rental.getDataValue('nextActionTime');  // Get the end timestamp of the rental to return it to the user
@@ -115,9 +117,9 @@ export class CheckoutController {
 
     let responseBookingObject;
     if (!isDynamic) {
-      responseBookingObject = { isDynamic: false, endTimestamp: endTimestamp };
+      responseBookingObject = { isDynamic: false, endTimestamp: endTimestamp, rentalId: rental.getDataValue('id') };
     } else {
-      responseBookingObject = { isDynamic: true };
+      responseBookingObject = { isDynamic: true, rentalId: rental.getDataValue('id') };
     }
 
     response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: responseBookingObject });

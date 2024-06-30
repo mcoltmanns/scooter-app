@@ -11,22 +11,24 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { FormGroup, FormBuilder, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
-import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
-import { Router } from '@angular/router';
+import { InfoModalComponent } from 'src/app/components/info-modal/info-modal.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
 @Component({
     selector: 'app-rentals',
     standalone: true,
     templateUrl: './rentals.component.html',
     styleUrl: './rentals.component.css',
-    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, ConfirmModalComponent]
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent]
 })
 export class RentalsComponent implements OnInit {
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
 
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router) {
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router, private route: ActivatedRoute) {
     //form group for the booking filter
     this.bookingFilterForm = this.fb.group({
       lower: ['', this.dateValidator],
@@ -38,10 +40,13 @@ export class RentalsComponent implements OnInit {
     this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
   }
 
+  // Variable to control the visibility of the loading spinner
+  public isLoading = true;
+
+  // Object to track loaded state of images by scooterId
+  imageLoaded: { [scooterId: string]: boolean } = {};
+
   // Variables for storing all rentals and the product information
-  public loadingDataScooter = true;
-  public loadingDataProduct = true;
-  public loadingDataOption = true;
   public rentals: Rental[] = [];
   public activeRentals: ActiveRental[] = [];
   public pastRentals: PastRental[] = [];
@@ -77,56 +82,58 @@ export class RentalsComponent implements OnInit {
   //-----------------------------------------------
 
   ngOnInit(): void {
-    /* Get all scooter bookings for the User from the backend*/
-    this.loadRentalInfo();
+    /* Fetch all rental information, product information and user preferences */
+    forkJoin([
+      this.rentalService.getRentalInfo(),
+      this.rentalService.getRentalProduct(),
+      this.optionService.getUserPreferences()
+    ]).subscribe({
+      next: ([rentalsResponse, productsResponse, preferencesResponse]) => {
+        /* Get all scooter bookings (rentals) for the User from the backend */
+        // this.rentals = rentalsResponse;
+        // this.filteredRentals = rentalsResponse;
+        this.filteredRentals = this.rentals;
+        this.activeRentals = rentalsResponse.activeRentals;
+        this.pastRentals = rentalsResponse.pastRentals;
+        // this.loadingDataScooter = false;
 
-    /* Get all scooters from backend */
-    this.rentalService.getRentalProduct().subscribe({
-      next: (value) => {
-        this.products = value;
-        this.loadingDataProduct = false;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingDataProduct = false;
-        console.log(err);
-      }
-    });
+        /* Get all products for the rentals of the user */
+        this.products = productsResponse;
+        // this.loadingDataProduct = false;
 
-    /* Get the metrics settings for a user */
-    this.optionService.getUserPreferences().subscribe({
-      next: (value) => {
-        this.option = value;
+        /* Get the metrics/units the user set in the settings */
+        this.option = preferencesResponse;
         this.selectedSpeed = this.option.speed;
         this.selectedDistance = this.option.distance;
         this.selectedCurrency = this.option.currency;
-        this.loadingDataOption = false;
+        // this.loadingDataOption = false;
+
+        this.isLoading = false;
+
+        /* Accessing the optional rental query parameter to show the info modal for that rental if it exists */
+        this.route.queryParams.subscribe(params => {
+          const paramRentalId = params['rental'];
+
+          const rental = this.getRentalObjByRentalId(paramRentalId);
+          if (rental) {
+            this.setUpAndShowInfoModal(rental.rental, rental.type);
+          }
+        });
       },
       error: (err) => {
-        this.errorMessage = err.message;
-        this.loadingDataOption = false;
-        console.error(err);
+        this.errorMessage = err.error.message;
+        // this.loadingDataScooter = false;
+        // this.loadingDataProduct = false;
+        // this.loadingDataOption = false;
+        this.isLoading = false;
+        console.log(err);
       }
     });
   }
 
-  /* load information about all booked scooters for a user */
-  loadRentalInfo(): void {
-    this.rentalService.getRentalInfo().subscribe({
-      next: (value) => {
-        //this.rentals = value;
-        //this.filteredRentals = value;
-        this.activeRentals = value.activeRentals;
-        this.pastRentals = value.pastRentals;
-        this.loadingDataScooter = false;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingDataScooter = false;
-        console.log(err);
-      }
-    });
-    this.filteredRentals = this.rentals;
+  // Function to call when an image is loaded
+  onImageLoad(scooterId: string): void {
+    this.imageLoaded[scooterId] = true;
   }
 
   getExactRentalDurationInHours(begin: string, end: string): number {
@@ -177,8 +184,11 @@ export class RentalsComponent implements OnInit {
   }
 
   /* Get Picture from the product list*/
-  getPictureByScooterId(scooterId: number): String{
+  getPictureByScooterId(scooterId: number): string | null {
     const product = this.products.find(p => p.scooterId === scooterId);
+    if (!product) {
+      return null;
+    }
     return `http://localhost:8000/img/products/${product ? product.name : undefined}.jpg`;
   }
 
@@ -225,7 +235,23 @@ export class RentalsComponent implements OnInit {
     );
   }
 
-  onClickRental(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
+  getRentalObjByRentalId(rentalId: number): { rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic' } | null {
+    let rental: ActiveRental | PastRental | undefined = undefined;
+
+    rental = this.activeRentals.find(rental => Number(rental.id) === Number(rentalId));
+    if (rental) {
+      return { rental, type: rental.renew ? 'dynamic' : 'prepaid' };
+    }
+
+    rental = this.pastRentals.find(rental => Number(rental.id) === Number(rentalId));
+    if (rental) {
+      return { rental, type: 'past' };
+    }
+    
+    return null;
+  }
+
+  setUpAndShowInfoModal(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
     if (type === 'past') {
       rental = rental as PastRental;
       this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
@@ -266,20 +292,35 @@ export class RentalsComponent implements OnInit {
     }
   }
 
+  onClickRental(rentalId: number): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { rental: rentalId },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   onCloseInfoModal(): void {
     this.showInfoModal = false;
+
+    /* Remove the rental query parameter from the URL */
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { rental: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   onNavigateToScooter(): void {
     this.showInfoModal = false;
 
     /* Navigate to the scooter page including the island state because then the scooter page will treat the back button as history back */
-       const originState = history.state.originState
-        ? { originState: { ...history.state.originState, island: true } }
-        : { originState: { island: true } };
-       this.router.navigate(['search/scooter', this.infoModalScooterId], { 
-         state: originState
-       });
+    const originState = history.state.originState
+    ? { originState: { ...history.state.originState, island: true } }
+    : { originState: { island: true } };
+    this.router.navigate(['search/scooter', this.infoModalScooterId], { 
+      state: originState
+    });
   }
 
   //functionalities for the filters-----------------------------------------------------------------
@@ -367,5 +408,4 @@ dateValidator(control: FormControl): { [key: string]: Boolean } | null {
     }
     this.bookingFilterForm.controls[controlName].setValue(value, { emitEvent: false });
   }
-    
 }

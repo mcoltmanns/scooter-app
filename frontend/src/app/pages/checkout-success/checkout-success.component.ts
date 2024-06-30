@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { NavigationExtras, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { trigger, style, transition, animate } from '@angular/animations';
 
@@ -24,11 +24,11 @@ export class CheckoutSuccessComponent implements OnInit {
 
   public isDynamic = false;
 
+  public rentalId: number | null = null;
+
   constructor(private router: Router) { }
 
   ngOnInit(): void {
-    console.log(history.state);
-
     /* Redirect to search if there is no booking object in the history state */
     if (!history.state.booking) {
       this.router.navigate(['/search']);
@@ -37,6 +37,10 @@ export class CheckoutSuccessComponent implements OnInit {
 
     if (history.state.booking.isDynamic) {
       this.isDynamic = true;
+    }
+
+    if (history.state.booking.rentalId) {
+      this.rentalId = history.state.booking.rentalId;
     }
 
     /* Extract the endTimestamp from the booking object in the history state */
@@ -57,8 +61,19 @@ export class CheckoutSuccessComponent implements OnInit {
   onNavigate(path: string): void {
     /* Pass the originState object to the next route if it exists */
     const originState = history.state.originState ? { originState: history.state.originState } : {};
-    this.router.navigate([path], { 
-      state: originState
-    });
+
+    let navigationObject: NavigationExtras;
+    if (path === 'booking' && this.rentalId !== null) {
+      /* Pass the rentalId as param to the booking page */
+      navigationObject = { 
+        state: originState,
+        queryParams: { rental: this.rentalId },
+        queryParamsHandling: 'merge',
+      };
+    } else {
+      navigationObject = { state: originState };
+    }
+
+    this.router.navigate([path], navigationObject);
   }
 }
