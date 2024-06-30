@@ -16,7 +16,7 @@ export class UserPosition {
           },
           (error) => {
             console.error('Fehler beim Abrufen der Position', error);
-            resolve(false); // or reject(error) if you want to propagate the error
+            resolve(false);
           }
         );
       } else {
