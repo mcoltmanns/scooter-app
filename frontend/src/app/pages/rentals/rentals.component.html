@@ -70,9 +70,9 @@
   <div class="scrollable-container">
   <div class="width-limiter">
 
-    <div class="rentals-container" *ngIf="!isLoading; else loading">
+    <div *ngIf="!isLoading; else loading" class="rentals-container">
       <div *ngIf="(activeRentals.length > 0 || pastRentals.length > 0); else noRentals">
-        <ul *ngIf="activeRentals.length > 0">
+        <ul *ngIf="activeRentals.length > 0" style="margin-top: 25px;">
           <li *ngFor="let rental of activeRentals">
             <div class="scooter-container" (click)="onClickRental(rental.id)">
               <img *ngIf="getPictureByScooterId(rental.scooterId)" (load)="onImageLoad(rental.scooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[rental.scooterId]}" [src]="getPictureByScooterId(rental.scooterId)" />
@@ -111,7 +111,10 @@
             </div>
           </li>
         </ul>
-        <h2 *ngIf="pastRentals.length > 0" [ngClass]="['subtitle', (activeRentals.length > 0) ? 'top-space' : '']">Beendete Buchungen</h2>
+
+        <hr *ngIf="(activeRentals.length > 0) && (pastRentals.length > 0)" class="solid">
+
+        <h2 *ngIf="pastRentals.length > 0" [ngClass]="['subtitle', (activeRentals.length > 0) ? '' : 'top-space']">Beendete Buchungen</h2>
         <ul *ngIf="pastRentals.length > 0">
           <li *ngFor="let rental of pastRentals">
             <div class="scooter-container" (click)="onClickRental(rental.id)">
