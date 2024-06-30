@@ -82,7 +82,6 @@
   font-size: 18px;
   border: 1px solid black;
 }
-
 .qr-icon {
   position: absolute;
   top: -47px;
@@ -249,5 +248,4 @@
 
 .corresponding app-button:last-child{
   flex: 1;
-  
 }
