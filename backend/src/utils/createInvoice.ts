@@ -197,7 +197,7 @@ export class CreateInvoice {
         });
 
         // generate QR Code
-        const qrCodeDataUrl = await QRCode.toDataURL('http://localhost:4200/booking');
+        const qrCodeDataUrl = await QRCode.toDataURL(`http://localhost:4200/booking?rental=${rentalId}`);
         const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
         const qrDims = qrImage.scale(0.5);
 
