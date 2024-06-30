@@ -349,9 +349,20 @@ export class MapComponent implements OnInit, OnDestroy {
 
   /* update the user position and put a user icon on the map */
   updateUserPosition(): void {
-    UserPosition.setUserPosition(this.positionService); // get user position from utils method
-    const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
-    this.layers.push(userMarker); // place the user icon on the map
+    UserPosition.setUserPosition(this.positionService)
+    .then((result) => {
+      console.log(result);
+      if (result) {
+        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+        this.layers.push(userMarker); // place the user icon on the map
+        console.log('Position successfully set');
+      } else {
+        console.log('Failed to set position');
+      }
+    })
+    .catch((error) => {
+      console.error('An error occurred:', error);
+    });
   }
 
 
