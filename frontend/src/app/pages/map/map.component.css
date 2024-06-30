@@ -100,7 +100,7 @@
 .qr-icon {
   position: absolute;
   z-index: 9997;
-  top: -40px;
+  top: -39px;
   right: 6px;
   width: 35px;
   height: 35px;
@@ -135,10 +135,10 @@
   justify-content: center;
 }
 
-.filter-btn {
+.map-header .filter-btn {
   position: absolute;
   top: 50px;
-  left: 89%;
+  right: 50px;
   color: var(--icon-color);
 }
 
