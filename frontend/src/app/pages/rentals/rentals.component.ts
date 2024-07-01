@@ -15,12 +15,37 @@ import { InfoModalComponent } from 'src/app/components/info-modal/info-modal.com
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { trigger, transition, style, animate, sequence } from '@angular/animations';
+
+interface InfoModal {
+  show: boolean;
+  title: string;
+  rentalId: number;
+  rentalObj: PastRental | ActiveRental | null;
+  scooterId: number;
+  createdAt: string;
+  endedAt: string;
+  totalPrice: string;
+  renew: boolean;
+  isActive: boolean;
+}
 
 @Component({
     selector: 'app-rentals',
     standalone: true,
     templateUrl: './rentals.component.html',
     styleUrl: './rentals.component.css',
+    animations: [
+      trigger('itemEnter', [
+        transition('void => *', [
+          sequence([
+            style({ height: '0', opacity: 0 }), // Initial state
+            animate('300ms ease-out', style({ height: '*', opacity: 0 })), // Animate height first
+            animate('200ms ease-out', style({ opacity: 1 })) // Then animate opacity
+          ])
+        ]),
+      ]),
+    ],
     imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent]
 })
 export class RentalsComponent implements OnInit, OnDestroy {
@@ -66,15 +91,18 @@ export class RentalsComponent implements OnInit, OnDestroy {
   public option: Option | null = null;
 
   // Info modal configuration
-  public showInfoModal = false;
-  public infoModalTitle = 'Buchungsdetails';
-  public infoModalRentalId = 0;
-  public infoModalScooterId = 0;
-  public infoModalCreatedAt = '';
-  public infoModalEndedAt = '';
-  public infoModalTotalPrice = '';
-  public infoModalRenew = false;
-  public infoModalIsActive = false;
+  public infoModal: InfoModal = {
+    show: false,
+    title: 'Buchungsdetails',
+    rentalId: 0,
+    rentalObj: null,
+    scooterId: 0,
+    createdAt: '',
+    endedAt: '',
+    totalPrice: '',
+    renew: false,
+    isActive: false
+  };
 
   //variables for the filters----------------------
 
@@ -296,7 +324,9 @@ export class RentalsComponent implements OnInit, OnDestroy {
     });
   }
 
+  /* Animate the removal of the active rental from the active rentals array */
   async moveRentalFromActiveToPast(activeRental: ActiveRental): Promise<void> {
+    /* Check if an animation is currently running and wait for it to end before starting a new one */
     if (this.animationTimeout) {
       await this.waitForAnimationToEnd();
       this.clearWaitForAnimationTimeout();
@@ -315,32 +345,37 @@ export class RentalsComponent implements OnInit, OnDestroy {
       paymentMethodId: activeRental.paymentMethodId
     };
 
+    /* Access the specific rental item in the DOM */
     const specificItem = this.rentalItems.find(item => Number(item.nativeElement.getAttribute('data-id')) === Number(activeRental.id));
     if (!specificItem) {
       return;
     }
 
+    /* Configure the animation */
     const fastAnimationDuration = 200;
     const fastAnimationDurationStr = `${fastAnimationDuration}ms`;
     const slowAnimationDuration = 1000;
     const slowAnimationDurationStr = `${slowAnimationDuration}ms`;
     const crossFadeDuration = Math.floor(fastAnimationDuration / 2);
     const crossFadeDurationStr = `${slowAnimationDuration - fastAnimationDuration}ms`;
+
+    /* Set some initial styles for the elements */
     const margin = 20;
 
+    /* Set up the animation for the list element (the specific rental item, i.e. the li element) */
     const liElement = specificItem.nativeElement;
-
     const liElementHeight = liElement.offsetHeight;
-
     liElement.style.height = `${liElementHeight}px`;
     liElement.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${fastAnimationDurationStr} ease-in`;
     
+    /* Set up the animation for the active rental list (i.e. the ul element) */
     const activeRentalListEl = this.activeRentalList.nativeElement;
     const activeRentalListElHeight = activeRentalListEl.offsetHeight;
     activeRentalListEl.style.height = `${activeRentalListElHeight}px`;
     activeRentalListEl.style.transition = `height ${slowAnimationDurationStr} ease-in-out`;
 
-
+    /* Set up the animation for the green bar, the past rentals title and the active rentals list 
+       in case the last active rental is being removed */
     let greenBarEl: HTMLElement;
     let pastRentalsTitleEl: HTMLElement;
     if (this.activeRentals.length === 1) {
@@ -353,15 +388,22 @@ export class RentalsComponent implements OnInit, OnDestroy {
       pastRentalsTitleEl.style.transition = `margin-top ${slowAnimationDurationStr} ease-in-out`;
     }
 
+    /* Start the animation */
     let wholeAnimationDuration = 0;
+
+    /* Animate a fade-out effect for the list element (li) */
     this.animationTimeout = setTimeout(() => {
       liElement.style.opacity = '0';
     }, 0);       
     wholeAnimationDuration += fastAnimationDuration;
 
+    /* Animate a height reduction for the list element (li) to visually close the gap */
     this.animationTimeout = setTimeout(() => {
       liElement.style.height = '0';
       liElement.style.marginBottom = '0';
+
+      /* In case the last active rental is being removed, also fade and squeeze out
+         the green bar, and adjust the past rentals title and the active rentals list */
       if (this.activeRentals.length === 1) {
         greenBarEl.style.marginTop = '-3px';
         greenBarEl.style.marginBottom = '0';
@@ -369,13 +411,15 @@ export class RentalsComponent implements OnInit, OnDestroy {
         activeRentalListEl.style.height = '0';
         activeRentalListEl.style.marginTop = '0';
         pastRentalsTitleEl.style.marginTop = `${margin}px`;
-      } else {
+      } else { // Otherwise, just reduce the height of the ul element to close the gap
         const newActiveRentalListElHeight = activeRentalListElHeight - liElementHeight - margin;
         activeRentalListEl.style.height = `${newActiveRentalListElHeight}px`;
       };
     }, fastAnimationDuration - crossFadeDuration);
     wholeAnimationDuration += slowAnimationDuration - crossFadeDuration;
 
+    /* After the animation is finished, remove the active rental from the active rentals array
+       and add it to the past rentals array */
     this.animationTimeout = setTimeout(() => {
       this.clearAnimationTimeout();
 
@@ -383,46 +427,50 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.activeRentals = this.activeRentals.filter(rental => rental.id !== activeRental.id);
 
       /* Add the past rental to the past rentals array */
-      this.pastRentals.push(newPastRental);
+      // this.pastRentals.push(newPastRental);
+      this.pastRentals.unshift(newPastRental);
     }, wholeAnimationDuration);
   }
 
   setUpAndShowInfoModal(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
     if (type === 'past') {
       rental = rental as PastRental;
-      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
-      this.infoModalRentalId = rental.id;
-      this.infoModalScooterId = rental.scooterId;
-      this.infoModalCreatedAt = rental.createdAt;
-      this.infoModalEndedAt = rental.endedAt;
-      this.infoModalTotalPrice = rental.total_price;
-      this.infoModalIsActive = false;
-      this.infoModalRenew = false;
-      this.showInfoModal = true;
+      this.infoModal.title = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModal.rentalId = rental.id;
+      this.infoModal.rentalObj = rental;
+      this.infoModal.scooterId = rental.scooterId;
+      this.infoModal.createdAt = rental.createdAt;
+      this.infoModal.endedAt = rental.endedAt;
+      this.infoModal.totalPrice = rental.total_price;
+      this.infoModal.isActive = false;
+      this.infoModal.renew = false;
+      this.infoModal.show = true;
     }
     if (type === 'prepaid') {
       rental = rental as ActiveRental;
-      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
-      this.infoModalRentalId = rental.id;
-      this.infoModalScooterId = rental.scooterId;
-      this.infoModalCreatedAt = rental.createdAt;
-      this.infoModalEndedAt = rental.nextActionTime.toString();
-      this.infoModalTotalPrice = rental.price_per_hour;
-      this.infoModalIsActive = true;
-      this.infoModalRenew = rental.renew;
-      this.showInfoModal = true;
+      this.infoModal.title = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModal.rentalId = rental.id;
+      this.infoModal.rentalObj = rental;
+      this.infoModal.scooterId = rental.scooterId;
+      this.infoModal.createdAt = rental.createdAt;
+      this.infoModal.endedAt = rental.nextActionTime.toString();
+      this.infoModal.totalPrice = rental.price_per_hour;
+      this.infoModal.isActive = true;
+      this.infoModal.renew = rental.renew;
+      this.infoModal.show = true;
     }
     if (type === 'dynamic') {
       rental = rental as ActiveRental;
-      this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
-      this.infoModalRentalId = rental.id;
-      this.infoModalScooterId = rental.scooterId;
-      this.infoModalCreatedAt = rental.createdAt;
-      this.infoModalEndedAt = rental.nextActionTime.toString();
-      this.infoModalTotalPrice = rental.price_per_hour;
-      this.infoModalIsActive = true;
-      this.infoModalRenew = rental.renew;
-      this.showInfoModal = true;
+      this.infoModal.title = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModal.rentalId = rental.id;
+      this.infoModal.rentalObj = rental;
+      this.infoModal.scooterId = rental.scooterId;
+      this.infoModal.createdAt = rental.createdAt;
+      this.infoModal.endedAt = rental.nextActionTime.toString();
+      this.infoModal.totalPrice = rental.price_per_hour;
+      this.infoModal.isActive = true;
+      this.infoModal.renew = rental.renew;
+      this.infoModal.show = true;
     }
   }
 
@@ -435,7 +483,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
   }
 
   onCloseInfoModal(): void {
-    this.showInfoModal = false;
+    this.infoModal.show = false;
 
     /* Remove the rental query parameter from the URL */
     this.router.navigate([], {
@@ -446,18 +494,29 @@ export class RentalsComponent implements OnInit, OnDestroy {
   }
 
   onNavigateToScooter(): void {
-    this.showInfoModal = false;
+    this.infoModal.show = false;
 
     /* Navigate to the scooter page including the island state because then the scooter page will treat the back button as history back */
     const originState = history.state.originState
     ? { originState: { ...history.state.originState, island: true } }
     : { originState: { island: true } };
-    this.router.navigate(['search/scooter', this.infoModalScooterId], { 
+    this.router.navigate(['search/scooter', this.infoModal.scooterId], { 
       state: originState
     });
   }
 
-  onCancelRental(activeRental: ActiveRental): void {
+  onCancelRental(activeRental: ActiveRental | PastRental | null): void {
+    /* Do nothing if the rental is null or a PastRental */
+    if (!activeRental || 'endedAt' in activeRental) {
+      return;
+    }
+
+    if (this.infoModal.show) {
+      /* Close the info modal */
+      this.infoModal.show = false;
+    }
+
+    /* Animate moving the active rental to the past rentals */
     this.moveRentalFromActiveToPast(activeRental);
   }
 
