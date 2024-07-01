@@ -378,7 +378,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
        in case the last active rental is being removed */
     let greenBarEl: HTMLElement;
     let pastRentalsTitleEl: HTMLElement;
-    if (this.activeRentals.length === 1) {
+    if (this.greenBar && this.activeRentals.length === 1) {
       greenBarEl = this.greenBar.nativeElement;
       greenBarEl.style.transition = `margin-top ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${crossFadeDurationStr} ease-in-out`;
 
@@ -404,7 +404,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
       /* In case the last active rental is being removed, also fade and squeeze out
          the green bar, and adjust the past rentals title and the active rentals list */
-      if (this.activeRentals.length === 1) {
+      if (this.greenBar && this.activeRentals.length === 1) {
         greenBarEl.style.marginTop = '-3px';
         greenBarEl.style.marginBottom = '0';
         greenBarEl.style.opacity = '0';
