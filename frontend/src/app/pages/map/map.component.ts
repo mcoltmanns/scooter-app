@@ -29,15 +29,6 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 import { Sorts } from 'src/app/utils/util-sorts';
 
 /**
- * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
- * innerhalb der ganzen Klasse verfügbar.
- */
-const defaultIcon = Leaflet.icon({
-  iconSize: [40, 40],
-  iconUrl: '/assets/marker.png',
-});
-
-/**
  * Icon for the user -> is displayed on the map
  */
 const userIcon = Leaflet.icon({
@@ -72,7 +63,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
   public scooterFilterForm!: FormGroup;
-//scooter arrays for the filters and sorting----
+//scooter arrays for the filters and sorting---
 //contains filtered scooters, unsorted
   public filteredScooters: Scooter[] = [];
 //contains filtered scooters, sorted
@@ -135,7 +126,6 @@ export class MapComponent implements OnInit, OnDestroy {
    * Dokumentation: https://github.com/bluehalo/ngx-leaflet#add-custom-layers-base-layers-markers-shapes-etc
    */
    
-  // layers = [Leaflet.marker([47.663557, 9.175365], { icon: defaultIcon })];
    layers: Leaflet.Layer[] = [];
 
   /**
@@ -150,13 +140,57 @@ export class MapComponent implements OnInit, OnDestroy {
     this.ngZone.run(() => this.router.navigate(['search/scooter', scooterId]));
   }
 
-  /**
-   * This method adds a marker on the map for every scooter in this.scooters
-   */
+  /* This method adds a marker on the map for every scooter in this.scooters */
   addScootersToMap(): void {
     for(const scooter of this.filteredScooters) {
+      
+      // Decide what color does the marker have.
+      let batteryColor = '#4df353';
+      
+      if (scooter.battery <= 20) {
+        batteryColor = '#d81204';
+      } else if (scooter.battery <= 50 && scooter.battery >= 20) {
+        batteryColor = '#fad609';
+      }
+
+      // This part contains all css styles for the scooter marker.
+      const batteryPieStyle = `
+      position: relative;
+      width: 30px;  /* reduced from 50px */
+      height: 30px; /* reduced from 50px */
+      border-radius: 50%;
+      background: conic-gradient(
+        ${batteryColor} calc(var(--percentage) * 1%), 
+        #f8fdff calc(var(--percentage) * 1%)
+      );
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      border: 2px solid rgb(46, 90, 120); /* reduced from 4px */
+      --percentage: ${scooter.battery};
+    `;
+
+    const batteryInnerPieStyle =`
+      position: absolute;
+      width: 18px;  /* reduced from 30px */
+      height: 18px; /* reduced from 30px */
+      background: ${batteryColor};
+      border: 4px solid rgb(46, 90, 120); /* reduced from 8px */
+      border-radius: 50%;
+    `;
+      
+      // Define the marker icon.
+      const icon = Leaflet.divIcon({
+        className: 'marker',
+        html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42] 
+      });
+
+      // Add markers to the map.
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
-        {icon: defaultIcon}
+        {icon: icon}
       ).on('click', ()=> {
         console.log(`${scooter.id} wurde angeklickt!`);
         this.buttonToScooter(scooter.id);
@@ -361,7 +395,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
 
-//things necessary for the filter------------------------------------------------------------------------------
+// things necessary for the filter------------------------------------------------------------------------------
 
 /**
  * enables/disables visibility of filter form

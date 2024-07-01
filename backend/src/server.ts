@@ -49,7 +49,7 @@ class Server {
           /* End the active rental if it is expired */
           console.log('End active rental', rental.dataValues.id, '(expired:', new Date(rental.dataValues.nextActionTime) + ')');
           await RentalManager.endRental(rental.dataValues.id);
-          return;
+          continue;
         }
         RentalManager.scheduleRentalCheck(rental.dataValues.id, new Date(rental.dataValues.nextActionTime));
       }

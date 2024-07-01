@@ -404,52 +404,16 @@ export class ScooterComponent implements OnInit, OnDestroy {
 
   /* Converts the distances */
   convertDistanceUnits(value: number | undefined, unit: string | undefined): string {
-    if(unit === undefined ||value === undefined){
-      return 'error';
-    }
-
-    let str = '';
-    if(unit === 'mi'){
-      value = UnitConverter.convertDistance(value, 'km', unit);
-      str = value.toFixed(0) + ' mi'; // toFixed(0) shows no decimal places
-    } 
-    else{
-      str = value.toString() + ' km';
-    }
-    return str;
+    return UnitConverter.convertDistanceUnits(value, unit);
   }
 
   /* converts the speeds */
   convertSpeedUnits(value: number | undefined, unit: string |undefined): string {
-    if(unit === undefined ||value === undefined){
-      return 'error';
-    }
-
-    let str = '';
-    if(unit === 'mp/h'){
-      value = UnitConverter.convertSpeed(value, 'km/h', unit);
-      str = value.toFixed(1) + ' mp/h'; // toFixed(1) only shows the last decimal place
-    }
-    else{
-      str = value.toString() + ' km/h';
-    }
-    return str;
+    return UnitConverter.convertSpeedUnits(value, unit);
   }
 
   /* Convert the currencies */
   convertCurrencyUnits(value: number, unit: string |undefined): string {
-    if(unit === undefined){
-      return 'error';
-    }
-
-    let str = '';
-    if(unit === '$'){
-      value = UnitConverter.convertCurrency(value, unit, '$');
-      str = value.toFixed(2) + ' $/h'; // toFixed(2) only shows the last two decimal place
-    }
-    else{
-      str = value.toString() + ' €/h';
-    }
-    return str;
+    return UnitConverter.convertCurrencyPerHourUnits(value, unit);
   }
 }

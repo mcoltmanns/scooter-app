@@ -9,7 +9,8 @@
     <div class="text">
       <ng-content></ng-content>
     </div>
-    <div class="buttons">
+    <div [ngClass]="['buttons', centerControls ? 'controls-centered' : 'controls-right']">
+      <app-button *ngIf="showActionButton" design="thin" (click)="onAction()">{{actionText}}</app-button>
       <app-button design="thin" color="accent" (click)="onClose()">{{closeText}}</app-button>
   </div>
 </div>
