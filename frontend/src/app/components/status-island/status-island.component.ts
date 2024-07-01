@@ -89,7 +89,8 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
       /* Configure the status island with the information from the reservation */
       this.imgPath = reservation.imagePath;
       this.redirectPath = reservation.redirectPath;
-      this.title = reservation.scooterName;
+      // this.title = reservation.scooterName;
+      this.title = 'Ein sehr langer Scooter-Name, der so lang ist, dass er gekürzt werden muss';
       this.content = 'reserviert:';
       this.showCancelButton = true;
       this.cancellationConfirmModalTitle = 'Reservierung aufheben';
@@ -210,17 +211,17 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   adjustElementsToWindow(): void {
     this.showContent = true;
     const screenWidth = window.innerWidth;
-    if (screenWidth > 575) {
+    if (screenWidth > 600) {
       this.titleMinLength = 50;
-    } else if (screenWidth > 425) {
+    } else if (screenWidth > 465) {
       this.titleMinLength = 30;
-    } else if (screenWidth > 345) {
+    } else if (screenWidth > 390) {
       this.titleMinLength = 20;
-    } else if (screenWidth > 265) {
+    } else if (screenWidth > 300) {
       this.titleMinLength = 8;
-    } else if (screenWidth > 250) {
+    } else if (screenWidth > 280) {
       this.titleMinLength = 6;
-    } else if (screenWidth > 200) {
+    } else if (screenWidth > 220) {
       this.titleMinLength = 8;
       this.showContent = false;
     } else {
