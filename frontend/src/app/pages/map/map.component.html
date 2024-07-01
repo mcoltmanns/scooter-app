@@ -129,6 +129,10 @@
               <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatNumber($event, 'minPrice')"></app-user-input>
               <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatNumber($event, 'maxPrice')"></app-user-input>
             </div>
+            <div class="content-section implementation">
+              <p-slider [(ngModel)]="minPrice" [ngModelOptions]="{standalone: true}"></p-slider>
+              <p>Wert: {{minPrice}}</p>
+            </div>
             <div class="filter-row">
               <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange" (input)="autoFormatNumber($event, 'minRange')"></app-user-input>
               <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange" (input)="autoFormatNumber($event, 'maxRange')"></app-user-input>

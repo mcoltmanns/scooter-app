@@ -28,6 +28,9 @@ import { Sorts } from 'src/app/utils/util-sorts';
 import { Html5Qrcode } from 'html5-qrcode';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
+//Slider for the filter
+import { SliderModule } from 'primeng/slider';
+
 /* user icon for showing the user position */
 const userIcon = Leaflet.icon({
   iconSize: [40, 40],
@@ -38,7 +41,7 @@ const userIcon = Leaflet.icon({
     standalone: true,
     templateUrl: './map.component.html',
     styleUrls: ['./map.component.css'],
-    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent, ToastComponent]
+    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent, ToastComponent, SliderModule]
 })
 
 export class MapComponent implements OnInit, OnDestroy {
