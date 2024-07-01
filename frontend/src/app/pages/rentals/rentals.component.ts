@@ -40,9 +40,9 @@ interface InfoModal {
       trigger('itemEnter', [
         transition('void => *', [
           sequence([
-            style({ height: '0', opacity: 0 }), // Initial state
-            animate('300ms ease-out', style({ height: '*', opacity: 0 })), // Animate height first
-            animate('200ms ease-out', style({ opacity: 1 })) // Then animate opacity
+            style({ height: '0', opacity: 0, transform: 'scale(0)' }), // Initial state
+            animate('300ms ease-out', style({ height: '*', opacity: 0, transform: 'scale(0.925)' })), // Animate height first
+            animate('200ms ease-out', style({ opacity: 1, transform: 'scale(1)' })) // Then animate opacity
           ])
         ]),
       ]),
@@ -268,7 +268,6 @@ export class RentalsComponent implements OnInit, OnDestroy {
     this.rentalService.generateInvoicePdf(rentalId, this.selectedCurrency).subscribe({
       // read and interpret the Blob from the backend 
       next: (pdfBlob: Blob) => {
-        console.log('Hier lande ich');
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
         //window.open(url, '_blank'); // used for debugging pdf file 
@@ -375,7 +374,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
     }
 
     /* Configure the animation */
-    const fastAnimationDuration = 200;
+    const fastAnimationDuration = 250;
     const fastAnimationDurationStr = `${fastAnimationDuration}ms`;
     const slowAnimationDuration = 1000;
     const slowAnimationDurationStr = `${slowAnimationDuration}ms`;
@@ -389,7 +388,8 @@ export class RentalsComponent implements OnInit, OnDestroy {
     const liElement = specificItem.nativeElement;
     const liElementHeight = liElement.offsetHeight;
     liElement.style.height = `${liElementHeight}px`;
-    liElement.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${fastAnimationDurationStr} ease-in`;
+    liElement.style.transform = 'scale(1)';
+    liElement.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${fastAnimationDurationStr} ease-in, transform ${fastAnimationDurationStr} ease-in`;
     
     /* Set up the animation for the active rental list (i.e. the ul element) */
     const activeRentalListEl = this.activeRentalList.nativeElement;
@@ -417,6 +417,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Animate a fade-out effect for the list element (li) */
     this.animationTimeout = setTimeout(() => {
       liElement.style.opacity = '0';
+      liElement.style.transform = 'scale(0.925)';
     }, 0);       
     wholeAnimationDuration += fastAnimationDuration;
 
