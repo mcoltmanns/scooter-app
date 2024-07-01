@@ -268,7 +268,6 @@ export class RentalsComponent implements OnInit, OnDestroy {
     this.rentalService.generateInvoicePdf(rentalId, this.selectedCurrency).subscribe({
       // read and interpret the Blob from the backend 
       next: (pdfBlob: Blob) => {
-        console.log('Hier lande ich');
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
         //window.open(url, '_blank'); // used for debugging pdf file 

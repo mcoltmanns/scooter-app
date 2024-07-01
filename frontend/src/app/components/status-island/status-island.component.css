@@ -34,8 +34,8 @@
 }
 
 .status-island-image {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   object-fit: cover;
   border-radius: 50%;
   vertical-align: middle;
@@ -45,9 +45,9 @@
 
 .status-island-text {
   font-family: Roboto;
-  font-size: 13px;
-  padding-top: 2px;
-  padding-bottom: 2px;
+  font-size: 15px;
+  padding-top: 3px;
+  padding-bottom: 3px;
   white-space: nowrap;
   transition: padding-top 0.3s ease, padding-bottom 0.3s ease;
 }
@@ -55,8 +55,8 @@
 .status-island-cancel-button {
   box-sizing: border-box;
   margin: 3px;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background-color: #659a4d;
   display: flex;
@@ -68,7 +68,7 @@
 .status-island-wrapper {
   position: relative;
   padding: 2px;
-  border-radius: 20px;
+  border-radius: 26px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
   cursor: pointer;
   transition: padding 0.3s ease;
@@ -79,7 +79,7 @@
   position: absolute;
   left: 0px;
   top: 0px;
-  border-radius: 20px;
+  border-radius: 26px;
   background: linear-gradient(45deg, #97fb64, #97fb64, #97fb64,#59963b, #4e8f2d, #71b64f, 
     #97fb64, #547a42,#97fb64, #97fb64);
   background-size: 400%;
@@ -90,7 +90,9 @@
 }
 
 .status-island-wrapper:after {
+  -webkit-filter: blur(15px);
   filter: blur(15px);
+  transform: translate3d(0, 0, 0);
   opacity: 0.5;
 }
 
@@ -100,7 +102,7 @@
   letter-spacing: 0.25px;
   color: white;
   background-color: var(--Highlights-Stroke, #123800);
-  border-radius: 18px;
+  border-radius: 24px;
 }
 
 .status-island-wrapper:hover {
@@ -108,8 +110,8 @@
 }
 
 .status-island-wrapper:hover .status-island-text {
-  padding-top: 4px;
-  padding-bottom: 4px;
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
 .status-island-wrapper:hover .no-image {
@@ -131,8 +133,8 @@
 }
 
 .status-island-wrapper:hover .status-island-image {
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   padding: 5px;
 }
 
