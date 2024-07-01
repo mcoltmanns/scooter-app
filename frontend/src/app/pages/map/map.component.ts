@@ -436,6 +436,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.filteredScooters = Filters.filterSpeed(this.filteredScooters, this.products);
     //add the new selection of scooters to the map
     this.addScootersToMap();
+    this.updateUserPosition();
   }
 
   /**
@@ -446,6 +447,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.filteredScooters = this.scooters;
     this.layers=[];
     this.addScootersToMap();
+    this.updateUserPosition();
     this.toggleFilterView();
     this.minPrice = '';
     this.maxPrice = '';
