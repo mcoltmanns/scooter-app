@@ -89,8 +89,7 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
       /* Configure the status island with the information from the reservation */
       this.imgPath = reservation.imagePath;
       this.redirectPath = reservation.redirectPath;
-      // this.title = reservation.scooterName;
-      this.title = 'Ein sehr langer Scooter-Name, der so lang ist, dass er gekürzt werden muss';
+      this.title = reservation.scooterName;
       this.content = 'reserviert:';
       this.showCancelButton = true;
       this.cancellationConfirmModalTitle = 'Reservierung aufheben';
