@@ -8,9 +8,8 @@ export class UserPosition {
   static setUserPosition(positionService: PositionService): void {
     if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition( // get current position
-          (position) => {
-            positionService.setLatitude(position.coords.latitude); // update the global variable user latitude 
-            positionService.setLongitude(position.coords.longitude); // update the global variable user longitude
+          (position) => {(47.68993119786016); // update the global variable user latitude 
+            positionService.setLongitude(9.187186360140915); // update the global variable user longitude
           },
           (error) => {
             console.error('Fehler beim Abrufen der Position', error);
