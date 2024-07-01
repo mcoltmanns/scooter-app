@@ -513,7 +513,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
     if (this.infoModal.show) {
       /* Close the info modal */
-      this.infoModal.show = false;
+      this.onCloseInfoModal();
     }
 
     /* Animate moving the active rental to the past rentals */

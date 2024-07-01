@@ -1,4 +1,4 @@
-<app-info-modal [showModal]="infoModal.show" [action]="onNavigateToScooter" [close]="onCloseInfoModal" [title]="infoModal.title" [showIcon]="false" [showActionButton]="infoModal.isActive ? false : true" actionText="Zum Scooter" cancelText="Schließen" [centerControls]="infoModal.isActive ? false : true">
+<app-info-modal [showModal]="infoModal.show" [action]="onNavigateToScooter" [close]="onCloseInfoModal" [title]="infoModal.title" [showIcon]="false" [showActionButton]="infoModal.isActive ? false : true" actionText="Zum Scooter" cancelText="Schließen" [centerControls]="true">
   <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 0.75em;">
     <img *ngIf="getPictureByScooterId(infoModal.scooterId)" (load)="onImageLoad(infoModal.scooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[infoModal.scooterId]}" [src]="getPictureByScooterId(infoModal.scooterId)" style="width: 60px;" />
   </div>
