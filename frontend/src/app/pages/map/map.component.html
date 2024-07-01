@@ -6,7 +6,7 @@
     <span class="switch-btn" (click)="toggleListView()">
       <span class="material-icons icon-outlined" style="cursor: pointer;">{{ view === "map" ? "view_kanban" : "map" }}</span>
     </span>
-    <app-filter-button class="filter-btn" (filterToggle)="toggleFilterView()"></app-filter-button>
+    <app-filter-button (filterToggle)="toggleFilterView()"></app-filter-button>
     <h1 class="title logo">SCOOTER</h1>
     
     <input

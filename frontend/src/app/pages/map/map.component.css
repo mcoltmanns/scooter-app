@@ -89,7 +89,7 @@
   width: 30px;
   height: 30px;
   top: 130px;
-  right: 15px;
+  right: 10px;
   cursor: pointer;
   border-radius: 15px;
   border: 1.5px solid var(--Highlights-Stroke, #123800);
@@ -133,13 +133,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.map-header .filter-btn {
-  position: absolute;
-  top: 50px;
-  right: 50px;
-  color: var(--icon-color);
 }
 
 .filter-menu-container {
