@@ -304,13 +304,6 @@ hr.solid {
     max-width: 400px;
 }
 
-.filter-btn {
-  position: absolute;
-  top: 50px;
-  left: 85%;
-  color: var(--icon-color);
-}
-
 .filter-menu-container {
     position: relative;
     width: 90%;

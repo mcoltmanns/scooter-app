@@ -21,7 +21,7 @@
 
 .filter-icon {
   position: absolute;
-  left: 85%;
-  top: 7%;
+  right: 18px;
+  top: 49px;
   cursor: pointer;
 }

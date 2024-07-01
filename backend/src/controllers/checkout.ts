@@ -33,8 +33,8 @@ export class CheckoutController {
     if (isDynamic) {
       rentalDuration = DYNAMIC_EXTENSION_INTERVAL_MS;
     } else {
-      // rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
-      rentalDuration = 80000; // For testing/debugging purposes, set the duration to 40 seconds
+      rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      // rentalDuration = 80000; // For testing/debugging purposes, set the duration to 40 seconds
     }
 
     let rental: Model | null = null;

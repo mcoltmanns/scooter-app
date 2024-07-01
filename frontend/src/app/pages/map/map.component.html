@@ -6,7 +6,7 @@
     <span class="switch-btn" (click)="toggleListView()">
       <span class="material-icons icon-outlined" style="cursor: pointer;">{{ view === "map" ? "view_kanban" : "map" }}</span>
     </span>
-    <app-filter-button class="filter-btn" (filterToggle)="toggleFilterView()"></app-filter-button>
+    <app-filter-button (filterToggle)="toggleFilterView()"></app-filter-button>
     <h1 class="title logo">SCOOTER</h1>
     
     <input
@@ -128,6 +128,10 @@
             <div class="filter-row">
               <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatNumber($event, 'minPrice')"></app-user-input>
               <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatNumber($event, 'maxPrice')"></app-user-input>
+            </div>
+            <div class="content-section implementation">
+              <p-slider [(ngModel)]="minPrice" [ngModelOptions]="{standalone: true}"></p-slider>
+              <p>Wert: {{minPrice}}</p>
             </div>
             <div class="filter-row">
               <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange" (input)="autoFormatNumber($event, 'minRange')"></app-user-input>
