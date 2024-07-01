@@ -27,6 +27,9 @@ import { Sorts } from 'src/app/utils/util-sorts';
 // QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { OptionService } from 'src/app/services/option.service';
+import { Option } from 'src/app/models/option';
+import { UnitConverter } from 'src/app/utils/unit-converter';
 
 /* user icon for showing the user position */
 const userIcon = Leaflet.icon({
@@ -85,8 +88,17 @@ export class MapComponent implements OnInit, OnDestroy {
   //Variables for the sorting--------------------
   sortMenuVisible = false;
   //---------------------------------------------
+   // User Units variables
+   public selectedSpeed = ''; 
+   public selectedDistance = '';
+   public selectedCurrency = '';
+   public option: Option | null = null;
 
-  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef) 
+
+
+
+
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService) 
   { //form group for the input on the scooter-filters
     this.scooterFilterForm = this.fb.group({ 
     minPrice: ['', [this.numberStringValidator(0, 99999)]],
@@ -240,6 +252,19 @@ export class MapComponent implements OnInit, OnDestroy {
     // Initializes the QR code scanner with the video element 'qr-reader'.
     this.qrReader = new Html5Qrcode('qr-reader');
     this.updateUserPosition(); // call method to update user Position
+
+    this.optionService.getUserPreferences().subscribe({
+      next: (value) => {
+        this.option = value;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+      },
+      error: (err) => {
+        this.errorMessage = err.message;
+        console.error(err);
+      }
+    });
   }
 
   /* if the we change the page */
@@ -416,10 +441,18 @@ export class MapComponent implements OnInit, OnDestroy {
       this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
       this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
       this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
+      //convert units to default backend units of metric and euro, using inline if to catch empty input fields
+      this.minPrice = (this.minPrice === '') ? '' : String (UnitConverter.convertCurrency(Number (this.minPrice), this.selectedCurrency, '€'));
+      this.maxPrice = (this.maxPrice === '') ? '' : String (UnitConverter.convertCurrency(Number (this.maxPrice), this.selectedCurrency, '€'));
+      this.minRange = (this.minRange === '') ? '' : String (UnitConverter.convertDistance(Number(this.minRange), this.selectedDistance, 'km'));
+      this.maxRange = (this.maxRange === '') ? '' : String (UnitConverter.convertDistance(Number(this.maxRange), this.selectedDistance, 'km'));
+      this.minSpeed = (this.minSpeed === '') ? '' : String (UnitConverter.convertSpeed(Number (this.minSpeed), this.selectedSpeed, 'km/h'));
+      this.maxSpeed = (this.maxSpeed === '') ? '' : String (UnitConverter.convertSpeed(Number (this.maxSpeed), this.selectedSpeed, 'km/h'));
       //update the memory values in the filter util file
       Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
       //then apply the filters
       this.filterUpdates();
+      console.log(this.filteredScooters);
       this.toggleFilterView();
       this.sortFiltered();
     }
