@@ -22,15 +22,13 @@ import { SortButtonComponent} from '../../components/sort-button/sort-button.com
 import { UserPosition } from 'src/app/utils/userPosition'; // get methods from utils folder 
 import { PositionService } from 'src/app/utils/position.service';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
+import { Sorts } from 'src/app/utils/util-sorts';
 
 // QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
-import { Sorts } from 'src/app/utils/util-sorts';
 
-/**
- * Icon for the user -> is displayed on the map
- */
+/* user icon for showing the user position */
 const userIcon = Leaflet.icon({
   iconSize: [40, 40],
   iconUrl: '/assets/person.png',
@@ -63,15 +61,15 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
   public scooterFilterForm!: FormGroup;
-//scooter arrays for the filters and sorting---
-//contains filtered scooters, unsorted
+  //scooter arrays for the filters and sorting---
+  //contains filtered scooters, unsorted
   public filteredScooters: Scooter[] = [];
-//contains filtered scooters, sorted
+  //contains filtered scooters, sorted
   public sortedScooters: Scooter[] = [];
-//---------------------------------------------
+  //---------------------------------------------
 
 
-//variables for the filters--------------------
+  //variables for the filters--------------------
   filterMenuVisible = false;
   //variables for the input of the form and hence the filters
   public minPrice = '';
@@ -82,11 +80,11 @@ export class MapComponent implements OnInit, OnDestroy {
   public maxBty = '';
   public minSpeed = '';
   public maxSpeed = '';
-//---------------------------------------------
+  //---------------------------------------------
 
-//Variables for the sorting--------------------
+  //Variables for the sorting--------------------
   sortMenuVisible = false;
-//---------------------------------------------
+  //---------------------------------------------
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef) 
   { //form group for the input on the scooter-filters
@@ -239,7 +237,7 @@ export class MapComponent implements OnInit, OnDestroy {
         }
       });
 
-      // Initializes the QR code scanner with the video element 'qr-reader'.
+    // Initializes the QR code scanner with the video element 'qr-reader'.
     this.qrReader = new Html5Qrcode('qr-reader');
     this.updateUserPosition(); // call method to update user Position
   }
