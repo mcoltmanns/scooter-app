@@ -19,11 +19,6 @@ import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-
 import { PositionService } from 'src/app/utils/position.service';
 import { UserPosition } from 'src/app/utils/userPosition';
 
-/* Icon for the scooters */
-const defaultIcon = Leaflet.icon({
-  iconSize: [40, 40],
-  iconUrl: '/assets/marker.png',
-});
 
 /*  Icon for the user -> is displayed on the map */
 const userIcon = Leaflet.icon({
@@ -120,7 +115,52 @@ export class ScooterComponent implements OnInit, OnDestroy {
         next: ([scooter, product, option, reservation]) => {
           /* Proess the scooter information */
           this.scooter = scooter;
-          const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: defaultIcon});
+
+           // Decide what color does the marker have.
+          let batteryColor = '#4df353';
+      
+          if (scooter.battery <= 20) {
+            batteryColor = '#d81204';
+          } else if (scooter.battery <= 50 && scooter.battery >= 20) {
+            batteryColor = '#fad609';
+          }
+
+          // This part contains all css styles for the scooter marker.
+          const batteryPieStyle = `
+            position: relative;
+            width: 30px;  /* reduced from 50px */
+            height: 30px; /* reduced from 50px */
+            border-radius: 50%;
+            background: conic-gradient(
+              ${batteryColor} calc(var(--percentage) * 1%), 
+              #f8fdff calc(var(--percentage) * 1%)
+            );
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgb(46, 90, 120); /* reduced from 4px */
+            --percentage: ${scooter.battery};
+          `;
+
+          const batteryInnerPieStyle =`
+            position: absolute;
+            width: 18px;  /* reduced from 30px */
+            height: 18px; /* reduced from 30px */
+            background: ${batteryColor};
+            border: 4px solid rgb(46, 90, 120); /* reduced from 8px */
+            border-radius: 50%;
+          `;
+      
+          // Define the marker icon.
+          const icon = Leaflet.divIcon({
+            className: 'marker',
+            html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
+            iconSize: [30, 42],
+            iconAnchor: [15, 42] 
+          });
+
+          const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: icon});
           this.layers.push(marker); 
           this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
           this.options.center = this.center; // Set the map center

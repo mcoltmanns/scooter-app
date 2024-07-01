@@ -20,6 +20,10 @@
                 <p class="info-box">{{ convertDistanceUnits(getRangeByProductId(scooter.product_id, scooter.battery), selectedDistance) }}</p>
                 <p class="secondary-text-font">Reichweite</p>
               </div>
+              <div class="stat-item">
+                <p class="info-box">{{ positionService.calcDistances(scooter.coordinates_lat, scooter.coordinates_lng, selectedDistance)}}</p>
+                <p class="secondary-text-font">Entfernung</p>
+              </div>
             </div>
             <div class="scooter-details">
               <p class="price"> PREIS: {{ convertCurrencyUnits(getPriceByProductId(scooter.product_id), selectedCurrency) }}</p>
@@ -32,7 +36,7 @@
                   />
                 </svg>
               </div>
-            </div>  
+            </div> 
           </div>
         </li>
       </ul>

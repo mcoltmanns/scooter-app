@@ -95,9 +95,10 @@
                 <div class="description" innerHTML="{{ product?.description_html }}">Beschreibung</div>
                 <hr class="solid">
                 <h2 style="margin: 15px;">Standort</h2>
-                <div class="bottom" style="margin-top: 15px; margin-bottom: 15px;"> Scooter ist {{ this.distance }} von Ihnen entfernt.</div>
+                <p style="margin: 15px;">Entfernung zum Scooter: <b style="color: chartreuse;">{{ this.distance }}</b></p>
                 <div class="map" leaflet [leafletOptions]="options" [(leafletCenter)]="center" [leafletLayers]="layers"></div>
             </div>
+            
         </ng-container>
     </ng-container>
 
