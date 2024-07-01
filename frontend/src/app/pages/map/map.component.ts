@@ -452,7 +452,6 @@ export class MapComponent implements OnInit, OnDestroy {
       Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
       //then apply the filters
       this.filterUpdates();
-      console.log(this.filteredScooters);
       this.toggleFilterView();
       this.sortFiltered();
     }
