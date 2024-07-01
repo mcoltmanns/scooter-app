@@ -16,6 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { trigger, transition, style, animate, sequence } from '@angular/animations';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 interface InfoModal {
   show: boolean;
@@ -46,15 +47,21 @@ interface InfoModal {
         ]),
       ]),
     ],
-    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent]
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent, ToastComponent]
 })
 export class RentalsComponent implements OnInit, OnDestroy {
+  /* Access the DOM elements that get animated */
   @ViewChildren('rentalItem') rentalItems!: QueryList<ElementRef>;
   @ViewChild('greenBar') greenBar!: ElementRef;
   @ViewChild('activeRentalList') activeRentalList!: ElementRef;
   @ViewChild('pastRentalsTitle') pastRentalsTitle!: ElementRef;
+
+  /* Variables to manage the animation timeouts */
   private animationTimeout: ReturnType<typeof setTimeout> | null = null;
   private waitForAnimationEndTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /* Get references to the toast component */
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent;
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
@@ -159,6 +166,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         // this.loadingDataScooter = false;
         // this.loadingDataProduct = false;
         // this.loadingDataOption = false;
+        this.toastComponentError.showToast();
         this.isLoading = false;
         console.log(err);
       }
@@ -257,10 +265,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
   /* This method should retrieve the invoice pdf from the backend */
   displayInvoice(rentalId: number): void {
     // send a request to the backend to generate the file
-    this.rentalService.generateInvoicePdf(rentalId, this.selectedCurrency).subscribe(
-      
+    this.rentalService.generateInvoicePdf(rentalId, this.selectedCurrency).subscribe({
       // read and interpret the Blob from the backend 
-      (pdfBlob: Blob) => {
+      next: (pdfBlob: Blob) => {
+        console.log('Hier lande ich');
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
         //window.open(url, '_blank'); // used for debugging pdf file 
@@ -274,10 +282,25 @@ export class RentalsComponent implements OnInit, OnDestroy {
         link.click();
         document.body.removeChild(link);
       },
-      (error) => {
-        console.error('Fehler beim Herunterladen der Rechnung:', error);
+      error: (error) => {
+        if (error.error instanceof Blob) {
+          error.error.text().then((text: string) => {
+            try {
+              const errorData = JSON.parse(text);
+              console.log(errorData);
+              this.errorMessage = errorData.message;
+            } catch (e) {
+              // Handle generic error if parsing fails
+              this.errorMessage = 'Fehler beim Herunterladen der Rechnung.';
+            }
+          });
+        } else {
+          // Handle non-Blob errors
+          this.errorMessage = error.error.message;
+        }
+        this.toastComponentError.showToast();
       }
-    );
+    });
   }
 
   getRentalObjByRentalId(rentalId: number): { rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic' } | null {

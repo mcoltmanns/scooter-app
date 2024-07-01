@@ -168,7 +168,7 @@ export class BookingsController {
         }
 
         if (!rentalId) {
-            response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
+            response.status(400).json({ code: 400, message: 'Keine Buchungs-ID angegeben.' });
             return;
         }
 
@@ -178,13 +178,13 @@ export class BookingsController {
             const rental = await RentalManager.getFullyPaidRentalByRentalId(rentalId);
 
             if (!rental) {
-                response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
+                response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
                 return;
             }
 
             if (rental.userId !== response.locals.userId) {
               /* Not athorized, user is not the owner of the rental */
-              response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
+              response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
               return;
             }
 

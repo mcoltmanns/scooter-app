@@ -44,6 +44,8 @@
   </div>
 </app-info-modal>
 
+<app-toast #toastComponentError [showDuration]=6000 type="error">{{errorMessage}}</app-toast>
+
 <div class="page-container">
   <div class="header">
     <app-filter-button (filterToggle)="toggle()" class="filter-btn"></app-filter-button>
