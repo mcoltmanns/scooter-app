@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ActiveRental, PastRental, ProductWithScooterId, Rental } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
@@ -23,7 +23,13 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
     styleUrl: './rentals.component.css',
     imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent]
 })
-export class RentalsComponent implements OnInit {
+export class RentalsComponent implements OnInit, OnDestroy {
+  @ViewChildren('rentalItem') rentalItems!: QueryList<ElementRef>;
+  @ViewChild('greenBar') greenBar!: ElementRef;
+  @ViewChild('activeRentalList') activeRentalList!: ElementRef;
+  @ViewChild('pastRentalsTitle') pastRentalsTitle!: ElementRef;
+  private animationTimeout: ReturnType<typeof setTimeout> | null = null;
+  private waitForAnimationEndTimeout: ReturnType<typeof setTimeout> | null = null;
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
@@ -66,7 +72,7 @@ export class RentalsComponent implements OnInit {
   public infoModalScooterId = 0;
   public infoModalCreatedAt = '';
   public infoModalEndedAt = '';
-  public infoModalTotalPrice = 0;
+  public infoModalTotalPrice = '';
   public infoModalRenew = false;
   public infoModalIsActive = false;
 
@@ -129,6 +135,12 @@ export class RentalsComponent implements OnInit {
         console.log(err);
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    /* Clear timeouts if still running */
+    this.clearAnimationTimeout();
+    this.clearWaitForAnimationTimeout();
   }
 
   // Function to call when an image is loaded
@@ -208,6 +220,11 @@ export class RentalsComponent implements OnInit {
     return UnitConverter.convertCurrencyUnits(value, unit);
   }
 
+  /* Convert a string into a number */
+  toNumber(value: string): number {
+    return Number(value);
+  }
+
 
   /* This method should retrieve the invoice pdf from the backend */
   displayInvoice(rentalId: number): void {
@@ -251,6 +268,125 @@ export class RentalsComponent implements OnInit {
     return null;
   }
 
+  clearAnimationTimeout(): void {
+    if (this.animationTimeout) {
+      clearTimeout(this.animationTimeout);
+      this.animationTimeout = null;
+    }
+  }
+
+  clearWaitForAnimationTimeout(): void {
+    if (this.waitForAnimationEndTimeout) {
+      clearTimeout(this.waitForAnimationEndTimeout);
+      this.waitForAnimationEndTimeout = null;
+    }
+  }
+
+  waitForAnimationToEnd(): Promise<void> {
+    return new Promise((resolve) => {
+      const checkAnimation = (): void => {
+        if (this.animationTimeout === null) {
+          resolve();
+        } else {
+          // Check again after a delay
+          this.waitForAnimationEndTimeout = setTimeout(checkAnimation, 100); // Check every 100 milliseconds
+        }
+      };
+      checkAnimation();
+    });
+  }
+
+  async moveRentalFromActiveToPast(activeRental: ActiveRental): Promise<void> {
+    if (this.animationTimeout) {
+      await this.waitForAnimationToEnd();
+      this.clearWaitForAnimationTimeout();
+    }
+
+    /* Convert the active rental to a past rental */
+    const endTimestamp = new Date().toISOString();
+    const totalPrice = (Number(activeRental.price_per_hour) * this.getExactRentalDurationInHours(activeRental.createdAt, endTimestamp)).toFixed(2);
+    const newPastRental: PastRental = {
+      id: activeRental.id,
+      scooterId: activeRental.scooterId,
+      userId: activeRental.userId,
+      createdAt: activeRental.createdAt,
+      endedAt: endTimestamp,
+      total_price: totalPrice,
+      paymentMethodId: activeRental.paymentMethodId
+    };
+
+    const specificItem = this.rentalItems.find(item => Number(item.nativeElement.getAttribute('data-id')) === Number(activeRental.id));
+    if (!specificItem) {
+      return;
+    }
+
+    const fastAnimationDuration = 200;
+    const fastAnimationDurationStr = `${fastAnimationDuration}ms`;
+    const slowAnimationDuration = 1000;
+    const slowAnimationDurationStr = `${slowAnimationDuration}ms`;
+    const crossFadeDuration = Math.floor(fastAnimationDuration / 2);
+    const crossFadeDurationStr = `${slowAnimationDuration - fastAnimationDuration}ms`;
+    const margin = 20;
+
+    const liElement = specificItem.nativeElement;
+
+    const liElementHeight = liElement.offsetHeight;
+
+    liElement.style.height = `${liElementHeight}px`;
+    liElement.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${fastAnimationDurationStr} ease-in`;
+    
+    const activeRentalListEl = this.activeRentalList.nativeElement;
+    const activeRentalListElHeight = activeRentalListEl.offsetHeight;
+    activeRentalListEl.style.height = `${activeRentalListElHeight}px`;
+    activeRentalListEl.style.transition = `height ${slowAnimationDurationStr} ease-in-out`;
+
+
+    let greenBarEl: HTMLElement;
+    let pastRentalsTitleEl: HTMLElement;
+    if (this.activeRentals.length === 1) {
+      greenBarEl = this.greenBar.nativeElement;
+      greenBarEl.style.transition = `margin-top ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${crossFadeDurationStr} ease-in-out`;
+
+      activeRentalListEl.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-top ${slowAnimationDurationStr} ease-in-out`;
+
+      pastRentalsTitleEl = this.pastRentalsTitle.nativeElement;
+      pastRentalsTitleEl.style.transition = `margin-top ${slowAnimationDurationStr} ease-in-out`;
+    }
+
+    let wholeAnimationDuration = 0;
+    this.animationTimeout = setTimeout(() => {
+      liElement.style.opacity = '0';
+    }, 0);       
+    wholeAnimationDuration += fastAnimationDuration;
+
+    this.animationTimeout = setTimeout(() => {
+      liElement.style.height = '0';
+      liElement.style.marginBottom = '0';
+      if (this.activeRentals.length === 1) {
+        greenBarEl.style.marginTop = '-3px';
+        greenBarEl.style.marginBottom = '0';
+        greenBarEl.style.opacity = '0';
+        activeRentalListEl.style.height = '0';
+        activeRentalListEl.style.marginTop = '0';
+        pastRentalsTitleEl.style.marginTop = `${margin}px`;
+      } else {
+        const newActiveRentalListElHeight = activeRentalListElHeight - liElementHeight - margin;
+        activeRentalListEl.style.height = `${newActiveRentalListElHeight}px`;
+      };
+    }, fastAnimationDuration - crossFadeDuration);
+    wholeAnimationDuration += slowAnimationDuration - crossFadeDuration;
+
+    this.animationTimeout = setTimeout(() => {
+      this.clearAnimationTimeout();
+
+      /* Remove the active rental from the active rentals array */
+      this.activeRentals = this.activeRentals.filter(rental => rental.id !== activeRental.id);
+
+      /* Add the past rental to the past rentals array */
+      this.pastRentals.push(newPastRental);
+    }, wholeAnimationDuration);
+  }
+
   setUpAndShowInfoModal(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
     if (type === 'past') {
       rental = rental as PastRental;
@@ -265,7 +401,6 @@ export class RentalsComponent implements OnInit {
       this.showInfoModal = true;
     }
     if (type === 'prepaid') {
-      console.log('Prepaid booking clicked');
       rental = rental as ActiveRental;
       this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
       this.infoModalRentalId = rental.id;
@@ -278,7 +413,6 @@ export class RentalsComponent implements OnInit {
       this.showInfoModal = true;
     }
     if (type === 'dynamic') {
-      console.log('Dynamic booking clicked');
       rental = rental as ActiveRental;
       this.infoModalTitle = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
       this.infoModalRentalId = rental.id;
@@ -321,6 +455,10 @@ export class RentalsComponent implements OnInit {
     this.router.navigate(['search/scooter', this.infoModalScooterId], { 
       state: originState
     });
+  }
+
+  onCancelRental(activeRental: ActiveRental): void {
+    this.moveRentalFromActiveToPast(activeRental);
   }
 
   //functionalities for the filters-----------------------------------------------------------------

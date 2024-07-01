@@ -196,16 +196,13 @@ hr.solid {
     white-space: nowrap;
 }
 
-.download-button, .download-button-static {
+.action-button, .action-button-static {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 4px;
     width: fit-content;
     height: 30px;
-    /* background-color: #0091ffbd; */
-    background-color: var(--accent-bg, #9af0ff);
-    border: solid 1.5px var(--accent-fg, #2a1800);
     border-radius: 15px;
     cursor: pointer;
     box-sizing: border-box;
@@ -214,15 +211,15 @@ hr.solid {
     padding-left: 6px;
 }
 
-.download-button:active, .download-button-static:active {
+.action-button:active, .action-button-static:active {
   transform: scale(0.95);
 }
 
-.download-button svg, .download-button-static svg {
+.action-button svg, .action-button-static svg {
   margin-top: -1px;
 }
 
-.download-button p, .download-button-static p {
+.action-button p, .action-button-static p {
     display: block;
     font-size: 0.8em;
     font-family: Roboto;
@@ -233,18 +230,28 @@ hr.solid {
     white-space: nowrap;
 }
 
+.action-button-accent {
+  background-color: var(--accent-bg, #9af0ff);
+  border: solid 1.5px var(--accent-fg, #2a1800);
+}
+
+.action-button-warning {
+  background-color: var(--warn-bg, #C55136);
+  border: solid 1.5px var(--accent-fg, #2a1800);
+}
+
 @media only screen and (max-width: 490px) {
-  .download-button {
+  .action-button {
     gap: 0px;
     width: 30px;
     border-radius: 50%;
     padding-right: 0px;
     padding-left: 0px;
   }
-  .download-button svg {
+  .action-button svg {
     margin-top: -3px;
   }
-  .download-button p {
+  .action-button p {
     display: none;
   }
 }

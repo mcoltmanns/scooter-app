@@ -11,7 +11,7 @@ export interface ActiveRental {
     id: number;
     nextActionTime: Date;
     renew: boolean;
-    price_per_hour: number;
+    price_per_hour: string;
     createdAt: string;
     updatedAt: string;
     userId: number;
@@ -21,7 +21,7 @@ export interface ActiveRental {
 
 export interface PastRental {
     id: number;
-    total_price: number;
+    total_price: string;
     createdAt: string;
     endedAt: string;
     userId: number;
