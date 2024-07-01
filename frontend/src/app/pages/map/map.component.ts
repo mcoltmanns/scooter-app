@@ -21,23 +21,14 @@ import { Product } from 'src/app/models/product';
 import { SortButtonComponent} from '../../components/sort-button/sort-button.component';
 import { UserPosition } from 'src/app/utils/userPosition'; // get methods from utils folder 
 import { PositionService } from 'src/app/utils/position.service';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
+import { Sorts } from 'src/app/utils/util-sorts';
 
 // QR-Code imports:
 import { Html5Qrcode } from 'html5-qrcode';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 
-/**
- * Konstante Variablen können außerhalb der Klasse definiert werden und sind dann
- * innerhalb der ganzen Klasse verfügbar.
- */
-const defaultIcon = Leaflet.icon({
-  iconSize: [40, 40],
-  iconUrl: '/assets/marker.png',
-});
-
-/**
- * Icon for the user -> is displayed on the map
- */
+/* user icon for showing the user position */
 const userIcon = Leaflet.icon({
   iconSize: [40, 40],
   iconUrl: '/assets/person.png',
@@ -47,7 +38,7 @@ const userIcon = Leaflet.icon({
     standalone: true,
     templateUrl: './map.component.html',
     styleUrls: ['./map.component.css'],
-    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent]
+    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent, ToastComponent]
 })
 
 export class MapComponent implements OnInit, OnDestroy {
@@ -62,18 +53,23 @@ export class MapComponent implements OnInit, OnDestroy {
   public qrActive = false;
   public qrButtonpressed = false;
   public isLoading = false; // camera loading variable
+  /* variables for the qr Code toast */
+  @ViewChild('toastComponent') toastComponent!: ToastComponent;
+  public showToast = false;
+  public toastMessage = 'Kamerazugriff verweigert!';
+  public toastType: 'success' | 'error' = 'error';
 
 
   public scooterFilterForm!: FormGroup;
-//scooter arrays for the filters and sorting----
-//contains filtered scooters, unsorted
+  //scooter arrays for the filters and sorting---
+  //contains filtered scooters, unsorted
   public filteredScooters: Scooter[] = [];
-//contains filtered scooters, sorted
+  //contains filtered scooters, sorted
   public sortedScooters: Scooter[] = [];
-//---------------------------------------------
+  //---------------------------------------------
 
 
-//variables for the filters--------------------
+  //variables for the filters--------------------
   filterMenuVisible = false;
   //variables for the input of the form and hence the filters
   public minPrice = '';
@@ -84,18 +80,11 @@ export class MapComponent implements OnInit, OnDestroy {
   public maxBty = '';
   public minSpeed = '';
   public maxSpeed = '';
-//---------------------------------------------
+  //---------------------------------------------
 
-//Variables for the sorting--------------------
+  //Variables for the sorting--------------------
   sortMenuVisible = false;
-  //variables that say what is to be filtered by
-  public price = false;
-  public range = false;
-  public bty = false;
-  public speed = false;
-  //variable for ascending filtered or not
-  public asc = true;
-//---------------------------------------------
+  //---------------------------------------------
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef) 
   { //form group for the input on the scooter-filters
@@ -135,7 +124,6 @@ export class MapComponent implements OnInit, OnDestroy {
    * Dokumentation: https://github.com/bluehalo/ngx-leaflet#add-custom-layers-base-layers-markers-shapes-etc
    */
    
-  // layers = [Leaflet.marker([47.663557, 9.175365], { icon: defaultIcon })];
    layers: Leaflet.Layer[] = [];
 
   /**
@@ -150,13 +138,57 @@ export class MapComponent implements OnInit, OnDestroy {
     this.ngZone.run(() => this.router.navigate(['search/scooter', scooterId]));
   }
 
-  /**
-   * This method adds a marker on the map for every scooter in this.scooters
-   */
+  /* This method adds a marker on the map for every scooter in this.scooters */
   addScootersToMap(): void {
     for(const scooter of this.filteredScooters) {
+      
+      // Decide what color does the marker have.
+      let batteryColor = '#4df353';
+      
+      if (scooter.battery <= 20) {
+        batteryColor = '#d81204';
+      } else if (scooter.battery <= 50 && scooter.battery >= 20) {
+        batteryColor = '#fad609';
+      }
+
+      // This part contains all css styles for the scooter marker.
+      const batteryPieStyle = `
+      position: relative;
+      width: 30px;  /* reduced from 50px */
+      height: 30px; /* reduced from 50px */
+      border-radius: 50%;
+      background: conic-gradient(
+        ${batteryColor} calc(var(--percentage) * 1%), 
+        #f8fdff calc(var(--percentage) * 1%)
+      );
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      border: 2px solid rgb(46, 90, 120); /* reduced from 4px */
+      --percentage: ${scooter.battery};
+    `;
+
+    const batteryInnerPieStyle =`
+      position: absolute;
+      width: 18px;  /* reduced from 30px */
+      height: 18px; /* reduced from 30px */
+      background: ${batteryColor};
+      border: 4px solid rgb(46, 90, 120); /* reduced from 8px */
+      border-radius: 50%;
+    `;
+      
+      // Define the marker icon.
+      const icon = Leaflet.divIcon({
+        className: 'marker',
+        html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42] 
+      });
+
+      // Add markers to the map.
       const marker = Leaflet.marker([scooter.coordinates_lat, scooter.coordinates_lng],
-        {icon: defaultIcon}
+        {icon: icon}
       ).on('click', ()=> {
         console.log(`${scooter.id} wurde angeklickt!`);
         this.buttonToScooter(scooter.id);
@@ -205,7 +237,7 @@ export class MapComponent implements OnInit, OnDestroy {
         }
       });
 
-      // Initializes the QR code scanner with the video element 'qr-reader'.
+    // Initializes the QR code scanner with the video element 'qr-reader'.
     this.qrReader = new Html5Qrcode('qr-reader');
     this.updateUserPosition(); // call method to update user Position
   }
@@ -302,6 +334,11 @@ export class MapComponent implements OnInit, OnDestroy {
         )
         .catch((err) => {
           this.isLoading = false;
+          this.qrButtonpressed = false;
+          this.qrActive = false;
+          this.showToast = true;
+          this.toastComponent.showToast();
+          this.showToast = false; // Reset the state to prevent the toast from showing again
           console.error(`Kamera konnte nicht gestartet werden: ${err}`);
         });
 
@@ -315,6 +352,7 @@ export class MapComponent implements OnInit, OnDestroy {
             })
             .catch(err => {
               this.isLoading = false;
+              this.qrButtonpressed = false;
               console.error('Kamerazugriff verweigert:', err);
         });
       }
@@ -366,7 +404,7 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
 
-//things necessary for the filter------------------------------------------------------------------------------
+// things necessary for the filter------------------------------------------------------------------------------
 
 /**
  * enables/disables visibility of filter form
@@ -409,6 +447,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.filteredScooters = Filters.filterSpeed(this.filteredScooters, this.products);
     //add the new selection of scooters to the map
     this.addScootersToMap();
+    this.updateUserPosition();
   }
 
   /**
@@ -419,6 +458,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.filteredScooters = this.scooters;
     this.layers=[];
     this.addScootersToMap();
+    this.updateUserPosition();
     this.toggleFilterView();
     this.minPrice = '';
     this.maxPrice = '';
@@ -428,7 +468,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.maxBty = '';
     this.minSpeed = '';
     this.maxSpeed = '';
-    this.sortFiltered();
+    this.sortCancel();
   }
   
   /**
@@ -485,19 +525,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * is called after we change the @filteredScooters array due to new filters to maintain the sorting if it existed
    */
   sortFiltered(): void {
-    //check what the last category filtered by and do the right sorting
-    if(this.price){
-      this.sortPrice(this.asc);
-    } else if(this.range) {
-      this.sortRange(this.asc);
-      return;
-    } else if(this.bty){
-      this.sortBty(this.asc);
-    } else if(this.speed){
-      this.sortSpeed(this.asc);
-    } else{
-      this.sortedScooters = this.filteredScooters;
-    }
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.redoSort(this.sortedScooters, this.products);
   }
 
   /**
@@ -505,12 +534,7 @@ export class MapComponent implements OnInit, OnDestroy {
    * same value they are initialized with
    */
   sortCancel(): void{
-    //reset to default values
-    this.asc= true;
-    this.price = false;
-    this.range = false;
-    this.bty = false;
-    this.speed = false;
+    Sorts.sortCancel();
 
     this.sortedScooters = this.filteredScooters;
     this.sortMenuVisible = !this.sortMenuVisible;
@@ -521,39 +545,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortPrice(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = true;
-    this.range = false;
-    this.bty = false;
-    this.speed = false;
-    this.sortedScooters = this.sortedScooters.sort((a,b) => {
-      //get the price of the scooters being compared
-    const priceA = this.products.find(p => p.name === a.product_id)?.price_per_hour;
-    const priceB = this.products.find(p => p.name === b.product_id)?.price_per_hour;
-    if(asc){//compare prices ascending
-      if(!(priceA === undefined) && !(priceB === undefined)){
-        const c = priceA - priceB;
-        //if equal in price sort by id of scooter, always ascending per default
-        if(c === 0){
-          return a.id -b.id;
-        }
-        return c;
-      }
-    } else{//compare prices descending
-      if(!(priceA === undefined) && !(priceB === undefined)){
-        const c = priceB-priceA;
-        //if equal in price sort by id, always ascending per default
-        if(c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    }
-    return 0;
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortPrice(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
   }
 
@@ -562,40 +555,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortRange(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = false;
-    this.range = true;
-    this.bty = false;
-    this.speed = false;
-    this.sortedScooters = [];
-    this.sortedScooters = this.filteredScooters.sort((a,b) => {
-    let rangeA = this.products.find(p => p.name === a.product_id)?.max_reach;
-    let rangeB = this.products.find(p => p.name === b.product_id)?.max_reach;
-    if(!(rangeA === undefined)&&!(rangeB === undefined)){
-      rangeA = (a.battery/100 * rangeA);
-      rangeB = (b.battery/100 * rangeB);
-      if(asc){//compare ascending
-        const c = rangeA - rangeB;
-        //if equal in range sort by id of scooter, always ascending per default
-        if(c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      } else{//compare descending
-        const c =  rangeB - rangeA;
-        //if equal in range, sort by id, always ascending per default
-        if (c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    }
-    return 0;
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
-    
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortRange(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
   }
 
@@ -604,33 +565,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortBty(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = false;
-    this.range = false;
-    this.bty = true;
-    this.speed = false;
-    this.sortedScooters = [];
-    this.sortedScooters = this.filteredScooters.sort((a,b) => {
-    if(asc){//compare ascending
-      const c = a.battery - b.battery;
-      //if equal in price sort by id of scooter, always ascending per default
-      if(c === 0){
-        return a.id - b.id;
-      }
-      return c;
-    } else{//compare descending
-      const c =  b.battery - a.battery;
-      //if equal in battery, sort by id, always ascending per default
-      if (c === 0){
-        return a.id - b.id;
-      }
-      return c;
-    }
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
-    
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortBty(asc, this.sortedScooters);
     this.sortMenuVisible = !this.sortMenuVisible;
   }
 
@@ -639,42 +575,8 @@ export class MapComponent implements OnInit, OnDestroy {
    * @param asc says whether they are sorted in ascending or descending order
    */
   sortSpeed(asc: boolean):void{
-    //set the variables to remember the last used sorting
-    this.asc = asc;
-    this.price = false;
-    this.range = false;
-    this.bty = false;
-    this.speed = true;
-    this.sortedScooters = [];
-    this.sortedScooters = this.filteredScooters.sort((a,b) => {
-      //get the speed of the scooters being compared
-    const speedA = this.products.find(p => p.name === a.product_id)?.max_speed;
-    const speedB = this.products.find(p => p.name === b.product_id)?.max_speed;
-    if(asc){ //compare ascending
-      if(!(speedA === undefined) && !(speedB === undefined)){
-        const c = speedA - speedB;
-        //if equal in speed, sort by id, always ascending per default
-        if (c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    } else{//compare descending
-      if(!(speedA === undefined) && !(speedB === undefined)){
-        const c = speedB-speedA;
-        //if equal in speed, sort by id, always ascending per default
-        if(c === 0){
-          return a.id - b.id;
-        }
-        return c;
-      }
-    }
-    return 0;
-    });
-    console.log(this.sortedScooters);
-    console.log(this.filteredScooters);
-    
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortSpeed(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
   }
-
 }

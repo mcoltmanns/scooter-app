@@ -197,7 +197,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
 
   /* Convert the currencies */
   convertCurrencyUnits(value: number, unit: string): string {
-    return UnitConverter.convertCurrencyUnits(value, unit);
+    return UnitConverter.convertCurrencyPerHourUnits(value, unit);
   }
 
   jumpToPosition(id: string | null): void {

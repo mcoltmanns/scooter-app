@@ -16,7 +16,7 @@ export class FilterButtonComponent {
 
   @Output() filterToggle = new EventEmitter<void>();
 
-  toggleFilters() {
+  toggleFilters():void {
     this.filterToggle.emit();
   }
 }

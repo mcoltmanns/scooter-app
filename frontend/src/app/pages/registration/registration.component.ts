@@ -52,8 +52,8 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     this.registerForm = this.fb.group({
       name: ['', Validators.required],
       street: ['', Validators.required],
-      houseNumber: ['', [Validators.required, this.checkNumericInput]],
-      zipCode: ['', [Validators.required, this.checkNumericInput]],
+      houseNumber: ['', [Validators.required, this.checkHouseNumber]],
+      zipCode: ['', [Validators.required, this.checkZipCode]],
       city: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password1: ['', [Validators.required, Validators.minLength(8)]],
@@ -94,7 +94,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     const nameErrMsg = 'Bitte geben Sie einen Namen ein.';
     const streetErrMsg = 'Bitte geben Sie eine Straße ein.';
     let houseNumberErrMsg = 'Bitte geben Sie eine Hausnummer ein.';
-    let zipCodeErrMsg = 'Bitte geben Sie eine Postleitzahl ein.';
+    let zipCodeErrMsg = 'Bitte geben Sie eine 5-stellige Postleitzahl ein.';
     const cityErrMsg = 'Bitte geben Sie einen Ort ein.';
     let emailErrMsg = 'Bitte geben Sie eine E-Mail-Adresse ein.';
     let password1ErrMsg = 'Bitte geben Sie ein Passwort ein.';
@@ -144,15 +144,26 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     return null;  // If the validation is successful you have to pass nothing or null
   }
 
-  /* Custom Validator to check whether an input is a numeric number */
-  checkNumericInput(control: FormControl): { [key: string]: unknown } | null {
-    const houseNumberPattern = /^[0-9]+$/; // regular expression that only accepts digits
+  /* Custom Validator to check whether an input is a house number */
+  checkHouseNumber(control: FormControl): { [key: string]: unknown } | null {
+    const re = /^[0-9]+(([A-Za-z])|([-/.]([0-9]|[A-Za-z])))?$/; // start of line followed by at least one digit followed by ((any upper or lower case) or (a separator followed by (a digit or an upper case or lower case letter))) 0 or 1 times followed by end of line
   
-    if (!houseNumberPattern.test(control.value)) {
-      return { 'invalidNumericInput': true }; // error message if the input does not contain any digits
+    if (!re.test(control.value)) {
+      return { 'invalidHouseNumberInput': true }; // error message if the input is not a house number
     }
   
     return null; // return null means no validation errors
+  }
+
+  // check if zip code is 5 digits
+  checkZipCode(control: FormControl): { [key: string]: unknown } | null {
+    const re = /^[0-9][0-9][0-9][0-9][0-9]$/; // match 5 digits
+
+    if(!re.test(control.value)) {
+      return { 'invalidZipCodeInput': true }; // error message if the input is not a zip code
+    }
+
+    return null;
   }
 
   /* Reset all error variables to empty strings */

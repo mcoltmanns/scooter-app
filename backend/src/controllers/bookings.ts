@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { Rental } from '../models/rental';
 import ReservationManager from '../services/reservation-manager';
 import RentalManager from '../services/rental-manager';
 import { Scooter } from '../models/scooter';
@@ -8,15 +7,13 @@ import { Op } from 'sequelize';
 import { CreateInvoice } from '../utils/createInvoice'; 
 import { UsersAuth } from '../models/user';
 import { UsersData } from '../models/user';
-import fs from 'fs';
-import path from 'path';
 
 // manages information about rentals and reservations
 export class BookingsController {
 
     constructor() {
         this.getUserRentals = this.getUserRentals.bind(this);
-        this.getRentalProducts = this.getRentalProducts.bind(this);
+        this.getProductsByRentals = this.getProductsByRentals.bind(this);
         this.generateInvoice = this.generateInvoice.bind(this);
         this.fetchUserData = this.fetchUserData.bind(this);
     }
@@ -126,19 +123,16 @@ export class BookingsController {
         }
     }
 
-    // TODO: getRentalProducts should use according managers (and rename more descriptively, e.g. getProductsByRentals)!
-    // FIX ME: Rentals table is not used anymore -> use activeRentals and pastRentals via rental manager
     /* Method that return for all bookings the product + the scooterId from the scooter table */
-    public async getRentalProducts(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId; // get userID from session cooki
+    public async getProductsByRentals(request: Request, response: Response): Promise<void> {
+        const userId = response.locals.userId; // get userID from session cookie
 
         try {
             // Get all rental contracts of the user
-            const rentals = await Rental.findAll({ where: { user_id: userId } });
+            const allRentals = await RentalManager.getAllRentalsByUserId(userId);
 
             // / Extract the scooter IDs from the rental agreements
-            const scooterIds = rentals.map(rental => rental.get('scooter_id'));
-
+            const scooterIds = [...new Set(allRentals.map(rental => rental.scooterId))];  // Use a Set to remove duplicates
             
             // Search for the names of the scooters using their IDs in the scooter table
             const scooters = await Scooter.findAll({ 
@@ -165,31 +159,47 @@ export class BookingsController {
     }
 
     /* method to get the information for the invoice pdf */
-    // TODO: check if a manager is possible
     public async generateInvoice(request: Request, response: Response): Promise<void> {
-        const { rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, selectedCurrency } = request.body;
-        // console.log(request.body);
+        const { rentalId } = request.body;
+        let selectedCurrency = request.body.selectedCurrency;
+
+        if (!selectedCurrency) {
+            selectedCurrency = '€'; // Default currency
+        }
 
         if (!rentalId) {
-            response.status(400).json({ code: 400, message: 'Keine Miet-ID angegeben.' });
+            response.status(400).json({ code: 400, message: 'Keine Buchungs-ID angegeben.' });
             return;
         }
 
         try {
 
-            // search for a rental agreement using the rentalId
+            // Search for a rental agreement using the rentalId
             const rental = await RentalManager.getFullyPaidRentalByRentalId(rentalId);
-            console.log(rental);
 
             if (!rental) {
-                response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
+                response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
                 return;
             }
 
             if (rental.userId !== response.locals.userId) {
               /* Not athorized, user is not the owner of the rental */
-              response.status(404).json({ code: 404, message: 'Mietvertrag nicht gefunden.' });
+              response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
               return;
+            }
+
+            /* Get the name for a scooterID*/
+            const scooterName = await this.getProductIdForScooter(rental.scooterId);
+            if (!scooterName) {
+                response.status(404).json({ code: 404, message: 'Produkt nicht gefunden.' });
+                return;
+            }
+
+            /* Get the price for a specific scooter */
+            const pricePerHour = await this.getPricePerHourByScooterName(scooterName);
+            if (!pricePerHour) {
+                response.status(404).json({ code: 404, message: 'Keinen Preis für den Scooter gefunden.' });
+                return;
             }
 
              // Fetch user data
@@ -200,28 +210,13 @@ export class BookingsController {
                  return;
              }
 
-            // create PDF
-            const pdfBytes = await CreateInvoice.editPdf(rentalId, userData.email, userData.name, userData.street, scooterName, total, duration, pricePerHour, createdAt, endedAt, selectedCurrency);
+            // Create PDF
+            const pdfBytes = await CreateInvoice.editPdf(rental.id, userData.email, userData.name, userData.street, scooterName.toString(), rental.total_price, pricePerHour, rental.createdAt.toString(), rental.endedAt.toString(), selectedCurrency);
 
-            // specify path to save the file
-            const filePath = path.resolve(process.cwd(), 'img', 'pdf', 'InvoiceScooter.pdf');
-
-            // write PDF to a new file
-            fs.writeFile(filePath, pdfBytes, (err) => {
-                if (err) {
-                    console.error('Fehler beim Speichern der PDF-Datei:', err);
-                    response.status(500).json({ code: 500, message: 'Fehler beim Speichern der PDF-Datei.' });
-                    return;
-                }
-            });
-            // send PDF as an answer
+            // Send PDF binary as an answer
             response.setHeader('Content-Type', 'application/pdf');
             response.setHeader('Content-Disposition', 'inline; filename="InvoiceScooter.pdf"');
-            /*
-            console.log(pdfBytes);
-            response.send(pdfBytes);
-            */
-           response.end(pdfBytes, 'binary');
+            response.end(pdfBytes, 'binary');
 
         } catch (error) {
             console.error(error);
@@ -247,6 +242,56 @@ export class BookingsController {
         } catch (error) {
             console.error('Error fetching user data:', error);
             throw error;
+        }
+    }
+
+    /* Returns the scooter name for a specific scooterId*/
+    private async getProductIdForScooter(scooterId: number): Promise<unknown> {
+        try {
+            const scooter = await Scooter.findOne({
+                where: {
+                    id: scooterId
+                },
+                attributes: ['product_id']
+            });
+
+            if (!scooter) {
+                throw new Error(`Scooter with ID ${scooterId} not found`);
+            }
+
+            return scooter.get('product_id');
+        } catch (error) {
+            console.error(`Error fetching product ID for scooter ID ${scooterId}:`, error);
+            throw error;
+        }
+    }
+
+
+    /* Get for a scooter name the price_per_hour  */
+    public async getPricePerHourByScooterName(scooterName: unknown): Promise<number> {
+        if (!scooterName) {
+            throw new Error('Kein Scooter-Name angegeben.');
+        }
+    
+        try {
+            // Fetch product data based on the scooter name
+            const product = await Product.findOne({
+                where: {
+                    name: scooterName
+                },
+                attributes: ['price_per_hour']
+            });
+    
+            if (!product) {
+                throw new Error('Product not found.');
+            }
+    
+            // Extract the price per hour
+            const pricePerHour = product.get('price_per_hour') as number;
+            return pricePerHour;
+        } catch (error) {
+            console.error('Error when retrieving the hourly rate:', error);
+            throw new Error('Error when retrieving the hourly rate.');
         }
     }
 }

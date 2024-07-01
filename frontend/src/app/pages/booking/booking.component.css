@@ -1,7 +1,16 @@
 .scrollable-container {
   display: flex;
   flex-direction: column;
+  align-items: center;
   width: 100%;
+  min-width: min-content;
+}
+
+.width-limiter {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 700px;
 }
 
 .scooter-box {
@@ -12,7 +21,10 @@
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     /* margin: 50px 20px 20px 20px; */
     display: flex;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
+    gap: 20px;
     width: 100%;
     min-width: min-content;
 }
@@ -20,15 +32,15 @@
 .picture {
     width: 90px;
     height: auto;
+    border-radius: 10px;
     display: block;
-    margin-right: 20px;
+    /* margin-right: 20px;
     margin-left: auto;
-    margin-right: auto;
+    margin-right: auto; */
 }
 
 .scooter-details {
-    flex-grow: 1;
-    margin-left: 20px;
+    margin: 0 auto;
 }
 
 .scooter-details p {
@@ -37,30 +49,75 @@
 }
 
 .scooter-details .scooter-name {
+    margin: 0;
     font-family: Roboto;
     font-size: 1.2em;
     font-weight: bold;
+    line-height: 1;
     text-transform: uppercase;
-    margin-top: -10px;
+    text-align: left;
 }
 
 .scooter-stats {
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    width: 220px;
-    height: 70px;
-    /* margin-right: 30px; */
-    margin-top: -10px;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 30px;
 }
 
-.scooter-stats-row {
+.scooter-stats-pair {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 30px;
+    margin: 0;
+}
+
+.scooter-stat {
     display: flex;
     flex-direction: column;
-    width: 100px;
+    width: fit-content;
     height: 35px;
     margin: 0;
+}
+
+@media only screen and (max-width: 600px) {
+  .scooter-box {
+      justify-content: flex-start;
+  }
+  .scooter-stats {
+      gap: 10px;
+  }
+  .scooter-stats-pair {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      gap: 0px;
+  }
+  .scooter-stat {
+    width: 100px;
+  }
+}
+@media only screen and (max-width: 400px) {
+  .scooter-box {
+    flex-direction: column;
+  }
+  .scooter-details {
+      margin: 0 0;
+  }
+  .scooter-details .scooter-name {
+      text-align: center;
+  }
+  .scooter-stats {
+      justify-content: center;
+  }
+}
+@media only screen and (max-width: 300px) {
+  .scooter-stats {
+      flex-direction: column;
+      gap: 0px;
+  }
 }
 
 .scooter-attribute {

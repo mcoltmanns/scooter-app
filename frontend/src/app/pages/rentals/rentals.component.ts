@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { ActiveRental, PastRental, ProductWithScooterId, Rental } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
@@ -6,36 +6,85 @@ import { CommonModule } from '@angular/common';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-import { Router } from '@angular/router';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
-import { FormGroup, FormBuilder, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
+import { InfoModalComponent } from 'src/app/components/info-modal/info-modal.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+import { trigger, transition, style, animate, sequence } from '@angular/animations';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
+
+interface InfoModal {
+  show: boolean;
+  title: string;
+  rentalId: number;
+  rentalObj: PastRental | ActiveRental | null;
+  scooterId: number;
+  createdAt: string;
+  endedAt: string;
+  totalPrice: string;
+  renew: boolean;
+  isActive: boolean;
+}
 
 @Component({
     selector: 'app-rentals',
     standalone: true,
     templateUrl: './rentals.component.html',
     styleUrl: './rentals.component.css',
-    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule]
+    animations: [
+      trigger('itemEnter', [
+        transition('void => *', [
+          sequence([
+            style({ height: '0', opacity: 0 }), // Initial state
+            animate('300ms ease-out', style({ height: '*', opacity: 0 })), // Animate height first
+            animate('200ms ease-out', style({ opacity: 1 })) // Then animate opacity
+          ])
+        ]),
+      ]),
+    ],
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent, ToastComponent]
 })
-export class RentalsComponent implements OnInit {
+export class RentalsComponent implements OnInit, OnDestroy {
+  /* Access the DOM elements that get animated */
+  @ViewChildren('rentalItem') rentalItems!: QueryList<ElementRef>;
+  @ViewChild('greenBar') greenBar!: ElementRef;
+  @ViewChild('activeRentalList') activeRentalList!: ElementRef;
+  @ViewChild('pastRentalsTitle') pastRentalsTitle!: ElementRef;
+
+  /* Variables to manage the animation timeouts */
+  private animationTimeout: ReturnType<typeof setTimeout> | null = null;
+  private waitForAnimationEndTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  /* Get references to the toast component */
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent;
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
 
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder) 
-  {//form group for the booking filter
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router, private route: ActivatedRoute) {
+    //form group for the booking filter
     this.bookingFilterForm = this.fb.group({
       lower: ['', this.dateValidator],
       upper: ['', this.dateValidator]
-  });}
+    });
+
+    /* Bind Information Modal to this instance */
+    this.onNavigateToScooter = this.onNavigateToScooter.bind(this);
+    this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
+  }
+
+  // Variable to control the visibility of the loading spinner
+  public isLoading = true;
+
+  // Object to track loaded state of images by scooterId
+  imageLoaded: { [scooterId: string]: boolean } = {};
 
   // Variables for storing all rentals and the product information
-  public loadingDataScooter = true;
-  public loadingDataProduct = true;
-  public loadingDataOption = true;
   public rentals: Rental[] = [];
   public activeRentals: ActiveRental[] = [];
   public pastRentals: PastRental[] = [];
@@ -47,6 +96,20 @@ export class RentalsComponent implements OnInit {
   public selectedDistance = '';
   public selectedCurrency = '';
   public option: Option | null = null;
+
+  // Info modal configuration
+  public infoModal: InfoModal = {
+    show: false,
+    title: 'Buchungsdetails',
+    rentalId: 0,
+    rentalObj: null,
+    scooterId: 0,
+    createdAt: '',
+    endedAt: '',
+    totalPrice: '',
+    renew: false,
+    isActive: false
+  };
 
   //variables for the filters----------------------
 
@@ -60,57 +123,73 @@ export class RentalsComponent implements OnInit {
   //-----------------------------------------------
 
   ngOnInit(): void {
-    /* Get all scooter bookings for the User from the backend*/
-    this.loadRentalInfo();
+    /* Fetch all rental information, product information and user preferences */
+    forkJoin([
+      this.rentalService.getRentalInfo(),
+      this.rentalService.getRentalProduct(),
+      this.optionService.getUserPreferences()
+    ]).subscribe({
+      next: ([rentalsResponse, productsResponse, preferencesResponse]) => {
+        /* Get all scooter bookings (rentals) for the User from the backend */
+        // this.rentals = rentalsResponse;
+        // this.filteredRentals = rentalsResponse;
+        this.filteredRentals = this.rentals;
+        this.activeRentals = rentalsResponse.activeRentals;
+        this.pastRentals = rentalsResponse.pastRentals;
+        // this.loadingDataScooter = false;
 
-    /* Get all scooters from backend */
-    this.rentalService.getRentalProduct().subscribe({
-      next: (value) => {
-        this.products = value;
-        this.loadingDataProduct = false;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingDataProduct = false;
-        console.log(err);
-      }
-    });
+        /* Get all products for the rentals of the user */
+        this.products = productsResponse;
+        // this.loadingDataProduct = false;
 
-    /* Get the metrics settings for a user */
-    this.optionService.getUserPreferences().subscribe({
-      next: (value) => {
-        this.option = value;
+        /* Get the metrics/units the user set in the settings */
+        this.option = preferencesResponse;
         this.selectedSpeed = this.option.speed;
         this.selectedDistance = this.option.distance;
         this.selectedCurrency = this.option.currency;
-        this.loadingDataOption = false;
+        // this.loadingDataOption = false;
+
+        this.isLoading = false;
+
+        /* Accessing the optional rental query parameter to show the info modal for that rental if it exists */
+        this.route.queryParams.subscribe(params => {
+          const paramRentalId = params['rental'];
+
+          const rental = this.getRentalObjByRentalId(paramRentalId);
+          if (rental) {
+            this.setUpAndShowInfoModal(rental.rental, rental.type);
+          }
+        });
       },
       error: (err) => {
-        this.errorMessage = err.message;
-        this.loadingDataOption = false;
-        console.error(err);
+        this.errorMessage = err.error.message;
+        // this.loadingDataScooter = false;
+        // this.loadingDataProduct = false;
+        // this.loadingDataOption = false;
+        this.toastComponentError.showToast();
+        this.isLoading = false;
+        console.log(err);
       }
     });
   }
 
-  /* load information about all booked scooters for a user */
-  loadRentalInfo(): void {
-    this.rentalService.getRentalInfo().subscribe({
-      next: (value) => {
-        //this.rentals = value;
-        //this.filteredRentals = value;
-        this.activeRentals = value.activeRentals;
-        this.pastRentals = value.pastRentals;
-        this.loadingDataScooter = false;
-        console.log(this.activeRentals, this.pastRentals);
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingDataScooter = false;
-        console.log(err);
-      }
-    });
-    this.filteredRentals = this.rentals;
+  ngOnDestroy(): void {
+    /* Clear timeouts if still running */
+    this.clearAnimationTimeout();
+    this.clearWaitForAnimationTimeout();
+  }
+
+  // Function to call when an image is loaded
+  onImageLoad(scooterId: string): void {
+    this.imageLoaded[scooterId] = true;
+  }
+
+  getExactRentalDurationInHours(begin: string, end: string): number {
+    const date1 = new Date(begin);
+    const date2 = new Date(end);
+
+    const diffMs = date2.getTime() - date1.getTime();
+    return diffMs / (1000 * 60 * 60); // Convert milliseconds to hours
   }
 
   /* how long a user booked the scooter */
@@ -153,8 +232,11 @@ export class RentalsComponent implements OnInit {
   }
 
   /* Get Picture from the product list*/
-  getPictureByScooterId(scooterId: number): String{
+  getPictureByScooterId(scooterId: number): string | null {
     const product = this.products.find(p => p.scooterId === scooterId);
+    if (!product) {
+      return null;
+    }
     return `http://localhost:8000/img/products/${product ? product.name : undefined}.jpg`;
   }
 
@@ -169,46 +251,24 @@ export class RentalsComponent implements OnInit {
     return `${day}.${month}.${year} ${hours}:${minutes}`;
   }
 
-  /* Convert the currencies */
+  /* Convert the currencies values */
   convertCurrencyUnits(value: string | undefined, unit: string): string {
-    if (value === undefined){
-      console.log('Something went wrong while converting Currency Units...');
-      return '';
-    }
-    let intValue = parseInt(value);
-    let str = '';
-    if(unit === '$'){
-      intValue = UnitConverter.convertCurrency(intValue, unit, '$');
-      str = intValue.toFixed(2) + ' $'; // toFixed(2) only shows the last two decimal place
-    }
-    else{
-      str = value.toString() + ' €';
-    }
-    return str;
+    return UnitConverter.convertCurrencyUnits(value, unit);
+  }
+
+  /* Convert a string into a number */
+  toNumber(value: string): number {
+    return Number(value);
   }
 
 
   /* This method should retrieve the invoice pdf from the backend */
-  displayInvoice(rentalId: number, scooterId: number, createdAt : string, endedAt: string): void {
-    // variables for the invoice pdf
-    const scooterName = this.getNameByScooterId(scooterId);
-    let total = this.getTotalPrice(scooterId, createdAt, endedAt);
-    total = this.convertCurrencyUnits(total, this.selectedCurrency);
-    const duration = this.rentalDuration(createdAt, endedAt);
-    let pricePerHour = this.getPriceByScooterId(scooterId);
-    pricePerHour = parseFloat(this.convertCurrencyUnits(pricePerHour?.toString(), this.selectedCurrency));
-
-    // check if an attribut is not defined
-    if(scooterName === undefined || total === undefined || pricePerHour === undefined){
-      console.log('Error - An Attribute is not defined');
-      return;
-    }
-
+  displayInvoice(rentalId: number): void {
     // send a request to the backend to generate the file
-    this.rentalService.generateInvoicePdf(rentalId, createdAt, endedAt, scooterName, total, duration, pricePerHour, this.selectedCurrency).subscribe(
-      
+    this.rentalService.generateInvoicePdf(rentalId, this.selectedCurrency).subscribe({
       // read and interpret the Blob from the backend 
-      (pdfBlob: Blob) => {
+      next: (pdfBlob: Blob) => {
+        console.log('Hier lande ich');
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
         //window.open(url, '_blank'); // used for debugging pdf file 
@@ -222,10 +282,265 @@ export class RentalsComponent implements OnInit {
         link.click();
         document.body.removeChild(link);
       },
-      (error) => {
-        console.error('Fehler beim Herunterladen der Rechnung:', error);
+      error: (error) => {
+        if (error.error instanceof Blob) {
+          error.error.text().then((text: string) => {
+            try {
+              const errorData = JSON.parse(text);
+              console.log(errorData);
+              this.errorMessage = errorData.message;
+            } catch (e) {
+              // Handle generic error if parsing fails
+              this.errorMessage = 'Fehler beim Herunterladen der Rechnung.';
+            }
+          });
+        } else {
+          // Handle non-Blob errors
+          this.errorMessage = error.error.message;
+        }
+        this.toastComponentError.showToast();
       }
-    );
+    });
+  }
+
+  getRentalObjByRentalId(rentalId: number): { rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic' } | null {
+    let rental: ActiveRental | PastRental | undefined = undefined;
+
+    rental = this.activeRentals.find(rental => Number(rental.id) === Number(rentalId));
+    if (rental) {
+      return { rental, type: rental.renew ? 'dynamic' : 'prepaid' };
+    }
+
+    rental = this.pastRentals.find(rental => Number(rental.id) === Number(rentalId));
+    if (rental) {
+      return { rental, type: 'past' };
+    }
+    
+    return null;
+  }
+
+  clearAnimationTimeout(): void {
+    if (this.animationTimeout) {
+      clearTimeout(this.animationTimeout);
+      this.animationTimeout = null;
+    }
+  }
+
+  clearWaitForAnimationTimeout(): void {
+    if (this.waitForAnimationEndTimeout) {
+      clearTimeout(this.waitForAnimationEndTimeout);
+      this.waitForAnimationEndTimeout = null;
+    }
+  }
+
+  waitForAnimationToEnd(): Promise<void> {
+    return new Promise((resolve) => {
+      const checkAnimation = (): void => {
+        if (this.animationTimeout === null) {
+          resolve();
+        } else {
+          // Check again after a delay
+          this.waitForAnimationEndTimeout = setTimeout(checkAnimation, 100); // Check every 100 milliseconds
+        }
+      };
+      checkAnimation();
+    });
+  }
+
+  /* Animate the removal of the active rental from the active rentals array */
+  async moveRentalFromActiveToPast(activeRental: ActiveRental): Promise<void> {
+    /* Check if an animation is currently running and wait for it to end before starting a new one */
+    if (this.animationTimeout) {
+      await this.waitForAnimationToEnd();
+      this.clearWaitForAnimationTimeout();
+    }
+
+    /* Convert the active rental to a past rental */
+    const endTimestamp = new Date().toISOString();
+    const totalPrice = (Number(activeRental.price_per_hour) * this.getExactRentalDurationInHours(activeRental.createdAt, endTimestamp)).toFixed(2);
+    const newPastRental: PastRental = {
+      id: activeRental.id,
+      scooterId: activeRental.scooterId,
+      userId: activeRental.userId,
+      createdAt: activeRental.createdAt,
+      endedAt: endTimestamp,
+      total_price: totalPrice,
+      paymentMethodId: activeRental.paymentMethodId
+    };
+
+    /* Access the specific rental item in the DOM */
+    const specificItem = this.rentalItems.find(item => Number(item.nativeElement.getAttribute('data-id')) === Number(activeRental.id));
+    if (!specificItem) {
+      return;
+    }
+
+    /* Configure the animation */
+    const fastAnimationDuration = 200;
+    const fastAnimationDurationStr = `${fastAnimationDuration}ms`;
+    const slowAnimationDuration = 1000;
+    const slowAnimationDurationStr = `${slowAnimationDuration}ms`;
+    const crossFadeDuration = Math.floor(fastAnimationDuration / 2);
+    const crossFadeDurationStr = `${slowAnimationDuration - fastAnimationDuration}ms`;
+
+    /* Set some initial styles for the elements */
+    const margin = 20;
+
+    /* Set up the animation for the list element (the specific rental item, i.e. the li element) */
+    const liElement = specificItem.nativeElement;
+    const liElementHeight = liElement.offsetHeight;
+    liElement.style.height = `${liElementHeight}px`;
+    liElement.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${fastAnimationDurationStr} ease-in`;
+    
+    /* Set up the animation for the active rental list (i.e. the ul element) */
+    const activeRentalListEl = this.activeRentalList.nativeElement;
+    const activeRentalListElHeight = activeRentalListEl.offsetHeight;
+    activeRentalListEl.style.height = `${activeRentalListElHeight}px`;
+    activeRentalListEl.style.transition = `height ${slowAnimationDurationStr} ease-in-out`;
+
+    /* Set up the animation for the green bar, the past rentals title and the active rentals list 
+       in case the last active rental is being removed */
+    let greenBarEl: HTMLElement;
+    let pastRentalsTitleEl: HTMLElement;
+    if (this.greenBar && this.activeRentals.length === 1) {
+      greenBarEl = this.greenBar.nativeElement;
+      greenBarEl.style.transition = `margin-top ${slowAnimationDurationStr} ease-in-out, margin-bottom ${slowAnimationDurationStr} ease-in-out, opacity ${crossFadeDurationStr} ease-in-out`;
+
+      activeRentalListEl.style.transition = `height ${slowAnimationDurationStr} ease-in-out, margin-top ${slowAnimationDurationStr} ease-in-out`;
+
+      pastRentalsTitleEl = this.pastRentalsTitle.nativeElement;
+      pastRentalsTitleEl.style.transition = `margin-top ${slowAnimationDurationStr} ease-in-out`;
+    }
+
+    /* Start the animation */
+    let wholeAnimationDuration = 0;
+
+    /* Animate a fade-out effect for the list element (li) */
+    this.animationTimeout = setTimeout(() => {
+      liElement.style.opacity = '0';
+    }, 0);       
+    wholeAnimationDuration += fastAnimationDuration;
+
+    /* Animate a height reduction for the list element (li) to visually close the gap */
+    this.animationTimeout = setTimeout(() => {
+      liElement.style.height = '0';
+      liElement.style.marginBottom = '0';
+
+      /* In case the last active rental is being removed, also fade and squeeze out
+         the green bar, and adjust the past rentals title and the active rentals list */
+      if (this.greenBar && this.activeRentals.length === 1) {
+        greenBarEl.style.marginTop = '-3px';
+        greenBarEl.style.marginBottom = '0';
+        greenBarEl.style.opacity = '0';
+        activeRentalListEl.style.height = '0';
+        activeRentalListEl.style.marginTop = '0';
+        pastRentalsTitleEl.style.marginTop = `${margin}px`;
+      } else { // Otherwise, just reduce the height of the ul element to close the gap
+        const newActiveRentalListElHeight = activeRentalListElHeight - liElementHeight - margin;
+        activeRentalListEl.style.height = `${newActiveRentalListElHeight}px`;
+      };
+    }, fastAnimationDuration - crossFadeDuration);
+    wholeAnimationDuration += slowAnimationDuration - crossFadeDuration;
+
+    /* After the animation is finished, remove the active rental from the active rentals array
+       and add it to the past rentals array */
+    this.animationTimeout = setTimeout(() => {
+      this.clearAnimationTimeout();
+
+      /* Remove the active rental from the active rentals array */
+      this.activeRentals = this.activeRentals.filter(rental => rental.id !== activeRental.id);
+
+      /* Add the past rental to the past rentals array */
+      // this.pastRentals.push(newPastRental);
+      this.pastRentals.unshift(newPastRental);
+    }, wholeAnimationDuration);
+  }
+
+  setUpAndShowInfoModal(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
+    if (type === 'past') {
+      rental = rental as PastRental;
+      this.infoModal.title = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModal.rentalId = rental.id;
+      this.infoModal.rentalObj = rental;
+      this.infoModal.scooterId = rental.scooterId;
+      this.infoModal.createdAt = rental.createdAt;
+      this.infoModal.endedAt = rental.endedAt;
+      this.infoModal.totalPrice = rental.total_price;
+      this.infoModal.isActive = false;
+      this.infoModal.renew = false;
+      this.infoModal.show = true;
+    }
+    if (type === 'prepaid') {
+      rental = rental as ActiveRental;
+      this.infoModal.title = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModal.rentalId = rental.id;
+      this.infoModal.rentalObj = rental;
+      this.infoModal.scooterId = rental.scooterId;
+      this.infoModal.createdAt = rental.createdAt;
+      this.infoModal.endedAt = rental.nextActionTime.toString();
+      this.infoModal.totalPrice = rental.price_per_hour;
+      this.infoModal.isActive = true;
+      this.infoModal.renew = rental.renew;
+      this.infoModal.show = true;
+    }
+    if (type === 'dynamic') {
+      rental = rental as ActiveRental;
+      this.infoModal.title = this.getNameByScooterId(rental.scooterId) || 'Buchungsdetails';
+      this.infoModal.rentalId = rental.id;
+      this.infoModal.rentalObj = rental;
+      this.infoModal.scooterId = rental.scooterId;
+      this.infoModal.createdAt = rental.createdAt;
+      this.infoModal.endedAt = rental.nextActionTime.toString();
+      this.infoModal.totalPrice = rental.price_per_hour;
+      this.infoModal.isActive = true;
+      this.infoModal.renew = rental.renew;
+      this.infoModal.show = true;
+    }
+  }
+
+  onClickRental(rentalId: number): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { rental: rentalId },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onCloseInfoModal(): void {
+    this.infoModal.show = false;
+
+    /* Remove the rental query parameter from the URL */
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { rental: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onNavigateToScooter(): void {
+    this.infoModal.show = false;
+
+    /* Navigate to the scooter page including the island state because then the scooter page will treat the back button as history back */
+    const originState = history.state.originState
+    ? { originState: { ...history.state.originState, island: true } }
+    : { originState: { island: true } };
+    this.router.navigate(['search/scooter', this.infoModal.scooterId], { 
+      state: originState
+    });
+  }
+
+  onCancelRental(activeRental: ActiveRental | PastRental | null): void {
+    /* Do nothing if the rental is null or a PastRental */
+    if (!activeRental || 'endedAt' in activeRental) {
+      return;
+    }
+
+    if (this.infoModal.show) {
+      /* Close the info modal */
+      this.onCloseInfoModal();
+    }
+
+    /* Animate moving the active rental to the past rentals */
+    this.moveRentalFromActiveToPast(activeRental);
   }
 
   //functionalities for the filters-----------------------------------------------------------------
@@ -313,5 +628,4 @@ dateValidator(control: FormControl): { [key: string]: Boolean } | null {
     }
     this.bookingFilterForm.controls[controlName].setValue(value, { emitEvent: false });
   }
-    
 }

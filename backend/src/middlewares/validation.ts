@@ -7,6 +7,24 @@ interface ErrorsObject {
 }
 
 export class Validator {
+  private static checkHouseNumber(houseNumber: string): boolean {
+    const re = /^[0-9]+(([A-Za-z])|([-/.]([0-9]|[A-Za-z])))?$/; // start of line followed by at least one digit followed by ((any upper or lower case) or (a separator followed by (a digit or an upper case or lower case letter))) 0 or 1 times followed by end of line
+
+    if (!re.test(houseNumber)) {
+      throw new Error('Bitte geben Sie eine gültige Hausnummer ein.'); // throw if not a house number
+    }
+    else return true;
+  }
+
+  private static checkZipCode(zipCode: string): boolean {
+    const re = /^[0-9][0-9][0-9][0-9][0-9]$/; // match 5 digits
+
+    if(!re.test(zipCode)) {
+      throw new Error('Bitte geben Sie eine 5-stellige PLZ ein.'); // throw if the input is not a zip code
+    }
+    else return true;
+  }
+
   private static async runAllChecks(errorCode: number, checks: ValidationChain[], request: Request, response: Response, next: NextFunction): Promise<void> {
     /* Run all checks */
     try {
@@ -44,7 +62,7 @@ export class Validator {
     const checks = [
       check('name').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Namen ein.'),
       check('street').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Straße ein.'),
-      check('houseNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Hausnummer ein.').bail().isNumeric().withMessage('Bitte geben Sie eine gültige numerische Hausnummer ein.'),
+      check('houseNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Hausnummer ein.').bail().custom(code => Validator.checkHouseNumber(code)),
       check('zipCode').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Postleitzahl ein.').bail().isNumeric().withMessage('Bitte geben Sie eine gültige numerische Postleitzahl ein.'),
       check('city').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Ort ein.'),
       check('email').trim().escape().notEmpty().withMessage('Bitte geben Sie eine E-Mail-Adresse ein.').bail().isEmail().withMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.').bail().normalizeEmail().custom(async (email) => {
@@ -77,8 +95,8 @@ export class Validator {
     const checks: ValidationChain[] = [
       check('name').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Namen ein.'),
       check('street').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Straße ein.'),
-      check('houseNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Hausnummer ein.').bail().isNumeric().withMessage('Bitte geben Sie eine gültige numerische Hausnummer ein.'),
-      check('zipCode').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Postleitzahl ein.').bail().isNumeric().withMessage('Bitte geben Sie eine gültige numerische Postleitzahl ein.'),
+      check('houseNumber').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Hausnummer ein.').bail().custom(code => Validator.checkHouseNumber(code)),
+      check('zipCode').trim().escape().notEmpty().withMessage('Bitte geben Sie eine Postleitzahl ein.').bail().custom(check => Validator.checkZipCode(check)),
       check('city').trim().escape().notEmpty().withMessage('Bitte geben Sie einen Ort ein.'),
       /* TODO: If the email will be updatable in the future, you can simply uncomment the following check: */
       // check('email').trim().escape().notEmpty().withMessage('Bitte geben Sie eine E-Mail-Adresse ein.').bail().isEmail().withMessage('Bitte geben Sie eine gültige E-Mail-Adresse ein.').bail().normalizeEmail().custom(async (email) => {
@@ -168,6 +186,16 @@ export class Validator {
   public async validateReservation(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
       check('scooterId').trim().escape().notEmpty().withMessage('Bitte eine Scooter-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Scooter ID.'),
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
+
+  /* Validates the rental id from the frontend request */
+  public async validateInvoice(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Rental-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Rental-ID.'),
+      check('selectedCurrency').optional().trim().escape().notEmpty().withMessage('Bitte eine Währung angeben.').bail().isIn(['€', '$']).withMessage('Ungültige Währung.')
     ];
 
     await Validator.runAllChecks(400, checks, request, response, next);

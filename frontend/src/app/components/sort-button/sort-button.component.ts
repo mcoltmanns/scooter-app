@@ -16,7 +16,7 @@ export class SortButtonComponent {
 
   @Output() sortToggle = new EventEmitter<void>();
 
-  toggleSort() {
+  toggleSort():void {
     this.sortToggle.emit();
   }
 }

@@ -40,7 +40,11 @@ export class UnitConverter {
     }
 
     /* Converts the distances */
-    static convertDistanceUnits(value: number, unit: string): string {
+    static convertDistanceUnits(value: number |undefined, unit: string | undefined): string {
+      if(unit === undefined || value === undefined){
+        console.error('Distance unit converting went wrong!');
+        return 'error';
+      }
       let str = '';
       if(unit === 'mi'){
         value = UnitConverter.convertDistance(value, 'km', unit);
@@ -52,8 +56,12 @@ export class UnitConverter {
       return str;
     }
 
-    /* Convert the currencies */
-    static convertCurrencyUnits(value: number, unit: string): string {
+    /* Convert the currencies per hour value */
+    static convertCurrencyPerHourUnits(value: number, unit: string|undefined): string {
+      if(unit === undefined){
+        console.error('Currency unit converting went wrong!');
+        return 'error';
+      }
       let str = '';
       if(unit === '$'){
         value = UnitConverter.convertCurrency(value, unit, '$');
@@ -61,6 +69,42 @@ export class UnitConverter {
       }
       else{
         str = value.toString() + ' €/H';
+      }
+      return str;
+    }
+
+    /* Converts single currency value */
+    static convertCurrencyUnits(value: string | undefined, unit: string): string {
+      if (value === undefined){
+        console.error('Currency unit converting went wrong!');
+        return 'error';
+      }
+      // let valueAsNumber = parseInt(value);   // parseInt() is not working with floating point numbers
+      let valueAsNumber = Number(value);
+      let str = '';
+      if(unit === '$'){
+        valueAsNumber = UnitConverter.convertCurrency(valueAsNumber, unit, '$');
+        str = valueAsNumber.toFixed(2).toString() + ' $'; // toFixed(2) only shows the last two decimal place
+      }
+      else{
+        str = Number(value).toFixed(2).toString() + ' €';
+      }
+      return str;
+    }
+
+    /* Converts a speed units  */
+    static convertSpeedUnits(value: number|undefined, unit: string|undefined): string{
+      if(unit === undefined || value === undefined){
+        console.error('Speed unit converting went wrong!');
+        return 'error';
+      }
+      let str = '';
+      if(unit === 'mp/h'){
+        value = UnitConverter.convertSpeed(value, 'km/h', unit);
+        str = value.toFixed(1) + ' mp/h'; // toFixed(1) only shows the last decimal place
+      }
+      else{
+        str = value.toString() + ' km/h';
       }
       return str;
     }

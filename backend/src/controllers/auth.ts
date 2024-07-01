@@ -79,7 +79,8 @@ export class AuthController {
     const { name, street, houseNumber, zipCode, city, email, password } = request.body;
 
     /* Convert numbers from type string to type number */
-    const houseNumberInt = Number(houseNumber);
+    // we do not convert houseNumber because we accept forms like 12a
+    // bad values will be caught by the validator
     const zipCodeInt = Number(zipCode);
 
     /* Hash the provided password */
@@ -109,7 +110,7 @@ export class AuthController {
       const newUserData = {
         name,
         street,
-        houseNumber: houseNumberInt,
+        houseNumber: houseNumber,
         zipCode: zipCodeInt,
         city,
         usersAuthId: createdUserAuth.getDataValue('id')

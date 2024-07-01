@@ -1,3 +1,6 @@
+<app-toast #toastComponent [showDuration]=2500 [type]="toastType" style="z-index: 9997;">
+  {{toastMessage}}
+</app-toast>
 <div class="map-container">
   <div class="map-header">
     <span class="switch-btn" (click)="toggleListView()">
@@ -17,10 +20,10 @@
       <div *ngIf="filterMenuVisible && view === 'list'" class="filter-menu-container">
         <div class="top">
           <app-button class="btn" type="submit" (click)="onSubmit()">
-            Anwenden
+            Filter & Sortierung anwenden
           </app-button>
           <app-button color="accent" class="btn" (click)="onCancel()">
-            Zurücksetzten
+            Filter & Sortierung verwerfen
           </app-button>
         </div>
         <div class="info"></div>
@@ -30,7 +33,7 @@
           <div class="sort-wrapper">
             <div *ngIf="sortMenuVisible" class="sort-menu">
               <div class="sort-menu-cont">
-                <h3 class="o-title">Sortier-Otionen</h3>
+                <h3 class="o-title">Sortier Optionen</h3>
                 <app-button color="accent" class="btn" type="submit" (click)="sortCancel()">
                   Sortierung zurücksetzten
                 </app-button>
@@ -148,9 +151,29 @@
   <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" [mapScooters]="sortedScooters" scrollPosition="{{listScrollPosition}}" (finishedLoadingAndPositioning)="adjustPageHeight()"></app-scooter-list>
 
   <!-- QR Icon -->
-  <div class="qr-container" (click)="startQrCodeScanner()">
+  <div *ngIf="view === 'map'" class="qr-container" (click)="startQrCodeScanner()">
     <div *ngIf="!isLoading; else loading">
       <svg
+        class="qr-icon"
+        width="50"
+        height="50"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M2 2H10V10H2V2ZM4 4V8H8V4H4ZM14 2H22V10H14V2ZM16 4V8H20V4H16ZM2 14H10V22H2V14ZM4 16V20H8V16H4ZM14 14H16V16H14V14ZM18 14H22V16H20V18H22V22H18V20H16V22H14V18H18V14ZM16 18H18V16H16V18Z"
+          fill="#00363D"
+        />
+     </svg>
+    </div>
+  </div>
+
+  <video #videoElement [ngClass]="['video-preview', qrActive ? 'video-visible' : 'video-hidden']" autoplay></video>
+  <div id="qr-reader"></div>
+
+  <!-- if camera is loading -->
+  <ng-template #loading>
+    <svg
         class="qr-icon"
         width="50"
         height="50"
@@ -162,15 +185,6 @@
           fill="black"
         />
      </svg>
-    </div>
-  </div>
-
-
-  <video #videoElement [ngClass]="['video-preview', qrActive ? 'video-visible' : 'video-hidden']" autoplay></video>
-  <div id="qr-reader"></div>
-
-  <!-- if camera is loading -->
-  <ng-template #loading>
     <div class="loading-container">
       <app-loading-overlay [isLoading]="true" type="inline"></app-loading-overlay>
     </div>

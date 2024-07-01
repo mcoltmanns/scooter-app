@@ -1,5 +1,5 @@
 /*
-
+calculates the distance between two words
 */
 export class Levenshtein{
     static levenshteinMethod(a: string, b: string): number{
