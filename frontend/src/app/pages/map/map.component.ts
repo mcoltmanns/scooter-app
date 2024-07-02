@@ -66,6 +66,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public toastType: 'success' | 'error' = 'error';
   // Variables for Slider:
   priceRange: number[] = [0, 0];
+  
 
 
   public scooterFilterForm!: FormGroup;

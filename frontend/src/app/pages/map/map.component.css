@@ -251,19 +251,13 @@
   flex: 1;
 }
 
-/* app.component.css */
 .content-section {
-  margin: 2em;
+  margin: 2em 0;
   text-align: center;
 }
 
 .implementation {
-  padding: 2em;
-}
-
-p-slider {
-  width: 300px;
-  margin: 0 auto;
+  padding: 2em 0.5em;
 }
 
 p {
@@ -271,4 +265,29 @@ p {
   font-size: 1.2em;
   color: #666;
   margin-top: 1em;
+}
+
+:host ::ng-deep .p-slider { 
+  width: 100%; 
+} 
+
+:host ::ng-deep .p-slider-handle { 
+  border-color: var(--primary-bg, #00363d); 
+}
+
+:host ::ng-deep .p-slider .p-slider-range { 
+  background: var(--accent-bg, #9af0ff);
+} 
+
+
+:host ::ng-deep .p-slider .p-slider-handle:hover { 
+  border-color: var(--primary-bg, #00363d); 
+  background: var(--primary-bg, #00363d); 
+} 
+
+
+:host ::ng-deep .p-slider .p-slider-handle:focus { 
+  border-color: var(--primary-bg, #00363d); 
+  box-shadow: none; 
+  background: var(--primary-bg, #00363d); 
 }

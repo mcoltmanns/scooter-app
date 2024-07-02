@@ -1,4 +1,4 @@
-<app-toast #toastComponent [showDuration]=2500 [type]="toastType" style="z-index: 9997;">
+<app-toast #toastComponent [showDuration]=3500 [type]="toastType" style="z-index: 9997;">
   {{toastMessage}}
 </app-toast>
 <div class="map-container">
@@ -111,7 +111,7 @@
     (leafletClick)="onMapClick($event)" 
   >
   <div *ngIf="filterMenuVisible && view ==='map'" class="wrapper">
-    <div *ngIf="filterMenuVisible && view ==='map'" class="filter-menu-container">
+    <div *ngIf="filterMenuVisible && view ==='map'" class="filter-menu-container" (click)="$event.stopPropagation()">
       <div class="top">
         <app-button class="btn" type="submit" (click)="onSubmit()">
           Anwenden
@@ -130,7 +130,7 @@
               <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatNumber($event, 'maxPrice')"></app-user-input>
             </div>
             <div class="content-section implementation">
-              <p-slider [(ngModel)]="priceRange"  [range]="true" [min]="0" [max]="500" [step]="5" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onPriceRangeChange()"></p-slider>
+              <p-slider [(ngModel)]="priceRange"  [range]="true" [min]="0" [max]="500" [step]="5" [ngModelOptions]="{standalone: true}" (onChange)="onPriceRangeChange()"></p-slider>
               <p>Preisbereich: {{priceRange[0]}} - {{priceRange[1]}}</p>
             </div>
             <div class="filter-row">
