@@ -20,10 +20,6 @@ interface ScooterInstance extends Model {
 export class CheckoutController {
   public async processCheckout(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-      return;
-    }
 
     const { scooterId, paymentMethodId, duration } = request.body;
 
