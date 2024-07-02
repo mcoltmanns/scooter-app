@@ -128,8 +128,7 @@ export class AuthController {
       };
 
       /* Save the new user preferences object in the database */
-      await UserPreferences.create(newUserPreferences);
-
+      await UserPreferences.create(newUserPreferences, { transaction }); // missing transaction here was caught by tests! hooray for tests!
 
       // create a new session for this new user
       const sessionId = uid.sync(24);
@@ -153,6 +152,7 @@ export class AuthController {
       /* Commit the transaction */
       await transaction.commit();
     } catch (error) {
+      console.log(error);
       await transaction.rollback(); // Rollback the transaction in case of an error
       response.status(500).json({ code: 500, message: 'Etwas ist schief gelaufen.', body: `${error}` }); // 500: Internal Server Error
       return;
