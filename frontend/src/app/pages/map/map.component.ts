@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild, Renderer2 } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild, Renderer2, ChangeDetectorRef  } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 /**
@@ -66,6 +66,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public toastType: 'success' | 'error' = 'error';
   // Variables for Slider:
   priceRange: number[] = [0, 0];
+  public  showSlider = true;
   
 
 
@@ -104,7 +105,7 @@ export class MapComponent implements OnInit, OnDestroy {
 
 
 
-  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService) 
+  public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService, private cdr: ChangeDetectorRef) 
   { //form group for the input on the scooter-filters
     this.scooterFilterForm = this.fb.group({ 
     minPrice: ['', [this.numberStringValidator(0, 99999)]],
@@ -613,5 +614,27 @@ export class MapComponent implements OnInit, OnDestroy {
       minPrice: this.priceRange[0],
       maxPrice: this.priceRange[1]
     });
+  }
+
+  /* updates max price slider */
+  onMaxPriceRangeChange():void {
+    this.scooterFilterForm.get('maxPrice')?.valueChanges.subscribe(maxPrice => {
+      this.priceRange[1] = maxPrice;
+    });
+    this.showSlider = false; // Disable Slider
+    setTimeout(() => {
+      this.showSlider = true;
+    }, 0); // Re-enable the slider
+  }
+
+  /* updates min price slider */
+  onMinPriceRangeChange():void {
+    this.scooterFilterForm.get('minPrice')?.valueChanges.subscribe(minPrice => {
+      this.priceRange[0] = minPrice;
+    });
+    this.showSlider = false; // Disable Slider
+    setTimeout(() => {
+      this.showSlider = true;
+    }, 0); // Re-enable the slider
   }
 }
