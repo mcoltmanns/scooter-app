@@ -48,13 +48,15 @@ const userIcon = Leaflet.icon({
 })
 
 export class MapComponent implements OnInit, OnDestroy {
+  // Variables for scooters
   public scooters: Scooter[] = [];
   public products: Product[] = [];
   public errorMessage = '';
   public searchTerm  = ''; // value for the input field of "search scooter"
   public listScrollPosition: string | null = null;
   private scrollTimeout: ReturnType<typeof setTimeout> | null = null;
-  /* variables for QR-Code */
+
+  /* Variables for QR-Code */
   private qrReader: Html5Qrcode | null = null;
   public qrActive = false;
   public qrButtonpressed = false;
@@ -64,8 +66,12 @@ export class MapComponent implements OnInit, OnDestroy {
   public showToast = false;
   public toastMessage = 'Kamerazugriff verweigert!';
   public toastType: 'success' | 'error' = 'error';
-  // Variables for Slider:
+
+  // Variables for the slider:
   priceRange: number[] = [0, 20];
+  scooterRange: number[] = [0, 300];
+  batteryPercentageRange: number[] = [0, 100];
+  speedRange: number[] = [0, 540];
   public  showSlider = true;
   
 
@@ -100,8 +106,6 @@ export class MapComponent implements OnInit, OnDestroy {
    public selectedDistance = '';
    public selectedCurrency = '';
    public option: Option | null = null;
-
-
 
 
 
@@ -621,10 +625,7 @@ export class MapComponent implements OnInit, OnDestroy {
     this.scooterFilterForm.get('maxPrice')?.valueChanges.subscribe(maxPrice => {
       this.priceRange[1] = maxPrice;
     });
-    this.showSlider = false; // Disable Slider
-    setTimeout(() => {
-      this.showSlider = true;
-    }, 0); // Re-enable the slider
+    this.updateSlider();
   }
 
   /* updates min price slider */
@@ -632,6 +633,80 @@ export class MapComponent implements OnInit, OnDestroy {
     this.scooterFilterForm.get('minPrice')?.valueChanges.subscribe(minPrice => {
       this.priceRange[0] = minPrice;
     });
+    this.updateSlider();
+  }
+
+  /* updates when price slider changes */
+  onScooterRangeChange():void{
+    console.log(this.scooterRange[0]);
+    this.scooterFilterForm.patchValue({
+      minRange: this.scooterRange[0],
+      maxRange: this.scooterRange[1]
+    });
+  }
+
+  
+  onMaxScooterRangeChange():void {
+    this.scooterFilterForm.get('maxRange')?.valueChanges.subscribe(maxRange => {
+      this.scooterRange[1] = maxRange;
+    });
+    this.updateSlider();
+  }
+
+  
+  onMinScooterRangeChange():void {
+    this.scooterFilterForm.get('minRange')?.valueChanges.subscribe(minRange => {
+      this.scooterRange[0] = minRange;
+    });
+    this.updateSlider();
+  }
+
+  
+  onBatteryRangeChange():void{
+    this.scooterFilterForm.patchValue({
+      minBty: this.batteryPercentageRange[0],
+      maxBty: this.batteryPercentageRange[1]
+    });
+  }
+
+  onMaxBatteryRangeChange():void {
+    this.scooterFilterForm.get('maxBty')?.valueChanges.subscribe(maxBty => {
+      this.batteryPercentageRange[1] = maxBty;
+    });
+    this.updateSlider();
+  }
+
+  onMinBatteryRangeChange():void {
+    console.log(this.minBty);
+    this.scooterFilterForm.get('minBty')?.valueChanges.subscribe(minBty => {
+      this.batteryPercentageRange[0] = minBty;
+    });
+    this.updateSlider();
+  }
+
+  onSpeedRangeChange():void{
+    this.scooterFilterForm.patchValue({
+      minSpeed: this.speedRange[0],
+      maxSpeed: this.speedRange[1]
+    });
+  }
+
+  onMaxSpeedRangeChange():void {
+    this.scooterFilterForm.get('maxSpeed')?.valueChanges.subscribe(maxSpeed => {
+      this.speedRange[1] = maxSpeed;
+    });
+    this.updateSlider();
+  }
+
+  onMinSpeedRangeChange():void {
+    this.scooterFilterForm.get('minSpeed')?.valueChanges.subscribe(minSpeed => {
+      this.speedRange[0] = minSpeed;
+    });
+    this.updateSlider();
+  }
+
+  /* updates the slider */
+  updateSlider():void{
     this.showSlider = false; // Disable Slider
     setTimeout(() => {
       this.showSlider = true;
