@@ -68,6 +68,7 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   /* Variables for controlling the length and visibility of all texts on the status island */
   private titleMinLength = 6;
   public showContent = false;
+  public showTitle = false;
 
   /* Variables for controlling the animation and the countdown */  
   private animationDuration = 300;  // Has to match the animation duration of the animation in @Component, e.g. 0.3s = 300ms
@@ -89,7 +90,8 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
       /* Configure the status island with the information from the reservation */
       this.imgPath = reservation.imagePath;
       this.redirectPath = reservation.redirectPath;
-      this.title = reservation.scooterName;
+      // this.title = reservation.scooterName;
+      this.title = 'Wir verrechnen die Zahlung, indem wir den alten Block erstatten und dann von der alten actionTime bis jetzt nochmal eine Zahlung durchführen.';
       this.content = 'reserviert:';
       this.showCancelButton = true;
       this.cancellationConfirmModalTitle = 'Reservierung aufheben';
@@ -208,23 +210,28 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   }
 
   adjustElementsToWindow(): void {
+    this.showTitle = true;
     this.showContent = true;
     const screenWidth = window.innerWidth;
-    if (screenWidth > 600) {
+    if (screenWidth > 670) {
       this.titleMinLength = 50;
-    } else if (screenWidth > 465) {
+    } else if (screenWidth > 500) {
       this.titleMinLength = 30;
-    } else if (screenWidth > 390) {
+    } else if (screenWidth > 425) {
       this.titleMinLength = 20;
-    } else if (screenWidth > 300) {
+    } else if (screenWidth > 320) {
       this.titleMinLength = 8;
-    } else if (screenWidth > 280) {
+    } else if (screenWidth > 310) {
       this.titleMinLength = 6;
-    } else if (screenWidth > 220) {
+    } else if (screenWidth > 235) {
       this.titleMinLength = 8;
+      this.showContent = false;
+    } else if (screenWidth > 190) {
+      this.titleMinLength = 2;
       this.showContent = false;
     } else {
       this.titleMinLength = 2;
+      this.showTitle = false;
       this.showContent = false;
     }
   }
