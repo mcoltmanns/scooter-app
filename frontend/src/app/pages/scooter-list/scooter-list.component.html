@@ -21,7 +21,7 @@
                 <p class="secondary-text-font">Reichweite</p>
               </div>
               <div class="stat-item">
-                <p class="info-box">{{ positionService.calcDistances(scooter.coordinates_lat, scooter.coordinates_lng, selectedDistance)}}</p>
+                <p class="info-box">{{ positionService.distanceToString(positionService.calcDistance(scooter.coordinates_lat, scooter.coordinates_lng), selectedDistance)}}</p>
                 <p class="secondary-text-font">Entfernung</p>
               </div>
             </div>

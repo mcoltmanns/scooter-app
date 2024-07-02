@@ -203,8 +203,9 @@ export class ScooterComponent implements OnInit, OnDestroy {
             });
 
             /* Calculate the distance to the current position */
-            this.distance = this.positionService.calcDistances(this.scooter.coordinates_lat,
-              this.scooter.coordinates_lng, this.selectedDistance);
+            this.distance = this.positionService.distanceToString(
+              this.positionService.calcDistance(this.scooter.coordinates_lat,
+              this.scooter.coordinates_lng), this.selectedDistance);
         },
         error: (err) => {
           this.errorMessage = err.error.message;
