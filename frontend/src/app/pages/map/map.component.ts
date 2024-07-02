@@ -65,7 +65,7 @@ export class MapComponent implements OnInit, OnDestroy {
   public toastMessage = 'Kamerazugriff verweigert!';
   public toastType: 'success' | 'error' = 'error';
   // Variables for Slider:
-  priceRange: number[] = [0, 0];
+  priceRange: number[] = [0, 20];
   public  showSlider = true;
   
 
