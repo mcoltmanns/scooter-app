@@ -122,6 +122,8 @@ app.post('/api/reserve', validator.validateReservation, bookings.reserveScooter)
 app.get('/api/reserve', bookings.getUserReservation); // get a user's active reservation
 app.delete('/api/reserve', bookings.endUserReservation); // end a user's active reservation
 app.post('/api/checkout', validator.validateCheckout, checkout.processCheckout);
+app.post('/api/rental/end', validator.validateEndRental, checkout.endDynamicRental);
+
 
 // Falls ein Fehler auftritt, gib den Stack trace aus
 if (process.env.NODE_ENV === 'development') {

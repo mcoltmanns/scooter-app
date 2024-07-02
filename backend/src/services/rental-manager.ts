@@ -6,28 +6,7 @@ import database from '../database';
 import { scheduleJob } from 'node-schedule';
 import { TransactionManager } from './payment/transaction-manager';
 import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
-
-interface ActiveRentalObject {
-    id: number;
-    nextActionTime: Date;
-    renew: boolean;
-    price_per_hour: number;
-    createdAt: Date;
-    updatedAt: Date;
-    userId: number;
-    scooterId: number;
-    paymentMethodId: number;
-}
-
-interface PastRentalObject {
-    id: number;
-    endedAt: Date;
-    total_price: number;
-    createdAt: Date;
-    userId: number;
-    scooterId: number;
-    paymentMethodId: number;
-}
+import { ActiveRentalObject, PastRentalObject } from '../interfaces/rentals.interface';
 
 abstract class RentalManager {
     /* Transform a prepaid ActiveRental object to look like a PastRental object */
@@ -76,6 +55,23 @@ abstract class RentalManager {
             console.error(`Error fetching past rental for rentalId ${rentalId}:`, error);
             throw new Error('FETCH_PAST_RENTAL_FAILED');
         }
+    }
+
+    /* Get an active rental by rentalId and userId */
+    public static async getActiveRentalByRentalIdUserId(rentalId: number, userId: number, transaction?: Transaction): Promise<Model | null> {
+      try {
+        const activeRental = await ActiveRental.findOne({
+          where: {
+            id: rentalId,
+            userId
+          },
+          transaction: transaction || undefined
+        });
+
+        return activeRental ? activeRental : null;
+      } catch (error) {
+        throw new Error(error);
+      }
     }
     
     // get all rentals associated with a scooter (active and ended)
@@ -165,19 +161,25 @@ abstract class RentalManager {
         return rental;
     }
 
-    public static async endRental(rentalId: number, transaction?: Transaction): Promise<void> {
+    public static async endRental(rentalId: number, transaction?: Transaction, activeRental?: Model): Promise<Model> {
         const transactionExtern: boolean = transaction !== undefined;
         if(!transactionExtern) transaction = await database.getSequelize().transaction();
         try {
-            const rental = await ActiveRental.findByPk(rentalId, { transaction: transaction });
-            if(!rental) return; // do nothing if rental not found
+            /* Fetch the activeRental if it wasn't provided */
+            if (!activeRental) {
+              activeRental = await ActiveRental.findByPk(rentalId, { transaction: transaction });
+            }
+            if(!activeRental) return; // do nothing if rental not found
 
             /* Create a past rental entry with the total price */
-            const total_price = parseFloat((rental.dataValues.price_per_hour * ((Date.now() - new Date(rental.dataValues.createdAt).getTime()) / 1000 / 60 / 60)).toFixed(2));
-            await PastRental.create({ id: rental.dataValues.id, endedAt: new Date(Date.now()), total_price: total_price, userId: rental.dataValues.userId, scooterId: rental.dataValues.scooterId, paymentMethodId: rental.dataValues.paymentMethodId, createdAt: new Date(rental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
+            const newEndDate = new Date(activeRental.dataValues.nextActionTime);
+            const total_price = parseFloat((activeRental.dataValues.price_per_hour * ((newEndDate.getTime() - new Date(activeRental.dataValues.createdAt).getTime()) / 1000 / 60 / 60)).toFixed(2));
+            const newPastRental = await PastRental.create({ id: activeRental.dataValues.id, endedAt: newEndDate, total_price: total_price, userId: activeRental.dataValues.userId, scooterId: activeRental.dataValues.scooterId, paymentMethodId: activeRental.dataValues.paymentMethodId, createdAt: new Date(activeRental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
+            // const total_price = parseFloat((activeRental.dataValues.price_per_hour * ((Date.now() - new Date(activeRental.dataValues.createdAt).getTime()) / 1000 / 60 / 60)).toFixed(2));
+            // await PastRental.create({ id: activeRental.dataValues.id, endedAt: new Date(Date.now()), total_price: total_price, userId: activeRental.dataValues.userId, scooterId: activeRental.dataValues.scooterId, paymentMethodId: activeRental.dataValues.paymentMethodId, createdAt: new Date(activeRental.dataValues.createdAt) }, { transaction: transaction }); // move rental to the past rentals
             
             /* End the active rental */
-            await rental.destroy({ transaction: transaction });
+            await activeRental.destroy({ transaction: transaction });
 
             /* End the active rental entry in the scooters table as well */
             // const scooter = await Scooter.findByPk(rental.getDataValue('scooter_id'), { transaction: transaction });
@@ -185,6 +187,8 @@ abstract class RentalManager {
             // await scooter.save({ transaction: transaction });
 
             if(!transactionExtern) await transaction.commit();
+
+            return newPastRental;
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error('END_RENTAL_FAILED');
