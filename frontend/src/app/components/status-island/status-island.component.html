@@ -10,7 +10,7 @@
       <div *ngIf="!processingCancellation" class="status-island-container">
         <img *ngIf="imgPath" class="status-island-image" [src]="imgPath" />
         <div [ngClass]="{'status-island-text': true, 'no-image': !imgPath, 'with-image': imgPath, 'no-cancel': !showCancelButton, 'with-cancel': showCancelButton}">
-          <span>{{ getShortenedTitle() }} </span>
+          <span *ngIf="showTitle">{{ getShortenedTitle() }} </span>
           <span *ngIf="showContent">{{ content }}</span>
           <span *ngIf="showCountdown" class="timer"> {{ getFormattedTime() }}</span>
         </div>

@@ -60,6 +60,12 @@ export class AuthController {
 
     /* Update the session cookie */
     response.cookie('sessionId', sessionId, { httpOnly: true, expires: newExpiry });
+
+    /* Check if the session has a user associated with it */
+    if (!session.getDataValue('usersAuthId')) {
+      response.status(401).json({ code: 401, validationErrors: { sessionId: 'Session ist ungültig, bitte melden Sie sich an.' } }); // 401: Unauthorized
+      return;
+    }
     
     /* Save the session in the response locals */
     response.locals.sessionId = session.getDataValue('id');
@@ -229,10 +235,6 @@ export class AuthController {
    */
   public async getUser(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-      return;
-    }
 
     /* Grab the user data from the database */
     let userData, userAuth;
@@ -258,12 +260,7 @@ export class AuthController {
    * @returns         null
    */
   public async updateUser(request: Request, response: Response): Promise<void> {
-    /* Make sure we actually have a user to update */
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-      return;
-    }
 
     /* Get the user data objects form the database */
     let userData, userAuth;

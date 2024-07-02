@@ -48,13 +48,6 @@ export class OptionController{
         try {
             const userId = response.locals.userId;
 
-            // Check whether the user exists
-            if (!userId) {
-                response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-                await transaction.rollback();
-                return;
-            }
-
             const existingPreferences = await UserPreferences.findOne({ where: { id: userId } });
             if (!existingPreferences) {
                 response.status(404).json({ code: 404, message: 'User preferences nicht gefunden.' });
