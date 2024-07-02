@@ -64,6 +64,8 @@ export class MapComponent implements OnInit, OnDestroy {
   public showToast = false;
   public toastMessage = 'Kamerazugriff verweigert!';
   public toastType: 'success' | 'error' = 'error';
+  // Variables for Slider:
+  priceRange: number[] = [0, 0];
 
 
   public scooterFilterForm!: FormGroup;
@@ -602,5 +604,13 @@ export class MapComponent implements OnInit, OnDestroy {
     this.sortedScooters = this.filteredScooters;
     this.sortedScooters = Sorts.sortSpeed(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
+  }
+
+  /* updates when price slider changes */
+  onPriceRangeChange():void{
+    this.scooterFilterForm.patchValue({
+      minPrice: this.priceRange[0],
+      maxPrice: this.priceRange[1]
+    });
   }
 }
