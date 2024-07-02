@@ -11,6 +11,9 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 import { take } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { Levenshtein } from 'src/app/utils/levenshtein';
+import { PositionService } from 'src/app/utils/position.service';
+
+
 
 @Component({
   selector: 'app-scooter-list',
@@ -20,7 +23,7 @@ import { Levenshtein } from 'src/app/utils/levenshtein';
   styleUrls: ['./scooter-list.component.css']
 })
 export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
-  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService) {}
+  public constructor(private mapService: MapService, private router: Router, private optionService: OptionService, public positionService: PositionService) {}
 
   @ViewChild('scrollableContainer', { static: false }) scrollableContainer!: ElementRef;
   @ViewChildren('elementRef') elementsRef!: QueryList<ElementRef>;
