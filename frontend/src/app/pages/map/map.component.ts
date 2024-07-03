@@ -57,11 +57,13 @@ export class MapComponent implements OnInit, OnDestroy {
   public qrActive = false;
   public qrButtonpressed = false;
   public isLoading = false; // camera loading variable
-  /* variables for the qr Code toast */
+
+  // Toast intialization
   @ViewChild('toastComponent') toastComponent!: ToastComponent;
-  public showToast = false;
-  public toastMessage = 'Kamerazugriff verweigert!';
   public toastType: 'success' | 'error' = 'error';
+  /* Variables for the qr Code toast and for the user location toast */
+  public showToast = false;
+  public toastMessage = '';
 
 
   public scooterFilterForm!: FormGroup;
@@ -340,6 +342,8 @@ export class MapComponent implements OnInit, OnDestroy {
           this.isLoading = false;
           this.qrButtonpressed = false;
           this.qrActive = false;
+          // Activate the failed user position toast
+          this.toastMessage = 'Kamerazugriff verweigert!';
           this.showToast = true;
           this.toastComponent.showToast();
           this.showToast = false; // Reset the state to prevent the toast from showing again
@@ -393,12 +397,15 @@ export class MapComponent implements OnInit, OnDestroy {
   updateUserPosition(): void {
     UserPosition.setUserPosition(this.positionService)
     .then((result) => {
-      console.log(result);
       if (result) {
         const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIconPulse });
         this.layers.push(userMarker); // place the user icon on the map
         console.log('Position successfully set');
       } else {
+        this.toastMessage = 'Fehler beim Abrufen der Position';
+        this.showToast = true;
+        this.toastComponent.showToast();
+        this.showToast = false; // Reset the state to prevent the toast from showing again
         console.log('Failed to set position');
       }
     })
