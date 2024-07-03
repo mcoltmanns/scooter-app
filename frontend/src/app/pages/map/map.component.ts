@@ -32,10 +32,11 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 import { SliderModule } from 'primeng/slider';
 
 /* user icon for showing the user position */
-const userIcon = Leaflet.icon({
-  iconSize: [40, 40],
-  iconUrl: '/assets/person.png',
-});
+// const userIcon = Leaflet.icon({
+//   iconSize: [40, 40],
+//   iconUrl: '/assets/person.png',
+// });
+const userIconPulse = UserPosition.createUserPositionIcon();
 
 @Component({
     standalone: true,
@@ -185,8 +186,8 @@ export class MapComponent implements OnInit, OnDestroy {
       const icon = Leaflet.divIcon({
         className: 'marker',
         html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
-        iconSize: [30, 42],
-        iconAnchor: [15, 42] 
+        iconSize: [30, 30],
+        iconAnchor: [15, 15] 
       });
 
       // Add markers to the map.
@@ -394,7 +395,7 @@ export class MapComponent implements OnInit, OnDestroy {
     .then((result) => {
       console.log(result);
       if (result) {
-        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIconPulse });
         this.layers.push(userMarker); // place the user icon on the map
         console.log('Position successfully set');
       } else {
