@@ -200,4 +200,12 @@ export class Validator {
 
     await Validator.runAllChecks(400, checks, request, response, next);
   }
+
+  public async validateEndRental(request: Request, response: Response, next: NextFunction): Promise<void> {
+    const checks = [
+      check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Rental-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Rental-ID.')
+    ];
+
+    await Validator.runAllChecks(400, checks, request, response, next);
+  }
 }

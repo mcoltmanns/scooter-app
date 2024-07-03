@@ -64,10 +64,15 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     // This is a default function that does nothing.
     // It will be replaced by a function from the parent component.
   };
+  @Input() countdownExpiredCallback: () => void = () => {
+    // This is a default function that does nothing.
+    // It will be replaced by a function from the parent component.
+  };
 
   /* Variables for controlling the length and visibility of all texts on the status island */
   private titleMinLength = 6;
   public showContent = false;
+  public showTitle = false;
 
   /* Variables for controlling the animation and the countdown */  
   private animationDuration = 300;  // Has to match the animation duration of the animation in @Component, e.g. 0.3s = 300ms
@@ -95,6 +100,9 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
       this.cancellationConfirmModalTitle = 'Reservierung aufheben';
       this.cancellationConfirmModalText = 'Bist du sicher, dass du die aktuell laufende Reservierung beenden möchtest?';
       this.processingCancellationMsg = 'Beende Reservierung...';
+      this.countdownExpiredCallback = (): void => {
+        this.bookingService.destroyReservationIsland();
+      };
 
       /* Configure the cancel function, that will be called when the user confirms the cancellation */
       this.cancel = (): void => {
@@ -141,6 +149,9 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   ngOnDestroy(): void {
     this.resetTimer();
 
+    console.log(this.countdownExpiredCallback);
+    console.log(this.cancel);
+
     /* Unsubscribe from all subscriptions */
     this.scooterReservedSubscription.unsubscribe();
     this.scooterUnreservedSubscription.unsubscribe();
@@ -181,8 +192,20 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     }
   }
 
+  unsetCallbacks(): void {
+    this.cancel = (): void => {
+      // This is a default function that does nothing.
+      // It will be replaced by a function from the parent component.
+    };
+    this.countdownExpiredCallback = (): void => {
+      // This is a default function that does nothing.
+      // It will be replaced by a function from the parent component.
+    };
+  }
+
   destroyIsland(): void {
     this.resetTimer();
+    this.unsetCallbacks();
     this.hide();
   }
 
@@ -198,6 +221,7 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
     }, 1000);
     
     this.islandTimeout = setTimeout(() => {
+      this.countdownExpiredCallback();
       this.destroyIsland();
     }, this.showDuration);
   }
@@ -208,23 +232,28 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   }
 
   adjustElementsToWindow(): void {
+    this.showTitle = true;
     this.showContent = true;
     const screenWidth = window.innerWidth;
-    if (screenWidth > 575) {
+    if (screenWidth > 670) {
       this.titleMinLength = 50;
-    } else if (screenWidth > 425) {
+    } else if (screenWidth > 500) {
       this.titleMinLength = 30;
-    } else if (screenWidth > 345) {
+    } else if (screenWidth > 425) {
       this.titleMinLength = 20;
-    } else if (screenWidth > 265) {
+    } else if (screenWidth > 320) {
       this.titleMinLength = 8;
-    } else if (screenWidth > 250) {
+    } else if (screenWidth > 310) {
       this.titleMinLength = 6;
-    } else if (screenWidth > 200) {
+    } else if (screenWidth > 235) {
       this.titleMinLength = 8;
+      this.showContent = false;
+    } else if (screenWidth > 190) {
+      this.titleMinLength = 2;
       this.showContent = false;
     } else {
       this.titleMinLength = 2;
+      this.showTitle = false;
       this.showContent = false;
     }
   }
