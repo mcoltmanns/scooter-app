@@ -538,6 +538,29 @@ export class MapComponent implements OnInit, OnDestroy {
     };
   }
 
+  // the auto formatters for all the input field pairs
+  autoFormatPrice(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
+    
+    //only allow 2 digit input
+    if (value.length > 2) {
+      value = value.slice(0, 2);
+    }
+  
+    // Restrict the input to values between 0 and 20, overwrite all values not in range with either minimal or maximal value
+    let numValue = Number(value);
+    if (numValue < 0) {
+      numValue = 0;
+      value = String (0);
+    } else if (numValue > 20) {
+      numValue = 20;
+      value = String(20);
+    }
+
+    this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: false });
+  }
+
 
 
   //sort functionalities ---------------------------------------------------------------------------------

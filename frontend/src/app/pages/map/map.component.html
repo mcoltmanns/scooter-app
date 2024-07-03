@@ -126,8 +126,8 @@
         <div class="form-container">
           <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
             <div class="filter-row">
-              <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatNumber($event, 'minPrice'); onMinPriceRangeChange()"></app-user-input>
-              <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatNumber($event, 'maxPrice'); onMaxPriceRangeChange()" ></app-user-input>
+              <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatPrice($event, 'minPrice'); onMinPriceRangeChange()"></app-user-input>
+              <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatPrice($event, 'maxPrice'); onMaxPriceRangeChange()" ></app-user-input>
             </div>
             <div class="content-section implementation">
               <p-slider *ngIf="showSlider" [(ngModel)]="priceRange"  [range]="true" [min]="0" [max]="20" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onPriceRangeChange()"></p-slider>
