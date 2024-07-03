@@ -32,7 +32,9 @@
           <app-sort-button class="sort-btn" (click)="toggleSortView()"></app-sort-button>
           <div class="sort-wrapper">
             <div *ngIf="sortMenuVisible" class="sort-menu">
-              <div class="sort-menu-cont">
+              <p-dropdown [options]="cities" optionLabel="name" [(ngModel)]="selectedCity"  placeholder="Select a City" (onChange)="onCityChange($event)"></p-dropdown>
+              <!-- 
+              <div class="sort-menu-cont">(onChange)="onCityChange($event)"
                 <h3 class="o-title">Sortier Optionen</h3>
                 <app-button color="accent" class="btn" type="submit" (click)="sortCancel()">
                   Sortierung zurücksetzten
@@ -70,9 +72,8 @@
                   </app-button>
                 </div>
               </div>
-
-
-              
+              -->
+ 
             </div>
           </div>
           <div class="form-container">
@@ -142,16 +143,16 @@
               <p>Reichweitenbereich: {{scooterRange[0]}} - {{scooterRange[1]}}</p>
             </div>
             <div class="filter-row">
-              <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty" (input)="autoFormatNumber($event, 'minBty'); onMaxBatteryRangeChange()"></app-user-input>
-              <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty" (input)="autoFormatNumber($event, 'maxBty'); onMinBatteryRangeChange()"></app-user-input>
+              <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty" (input)="autoFormatNumber($event, 'minBty')" (ngModelChange)="onMinBatteryRangeChange()"></app-user-input>
+              <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty" (input)="autoFormatNumber($event, 'maxBty')" (ngModelChange)="onMinBatteryRangeChange()"></app-user-input>
             </div>
             <div class="content-section implementation">
               <p-slider *ngIf="showSlider" [(ngModel)]="batteryPercentageRange"  [range]="true" [min]="0" [max]="100" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onBatteryRangeChange()"></p-slider>
               <p>Batteriestand: {{batteryPercentageRange[0]}} - {{batteryPercentageRange[1]}}</p>
             </div>
             <div class="filter-row">
-              <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatNumber($event, 'minSpeed');onMaxSpeedRangeChange()"></app-user-input>
-              <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatNumber($event, 'maxSpeed');onMinSpeedRangeChange()"></app-user-input>
+              <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatNumber($event, 'minSpeed');" (ngModelChange)="onMaxSpeedRangeChange()"></app-user-input>
+              <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatNumber($event, 'maxSpeed')" (ngModelChange)="onMinSpeedRangeChange()"></app-user-input>
             </div>
             <div class="content-section implementation">
               <p-slider *ngIf="showSlider" [(ngModel)]="speedRange"  [range]="true" [min]="0" [max]="540" [step]="10" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onSpeedRangeChange()"></p-slider>
