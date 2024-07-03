@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient} from '@angular/common/http';
 import { Observable} from 'rxjs';
 import { ActiveRental, PastRental, ProductWithScooterId } from '../models/rental';
+import { ResponseObjEndRental } from '../models/response-message';
 
 interface RentalsResponse {
   code: number;
@@ -32,6 +33,11 @@ export class RentalService{
     /* get all products for booked scooters */
     public getRentalProduct(): Observable<ProductWithScooterId[]> {
         return this.http.get<ProductWithScooterId[]>('/api/bookScooterProducts');
+    }
+
+    /* Request to end an active dynamic rental */
+    public postEndRental(data: { rentalId: number }): Observable<ResponseObjEndRental> {
+      return this.http.post<ResponseObjEndRental>('api/rental/end', data);
     }
 
     /* request to the backend to generate an invoice for one specific scooter  */

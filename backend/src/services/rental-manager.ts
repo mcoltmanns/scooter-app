@@ -58,11 +58,12 @@ abstract class RentalManager {
     }
 
     /* Get an active rental by rentalId and userId */
-    public static async getActiveRentalByRentalIdUserId(rentalId: number, userId: number, transaction?: Transaction): Promise<Model | null> {
+    public static async getDynamicActiveRentalByRentalIdUserId(rentalId: number, userId: number, transaction?: Transaction): Promise<Model | null> {
       try {
         const activeRental = await ActiveRental.findOne({
           where: {
             id: rentalId,
+            renew: true,
             userId
           },
           transaction: transaction || undefined

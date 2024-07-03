@@ -1,4 +1,5 @@
 import { PaymentOptions } from './payment';
+import { PastRental } from './rental';
 
 export type ResponseMessage = {
     code: number,
@@ -27,4 +28,10 @@ export interface ResponseMessageReservation {
     scooter_id: number;
     endsAt: string;
   }
+}
+
+export interface ResponseObjEndRental {
+  code: number;
+  message: string;
+  newPastRental?: PastRental;
 }

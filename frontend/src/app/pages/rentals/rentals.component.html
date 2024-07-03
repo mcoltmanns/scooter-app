@@ -1,3 +1,9 @@
+<app-loading-overlay [isLoading]="processingEndReservation"></app-loading-overlay>
+
+<app-confirm-modal [showModal]="this.confirmModal.showConfirmModal" [confirm]="onConfirmConfirmModal" [cancel]="onCloseConfirmModal" [reverseControls]="true" title="Buchung beenden">
+  Bist du sicher, dass du die Buchung für den Scooter {{ this.confirmModal.scooterName }} beenden willst?
+</app-confirm-modal>
+
 <app-info-modal [showModal]="infoModal.show" [action]="onNavigateToScooter" [close]="onCloseInfoModal" [title]="infoModal.title" [showIcon]="false" [showActionButton]="infoModal.isActive ? false : true" actionText="Zum Scooter" cancelText="Schließen" [centerControls]="true">
   <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 0.75em;">
     <img *ngIf="getPictureByScooterId(infoModal.scooterId)" (load)="onImageLoad(infoModal.scooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[infoModal.scooterId]}" [src]="getPictureByScooterId(infoModal.scooterId)" style="width: 60px;" />
@@ -180,7 +186,7 @@
       </ng-template>
     </div>
     <ng-template #loading>
-      <app-loading-overlay [isLoading]="true" type="inline"></app-loading-overlay>
+      <app-loading-overlay class="inline-loading" [isLoading]="true" type="inline"></app-loading-overlay>
     </ng-template>
 
   </div>

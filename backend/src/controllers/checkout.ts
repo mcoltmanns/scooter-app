@@ -131,8 +131,8 @@ export class CheckoutController {
     const transaction = await Database.getSequelize().transaction();
 
     try {
-      /* Fetch the active rental for the provided rentalId and ensure it belongs to the user */
-      const activeRental = await RentalManager.getActiveRentalByRentalIdUserId(rentalId, userId, transaction);
+      /* Fetch the active dynamic rental for the provided rentalId and ensure it belongs to the user */
+      const activeRental = await RentalManager.getDynamicActiveRentalByRentalIdUserId(rentalId, userId, transaction);
       if (!activeRental) {
         throw new Error('ACTIVE_RENTAL_NOT_FOUND');
       }
