@@ -677,7 +677,6 @@ export class MapComponent implements OnInit, OnDestroy {
   }
 
   onMinBatteryRangeChange():void {
-    console.log(this.minBty);
     this.scooterFilterForm.get('minBty')?.valueChanges.subscribe(minBty => {
       this.batteryPercentageRange[0] = minBty;
     });
