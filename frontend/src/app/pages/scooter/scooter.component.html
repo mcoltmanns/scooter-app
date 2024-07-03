@@ -73,8 +73,7 @@
                         <div class="price-text">{{ convertCurrencyUnits(product.price_per_hour, selectedCurrency) }}</div>
                     </div>
                 </div>
-            </div>
-
+            </div>            
             <div class="bottom">
                 <app-button color="primary" type="submit" class="scooter-btn" (click)="onBook()" [disabled]="disableButtons">
                     Scooter buchen
@@ -96,8 +95,10 @@
                 <div class="description" innerHTML="{{ product?.description_html }}">Beschreibung</div>
                 <hr class="solid">
                 <h2 style="margin: 15px;">Standort</h2>
+                <p style="margin: 15px;">Entfernung zum Scooter: <b style="color: chartreuse;">{{ this.distance }}</b></p>
                 <div class="map" leaflet [leafletOptions]="options" [(leafletCenter)]="center" [leafletLayers]="layers"></div>
             </div>
+            
         </ng-container>
     </ng-container>
 

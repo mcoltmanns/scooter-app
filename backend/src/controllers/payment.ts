@@ -15,10 +15,7 @@ interface PaymentMethod {
 export class PaymentController {
   public async getAllPaymentMethods(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
-    if (!userId) {
-        response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-        return;
-    }
+
     try {
         // const paymentMethods = await PaymentMethod.findAll({ where: { usersAuthId: userId } });
         const paymentMethods = await PaymentMethod.findAll({
@@ -59,12 +56,7 @@ export class PaymentController {
   }
 
   public async addBachelorcard(request: Request, response: Response): Promise<void> {
-    /* Make sure we actually have a user */
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-      return;
-    }
 
     /* Extract the relevant data from the request body */
     const { name, cardNumber, securityCode, expirationDate } = request.body;
@@ -119,12 +111,7 @@ export class PaymentController {
   }
 
   public async addHcipal(request: Request, response: Response): Promise<void> {
-    /* Make sure we actually have a user */
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-      return;
-    }
 
     /* Extract the relevant data from the request body */
     const { accountName, accountPassword } = request.body;
@@ -179,12 +166,7 @@ export class PaymentController {
   }
 
   public async addSwpsafe(request: Request, response: Response): Promise<void> {
-    /* Make sure we actually have a user */
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-      return;
-    }
 
     /* Extract the relevant data from the request body */
     const { swpCode } = request.body;
@@ -239,12 +221,7 @@ export class PaymentController {
   }
 
   public async deletePayment(request: Request, response: Response): Promise<void> {
-    /* Make sure we actually have a user */
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-      return;
-    }
 
     /* Extract the relevant data from the request parameters */
     const paymentId = request.params.paymentId;

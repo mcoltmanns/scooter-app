@@ -20,10 +20,6 @@ interface ScooterInstance extends Model {
 export class CheckoutController {
   public async processCheckout(request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
-    if (!userId) {
-      response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-      return;
-    }
 
     const { scooterId, paymentMethodId, duration } = request.body;
 
@@ -124,5 +120,59 @@ export class CheckoutController {
 
     response.status(200).json({ code: 200, message: 'Die Buchung war erfolgreich!', booking: responseBookingObject });
     return;
+  }
+
+  public async endDynamicRental (request: Request, response: Response): Promise<void> {
+    const userId = response.locals.userId;
+
+    const { rentalId } = request.body;
+
+    /* Start a transaction to solve multiple db queries at once and protect against the problem of partial success */
+    const transaction = await Database.getSequelize().transaction();
+
+    try {
+      /* Fetch the active rental for the provided rentalId and ensure it belongs to the user */
+      const activeRental = await RentalManager.getActiveRentalByRentalIdUserId(rentalId, userId, transaction);
+      if (!activeRental) {
+        throw new Error('ACTIVE_RENTAL_NOT_FOUND');
+      }
+
+      /* Calculate the difference between the current time and the nextActionTime of the rental */
+      const currentTime = new Date();
+      const nextActionTime = new Date(activeRental.getDataValue('nextActionTime'));
+      const differencePaidUsed = nextActionTime.getTime() - currentTime.getTime();
+
+      /* Check if the user has paid more time than used */
+      // We will settle the payment by refunding the old block and then making another payment from the old actionTime to currentTime.
+      if (differencePaidUsed > 0) {
+        console.log('User has paid more time than used. Refunding the user.');
+        // TODO: Cancel/reverse the last paid time piece. The last actionTime can be calculated by subtracting the duration of the last piece (i.e. DYNAMIC_EXTENSION_INTERVAL_MS) from the nextActionTime.
+        // TODO: Charge the user for the actual time used. That is, the time from the last actionTime to the current time.
+      }
+
+      /* Create a new past rental entry */
+      // Set the nextActionTime to the time the current time since the user has paid for the time until now
+      activeRental.setDataValue('nextActionTime', currentTime); // Not necessary to save the updated rental here, as it will be destroyed when ending the rental
+      // End the rental (removes the rental from activeRentals and adds it to pastRentals with nextActionTime as the end time of the rental)
+      const newPastRental = await RentalManager.endRental(activeRental.getDataValue('id'), transaction, activeRental);  // Passing the activeRental object to avoid another db query and to make endRental() use the newly set nextActionTime as the end time of the rental
+
+      await transaction.commit();
+
+      response.status(200).json({ code: 200, message: 'Die Buchung wurde erfolgreich beendet.', newPastRental: newPastRental.toJSON() });
+      return;
+    } catch (error) {
+      console.error(error);
+
+      await transaction.rollback(); // Rollback the transaction in case of an error
+
+      /* Handle thrown errors and translate the error messages to a more user-friendly format */
+      if (error.message === 'ACTIVE_RENTAL_NOT_FOUND') {
+        response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
+        return;
+      }
+
+      response.status(500).json({ code: 500, message: 'Fehler beim Beenden der Buchung.'}); // Default error message
+      return;
+    }
   }
 }

@@ -20,11 +20,7 @@ export class BookingsController {
 
     /* Method that returns all current and past rentals for a specific User_Id */
     public async getUserRentals(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId; // get userID from session cookie
-        if (!userId) {
-            response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-            return;
-        }
+        const userId = response.locals.userId; // we have the user id from the session
 
         try {
             const rentals = await RentalManager.getRentalsFromUser(userId); // rentals[0] is active rentals, rentals[1] is past rentals
@@ -43,11 +39,7 @@ export class BookingsController {
 
     // get the reservation for a user, if it exists
     public async getUserReservation(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId; // get userID from session cookie
-        if (!userId) {
-            response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-            return;
-        }
+        const userId = response.locals.userId; // we have the user id from the session
 
         try {
             /* Get the reservation for the user including name and image from the product table */
@@ -67,11 +59,8 @@ export class BookingsController {
 
     // end the reservation for a user, if it exists
     public async endUserReservation(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId; // get userID from session cookie
-        if (!userId) {
-            response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-            return;
-        }
+        const userId = response.locals.userId; // we have the user id from the session
+
         try {
             const reservation = await ReservationManager.getReservationFromUser(userId);
             if(!reservation) {
@@ -90,11 +79,8 @@ export class BookingsController {
 
     // reserve a scooter for a given user
     public async reserveScooter(request: Request, response: Response): Promise<void> {
-        const userId = response.locals.userId; // get userID from session cookie
-        if (!userId) {
-            response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' });
-            return;
-        }
+        const userId = response.locals.userId; // we have the user id from the session
+
         const scooterId = request.body.scooterId;
         try {
             const reservation = await ReservationManager.startReservation(userId, scooterId);

@@ -7,12 +7,7 @@ import { ActiveRental, Reservation } from '..//models/rental';
 export class ScooterController {
     // get scooters that aren't rented
     public async getAvailableScooters(request: Request, response: Response): Promise<void> {
-        /* Make sure we actually have a user */
         const userId = Number(response.locals.userId);
-        if (!userId) {
-          response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-          return;
-        }
 
         let scooters = [];
         try {
@@ -74,12 +69,7 @@ export class ScooterController {
 
     /* Method to get scooter information by scooter ID */
     public async getScooterById(request: Request, response: Response): Promise<void> {
-        /* Make sure we actually have a user */
         const userId = Number(response.locals.userId);
-        if (!userId) {
-          response.status(401).json({ code: 401, message: 'Kein Benutzer angegeben.' }); // 401: Unauthorized
-          return;
-        }
 
         const { scooterId } = request.params;
 
