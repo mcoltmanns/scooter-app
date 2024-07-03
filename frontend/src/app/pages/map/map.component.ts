@@ -597,7 +597,10 @@ export class MapComponent implements OnInit, OnDestroy{
     };
   }
 
-  // the auto formatters for all the input field pairs
+  // the auto formatters for all the input field pairs---------------------------------------------------------------
+
+
+
   autoFormatPrice(event: Event, controlName: string): void {
     const input = event.target as HTMLInputElement;
     let value = input.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
@@ -607,7 +610,7 @@ export class MapComponent implements OnInit, OnDestroy{
       value = value.slice(0, 2);
     }
   
-    // Restrict the input to values between 0 and 20, overwrite all values not in range with either minimal or maximal value
+    // Restrict the input to values between 0 and 20, overwrite all values larger then max with maximal value
     let numValue = Number(value);
     if (numValue > 20) {
       numValue = 20;
@@ -617,6 +620,62 @@ export class MapComponent implements OnInit, OnDestroy{
     this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: true });
   }
 
+  autoFormatRange(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
+    
+    //only allow 3 digit input
+    if (value.length > 3) {
+      value = value.slice(0, 3);
+    }
+  
+    // Restrict the input to values between 0 and 300, overwrite all values that are too large with max
+    let numValue = Number(value);
+    if (numValue > 300) {
+      numValue = 300;
+      value = String(300);
+    }
+
+    this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: true });
+  }
+
+  autoFormatBty(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
+    
+    //only allow 3 digit input
+    if (value.length > 3) {
+      value = value.slice(0, 3);
+    }
+  
+    // Restrict the input to values between 0 and 100, overwrite all values that are too large with max
+    let numValue = Number(value);
+    if (numValue > 100) {
+      numValue = 100;
+      value = String(100);
+    }
+
+    this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: true });
+  }
+
+  autoFormatSpeed(event: Event, controlName: string): void {
+    const input = event.target as HTMLInputElement;
+    let value = input.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
+    
+    //only allow 3 digit input
+    if (value.length > 3) {
+      value = value.slice(0, 3);
+    }
+  
+    // Restrict the input to values between 0 and 540, overwrite all values that are too large with max
+    let numValue = Number(value);
+    if (numValue > 540) {
+      numValue = 540;
+      value = String(540);
+    }
+
+    this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: true });
+  }
 
 
   //sort functionalities ---------------------------------------------------------------------------------
