@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild, Renderer2, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnInit, NgZone, OnDestroy, ElementRef, ViewChild, Renderer2, ChangeDetectorRef} from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 
 /**
@@ -33,6 +33,9 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 
 //Slider for the filter
 import { SliderModule } from 'primeng/slider';
+//Drop down menu
+import { DropdownModule } from 'primeng/dropdown';
+
 
 /* user icon for showing the user position */
 const userIcon = Leaflet.icon({
@@ -40,14 +43,19 @@ const userIcon = Leaflet.icon({
   iconUrl: '/assets/person.png',
 });
 
+interface City {
+  name: string;
+  code: string;
+}
+
 @Component({
     standalone: true,
     templateUrl: './map.component.html',
     styleUrls: ['./map.component.css'],
-    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent, ToastComponent, SliderModule]
+    imports: [LeafletModule, CommonModule, ScooterListComponent, FormsModule, FilterButtonComponent, ButtonComponent, ReactiveFormsModule, UserInputComponent, SortButtonComponent, LoadingOverlayComponent, ToastComponent, SliderModule, DropdownModule]
 })
 
-export class MapComponent implements OnInit, OnDestroy {
+export class MapComponent implements OnInit, OnDestroy{
   // Variables for scooters
   public scooters: Scooter[] = [];
   public products: Product[] = [];
@@ -107,7 +115,8 @@ export class MapComponent implements OnInit, OnDestroy {
    public selectedCurrency = '';
    public option: Option | null = null;
 
-
+  cities: City[];
+  selectedCity: City = { name: 'New York', code: 'NY' };
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService, private cdr: ChangeDetectorRef) 
   { //form group for the input on the scooter-filters
@@ -120,7 +129,17 @@ export class MapComponent implements OnInit, OnDestroy {
       maxBty: ['', [this.numberStringValidator(0, 100)]],
       minSpeed: ['', [this.numberStringValidator(0, 99999)]],
       maxSpeed: ['', [this.numberStringValidator(0, 99999)]]
-  });}
+  }),this.cities = [
+    { name: 'New York', code: 'NY' },
+    { name: 'Rome', code: 'RM' },
+    { name: 'London', code: 'LDN' },
+    { name: 'Istanbul', code: 'IST' },
+    { name: 'Paris', code: 'PRS' }
+  ];}
+
+  onCityChange(event: any):void {
+    console.log('Selected city:', event.value);
+  }
 
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
 
@@ -294,6 +313,8 @@ export class MapComponent implements OnInit, OnDestroy {
       this.scrollTimeout = null;
     }
   }
+
+  
 
   adjustPageHeight(): void {
     if (this.view !== 'list') {
