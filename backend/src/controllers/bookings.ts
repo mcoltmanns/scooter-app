@@ -24,12 +24,6 @@ export class BookingsController {
 
         try {
             const rentals = await RentalManager.getRentalsFromUser(userId); // rentals[0] is active rentals, rentals[1] is past rentals
-
-            if (rentals[0].length === 0 && rentals[1].length === 0) {
-                response.status(404).json({ code: 404, message: 'Keine Buchungen gefunden.' });
-                return;
-            }
-
             response.status(200).json({ code: 200, activeRentals: rentals[0], pastRentals: rentals[1] });
         } catch (error) {
             console.error(error);
