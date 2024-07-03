@@ -103,6 +103,8 @@ export class AuthController {
         password: passwordHash
       };
 
+      console.log(`new users auth is ${JSON.stringify(newUserAuth)}`);
+
       /* Save the new user auth object in the database */ 
       createdUserAuth = await UsersAuth.create(newUserAuth, { transaction });
 
