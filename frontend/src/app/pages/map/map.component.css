@@ -18,6 +18,16 @@
   z-index: 9998;
 }
 
+.wrapper-map {
+  position: fixed; 
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: transparent;
+  z-index: 9998;
+}
+
 .logo.title {
   /* "Lokale" Styles können "Globale" Styles überschreiben */
   font-size: 38px;
@@ -145,12 +155,31 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+.filter-menu-container-map {
+  position: absolute; 
+  top: calc(var(--logo-title-height) + var(--header-padding-top) + var(--header-padding) + 7.5px);
+  bottom: 79.5px;
+  left: 5%;
+  right: 5%;
+  margin: 0 auto;
+  overflow: auto;
+  background-color: #fff;
+  border: 2px solid #4a4242;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 .filter-menu {
   max-height: 400px; /* Adjust this as needed */
   overflow-y: auto;
 }
 
 .filter-menu-container .filter-content{
+  color: black;
+}
+
+.filter-menu-container-map .filter-content{
   color: black;
 }
 

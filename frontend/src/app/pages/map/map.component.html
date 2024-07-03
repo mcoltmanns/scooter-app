@@ -111,8 +111,11 @@
     [leafletLayers]="layers"
     (leafletClick)="onMapClick($event)" 
   >
-  <div *ngIf="filterMenuVisible && view ==='map'" class="wrapper">
-    <div *ngIf="filterMenuVisible && view ==='map'" class="filter-menu-container" (click)="$event.stopPropagation()">
+  </div>
+
+  <!-- Filter menu for the map -->
+  <div *ngIf="filterMenuVisible && view ==='map'" class="wrapper-map" (click)="toggleFilterView()">
+    <div *ngIf="filterMenuVisible && view ==='map'" class="filter-menu-container-map" (click)="$event.stopPropagation()">
       <div class="top">
         <app-button class="btn" type="submit" (click)="onSubmit()">
           Anwenden
@@ -162,7 +165,7 @@
         </div>
       </div>
     </div>
-  </div></div>
+  </div>
 
   <!-- If the switch button is pressed, the scooterList page should be loaded. -->
   <app-scooter-list *ngIf="view === 'list' && qrButtonpressed === false" [searchTerm]="searchTerm" [mapScooters]="sortedScooters" scrollPosition="{{listScrollPosition}}" (finishedLoadingAndPositioning)="adjustPageHeight()"></app-scooter-list>
