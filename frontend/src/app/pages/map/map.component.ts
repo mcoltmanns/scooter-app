@@ -135,6 +135,8 @@ export class MapComponent implements OnInit, OnDestroy{
     { name: 'Reichweite absteigend'},
     { name: 'Batteriestand aufsteigend'},
     { name: 'Batteriestand absteigend'},
+    { name: 'Geschwindigkeit Aufsteigend'},
+    { name: 'Geschwindigkeit Absteigend'},
   ];}
 
   /* user can choose an ordering method from the drop down bar */
@@ -157,6 +159,12 @@ export class MapComponent implements OnInit, OnDestroy{
     }
     if(event.value.name === 'Batteriestand absteigend'){
       this.sortBty(false);
+    }
+    if(event.value.name === 'Geschwindigkeit Aufsteigend'){
+      this.sortSpeed(true);
+    }
+    if(event.value.name === 'Geschwindigkeit Absteigend'){
+      this.sortSpeed(false);
     }
   }
 
