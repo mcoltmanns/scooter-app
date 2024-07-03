@@ -32,7 +32,7 @@
           <app-sort-button class="sort-btn" (click)="toggleSortView()"></app-sort-button>
           <div class="sort-wrapper">
             <div *ngIf="sortMenuVisible" class="sort-menu">
-              <p-dropdown [options]="cities" optionLabel="name" [(ngModel)]="selectedCity"  placeholder="Select a City" (onChange)="onCityChange($event)"></p-dropdown>
+              <p-dropdown [options]="cities" optionLabel="name" [(ngModel)]="selectedCity"  placeholder="Ordnung" (onChange)="onOrderChange($event)"></p-dropdown>
               <!-- 
               <div class="sort-menu-cont">(onChange)="onCityChange($event)"
                 <h3 class="o-title">Sortier Optionen</h3>

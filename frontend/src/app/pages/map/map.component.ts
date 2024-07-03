@@ -45,7 +45,6 @@ const userIcon = Leaflet.icon({
 
 interface City {
   name: string;
-  code: string;
 }
 
 @Component({
@@ -116,7 +115,7 @@ export class MapComponent implements OnInit, OnDestroy{
    public option: Option | null = null;
 
   cities: City[];
-  selectedCity: City = { name: 'New York', code: 'NY' };
+  selectedCity: City = { name: ''};
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService, private cdr: ChangeDetectorRef) 
   { //form group for the input on the scooter-filters
@@ -130,15 +129,35 @@ export class MapComponent implements OnInit, OnDestroy{
       minSpeed: ['', [this.numberStringValidator(0, 99999)]],
       maxSpeed: ['', [this.numberStringValidator(0, 99999)]]
   }),this.cities = [
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-    { name: 'London', code: 'LDN' },
-    { name: 'Istanbul', code: 'IST' },
-    { name: 'Paris', code: 'PRS' }
+    { name: 'Preis aufsteigend'},
+    { name: 'Preis absteigend'},
+    { name: 'Reichweite aufsteigend'},
+    { name: 'Reichweite absteigend'},
+    { name: 'Batteriestand aufsteigend'},
+    { name: 'Batteriestand absteigend'},
   ];}
 
-  onCityChange(event: any):void {
+  /* user can choose an ordering method from the drop down bar */
+  onOrderChange(event: { value: { name: string; }; }):void {
     console.log('Selected city:', event.value);
+    if(event.value.name === 'Preis aufsteigend'){
+      this.sortPrice(true);
+    }
+    if(event.value.name === 'Preis absteigend'){
+      this.sortPrice(false);
+    }
+    if(event.value.name === 'Reichweite aufsteigend'){
+      this.sortRange(true);
+    }
+    if(event.value.name === 'Reichweite absteigend'){
+      this.sortRange(false);
+    }
+    if(event.value.name === 'Batteriestand aufsteigend'){
+      this.sortBty(true);
+    }
+    if(event.value.name === 'Batteriestand absteigend'){
+      this.sortBty(false);
+    }
   }
 
   @ViewChild('videoElement', { static: false }) videoElement!: ElementRef<HTMLVideoElement>;
