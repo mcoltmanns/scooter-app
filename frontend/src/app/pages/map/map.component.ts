@@ -524,7 +524,7 @@ export class MapComponent implements OnInit, OnDestroy {
       value = value.slice(0, 5);
     }
 
-    this.scooterFilterForm.controls[controlName].setValue(value, { emitEvent: false });
+    this.scooterFilterForm.controls[controlName].setValue(value, { emitEvent: true });
   }
 
 
@@ -561,15 +561,12 @@ export class MapComponent implements OnInit, OnDestroy {
   
     // Restrict the input to values between 0 and 20, overwrite all values not in range with either minimal or maximal value
     let numValue = Number(value);
-    if (numValue < 0) {
-      numValue = 0;
-      value = String (0);
-    } else if (numValue > 20) {
+    if (numValue > 20) {
       numValue = 20;
       value = String(20);
     }
 
-    this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: false });
+    this.scooterFilterForm.controls[controlName].setValue(value.toString(), { emitEvent: true });
   }
 
 
