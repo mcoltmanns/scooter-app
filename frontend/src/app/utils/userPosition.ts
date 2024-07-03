@@ -101,7 +101,7 @@ export class UserPosition {
       height: 25px;
       border-radius: 50%;
       box-shadow: 0px 0px 0px 0px #000000;
-      animation: pulse-animation-shadow 4s infinite 0.65s, animate-in 0.3s ease-out;
+      animation: pulse-animation-shadow 3s infinite 0.625s, animate-in 0.3s ease-out;
     `;
     const userIconPulseStyleOuter = `
       position: relative;
@@ -121,7 +121,7 @@ export class UserPosition {
       height: 23px;
       border-radius: 50%;
       transform: scale(1);
-      animation: pulse-animation-inner1 4s infinite;
+      animation: pulse-animation-inner1 3s infinite;
     `;
     const userIconPulseStyleInner2 = `
       background-color: #75db42;
@@ -130,7 +130,7 @@ export class UserPosition {
       border-radius: 50%;
       transform: scale(1);
       opacity: 1;
-      animation: pulse-animation-inner2 4s infinite;
+      animation: pulse-animation-inner2 3s infinite;
     `;
     const userIconPulseStyleInner3 = `
       position: absolute;
