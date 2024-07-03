@@ -28,6 +28,24 @@ const toAdd: {[key: string]: string }= { // weird typing because otherwise the l
     password: 'password'
 };
 
+const toLogin: {[key: string]: string} = {
+    email: 'jane@email.com',
+    password: 'password'
+};
+
+const mockUsersAuth: {[key: string]: string}[] = [
+    {
+        id: '0',
+        email: 'guy@email.com',
+        password: 'HASHED1'
+    },
+    {
+        id: '1',
+        email: 'jane@email.com',
+        password: 'HASHED2'
+    }
+];
+
 // declare mock methods for rollback, commit, and sequelize.transaction()
 let mockRollback: Mock;
 let mockCommit: Mock;
@@ -48,8 +66,7 @@ describe('auth controller', () => {
             rollback: mockRollback,
             commit: mockCommit
         };
-        mockTransaction = jest.fn().mockReturnValue(mockTransactionInstance);
-        (database.getSequelize() as any).transaction = mockTransaction;
+        mockTransaction = (database.getSequelize() as any).transaction = jest.fn().mockReturnValue(mockTransactionInstance);
 
         validator_runAllChecks = jest.spyOn(Validator as any, 'runAllChecks'); // any is necessary here to spy on a private method
     });
@@ -68,12 +85,11 @@ describe('auth controller', () => {
         const then = Date.now();
         (Date.now as any) = jest.fn().mockReturnValue(then); // fix now to right now
 
-        const usersAuthFindOne = jest.fn().mockReturnValue(null);
-        (UsersAuth as any).findOne = usersAuthFindOne; // mock no email found (we're assuming the validator didn't find anyone with a matching email)
+        const usersAuthFindOne = (UsersAuth as any).findOne = jest.fn().mockReturnValue(null); // mock no email found (we're assuming the validator didn't find anyone with a matching email)
 
         // mock users auth creation
         // return an object with the getDataValue method where we can access the attributes of the user we just added
-        const usersAuthCreate = jest.fn().mockReturnValue({
+        const usersAuthCreate = (UsersAuth as any).create = jest.fn().mockReturnValue({
             getDataValue: (key: string) => {
                 switch (key) {
                     case 'id':
@@ -90,15 +106,11 @@ describe('auth controller', () => {
                 }
             }
         });
-        (UsersAuth as any).create = usersAuthCreate;
 
         // do nothing for data, preference, and session db writes because we're cut off from the database
-        const usersDataCreate = jest.fn();
-        (UsersData as any).create = usersDataCreate;
-        const userPreferencesCreate = jest.fn();
-        (UserPreferences as any).create = userPreferencesCreate;
-        const usersSessionCreate = jest.fn();
-        (UsersSession as any).create = usersSessionCreate;
+        const usersDataCreate = (UsersData as any).create = jest.fn();
+        const userPreferencesCreate = (UserPreferences as any).create = jest.fn();
+        const usersSessionCreate = (UsersSession as any).create = jest.fn();
 
         const response = await request(app)
             .post('/api/register') // ask to register
@@ -108,7 +120,8 @@ describe('auth controller', () => {
         // check header
         const cookies = response.headers['set-cookie'];
         expect(cookies.length).toBe(1); // we should get exactly one cookie back
-        expect(cookies[0]).toMatch(/sessionId=.+/); // and it should be named sessionId TODO: this regex probably needs to be stronger
+        console.log(cookies[0]);
+        expect(cookies[0]).toMatch(`sessionId=${mockSessionId}`); // and it should be named sessionId TODO: this regex probably needs to be stronger
 
         // check body
         expect(response.body.code).toBe(201); // should go well
@@ -124,12 +137,13 @@ describe('auth controller', () => {
         expect(usersDataCreate).toBeCalledWith({ name: toAdd.name, street: toAdd.street, houseNumber: toAdd.houseNumber, zipCode: Number(toAdd.zipCode), city: toAdd.city, usersAuthId: 0 }, { transaction: mockTransactionInstance }); // we should have created a usersData entry with the correct data and in a mockTransactionInstance
         expect(userPreferencesCreate).toBeCalledWith({ speed: 'km/h', distance: 'km', currency: '€', usersAuthId: 0 }, { transaction: mockTransactionInstance }); // ditto for preferences
         expect(usersSessionCreate).toBeCalledWith({ id: mockSessionId, expires: new Date(then + SESSION_LIFETIME), usersAuthId: 0 }, { transaction: mockTransactionInstance }); // ditto for session
+
+        // TODO: really we also need something like 'and nothing else passes the test'. can we do that?
     });
 
     // negative case: email already exists in database
     it('should require unique email for registration', async () => {
-        const usersAuthFindOne = jest.fn().mockReturnValue(true);
-        (UsersAuth as any).findOne = usersAuthFindOne; // mock email found (we're assuming the validator found someone with a matching email)
+        const usersAuthFindOne = (UsersAuth as any).findOne = jest.fn().mockReturnValue(true); // mock email found (we're assuming the validator found someone with a matching email)
 
         const register = jest.spyOn(AuthController.prototype, 'register'); // watch the registration method
         
@@ -139,6 +153,7 @@ describe('auth controller', () => {
             .expect(400); // should go bad
 
         expect(validator_runAllChecks).toBeCalledTimes(1); // validator should be called
+        expect(usersAuthFindOne).toBeCalledWith({ where: { email: toAdd.email } }); // should look for the email
         expect(register).toBeCalledTimes(0); // register method should never be called
         expect(response.status).toBe(400); // status should be bad
         expect(response.body).toStrictEqual({ // this is what we want the error message to look like
@@ -147,8 +162,21 @@ describe('auth controller', () => {
         });
     });
 
-    it('should start new session on login', () => {
+    // positive login test case
+    it('should start new session on login if no session existed', () => {
+        const usersAuthFindOne = (UsersAuth as any).findOne = jest.fn().mockReturnValue({
+            getDataValue: (key: string) => {
+                return mockUsersAuth[key];
+            }
+        });
 
+        const usersSessionFindOne = (UsersSession as any).findOne = jest.fn().mockReturnValue(null); // mock no session
+
+        const usersSessionCreate = (UsersSession as any).create = jest.fn().mockReturnValue({
+            getDataValue: (key: string) => {
+                
+            }
+        });
     });
 
     it('should not allow unknown users to login', () => {
