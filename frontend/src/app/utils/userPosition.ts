@@ -34,6 +34,9 @@ export class UserPosition {
       0% {
         box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.35);
       }
+      50% {
+        box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
+      }
       100% {
         box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
       }
@@ -41,87 +44,44 @@ export class UserPosition {
 
     @keyframes pulse-animation-inner1 {
       0% {
-        background-color: #97fb64;
-      }
-      25% {
-        background-color: #97fb64;
-      }
-      25.1% {
-        background-color: #89ef56;
+        background-color: #75db42;
       }
       50% {
-        background-color: #89ef56;
+        background-color: #75db42;
       }
-      50.1% {
-        background-color: #97fb64;
-      }
-      75% {
-        background-color: #97fb64;
-      }
-      75.1% {
-        background-color: #89ef56;
+      51% {
+        background-color: #97FB64;
       }
       100% {
-        background-color: #89ef56;
+        background-color: #75db42;
       }
     }
 
     @keyframes pulse-animation-inner2 {
       0% {
-        background-color: #89ef56;
+        background-color: #97FB64;
         transform: scale(0);
-      }
-      25% {
-        background-color: #89ef56;
-        transform: scale(1);
-      }
-      25.1% {
-        background-color: #89ef56;
-        transform: scale(1);
-      }
-      25.2% {
-        background-color: #89ef56;
-        transform: scale(0);
-      }
-      25.3% {
-        background-color: #97fb64;
-        transform: scale(0);
+        opacity: 0;
       }
       50% {
-        background-color: #97fb64;
+        background-color: #97FB64;
         transform: scale(1);
+        opacity: 1;
       }
-      50.1% {
-        background-color: #97fb64;
+      51% {
+        background-color: #97FB64;
         transform: scale(1);
+        opacity: 1;
       }
-      50.2% {
-        background-color: #97fb64;
+      52% {
+        background-color: #97FB64;
         transform: scale(0);
-      }
-      50.3% {
-        background-color: #89ef56;
-        transform: scale(0);
-      }
-      75% {
-        background-color: #89ef56;
-        transform: scale(1);
-      }
-      75.1% {
-        background-color: #89ef56;
-        transform: scale(1);
-      }
-      75.2% {
-        background-color: #89ef56;
-        transform: scale(0);
-      }
-      75.3% {
-        background-color: #97fb64;
-        transform: scale(0);
+        opacity: 0;
       }
       100% {
-        background-color: #97fb64;
-        transform: scale(1);
+        background-color: #97FB64;
+        transform: scale(0);
+        opacity: 0;
       }
     }
       
@@ -141,7 +101,7 @@ export class UserPosition {
       height: 25px;
       border-radius: 50%;
       box-shadow: 0px 0px 0px 0px #000000;
-      animation: pulse-animation-shadow 2s infinite 1s, animate-in 0.3s ease-out;
+      animation: pulse-animation-shadow 4s infinite 0.65s, animate-in 0.3s ease-out;
     `;
     const userIconPulseStyleOuter = `
       position: relative;
@@ -156,20 +116,21 @@ export class UserPosition {
     `;
     const userIconPulseStyleInner1 = `
       margin: 1px;
-      background-color: #97fb64;
+      background-color: #97FB64;
       width: 23px;
       height: 23px;
       border-radius: 50%;
       transform: scale(1);
-      animation: pulse-animation-inner1 8s infinite;
+      animation: pulse-animation-inner1 4s infinite;
     `;
     const userIconPulseStyleInner2 = `
-      background-color: #89ef56;
+      background-color: #75db42;
       width: 23px;
       height: 23px;
       border-radius: 50%;
       transform: scale(1);
-      animation: pulse-animation-inner2 8s infinite;
+      opacity: 1;
+      animation: pulse-animation-inner2 4s infinite;
     `;
     const userIconPulseStyleInner3 = `
       position: absolute;
