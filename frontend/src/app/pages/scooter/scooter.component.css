@@ -127,8 +127,8 @@
   
 /* inner circle styling */
 .inner {
-    height: 70px;
-    width: 70px;
+    height: 68px;
+    width: 68px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -209,8 +209,8 @@
     align-items: center;
     gap: 15px;
     padding: 0px;
-    margin-top: 30px; /* Add an upper spacing */
-    margin-bottom: 30px;
+    margin-top: 45px; /* Add an upper spacing */
+    margin-bottom: 45px;
     min-width: min-content;
 }
 
@@ -224,6 +224,23 @@
   .scooter-btn {
     min-width: 162px;
   }
+}
+
+.description-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+.description-location {
+  margin: 15px;
+  margin-bottom: 17.5px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
 }
 
 /* green line */
@@ -240,7 +257,7 @@ hr.solid {
     letter-spacing: -0.32px;
     line-height: 35px;
     margin-bottom: 30px;
-    padding-top: 40px;
+    padding-top: 8px;
     padding-left: 15px;
     padding-right: 15px;
 }
@@ -316,8 +333,8 @@ hr.solid {
     gap: 10px;
   }
   .outer {
-    height: 60px;
-    width: 60px;
+    height: 62px;
+    width: 62px;
   } 
   .inner {
     height: 52px;

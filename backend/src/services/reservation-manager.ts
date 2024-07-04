@@ -91,9 +91,7 @@ abstract class ReservationManager {
             // dispatch a job to delete the reservation when it expires
             ReservationManager.scheduleReservationEnding(reservation);
         } catch (error) {
-
-          console.log(error);
-          console.log('Have I been called?');
+            console.log(error);
             if(!transactionExtern) await transaction.rollback();
             throw new Error(error.message);
         }

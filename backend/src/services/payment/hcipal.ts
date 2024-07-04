@@ -12,12 +12,15 @@ abstract class HciPal {
 
     public static getCountryCode(accountName: string): Promise<{status: number, message: string}> {
         const data = { accountName: accountName };
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/hcipal/country', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), 'country'));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
@@ -25,12 +28,15 @@ abstract class HciPal {
 
     public static initTransaction(dataObject: HciPalData, amount: number): Promise<{status: number, message: string}> {
         const data = { accountName: dataObject.accountName, accountPassword: dataObject.accountPassword, amount: amount };
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/hcipal/check', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), 'token'));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
@@ -38,12 +44,15 @@ abstract class HciPal {
 
     public static commitTransaction(token: string): Promise<{status: number, message: string}> {
         const data = {token: token};
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/hcipal/payment', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), ''));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });
@@ -51,12 +60,15 @@ abstract class HciPal {
 
     public static rollbackTransaction(token: string): Promise<{status: number, message: string}> {
         const data = {token: token};
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/hcipal/payback', {data: data, method: 'POST'})
             .then((response) => {
                 resolve(this.processResponse(JSON.stringify(response.data), ''));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
         });

@@ -3,7 +3,7 @@
     padding: 0px;
 }
 
-app-loading-overlay {
+.inline-loading {
   position: absolute;
   top: 36vh;
   left: 50%;

@@ -29,7 +29,7 @@
     animation: fadeIn 0.25s ease-out;
     width: 100%;
     min-width: 245px;
-    max-width: 800px;
+    max-width: 700px;
 }
 
 .top-box {
@@ -96,7 +96,7 @@
     width: auto;
     height: auto;
     max-width: 60%;
-    max-height: 350px;
+    max-height: 300px;
     /* object-fit: contain; */
     display: block;
     margin: 10px auto;
@@ -114,10 +114,27 @@
     margin-top: 10px;
     margin-bottom: 4px;
 }
-@media only screen and (max-width: 500px) {
+@media only screen and (max-width: 630px) {
+  .secondary-text {
+    justify-content: flex-start;
+    gap: 10px;
+  }
+}
+
+.space-left {
+    margin-left: 0px;
+}
+@media only screen and (max-width: 570px) {
+  .space-left {
+    margin-left: 30px;
+  }
+}
+@media only screen and (max-width: 445px) {
+  .space-left {
+    margin-left: 0px;
+  }
   .secondary-text {
     justify-content: space-between;
-    gap: 10px;
   }
 }
 
@@ -129,6 +146,14 @@
   gap: 10px;
 }
 
+.distance-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
 .info-box {
     padding: 4px 9px 2px 9px;
     border-radius: 4px;
@@ -136,11 +161,37 @@
     white-space: nowrap;
 }
 
+.info-box-distance {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding-right: 9px;
+  padding-left: 5.5px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border-radius: 4px;
+  background: var(--Highlights-Stroke, #123800);
+  color: var(--Highlights, #97FB64);
+  white-space: nowrap;
+}
+
+.info-box-distance span {
+  padding: 1px 0px 0px 7.69px;
+  line-height: 1;
+  color: var(--Highlights, #97FB64); /* or color: red; */
+}
 
 .secondary-text .secondary-text-font {
     font-size: 14px;
     color: #808080; 
     padding-top: 2px;
+}
+
+.secondary-text .distance-wrapper-font {
+  font-size: 14px;
+  color: var(--Highlights-Stroke, #123800); 
+  padding-top: 2px;
 }
 
 .scooter-details {
@@ -188,4 +239,5 @@
 
 .noScooterpicture {
     width: 100%;
+    max-width: 400px;
 }

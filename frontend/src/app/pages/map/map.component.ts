@@ -38,10 +38,11 @@ import { DropdownModule } from 'primeng/dropdown';
 
 
 /* user icon for showing the user position */
-const userIcon = Leaflet.icon({
-  iconSize: [40, 40],
-  iconUrl: '/assets/person.png',
-});
+// const userIcon = Leaflet.icon({
+//   iconSize: [40, 40],
+//   iconUrl: '/assets/person.png',
+// });
+const userIconPulse = UserPosition.createUserPositionIcon();
 
 interface City {
   name: string;
@@ -68,11 +69,13 @@ export class MapComponent implements OnInit, OnDestroy{
   public qrActive = false;
   public qrButtonpressed = false;
   public isLoading = false; // camera loading variable
-  /* variables for the qr Code toast */
+
+  // Toast intialization
   @ViewChild('toastComponent') toastComponent!: ToastComponent;
-  public showToast = false;
-  public toastMessage = 'Kamerazugriff verweigert!';
   public toastType: 'success' | 'error' = 'error';
+  /* Variables for the qr Code toast and for the user location toast */
+  public showToast = false;
+  public toastMessage = '';
 
   // Variables for the slider:
   priceRange: number[] = [0, 20];
@@ -251,8 +254,8 @@ export class MapComponent implements OnInit, OnDestroy{
       const icon = Leaflet.divIcon({
         className: 'marker',
         html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
-        iconSize: [30, 42],
-        iconAnchor: [15, 42] 
+        iconSize: [30, 30],
+        iconAnchor: [15, 15] 
       });
 
       // Add markers to the map.
@@ -420,6 +423,8 @@ export class MapComponent implements OnInit, OnDestroy{
           this.isLoading = false;
           this.qrButtonpressed = false;
           this.qrActive = false;
+          // Activate the failed user position toast
+          this.toastMessage = 'Kamerazugriff verweigert!';
           this.showToast = true;
           this.toastComponent.showToast();
           this.showToast = false; // Reset the state to prevent the toast from showing again
@@ -473,12 +478,15 @@ export class MapComponent implements OnInit, OnDestroy{
   updateUserPosition(): void {
     UserPosition.setUserPosition(this.positionService)
     .then((result) => {
-      console.log(result);
       if (result) {
-        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIconPulse });
         this.layers.push(userMarker); // place the user icon on the map
         console.log('Position successfully set');
       } else {
+        this.toastMessage = 'Fehler beim Abrufen der Position';
+        this.showToast = true;
+        this.toastComponent.showToast();
+        this.showToast = false; // Reset the state to prevent the toast from showing again
         console.log('Failed to set position');
       }
     })

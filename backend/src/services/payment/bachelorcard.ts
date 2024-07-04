@@ -24,7 +24,7 @@ class BachelorCard {
 
     public static getCountryCode(cardNumber: string): Promise<{status: number, message: string}> {
         const data = `<?xml version="1.0" encoding="utf-8"?><transactionRequest type="country"><version>1.0.0</version><merchantInfo><name>${merchantName}</name></merchantInfo><cardNumber>${cardNumber}</cardNumber></transactionRequest>`;
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/bachelorcard', { headers: {
                     'Content-Type': 'application/xml',
                     'Content-Length': data.length,
@@ -36,6 +36,9 @@ class BachelorCard {
                 resolve(this.processResponse(response.data, 'country'));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
         });
@@ -65,7 +68,7 @@ class BachelorCard {
         </payment>
         </transactionRequest>
         `;
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/bachelorcard', { headers: {
                     'Content-Type': 'application/xml',
                     'Content-Length': data.length,
@@ -77,6 +80,9 @@ class BachelorCard {
                 resolve(this.processResponse(response.data, 'transactionCode'));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
         });
@@ -92,7 +98,7 @@ class BachelorCard {
         <transactionCode>${token}</transactionCode>
         </transactionRequest>
         `;
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/bachelorcard', { headers: {
                     'Content-Type': 'application/xml',
                     'Content-Length': data.length,
@@ -104,6 +110,9 @@ class BachelorCard {
                 resolve(this.processResponse(response.data, 'status'));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
         });
@@ -119,7 +128,7 @@ class BachelorCard {
         <transactionCode>${token}</transactionCode>
         </transactionRequest>
         `;
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
             post('https://pass.hci.uni-konstanz.de/bachelorcard', { headers: {
                     'Content-Type': 'application/xml',
                     'Content-Length': data.length,
@@ -131,6 +140,9 @@ class BachelorCard {
                 resolve(this.processResponse(response.data, 'status'));
             })
             .catch((error) => {
+                if (!error.response || !error.response.data) {
+                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
         });

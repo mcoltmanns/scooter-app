@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 import { Product } from 'src/app/models/product';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
-import { take } from 'rxjs';
+import { forkJoin, take } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { Levenshtein } from 'src/app/utils/levenshtein';
 import { PositionService } from 'src/app/utils/position.service';
@@ -46,13 +46,23 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
   @Output() finishedLoadingAndPositioning = new EventEmitter<void>();
   
   ngOnInit(): void {
-    /* Get all scooters from backend */
-    this.mapService.getScooterInfo().subscribe({
-      next: (value) => {
-        this.scooters = value;
+    forkJoin([
+      this.mapService.getScooterInfo(),
+      this.mapService.getProductInfo(),
+      this.optionService.getUserPreferences()
+    ]).subscribe({
+      next: ([scooters, products, preferences]) => {
+        this.scooters = scooters;
+        this.products = products;
 
-        /* Creating an array of promises to load all images. */
-        const imageLoadPromises = this.scooters.map(scooter => {
+        /* User preferences */
+        this.option = preferences;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+
+         /* Creating an array of promises to load all images. */
+         const imageLoadPromises = this.scooters.map(scooter => {
           return new Promise((resolve, reject) => {
             const img = new Image();
             img.src = this.getImageUrl(scooter.product_id);
@@ -61,13 +71,13 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
           });
         });
       
-        /* Wait for all images to load and only then set loadingData to false. This way, the loading overlay
-        will be removed only after all images are loaded. It is also necessary because it can come to problems
-        with the scroll position if they are calculated before the images are loaded. */
+        /* Wait for all images to load. This way, the loading overlay will be removed
+           only after all images are loaded. It is also necessary because it can come to problems
+           with the scroll position if they are calculated before the images are loaded. */
         Promise.all(imageLoadPromises)
           .then(() => {
-            this.loadingData = false;
             this.filterScooters();
+            this.loadingData = false;
           })
           .catch(error => {
             console.error('One or more images failed to load:', error);
@@ -80,30 +90,6 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
         console.log(err);
       }
     });
-
-    /* Get all scooters from backend */
-    this.mapService.getProductInfo().subscribe({
-      next: (value) => {
-        this.products = value;
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        console.log(err);
-      }
-    });
-
-    this.optionService.getUserPreferences().subscribe({
-      next: (value) => {
-        this.option = value;
-        this.selectedSpeed = this.option.speed;
-        this.selectedDistance = this.option.distance;
-        this.selectedCurrency = this.option.currency;
-      },
-      error: (err) => {
-        this.errorMessage = err.message;
-        console.error(err);
-      }
-    });
   }
 
   ngAfterViewInit(): void {
@@ -114,9 +100,6 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
         this.jumpToPosition(this.scrollPosition);
 
         /* Scroll to the top of the page with a timeout of 0ms to ensure that the scroll is done after the view is rendered */
-        // setTimeout(() => {
-        //   window.scrollTo(0, 0);
-        // }, 0);
         this.finishedLoadingAndPositioning.emit();
       });
     }
@@ -186,7 +169,7 @@ export class ScooterListComponent implements OnInit, OnChanges, AfterViewInit {
     this.levenshteinFilteredScooters= this.mapScooters.filter(scooter => 
       Levenshtein.levenshteinMethod(scooter.product_id.substring(0, len).toLowerCase(), this.searchTerm.toLowerCase()) <= threshold
     );
-    console.log(this.filterScooters.length);
+    // console.log(this.filterScooters.length);
   }
 
 

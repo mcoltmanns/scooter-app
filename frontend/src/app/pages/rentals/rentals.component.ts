@@ -17,6 +17,8 @@ import { forkJoin } from 'rxjs';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { trigger, transition, style, animate, sequence } from '@angular/animations';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
+import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
+
 
 interface InfoModal {
   show: boolean;
@@ -47,7 +49,7 @@ interface InfoModal {
         ]),
       ]),
     ],
-    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent, ToastComponent]
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent, ToastComponent, ConfirmModalComponent]
 })
 export class RentalsComponent implements OnInit, OnDestroy {
   /* Access the DOM elements that get animated */
@@ -76,10 +78,15 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Bind Information Modal to this instance */
     this.onNavigateToScooter = this.onNavigateToScooter.bind(this);
     this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
+
+    /* Bind Confirm Modal to this instance */
+    this.onConfirmConfirmModal = this.onConfirmConfirmModal.bind(this);
+    this.onCloseConfirmModal = this.onCloseConfirmModal.bind(this);
   }
 
   // Variable to control the visibility of the loading spinner
   public isLoading = true;
+  public processingEndReservation = false;
 
   // Object to track loaded state of images by scooterId
   imageLoaded: { [scooterId: string]: boolean } = {};
@@ -97,7 +104,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
   public selectedCurrency = '';
   public option: Option | null = null;
 
-  // Info modal configuration
+  /* Info modal configuration */
   public infoModal: InfoModal = {
     show: false,
     title: 'Buchungsdetails',
@@ -109,6 +116,16 @@ export class RentalsComponent implements OnInit, OnDestroy {
     totalPrice: '',
     renew: false,
     isActive: false
+  };
+
+  /* Confirm modal configuration */
+  public confirmModal = {
+    showConfirmModal: false,
+    infoModalWasOpen: false,
+    scooterName: '',
+    confirmCallback: (): void => {
+      // Do nothing by default
+    }
   };
 
   //variables for the filters----------------------
@@ -136,6 +153,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         this.filteredRentals = this.rentals;
         this.activeRentals = rentalsResponse.activeRentals;
         this.pastRentals = rentalsResponse.pastRentals;
+        this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
         // this.loadingDataScooter = false;
 
         /* Get all products for the rentals of the user */
@@ -347,26 +365,29 @@ export class RentalsComponent implements OnInit, OnDestroy {
   }
 
   /* Animate the removal of the active rental from the active rentals array */
-  async moveRentalFromActiveToPast(activeRental: ActiveRental): Promise<void> {
+  async moveRentalFromActiveToPast(activeRental: ActiveRental, newPastRental?: PastRental): Promise<void> {
     /* Check if an animation is currently running and wait for it to end before starting a new one */
     if (this.animationTimeout) {
       await this.waitForAnimationToEnd();
       this.clearWaitForAnimationTimeout();
     }
 
-    /* Convert the active rental to a past rental */
-    const endTimestamp = new Date().toISOString();
-    const totalPrice = (Number(activeRental.price_per_hour) * this.getExactRentalDurationInHours(activeRental.createdAt, endTimestamp)).toFixed(2);
-    const newPastRental: PastRental = {
-      id: activeRental.id,
-      scooterId: activeRental.scooterId,
-      userId: activeRental.userId,
-      createdAt: activeRental.createdAt,
-      endedAt: endTimestamp,
-      total_price: totalPrice,
-      paymentMethodId: activeRental.paymentMethodId
-    };
-
+    /* Convert the active rental to a past rental if no new past rental is provided */
+    if (!newPastRental) {
+      console.log('Converting the active rental to a past rental');
+      const endTimestamp = new Date().toISOString();
+      const totalPrice = (Number(activeRental.price_per_hour) * this.getExactRentalDurationInHours(activeRental.createdAt, endTimestamp)).toFixed(2);
+      newPastRental = {
+        id: activeRental.id,
+        scooterId: activeRental.scooterId,
+        userId: activeRental.userId,
+        createdAt: activeRental.createdAt,
+        endedAt: endTimestamp,
+        total_price: totalPrice,
+        paymentMethodId: activeRental.paymentMethodId
+      };
+    }
+    
     /* Access the specific rental item in the DOM */
     const specificItem = this.rentalItems.find(item => Number(item.nativeElement.getAttribute('data-id')) === Number(activeRental.id));
     if (!specificItem) {
@@ -451,8 +472,8 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.activeRentals = this.activeRentals.filter(rental => rental.id !== activeRental.id);
 
       /* Add the past rental to the past rentals array */
-      // this.pastRentals.push(newPastRental);
-      this.pastRentals.unshift(newPastRental);
+      // this.pastRentals.push(newPastRental!);  // Add the new past rental to the end of the past rentals array
+      this.pastRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the past rentals array
     }, wholeAnimationDuration);
   }
 
@@ -529,19 +550,101 @@ export class RentalsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onCancelRental(activeRental: ActiveRental | PastRental | null): void {
-    /* Do nothing if the rental is null or a PastRental */
-    if (!activeRental || 'endedAt' in activeRental) {
+  cancelRental(activeRental: ActiveRental | PastRental | null): void {
+    /* Do nothing if the rental is null, a PastRental, or not a dynamic rental */
+    if (!activeRental || 'endedAt' in activeRental || activeRental.renew === false) {
       return;
     }
 
-    if (this.infoModal.show) {
-      /* Close the info modal */
-      this.onCloseInfoModal();
+    /* Hide the info modal if it was open while processing the request so that we can show the loading overlay */
+    if (this.confirmModal.infoModalWasOpen) {
+      this.infoModal.show = false;
     }
 
-    /* Animate moving the active rental to the past rentals */
-    this.moveRentalFromActiveToPast(activeRental);
+    /* Show the loading overlay */
+    this.processingEndReservation = true;
+
+    /* Request to end the dynamic rental */
+    this.rentalService.postEndRental({ rentalId: activeRental.id }).subscribe({
+      next: (response) => {
+        console.log(response);
+
+        /* Hide the loading overlay */
+        this.processingEndReservation = false;
+
+        /* Restore the info modal if it was open before */
+        if (this.confirmModal.infoModalWasOpen) {
+          this.infoModal.show = true;
+          this.confirmModal.infoModalWasOpen = false;  // Reset the state in the confirm modal
+        }
+
+        /* Close the info modal if the user ended the rental from the info modal */
+        if (this.infoModal.show) {
+          /* Close the info modal */
+          this.onCloseInfoModal();   // Not only hides the info modal but also clears the rental query parameter from the URL
+        }
+    
+        /* Animate moving the active rental to the past rentals */
+        this.moveRentalFromActiveToPast(activeRental, response.newPastRental);
+      },
+      error: (error) => {
+        console.log(error);
+
+        /* Hide the loading overlay */
+        this.processingEndReservation = false;
+        this.errorMessage = error.error.message;
+        this.toastComponentError.showToast();
+
+        /* Restore the info modal if it was open before */
+        if (this.confirmModal.infoModalWasOpen) {
+          this.infoModal.show = true;
+          this.confirmModal.infoModalWasOpen = false;  // Reset the state in the confirm modal
+        }
+      }
+    });
+  }
+
+  onCancelRental(activeRental: ActiveRental | PastRental | null): void {
+    /* Set up and show the confirm modal */
+    this.confirmModal.infoModalWasOpen = this.infoModal.show;
+    
+    if (this.confirmModal.infoModalWasOpen) {
+      this.infoModal.show = false;
+    }
+    
+    this.confirmModal.showConfirmModal = true;
+
+    if (activeRental) {
+      this.confirmModal.scooterName = this.getNameByScooterId(activeRental.scooterId) || '';
+    }
+    this.confirmModal.confirmCallback = (): void => this.cancelRental(activeRental);
+  }
+
+  onCloseConfirmModal(): void {
+    /* Restore the info modal if it was open before */
+    if (this.confirmModal.infoModalWasOpen) {
+      this.infoModal.show = true;
+    }
+    
+    /* Reset the confirm modal */
+    this.confirmModal.showConfirmModal = false;
+    this.confirmModal.infoModalWasOpen = false;
+    this.confirmModal.scooterName = '';
+    this.confirmModal.confirmCallback = (): void => {
+      // Do nothing by default
+    };
+  }
+
+  onConfirmConfirmModal(): void {
+    /* Call the confirm callback function */
+    this.confirmModal.confirmCallback();
+
+    /* Reset the confirm modal */
+    this.confirmModal.showConfirmModal = false;
+    this.confirmModal.scooterName = '';
+    this.confirmModal.confirmCallback = (): void => {
+      // Do nothing by default
+    };
   }
 
   //functionalities for the filters-----------------------------------------------------------------

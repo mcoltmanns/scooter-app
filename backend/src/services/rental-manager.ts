@@ -58,11 +58,12 @@ abstract class RentalManager {
     }
 
     /* Get an active rental by rentalId and userId */
-    public static async getActiveRentalByRentalIdUserId(rentalId: number, userId: number, transaction?: Transaction): Promise<Model | null> {
+    public static async getDynamicActiveRentalByRentalIdUserId(rentalId: number, userId: number, transaction?: Transaction): Promise<Model | null> {
       try {
         const activeRental = await ActiveRental.findOne({
           where: {
             id: rentalId,
+            renew: true,
             userId
           },
           transaction: transaction || undefined
@@ -95,7 +96,14 @@ abstract class RentalManager {
 
     // get all rentals associated with a user
     public static async getRentalsFromUser(userId: number): Promise<[Model[], Model[]]> {
-        return [await ActiveRental.findAll({ where: { userId: userId } }), await PastRental.findAll({ where: { userId: userId }})];
+        const activeRentals = await ActiveRental.findAll({ where: { userId: userId } });
+        const pastRentals = await PastRental.findAll({ where: { userId: userId }});
+
+        if (!activeRentals || !pastRentals) {
+          throw new Error('ERROR_FETCHING_RENTALS');
+        }
+
+        return [activeRentals, pastRentals];
     }
 
     // get all active rentals associated with a scooter

@@ -1,14 +1,14 @@
 .overlay {
-  position: fixed; /* Fixed positioning */
-  top: 0; /* Position from the top */
-  left: 0; /* Position from the left */
-  width: 100vw; /* Full width */
-  height: 100vh; /* Full height */
-  background-color: rgba(38, 98, 124, 0.80); /* Semi-transparent black */
-  z-index: 10000; /* High z-index to ensure it's on top */
-  display: flex; /* Use flexbox */
-  justify-content: center; /* Center horizontally */
-  align-items: center; /* Center vertically */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(38, 98, 124, 0.80);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .inline {
