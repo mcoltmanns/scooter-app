@@ -466,7 +466,6 @@ export class ScooterComponent implements OnInit, AfterViewInit, OnDestroy {
   updateUserPosition(): void {
     UserPosition.setUserPosition(this.positionService)
     .then((result) => {
-      console.log(result);
       if (result) {
         const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIconPulse });
         this.layers.push(userMarker); // place the user icon on the map
