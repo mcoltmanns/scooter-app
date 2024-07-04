@@ -233,6 +233,16 @@
     width: 100%;
 }
 
+.description-location {
+  margin: 15px;
+  margin-bottom: 17.5px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
 /* green line */
 hr.solid {
     border-top: 2px solid #97FB64;

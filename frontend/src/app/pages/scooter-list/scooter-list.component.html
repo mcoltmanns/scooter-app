@@ -12,17 +12,20 @@
             <img class="picture" [src]="getImageUrl(scooter.product_id)" />
             <div class="dividing-line"></div>
             <div class="secondary-text">
-              <div class="stat-item">
+              <div class="distance-item">
+                <div class="info-box-distance">
+                  <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#97FB64" style="margin-top: 3.6px; margin-bottom: 3.2px;"><path d="M440-42v-80q-125-14-214.5-103.5T122-440H42v-80h80q14-125 103.5-214.5T440-838v-80h80v80q125 14 214.5 103.5T838-520h80v80h-80q-14 125-103.5 214.5T520-122v80h-80Zm40-158q116 0 198-82t82-198q0-116-82-198t-198-82q-116 0-198 82t-82 198q0 116 82 198t198 82Zm0-120q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm0-80q33 0 56.5-23.5T560-480q0-33-23.5-56.5T480-560q-33 0-56.5 23.5T400-480q0 33 23.5 56.5T480-400Zm0-80Z"/></svg>
+                  <span>{{ positionService.distanceToString(positionService.calcDistance(scooter.coordinates_lat, scooter.coordinates_lng), selectedDistance)}}</span>
+                </div>
+                <p class="distance-wrapper-font">Entfernung</p>
+              </div>
+              <div class="stat-item space-left">
                 <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
                 <p class="secondary-text-font">Batteriestand</p>
               </div>
               <div class="stat-item">
                 <p class="info-box">{{ convertDistanceUnits(getRangeByProductId(scooter.product_id, scooter.battery), selectedDistance) }}</p>
                 <p class="secondary-text-font">Reichweite</p>
-              </div>
-              <div class="stat-item">
-                <p class="info-box">{{ positionService.distanceToString(positionService.calcDistance(scooter.coordinates_lat, scooter.coordinates_lng), selectedDistance)}}</p>
-                <p class="secondary-text-font">Entfernung</p>
               </div>
             </div>
             <div class="scooter-details">
@@ -44,7 +47,7 @@
     <ng-template #noScooters>
       <div *ngIf="levenshteinFilteredScooters.length > 0; else noScooters1">
         <ul class="scooter-list">
-          <p class="suggestion-text">Meinen Sie eventuell einen der folgenden Scooter?</p>
+          <p class="suggestion-text">Meinst du eventuell einen der folgenden Scooter?</p>
           <li *ngFor="let scooter of levenshteinFilteredScooters" class="scooter-item" [id]="scooter.id" #elementRef>
             <div class="top-box" (click)="buttonToScooter(scooter.id)">
               <div class="scooter-name">
@@ -55,7 +58,14 @@
               <img class="picture" [src]="getImageUrl(scooter.product_id)" />
               <div class="dividing-line"></div>
               <div class="secondary-text">
-                <div class="stat-item">
+                <div class="distance-item">
+                  <div class="info-box-distance">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#97FB64" style="margin-top: 3.6px; margin-bottom: 3.2px;"><path d="M440-42v-80q-125-14-214.5-103.5T122-440H42v-80h80q14-125 103.5-214.5T440-838v-80h80v80q125 14 214.5 103.5T838-520h80v80h-80q-14 125-103.5 214.5T520-122v80h-80Zm40-158q116 0 198-82t82-198q0-116-82-198t-198-82q-116 0-198 82t-82 198q0 116 82 198t198 82Zm0-120q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm0-80q33 0 56.5-23.5T560-480q0-33-23.5-56.5T480-560q-33 0-56.5 23.5T400-480q0 33 23.5 56.5T480-400Zm0-80Z"/></svg>
+                    <span>{{ positionService.distanceToString(positionService.calcDistance(scooter.coordinates_lat, scooter.coordinates_lng), selectedDistance)}}</span>
+                  </div>
+                  <p class="distance-wrapper-font">Entfernung</p>
+                </div>
+                <div class="stat-item space-left">
                   <p class="info-box">{{ roundUpBattery(scooter.battery) }}%</p>
                   <p class="secondary-text-font">Batteriestand</p>
                 </div>

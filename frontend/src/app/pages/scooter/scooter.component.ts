@@ -270,8 +270,8 @@ export class ScooterComponent implements OnInit, AfterViewInit, OnDestroy {
     const icon = Leaflet.divIcon({
       className: 'marker',
       html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
-      iconSize: [30, 42],
-      iconAnchor: [15, 42] 
+      iconSize: [30, 30],
+      iconAnchor: [15, 15] 
     });
 
     const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: icon});
