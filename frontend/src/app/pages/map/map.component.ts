@@ -117,7 +117,7 @@ export class MapComponent implements OnInit, OnDestroy{
   public selectedCurrency = '';
   public option: Option | null = null;
 
-  // Varibles for the Drop Down Menu
+  // Varibles for the drop down menu
   sortings: DropDownMenu[];
   selectedSorting: DropDownMenu = { name: ''};
 
@@ -301,7 +301,6 @@ export class MapComponent implements OnInit, OnDestroy{
               console.log(err);
             }
           });
-    
         },
   
         error: (err) => {
@@ -759,6 +758,8 @@ export class MapComponent implements OnInit, OnDestroy{
     this.sortMenuVisible = !this.sortMenuVisible;
   }
 
+  // Variables for the sliders:
+
   /* updates when price slider changes */
   onPriceRangeChange():void{
     this.scooterFilterForm.patchValue({
@@ -792,7 +793,7 @@ export class MapComponent implements OnInit, OnDestroy{
     });
   }
 
-  
+  /* update max scooter range on slider */
   onMaxScooterRangeChange():void {
     this.scooterFilterForm.get('maxRange')?.valueChanges.subscribe(maxRange => {
       this.scooterRange[1] = maxRange;
@@ -800,15 +801,15 @@ export class MapComponent implements OnInit, OnDestroy{
     this.updateSlider();
   }
 
-  
+  /* update min scooter range on slider */
   onMinScooterRangeChange():void {
     this.scooterFilterForm.get('minRange')?.valueChanges.subscribe(minRange => {
       this.scooterRange[0] = minRange;
     });
     this.updateSlider();
   }
-
   
+  /* update battery user input fields */
   onBatteryRangeChange():void{
     this.scooterFilterForm.patchValue({
       minBty: this.batteryPercentageRange[0],
@@ -816,6 +817,7 @@ export class MapComponent implements OnInit, OnDestroy{
     });
   }
 
+  /* update max battery on slider */
   onMaxBatteryRangeChange():void {
     this.scooterFilterForm.get('maxBty')?.valueChanges.subscribe(maxBty => {
       this.batteryPercentageRange[1] = maxBty;
@@ -823,6 +825,7 @@ export class MapComponent implements OnInit, OnDestroy{
     this.updateSlider();
   }
 
+  /* update min battery on slider */
   onMinBatteryRangeChange():void {
     this.scooterFilterForm.get('minBty')?.valueChanges.subscribe(minBty => {
       this.batteryPercentageRange[0] = minBty;
@@ -830,6 +833,7 @@ export class MapComponent implements OnInit, OnDestroy{
     this.updateSlider();
   }
 
+  // update input fields for speed
   onSpeedRangeChange():void{
     this.scooterFilterForm.patchValue({
       minSpeed: this.speedRange[0],
@@ -837,6 +841,7 @@ export class MapComponent implements OnInit, OnDestroy{
     });
   }
 
+  /* update maxSpeed on slider */
   onMaxSpeedRangeChange():void {
     this.scooterFilterForm.get('maxSpeed')?.valueChanges.subscribe(maxSpeed => {
       this.speedRange[1] = maxSpeed;
@@ -844,6 +849,7 @@ export class MapComponent implements OnInit, OnDestroy{
     this.updateSlider();
   }
 
+  /* update minSpeed on slider */
   onMinSpeedRangeChange():void {
     this.scooterFilterForm.get('minSpeed')?.valueChanges.subscribe(minSpeed => {
       this.speedRange[0] = minSpeed;

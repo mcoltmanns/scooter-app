@@ -76,32 +76,32 @@
           <div class="form-container">
             <form [formGroup]="scooterFilterForm" (ngSubmit)="onSubmit()">
               <div class="filter-row">
-                <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatPrice($event, 'minPrice')"></app-user-input>
-                <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatPrice($event, 'maxPrice')"></app-user-input>
+                <app-user-input label="Mindestpreis" [(text)]="minPrice" formControlName="minPrice" (input)="autoFormatPrice($event, 'minPrice'); onMinPriceRangeChange()"></app-user-input>
+                <app-user-input label="Maximalpreis" [(text)]="maxPrice" formControlName="maxPrice" (input)="autoFormatPrice($event, 'maxPrice'); onMaxPriceRangeChange()"></app-user-input>
               </div>
               <div class="content-section implementation">
                 <p-slider *ngIf="showSlider" [(ngModel)]="priceRange"  [range]="true" [min]="0" [max]="20" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onPriceRangeChange()"></p-slider>
                 <p>Preisbereich: {{priceRange[0]}} - {{priceRange[1]}}</p>
               </div>
               <div class="filter-row">
-                <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange" (input)="autoFormatRange($event, 'minRange')"></app-user-input>
-                <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange" (input)="autoFormatRange($event, 'maxRange')"></app-user-input>
+                <app-user-input label="Mindestreichweite" [(text)]="minRange" formControlName="minRange" (input)="autoFormatRange($event, 'minRange'); onMinScooterRangeChange()"></app-user-input>
+                <app-user-input label="Maximalreichweite" [(text)]="maxRange" formControlName="maxRange" (input)="autoFormatRange($event, 'maxRange'); onMaxScooterRangeChange()"></app-user-input>
               </div>
               <div class="content-section implementation">
                 <p-slider *ngIf="showSlider" [(ngModel)]="scooterRange"  [range]="true" [min]="0" [max]="300" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onScooterRangeChange()"></p-slider>
                 <p>Reichweitenbereich: {{scooterRange[0]}} - {{scooterRange[1]}}</p>
               </div>
               <div class="filter-row">
-                <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty" (input)="autoFormatBty($event, 'minBty')"></app-user-input>
-                <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty" (input)="autoFormatBty($event, 'maxBty')"></app-user-input>
+                <app-user-input label="min. Batteriestand" [(text)]="minBty" formControlName="minBty" (input)="autoFormatBty($event, 'minBty')" (ngModelChange)="onMinBatteryRangeChange()"></app-user-input>
+                <app-user-input label="max. Batteriestand" [(text)]="maxBty" formControlName="maxBty" (input)="autoFormatBty($event, 'maxBty')"(ngModelChange)="onMaxBatteryRangeChange()"></app-user-input>
               </div>
               <div class="content-section implementation">
                 <p-slider *ngIf="showSlider" [(ngModel)]="batteryPercentageRange"  [range]="true" [min]="0" [max]="100" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onBatteryRangeChange()"></p-slider>
                 <p>Batteriestand: {{batteryPercentageRange[0]}} - {{batteryPercentageRange[1]}}</p>
               </div>
               <div class="filter-row">
-                <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatBty($event, 'minSpeed')"></app-user-input>
-                <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatBty($event, 'maxSpeed')"></app-user-input>
+                <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatBty($event, 'minSpeed')" (ngModelChange)="onMinSpeedRangeChange()"></app-user-input>
+                <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatBty($event, 'maxSpeed')" (ngModelChange)="onMaxSpeedRangeChange()"></app-user-input>
               </div>
               <div class="content-section implementation">
                 <p-slider *ngIf="showSlider" [(ngModel)]="speedRange"  [range]="true" [min]="0" [max]="540" [step]="10" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onSpeedRangeChange()"></p-slider>
@@ -168,8 +168,8 @@
               <p>Batteriestand: {{batteryPercentageRange[0]}} - {{batteryPercentageRange[1]}}</p>
             </div>
             <div class="filter-row">
-              <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatSpeed($event, 'minSpeed');" (ngModelChange)="onMaxSpeedRangeChange()"></app-user-input>
-              <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatSpeed($event, 'maxSpeed')" (ngModelChange)="onMinSpeedRangeChange()"></app-user-input>
+              <app-user-input label="min. Speed" [(text)]="minSpeed" formControlName="minSpeed" (input)="autoFormatSpeed($event, 'minSpeed') "(ngModelChange)="onMaxSpeedRangeChange()"></app-user-input>
+              <app-user-input label="max. Speed" [(text)]="maxSpeed" formControlName="maxSpeed" (input)="autoFormatSpeed($event, 'maxSpeed') "(ngModelChange)="onMinSpeedRangeChange()"></app-user-input>
             </div>
             <div class="content-section implementation">
               <p-slider *ngIf="showSlider" [(ngModel)]="speedRange"  [range]="true" [min]="0" [max]="540" [step]="10" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onSpeedRangeChange()"></p-slider>
