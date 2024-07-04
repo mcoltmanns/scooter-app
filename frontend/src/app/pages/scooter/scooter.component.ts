@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { LeafletModule } from '@asymmetrik/ngx-leaflet';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ButtonComponent } from 'src/app/components/button/button.component';
@@ -21,10 +21,11 @@ import { UserPosition } from 'src/app/utils/userPosition';
 
 
 /*  Icon for the user -> is displayed on the map */
-const userIcon = Leaflet.icon({
-  iconSize: [40, 40],
-  iconUrl: '/assets/person.png',
-});
+// const userIcon = Leaflet.icon({
+//   iconSize: [40, 40],
+//   iconUrl: '/assets/person.png',
+// });
+const userIconPulse = UserPosition.createUserPositionIcon();
 
 @Component({
   selector: 'app-scooter',
@@ -33,7 +34,7 @@ const userIcon = Leaflet.icon({
   templateUrl: './scooter.component.html',
   styleUrl: './scooter.component.css'
 })
-export class ScooterComponent implements OnInit, OnDestroy {
+export class ScooterComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
 
   public backButtonPath: string | null = '/search';  // Path for the back button
@@ -99,6 +100,8 @@ export class ScooterComponent implements OnInit, OnDestroy {
 
   layers: Leaflet.Layer[] = [];
 
+  public showMap = false;
+
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       this.processRoutingState();  // Handle the state of the previous page
@@ -115,55 +118,6 @@ export class ScooterComponent implements OnInit, OnDestroy {
         next: ([scooter, product, option, reservation]) => {
           /* Proess the scooter information */
           this.scooter = scooter;
-
-           // Decide what color does the marker have.
-          let batteryColor = '#4df353';
-      
-          if (scooter.battery <= 20) {
-            batteryColor = '#d81204';
-          } else if (scooter.battery <= 50 && scooter.battery >= 20) {
-            batteryColor = '#fad609';
-          }
-
-          // This part contains all css styles for the scooter marker.
-          const batteryPieStyle = `
-            position: relative;
-            width: 30px;  /* reduced from 50px */
-            height: 30px; /* reduced from 50px */
-            border-radius: 50%;
-            background: conic-gradient(
-              ${batteryColor} calc(var(--percentage) * 1%), 
-              #f8fdff calc(var(--percentage) * 1%)
-            );
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            border: 2px solid rgb(46, 90, 120); /* reduced from 4px */
-            --percentage: ${scooter.battery};
-          `;
-
-          const batteryInnerPieStyle =`
-            position: absolute;
-            width: 18px;  /* reduced from 30px */
-            height: 18px; /* reduced from 30px */
-            background: ${batteryColor};
-            border: 4px solid rgb(46, 90, 120); /* reduced from 8px */
-            border-radius: 50%;
-          `;
-      
-          // Define the marker icon.
-          const icon = Leaflet.divIcon({
-            className: 'marker',
-            html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
-            iconSize: [30, 42],
-            iconAnchor: [15, 42] 
-          });
-
-          const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: icon});
-          this.layers.push(marker); 
-          this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
-          this.options.center = this.center; // Set the map center
       
           /* Process the product information */
           this.product = product;
@@ -178,6 +132,9 @@ export class ScooterComponent implements OnInit, OnDestroy {
             this.userHasReservation = true;
             this.userReservedThisScooter = reservation.reservation.scooter_id === this.scooter!.id;
           }
+
+          /* Add the scooter icon to the map */
+          this.addScooterIconToMap();
   
           /* Load the product image */
           const imageLoadPromise = new Promise((resolve, reject) => {
@@ -209,14 +166,19 @@ export class ScooterComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.errorMessage = err.error.message;
+          this.toastComponentError.showToast();
           this.loadingScooter = false;
           this.scooterNotFound = true;
           console.log(err);
         }
       });
     });
-
     this.updateUserPosition(); // set user icon on the map
+  }
+
+  ngAfterViewInit(): void {
+    /* Make the map visible after the view has been initialized */
+    this.showMap = true;
   }
 
   ngOnDestroy(): void {
@@ -260,6 +222,62 @@ export class ScooterComponent implements OnInit, OnDestroy {
   
     /* Update the router state */
     history.replaceState(historyState, '');
+  }
+
+  /* Render the scooter icon to the map */
+  addScooterIconToMap(): void {
+    if (!this.scooter) {
+      return;
+    }
+
+    // Decide what color does the marker have.
+    let batteryColor = '#4df353';
+      
+    if (this.scooter.battery <= 20) {
+      batteryColor = '#d81204';
+    } else if (this.scooter.battery <= 50 && this.scooter.battery >= 20) {
+      batteryColor = '#fad609';
+    }
+
+    // This part contains all css styles for the scooter marker.
+    const batteryPieStyle = `
+      position: relative;
+      width: 30px;  /* reduced from 50px */
+      height: 30px; /* reduced from 50px */
+      border-radius: 50%;
+      background: conic-gradient(
+        ${batteryColor} calc(var(--percentage) * 1%), 
+        #f8fdff calc(var(--percentage) * 1%)
+      );
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+      border: 2px solid rgb(46, 90, 120); /* reduced from 4px */
+      --percentage: ${this.scooter.battery};
+    `;
+
+    const batteryInnerPieStyle =`
+      position: absolute;
+      width: 18px;  /* reduced from 30px */
+      height: 18px; /* reduced from 30px */
+      background: ${batteryColor};
+      border: 4px solid rgb(46, 90, 120); /* reduced from 8px */
+      border-radius: 50%;
+    `;
+
+    // Define the marker icon.
+    const icon = Leaflet.divIcon({
+      className: 'marker',
+      html: `<div style="${batteryPieStyle}"><div style="${batteryInnerPieStyle}"></div></div>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 42] 
+    });
+
+    const marker = Leaflet.marker([this.scooter.coordinates_lat, this.scooter.coordinates_lng], {icon: icon});
+    this.layers.push(marker); 
+    this.center = new Leaflet.LatLng(this.scooter.coordinates_lat, this.scooter.coordinates_lng);
+    this.options.center = this.center; // Set the map center
   }
 
   animateScooterStatusCircles(): void {
@@ -450,13 +468,15 @@ export class ScooterComponent implements OnInit, OnDestroy {
     .then((result) => {
       console.log(result);
       if (result) {
-        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIcon });
+        const userMarker = Leaflet.marker([this.positionService.latitude, this.positionService.longitude], { icon: userIconPulse });
         this.layers.push(userMarker); // place the user icon on the map
       } else {
         console.log('Failed to set position');
       }
     })
     .catch((error) => {
+      this.errorMessage = error.error.message;
+      this.toastComponentError.showToast();
       console.error('An error occurred:', error);
     });
   }

@@ -6,7 +6,7 @@
   Bist du sicher, dass du die aktuell laufende Reservierung beenden möchtest?
 </app-confirm-modal>
 
-<app-toast #toastComponentError [showDuration]=3000 type="error">{{errorMessage}}</app-toast>
+<app-toast #toastComponentError [showDuration]=5000 type="error">{{errorMessage}}</app-toast>
 
 <header class="header">
     <app-back-button path="{{ backButtonPath }}"></app-back-button>
@@ -90,13 +90,15 @@
                 </app-button>
             </div>
 
-            <div style="padding: 15px;">
-                <hr class="solid">
+            <div class="description-wrapper">
+              <div style="padding: 0 15px; max-width: 800px;">
+                <hr class="solid" />
+                <h2 style="margin: 15px; margin-top: 35px; line-height: 1;">Standort</h2>
+                <p style="margin: 15px; margin-bottom: 17.5px;">Deine Entfernung zum Scooter: <b style="color: chartreuse; white-space: nowrap;">{{ this.distance }}</b></p>
+                <div *ngIf="showMap" class="map" leaflet [leafletOptions]="options" [(leafletCenter)]="center" [leafletLayers]="layers"></div>
+                <hr class="solid" style="margin-top: 47.5px;" />
                 <div class="description" innerHTML="{{ product?.description_html }}">Beschreibung</div>
-                <hr class="solid">
-                <h2 style="margin: 15px;">Standort</h2>
-                <p style="margin: 15px;">Entfernung zum Scooter: <b style="color: chartreuse;">{{ this.distance }}</b></p>
-                <div class="map" leaflet [leafletOptions]="options" [(leafletCenter)]="center" [leafletLayers]="layers"></div>
+              </div>
             </div>
             
         </ng-container>
