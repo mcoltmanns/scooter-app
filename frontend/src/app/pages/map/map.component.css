@@ -149,13 +149,15 @@
 }
 
 .filter-menu-container {
-  width: 90%;
+  width: 100%;
   margin: 0 auto;
   background-color: #fff;
   border: 2px solid #4a4242;
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 500px; /* Setzt eine maximale Höhe für den scrollbaren Container */
+  overflow-y: auto;
 }
 
 .filter-menu-container-map {
@@ -321,4 +323,34 @@ p {
   border-color: var(--primary-bg, #00363d); 
   box-shadow: none; 
   background: var(--primary-bg, #00363d); 
+}
+
+/* CSS classes for drop down menu */
+
+:host ::ng-deep .p-dropdown {
+  border-width: 1.5px !important; 
+  border-color: #000000 !important; 
+  border-style: solid !important;
+  border-radius: 8px !important;
+}
+
+/* Optional: Ändere die Umrandung der Dropdown-Liste */
+:host ::ng-deep .p-dropdown-panel .p-dropdown-items {
+  border-width: 4px !important;
+  border-color: #000000 !important;
+}
+
+:host ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item.p-highlight {
+  color: #000000;
+  background: #9d9d9d42;
+}
+
+:host ::ng-deep .p-dropdown-panel {
+  background: #ffffff;
+  color: #495057;
+  border: 2px solid #4d4d4d;
+  border-radius: 6px;
+  box-shadow: 0 3px 6px 0 rgba(0, 0, 0, 0.1);
+  margin-top: 5px;
+  margin-left: -2px;
 }

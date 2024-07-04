@@ -23,17 +23,16 @@ import { UserPosition } from 'src/app/utils/userPosition'; // get methods from u
 import { PositionService } from 'src/app/utils/position.service';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { Sorts } from 'src/app/utils/util-sorts';
-
-// QR-Code imports:
-import { Html5Qrcode } from 'html5-qrcode';
-import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { OptionService } from 'src/app/services/option.service';
 import { Option } from 'src/app/models/option';
 import { UnitConverter } from 'src/app/utils/unit-converter';
 
-//Slider for the filter
+// QR-Code imports:
+import { Html5Qrcode } from 'html5-qrcode';
+import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
+
+//Slider and drop down menu imports for the filters 
 import { SliderModule } from 'primeng/slider';
-//Drop down menu
 import { DropdownModule } from 'primeng/dropdown';
 
 
@@ -44,7 +43,8 @@ import { DropdownModule } from 'primeng/dropdown';
 // });
 const userIconPulse = UserPosition.createUserPositionIcon();
 
-interface City {
+/* interface for the DropDown Menu */
+interface DropDownMenu {
   name: string;
 }
 
@@ -111,14 +111,15 @@ export class MapComponent implements OnInit, OnDestroy{
   //Variables for the sorting--------------------
   sortMenuVisible = false;
   //---------------------------------------------
-   // User Units variables
-   public selectedSpeed = ''; 
-   public selectedDistance = '';
-   public selectedCurrency = '';
-   public option: Option | null = null;
+  // User Units variables
+  public selectedSpeed = ''; 
+  public selectedDistance = '';
+  public selectedCurrency = '';
+  public option: Option | null = null;
 
-  cities: City[];
-  selectedCity: City = { name: ''};
+  // Varibles for the Drop Down Menu
+  sortings: DropDownMenu[];
+  selectedSorting: DropDownMenu = { name: ''};
 
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService, private cdr: ChangeDetectorRef) 
   { //form group for the input on the scooter-filters
@@ -131,7 +132,7 @@ export class MapComponent implements OnInit, OnDestroy{
       maxBty: ['', [this.numberStringValidator(0, 100)]],
       minSpeed: ['', [this.numberStringValidator(0, 99999)]],
       maxSpeed: ['', [this.numberStringValidator(0, 99999)]]
-  }),this.cities = [
+  }),this.sortings = [
     { name: 'Preis aufsteigend'},
     { name: 'Preis absteigend'},
     { name: 'Reichweite aufsteigend'},
