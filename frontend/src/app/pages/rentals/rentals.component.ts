@@ -130,7 +130,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
   //variables for the filters----------------------
 
-  public filteredRentals: Rental[] = []; //filtered version of the Rental[]
+  public filteredRentals: PastRental[] = []; //filtered version of the Rental[]
   
   filterMenuVisible = false;//visibility variable of filter menu
   //filter form input variables
@@ -150,7 +150,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         /* Get all scooter bookings (rentals) for the User from the backend */
         // this.rentals = rentalsResponse;
         // this.filteredRentals = rentalsResponse;
-        this.filteredRentals = this.rentals;
+        this.filteredRentals = this.pastRentals;
         this.activeRentals = rentalsResponse.activeRentals;
         this.pastRentals = rentalsResponse.pastRentals;
         this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
@@ -666,7 +666,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.lower = this.bookingFilterForm.get('lower')?.value;
       this.upper = this.bookingFilterForm.get('upper')?.value;
 
-      this.filteredRentals = Filters.filterDate(this.lower.replace('.', '-').replace('.', '-'), this.upper.replace('.', '-').replace('.', '-'), this.rentals);
+      this.filteredRentals = Filters.filterDate(this.lower.replace('.', '-').replace('.', '-'), this.upper.replace('.', '-').replace('.', '-'), this.pastRentals);
       this.toggle();
     } 
     else {
@@ -679,7 +679,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
    * removes upper and lower bound an shows all rentals again
    */
   onCancel(): void {
-    this.filteredRentals = this.rentals;
+    this.filteredRentals = this.pastRentals;
     this.lower='';
     this.upper='';
     this.toggle();
