@@ -146,6 +146,8 @@ export class MapComponent implements OnInit, OnDestroy{
     { name: 'Batteriestand absteigend'},
     { name: 'Geschwindigkeit aufsteigend'},
     { name: 'Geschwindigkeit absteigend'},
+    { name: 'Distanz aufsteigend'},
+    { name: 'Distanz absteigend'}
   ];}
 
   /* user can choose an ordering method from the drop down bar */
@@ -174,6 +176,12 @@ export class MapComponent implements OnInit, OnDestroy{
     }
     if(event.value.name === 'Geschwindigkeit absteigend'){
       this.sortSpeed(false);
+    }
+    if(event.value.name === 'Distanz aufsteigend'){
+      this.sortDist(true);
+    }
+    if(event.value.name === 'Distanz absteigend'){
+      this.sortDist(false);
     }
   }
 
@@ -782,6 +790,17 @@ export class MapComponent implements OnInit, OnDestroy{
     this.sortedScooters = Sorts.sortSpeed(asc, this.sortedScooters, this.products);
     this.sortMenuVisible = !this.sortMenuVisible;
   }
+
+  /**
+   * sorts scooter by distance to use
+   * @param asc says whether they are sorted in ascending or descending order
+   */
+  sortDist(asc: boolean):void{
+    this.sortedScooters = this.filteredScooters;
+    this.sortedScooters = Sorts.sortDist(asc, this.sortedScooters);
+    this.sortMenuVisible = !this.sortMenuVisible;
+  }
+
 
   // Variables for the sliders:
 

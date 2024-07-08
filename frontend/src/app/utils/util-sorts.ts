@@ -1,5 +1,6 @@
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
+import { PositionService } from './position.service';
 
 /**
  * This class provides the sort functionalities for the scooter list
@@ -11,6 +12,7 @@ export class Sorts {
   private static range = false;
   private static bty = false;
   private static speed = false;
+  private static dist = false;
   //variable for ascending filtered or not
   private static asc = true;
 //---------------------------------------------
@@ -32,7 +34,10 @@ export class Sorts {
       return this.sortBty(this.asc, scooters);
     } else if(this.speed){
       return this.sortSpeed(this.asc, scooters, products);
-    } else{
+    } else if(this.dist){
+      return this.sortDist(this.asc, scooters);
+    }
+    else{
       return scooters;
     }
   }
@@ -48,6 +53,7 @@ export class Sorts {
     this.range = false;
     this.bty = false;
     this.speed = false;
+    this.dist = false;
   }
 
   /**
@@ -61,6 +67,7 @@ export class Sorts {
     this.range = false;
     this.bty = false;
     this.speed = false;
+    this.dist = false;
     scooters = scooters.sort((a,b) => {
       //get the price of the scooters being compared
     const priceA = products.find(p => p.name === a.product_id)?.price_per_hour;
@@ -100,6 +107,7 @@ export class Sorts {
     this.range = true;
     this.bty = false;
     this.speed = false;
+    this.dist = false;
     scooters = scooters.sort((a,b) => {
     let rangeA = products.find(p => p.name === a.product_id)?.max_reach;
     let rangeB = products.find(p => p.name === b.product_id)?.max_reach;
@@ -138,6 +146,7 @@ export class Sorts {
     this.range = false;
     this.bty = true;
     this.speed = false;
+    this.dist = false;
     scooters = scooters.sort((a,b) => {
     if(asc){//compare ascending
       const c = a.battery - b.battery;
@@ -169,6 +178,7 @@ export class Sorts {
     this.range = false;
     this.bty = false;
     this.speed = true;
+    this.dist = false;
     scooters = scooters.sort((a,b) => {
       //get the speed of the scooters being compared
     const speedA = products.find(p => p.name === a.product_id)?.max_speed;
@@ -193,6 +203,45 @@ export class Sorts {
       }
     }
     return 0;
+    });
+    return scooters;
+  }
+
+  /**
+   * sorts scooters by distance to user
+   */
+  static sortDist(asc: boolean, scooters: Scooter[]): Scooter[]{
+    //set the variables to remember the last used sorting
+    this.asc = asc;
+    this.price = false;
+    this.range = false;
+    this.bty = false;
+    this.speed = false;
+    this.dist = true;
+    scooters = scooters.sort( (a,b) => {
+      //calculate the distances of a, b respectively
+      const distA = PositionService.calculateDist(a.coordinates_lat, a.coordinates_lng);
+      const distB = PositionService.calculateDist(b.coordinates_lat, b.coordinates_lng);
+      if(asc){//compare ascending
+        if(!(distA === -1) && !(distB === -1)){
+          const c = distA - distB;
+          //if equal sort by id
+          if(c === 0){
+            return a.id - b.id;
+          }
+          return c;
+        }
+      } else {
+        if(!(distA === -1) && !(distB === -1)){
+          const c = distB - distA;
+          //if equal sort by id
+          if(c === 0){
+            return a.id - b.id;
+          }
+          return c;
+        }
+      }
+      return 0;
     });
     return scooters;
   }
