@@ -2,14 +2,13 @@ import request from 'supertest';
 import bcrypt from 'bcrypt';
 import app from '../../src/app';
 import uid from 'uid-safe';
-import {expect, jest, test, describe, it, afterEach, beforeAll} from '@jest/globals';
+import {expect, jest, describe, it, afterEach, beforeAll} from '@jest/globals';
 import { UsersAuth, UsersData, UserPreferences, UsersSession, SESSION_LIFETIME } from '../../src/models/user';
 import database from '../../src/database';
 import { Mock, SpiedFunction } from 'jest-mock';
 import { AuthController } from '../../src/controllers/auth';
 import { Validator } from '../../src/middlewares/validation';
-import { CreateOptions, FindOptions } from 'sequelize';
-import { MockModel, KeyStringMap } from '../mocks/mock-model';
+import { MockModel } from '../mocks/mock-model';
 import { mockUserPreferencesData, mockUsersAuthData, mockUsersDatasData } from '../mocks/mock-data';
 import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
@@ -50,6 +49,8 @@ let mockUsersSession: MockModel;
 let validator_runAllChecks: SpiedFunction;
 let register: SpiedFunction<(request: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>) => Promise<void>>;
 
+const mockPwdHash = bcrypt.hashSync(toAdd.password, 10);
+
 //------------------------TESTS--------------------------
 describe('auth controller', () => {
     beforeAll(() => {
@@ -86,8 +87,7 @@ describe('auth controller', () => {
 
     // positive test case for registration
     it('should add new user and start new session upon registration', async () => {
-        const mockHash = bcrypt.hashSync(toAdd.password, 10); // generate a mock hash to check against later
-        (bcrypt.hashSync as any) = jest.fn().mockReturnValue(mockHash);
+        (bcrypt.hashSync as any) = jest.fn().mockReturnValue(mockPwdHash);
         const mockSessionId = uid.sync(24); // generate a mock session token to check against later
         (uid.sync as any) = jest.fn().mockReturnValue(mockSessionId);
         const then = Date.now();
@@ -114,7 +114,7 @@ describe('auth controller', () => {
         expect(mockTransactionCall).toBeCalledTimes(1); // we should start exactly one transaction
         expect(mockUsersAuth.findOneMock).toBeCalledWith({ where: { email: toAdd.email } }); // we should have checked the database for the user we're adding
         // make sure everything happened under a transaction, and with the right parameters
-        expect(mockUsersAuth.createMock).toBeCalledWith({ email: toAdd.email, password: mockHash }, { transaction: mockTransactionInstance });
+        expect(mockUsersAuth.createMock).toBeCalledWith({ email: toAdd.email, password: mockPwdHash }, { transaction: mockTransactionInstance });
         expect(mockUsersData.createMock).toBeCalledWith({ name: toAdd.name, street: toAdd.street, houseNumber: toAdd.houseNumber, zipCode: Number(toAdd.zipCode), city: toAdd.city, usersAuthId: (mockUsersAuth.data.length - 1).toString()}, { transaction: mockTransactionInstance });
         expect(mockUsersPreferences.createMock).toBeCalledWith({ speed: 'km/h', distance: 'km', currency: '€', usersAuthId: (mockUsersAuth.data.length - 1).toString() }, { transaction: mockTransactionInstance });
         expect(mockUsersSession.createMock).toBeCalledWith({ id: mockSessionId, expires: new Date(then + SESSION_LIFETIME), usersAuthId: (mockUsersAuth.data.length - 1).toString() }, { transaction: mockTransactionInstance });
@@ -168,13 +168,10 @@ describe('auth controller', () => {
 
     // positive logout test case
     it('should end session of user on logout', async () => {
-        console.log('testing logout');
         const response = await request(app)
             .delete('/api/logout')
             .set('Cookie', [`sessionId=${mockSessionId}`])
             .expect(200);
-
-        console.log(JSON.stringify(response.body));
 
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({
@@ -182,18 +179,46 @@ describe('auth controller', () => {
             message: 'Logout erfolgreich.'
         });
 
-        // check calls?
+        // should clear the session cookie
+        const cookies = response.headers['set-cookie'];
+        expect(cookies.length).toBe(2); // should be 2 cookies - one for the old sessionId, one for the deleted
+        expect(cookies[0]).toMatch(`sessionId=${mockSessionId};`); // old cookie should still match
+        expect(cookies[1]).toMatch('sessionId=;'); // new cookie should be deleted
+
+        // sucessful logout expects UsersSession.destroy to be called on the sessionId
+        expect(mockUsersSession.destroyMock).toBeCalledWith({where: { id: mockSessionId }});
     });
 
-    it('should not allow unknown users to login', () => {
+    it('should not allow unknown users to login', async () => {
+        const unknown = { email: 'person@mail.com', password: 'password' };
+        const response = await request(app)
+            .post('/api/login')
+            .send(unknown)
+            .expect(401);
 
+        // we should fail on the email find
+        expect(response.status).toBe(401);
+        expect(response.body).toStrictEqual({
+            code: 401, validationErrors: { email: 'E-Mail-Adresse nicht gefunden.' }
+        });
+
+        expect(mockUsersAuth.findOneMock).toBeCalledWith({ where: { email: unknown.email } }); // expect to have looked for the email that's trying to login
     });
 
-    it('should not allow logins with wrong password', () => {
+    it('should not allow logins with wrong password', async () => {
+        const passwordCheck = jest.spyOn(bcrypt, 'compareSync');
+        const unknown = { email: toAdd.email, password: 'notPassword' };
+        const response = await request(app)
+            .post('/api/login')
+            .send(unknown)
+            .expect(401);
 
-    });
+        expect(response.status).toBe(401);
+        expect(response.body).toStrictEqual({
+            code: 401, validationErrors: { password: 'Falsches Passwort.' } // expect to have failed at password check
+        });
 
-    it('should not permit accessing or changing user data without an active session', () => {
-
+        expect(mockUsersAuth.findOneMock).toBeCalledWith({ where: { email: unknown.email } }); // expect to have looked for the email that's trying to login
+        expect(passwordCheck).toBeCalledWith(unknown.password, mockPwdHash); // expect to have compared the password on record with the password provided
     });
 });
