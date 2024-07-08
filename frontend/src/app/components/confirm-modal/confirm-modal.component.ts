@@ -22,7 +22,7 @@ import { trigger, style, transition, animate } from '@angular/animations';
 export class ConfirmModalComponent {
   @Input() public showModal = false;
   @Input() public showIcon = true;
-  @Input() public reverseControls = false;
+  @Input() public reverseControls = true;
   @Input() public centerControls = false;
   @Input() public title = 'Bastätigung';
   @Input() public confirmText = 'Ja';

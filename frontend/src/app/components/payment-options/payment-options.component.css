@@ -1,6 +1,15 @@
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: min-content;
+}
+
 .payment-entry {
   margin-bottom: 20px;
   width: 100%;
+  max-width: 700px;
   min-width: 210px;
   padding: 5px 15px 5px 15px;
   display: flex;
@@ -12,7 +21,7 @@
   border-radius: 6px;
   border: 1px solid var(--Textfeld-Stroke, #000);
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
-  }
+}
 
 .payment-icon {
   display: flex;

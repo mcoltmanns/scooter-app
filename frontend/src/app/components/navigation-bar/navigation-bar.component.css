@@ -10,7 +10,8 @@
 
   display: flex;
   flex-direction: row;
-  justify-content: space-evenly;
+  /* justify-content: space-evenly; */
+  justify-content: center;
   align-items: flex-end;
   gap: 0;
 
@@ -36,6 +37,8 @@
   font-size: 14px;
   font-style: normal;
   font-weight: 400;
+
+  max-width: 350px;
 }
 
 .entry mat-icon.icon {

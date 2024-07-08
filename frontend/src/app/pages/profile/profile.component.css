@@ -1,3 +1,16 @@
+.scrollable-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: min-content;
+}
+
+.my-form {
+  width: 100%;
+  max-width: 700px;
+}
+
 .highlight {
   font-weight: bold;
 }
@@ -63,6 +76,8 @@ button .icon {
 
 .profileSave-btn {
   width: 90%;
+  max-width: 300px;
+  min-width: min-content;
 }
 
 .info {
@@ -75,4 +90,6 @@ button .icon {
 
 .abort-btn {
   width: 90%;
+  max-width: 300px;
+  min-width: min-content;
 }
