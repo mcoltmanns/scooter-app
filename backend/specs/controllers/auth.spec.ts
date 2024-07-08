@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import app from '../../src/app';
 import uid from 'uid-safe';
 import {expect, jest, describe, it, afterEach, beforeAll} from '@jest/globals';
-import { UsersAuth, UsersData, UserPreferences, UsersSession, SESSION_LIFETIME } from '../../src/models/user';
+import { UsersAuth, UsersData, UserPreferences, UsersSession } from '../../src/models/user';
 import database from '../../src/database';
 import { Mock, SpiedFunction } from 'jest-mock';
 import { AuthController } from '../../src/controllers/auth';
@@ -13,6 +13,7 @@ import { mockUserPreferencesData, mockUsersAuthData, mockUsersDatasData } from '
 import { Request, Response } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { ParsedQs } from 'qs';
+import { SESSION_LIFETIME } from '../../src/static-data/global-variables';
 
 /**
  * Testing the controller classes (src/controllers) is a good place to start, but not really that constructive.
