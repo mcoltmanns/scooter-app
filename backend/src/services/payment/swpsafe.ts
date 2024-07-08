@@ -1,8 +1,13 @@
 import { parse } from 'csv-parse';
 import get from 'axios';
-import { SwpSafeData } from '../../interfaces/payment-service.interface';
+import { PaymentService, SwpSafeData } from '../../interfaces/payment-service.interface';
 
+const staticImplements = <T>() => <U extends T>(constructor: U): U => constructor;
+
+@staticImplements<PaymentService>()
 abstract class SwpSafe {
+    private constructor() {} // Private constructor prevents instantiation
+
     private static processResponse(data: string, fieldWanted: string): Promise<{ status: number, message: string }> {
         return new Promise((resolve) => {
             console.log(data);

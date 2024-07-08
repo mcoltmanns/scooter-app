@@ -1,9 +1,12 @@
 import { parseString } from 'xml2js';
 import post from 'axios';
-import { BachelorCardData } from '../../interfaces/payment-service.interface';
+import { BachelorCardData, PaymentService } from '../../interfaces/payment-service.interface';
 
 const merchantName = 'ScooterApp';
 
+const staticImplements = <T>() => <U extends T>(constructor: U): U => constructor;
+
+@staticImplements<PaymentService>()
 class BachelorCard {
     private constructor() {} // Private constructor prevents instantiation
 
@@ -46,7 +49,7 @@ class BachelorCard {
 
     public static initTransaction(dataObject: BachelorCardData, amount: number): Promise<{status: number, message: string}> {
       const { cardNumber, name, securityCode, expirationDate } = dataObject;
-      
+
       const data = `<?xml version="1.0" encoding="utf-8"?>
         <transactionRequest type="validate">
         <version>1.0.0</version>

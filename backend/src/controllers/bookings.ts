@@ -176,7 +176,7 @@ export class BookingsController {
             }
 
             /* Get the price for a specific scooter */
-            const pricePerHour = await this.getPricePerHourByScooterName(scooterName);
+            const pricePerHour = rental.price_per_hour;
             if (!pricePerHour) {
                 response.status(404).json({ code: 404, message: 'Keinen Preis für den Scooter gefunden.' });
                 return;
@@ -243,35 +243,6 @@ export class BookingsController {
         } catch (error) {
             console.error(`Error fetching product ID for scooter ID ${scooterId}:`, error);
             throw error;
-        }
-    }
-
-
-    /* Get for a scooter name the price_per_hour  */
-    public async getPricePerHourByScooterName(scooterName: unknown): Promise<number> {
-        if (!scooterName) {
-            throw new Error('Kein Scooter-Name angegeben.');
-        }
-    
-        try {
-            // Fetch product data based on the scooter name
-            const product = await Product.findOne({
-                where: {
-                    name: scooterName
-                },
-                attributes: ['price_per_hour']
-            });
-    
-            if (!product) {
-                throw new Error('Product not found.');
-            }
-    
-            // Extract the price per hour
-            const pricePerHour = product.get('price_per_hour') as number;
-            return pricePerHour;
-        } catch (error) {
-            console.error('Error when retrieving the hourly rate:', error);
-            throw new Error('Error when retrieving the hourly rate.');
         }
     }
 }

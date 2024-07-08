@@ -1,7 +1,12 @@
 import post from 'axios';
-import { HciPalData } from '../../interfaces/payment-service.interface';
+import { HciPalData, PaymentService } from '../../interfaces/payment-service.interface';
 
-abstract class HciPal {
+const staticImplements = <T>() => <U extends T>(constructor: U): U => constructor;
+
+@staticImplements<PaymentService>()
+class HciPal {
+    private constructor() {} // Private constructor prevents instantiation
+
     private static processResponse(data: string, fieldWanted: string): {status: number, message: string} {
         const jsonData = JSON.parse(data);
         if(jsonData.success) {

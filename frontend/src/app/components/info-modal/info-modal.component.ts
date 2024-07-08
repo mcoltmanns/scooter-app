@@ -22,6 +22,7 @@ import { trigger, style, transition, animate } from '@angular/animations';
 export class InfoModalComponent {
   @Input() public showModal = false;
   @Input() public showIcon = true;
+  @Input() public iconMode: 'info' | 'warn' = 'info';
   @Input() public showActionButton = false;
   @Input() public centerControls = false;
   @Input() public title = 'Hinweis';

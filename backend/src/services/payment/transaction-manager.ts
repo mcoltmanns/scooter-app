@@ -6,37 +6,47 @@ import HciPal from './hcipal';
 import SwpSafe from './swpsafe';
 
 export class TransactionManager {
+    public static async getPaymentService(paymentMethodId: number, userId: number, transaction?: Transaction): Promise<{ paymentService: PaymentService, paymentData: BachelorCardData | SwpSafeData | HciPalData }> {
+      const paymentMethod = await PaymentMethod.findOne({ 
+        where: { id: paymentMethodId, usersAuthId: userId },
+        transaction: transaction || undefined
+      });
+      if (!paymentMethod) {
+        throw new Error('PAYMENT_METHOD_NOT_FOUND');
+      }
+      
+      let paymentService: PaymentService | null = null;
+      let paymentData: BachelorCardData | SwpSafeData | HciPalData | null = null;
+      /* Determine the correct payment service to process the payment */
+      if (paymentMethod.get('type') === 'bachelorcard') {
+        paymentService = BachelorCard;
+        paymentData = paymentMethod.get('data') as BachelorCardData;
+      }
+      if (paymentMethod.get('type') === 'swpsafe') {
+        paymentService = SwpSafe;
+        paymentData = paymentMethod.get('data') as SwpSafeData;
+      }
+      if (paymentMethod.get('type') === 'hcipal') {
+        paymentService = HciPal;
+        paymentData = paymentMethod.get('data') as HciPalData;
+      }
+
+      if (!paymentService || !paymentData) {
+        throw new Error('PAYMENT_SERVICE_NOT_FOUND');
+      }
+
+      return { paymentService, paymentData };
+    }
+
     // try to perform a transaction for a certain number of euros
     // does the heavy lifting for mapping payment method ids to the right services and making the requests
     // on success returns a rollbackable payment token and the payment service used to perform the transaction
-    public static async doTransaction(paymentMethodId: number, userId: number, amount: number, transaction?: Transaction): Promise<{ token: string, serviceUsed: PaymentService }> {
-        let paymentService: PaymentService | null = null;
-        
-        const paymentMethod = await PaymentMethod.findOne({ 
-            where: { id: paymentMethodId, usersAuthId: userId },
-            transaction: transaction || undefined
-        });
-            if (!paymentMethod) {
-            throw new Error('PAYMENT_METHOD_NOT_FOUND');
-        }
-
-        let paymentData: BachelorCardData | SwpSafeData | HciPalData | null = null;
-        /* Determine the correct payment service to process the payment */
-        if (paymentMethod.get('type') === 'bachelorcard') {
-          paymentService = BachelorCard as unknown as PaymentService;
-          paymentData = paymentMethod.get('data') as BachelorCardData;
-        }
-        if (paymentMethod.get('type') === 'swpsafe') {
-          paymentService = SwpSafe as unknown as PaymentService;
-          paymentData = paymentMethod.get('data') as SwpSafeData;
-        }
-        if (paymentMethod.get('type') === 'hcipal') {
-          paymentService = HciPal as unknown as PaymentService;
-          paymentData = paymentMethod.get('data') as HciPalData;
-        }
-  
+    public static async doTransaction(paymentMethodId: number, userId: number, amount: number, transaction?: Transaction, paymentService?: PaymentService, paymentData?: BachelorCardData | SwpSafeData | HciPalData): Promise<{ token: string, serviceUsed: PaymentService }> {
+        /* Fetch paymentService and the payment data/credentials in case they are not provided */
         if (!paymentService || !paymentData) {
-          throw new Error('PAYMENT_SERVICE_NOT_FOUND');
+          const { paymentService:paymentServiceRes, paymentData:paymentDataRes } = await this.getPaymentService(paymentMethodId, userId, transaction || undefined);
+          paymentService = paymentServiceRes;
+          paymentData = paymentDataRes;
         }
 
         /* Validate the payment */
