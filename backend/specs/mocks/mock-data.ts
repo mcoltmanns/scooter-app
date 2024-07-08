@@ -1,5 +1,7 @@
 import { KeyStringMap } from './mock-model';
 
+// mock preloaded database data
+
 export const mockUsersAuthData: KeyStringMap[] = [
     {
         id: '0',
