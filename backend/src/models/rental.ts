@@ -31,6 +31,21 @@ export const ActiveRental = Database.getSequelize().define('activeRentals', {
         validate: {
             min: 0,
         }
+    },
+    total_price: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        validate: {
+            min: 0,
+        }
+    },
+    lastPaymentToken: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    paymentOffset: {
+        type: DataTypes.DECIMAL,
+        allowNull: false
     }
 }, { updatedAt: true, createdAt: true });
 
@@ -46,12 +61,23 @@ export const PastRental = Database.getSequelize().define('pastRentals', {
         type: DataTypes.DATE,
         allowNull: false
     },
+    price_per_hour: {
+        type: DataTypes.DECIMAL,
+        allowNull: false,
+        validate: {
+            min: 0,
+        }
+    },
     total_price: {
         type: DataTypes.DECIMAL,
         allowNull: false,
         validate: {
             min: 0,
         }
+    },
+    paymentOffset: {
+        type: DataTypes.DECIMAL,
+        allowNull: false
     }
 }, { updatedAt: false, createdAt: true });
 

@@ -2,8 +2,6 @@ import Database from '../database';
 import { DataTypes } from 'sequelize';
 import { ActiveRental, PastRental, Rental, Reservation } from './rental';
 
-export const SESSION_LIFETIME = 60 * 60 * 1000; // sessions expire after 1 hour
-
 export const UsersAuth = Database.getSequelize().define('usersAuths', {
   id: {
     type: DataTypes.INTEGER,

@@ -1,5 +1,9 @@
 <app-loading-overlay [isLoading]="processingEndReservation"></app-loading-overlay>
 
+<app-info-modal [showModal]="hotErrorMessage ? true : false" [close]="onCloseHotError" [title]="errorMessage" [showIcon]="true" cancelText="Schließen" iconMode="warn">
+  {{ hotErrorMessage }}
+</app-info-modal>
+
 <app-confirm-modal [showModal]="this.confirmModal.showConfirmModal" [confirm]="onConfirmConfirmModal" [cancel]="onCloseConfirmModal" [reverseControls]="true" title="Buchung beenden">
   Bist du sicher, dass du die Buchung für den Scooter {{ this.confirmModal.scooterName }} beenden willst?
 </app-confirm-modal>

@@ -3,7 +3,8 @@ import bcrypt from 'bcrypt';
 import uid from 'uid-safe';
 import Database from '../database';
 import { UserPreferences, UsersAuth, UsersData } from '../models/user';
-import { SESSION_LIFETIME, UsersSession } from '../models/user';
+import { UsersSession } from '../models/user';
+import { SESSION_LIFETIME } from '../static-data/global-variables';
 import SessionManager from '../services/session-manager';
 
 /**

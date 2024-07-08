@@ -1,9 +1,13 @@
 import { parseString } from 'xml2js';
 import post from 'axios';
-import { BachelorCardData } from '../../interfaces/payment-service.interface';
+import { BachelorCardData, PaymentService } from '../../interfaces/payment-service.interface';
+import { errorMessages } from '../../static-data/error-messages';
 
 const merchantName = 'ScooterApp';
 
+const staticImplements = <T>() => <U extends T>(constructor: U): U => constructor;
+
+@staticImplements<PaymentService>()
 class BachelorCard {
     private constructor() {} // Private constructor prevents instantiation
 
@@ -37,7 +41,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
@@ -46,7 +50,7 @@ class BachelorCard {
 
     public static initTransaction(dataObject: BachelorCardData, amount: number): Promise<{status: number, message: string}> {
       const { cardNumber, name, securityCode, expirationDate } = dataObject;
-      
+
       const data = `<?xml version="1.0" encoding="utf-8"?>
         <transactionRequest type="validate">
         <version>1.0.0</version>
@@ -81,7 +85,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
@@ -111,7 +115,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
@@ -141,7 +145,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });

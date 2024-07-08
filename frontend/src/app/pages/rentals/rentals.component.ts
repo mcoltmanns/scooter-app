@@ -82,6 +82,9 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Bind Confirm Modal to this instance */
     this.onConfirmConfirmModal = this.onConfirmConfirmModal.bind(this);
     this.onCloseConfirmModal = this.onCloseConfirmModal.bind(this);
+
+    /* Bind Hot Error Modal to this instance */
+    this.onCloseHotError = this.onCloseHotError.bind(this);
   }
 
   // Variable to control the visibility of the loading spinner
@@ -97,6 +100,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
   public pastRentals: PastRental[] = [];
   public products: ProductWithScooterId[] = [];
   public errorMessage = '';
+  public hotErrorMessage: string | null = null;
 
   // User Units variables
   public selectedSpeed = ''; 
@@ -593,12 +597,18 @@ export class RentalsComponent implements OnInit, OnDestroy {
         /* Hide the loading overlay */
         this.processingEndReservation = false;
         this.errorMessage = error.error.message;
+        this.hotErrorMessage = error.error.hotMessage;
         this.toastComponentError.showToast();
 
         /* Restore the info modal if it was open before */
         if (this.confirmModal.infoModalWasOpen) {
           this.infoModal.show = true;
           this.confirmModal.infoModalWasOpen = false;  // Reset the state in the confirm modal
+        }
+
+        /* Close the info modal in case of a hot error */
+        if (this.hotErrorMessage) {
+          this.onCloseInfoModal();
         }
       }
     });
@@ -645,6 +655,13 @@ export class RentalsComponent implements OnInit, OnDestroy {
     this.confirmModal.confirmCallback = (): void => {
       // Do nothing by default
     };
+  }
+
+  onCloseHotError(): void {
+    this.hotErrorMessage = null;  // Reset the hot error message, this also closes the hot error modal
+
+    /* Reload the page to fetch the latest data because we don't know what actually happened to the data in case of a hot error */
+    window.location.reload();
   }
 
   //functionalities for the filters-----------------------------------------------------------------

@@ -38,13 +38,10 @@ export class Validator {
     const validationErrors = validationResult(request);
 
     /* Handle the validation errors if they occurred */
-    // TODO: refactor into a universal error handler maybe?
     if (!validationErrors.isEmpty()) {
       const errors: ErrorsObject = {};
 
-      // validationErrors.array().forEach(
-      //   (valErr: FieldValidationError) => (errors[valErr.path] = `${valErr.msg}: ${valErr.value} at ${valErr.location}`)
-      // );
+      /* Map the validation errors to the errors object */
       validationErrors.array().forEach(
         (valErr: FieldValidationError) => (errors[valErr.path] = valErr.msg)
       );

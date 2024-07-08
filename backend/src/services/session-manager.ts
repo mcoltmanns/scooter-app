@@ -1,6 +1,7 @@
 import { Model } from 'sequelize';
 import uid from 'uid-safe';
-import { SESSION_LIFETIME, UsersSession } from '../models/user';
+import { UsersSession } from '../models/user';
+import { SESSION_LIFETIME } from '../static-data/global-variables';
 import database from '../database';
 
 abstract class SessionManager {

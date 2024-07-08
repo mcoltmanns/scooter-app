@@ -1,8 +1,14 @@
 import { parse } from 'csv-parse';
 import get from 'axios';
-import { SwpSafeData } from '../../interfaces/payment-service.interface';
+import { PaymentService, SwpSafeData } from '../../interfaces/payment-service.interface';
+import { errorMessages } from '../../static-data/error-messages';
 
+const staticImplements = <T>() => <U extends T>(constructor: U): U => constructor;
+
+@staticImplements<PaymentService>()
 abstract class SwpSafe {
+    private constructor() {} // Private constructor prevents instantiation
+
     private static processResponse(data: string, fieldWanted: string): Promise<{ status: number, message: string }> {
         return new Promise((resolve) => {
             console.log(data);
@@ -21,7 +27,7 @@ abstract class SwpSafe {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'errormessage'));
             });
@@ -37,7 +43,7 @@ abstract class SwpSafe {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'errormessage'));
             });
@@ -52,7 +58,7 @@ abstract class SwpSafe {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'errormessage'));
             });
@@ -67,7 +73,7 @@ abstract class SwpSafe {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'errormessage'));
             });
