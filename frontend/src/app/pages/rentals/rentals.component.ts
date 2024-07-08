@@ -159,6 +159,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         this.pastRentals = rentalsResponse.pastRentals;
         this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
         // this.loadingDataScooter = false;
+        this.filteredRentals = this.pastRentals; //to see something on the list of past rentals
 
         /* Get all products for the rentals of the user */
         this.products = productsResponse;
