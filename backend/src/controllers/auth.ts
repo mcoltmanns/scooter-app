@@ -64,7 +64,6 @@ export class AuthController {
     /* Save the session in the response locals */
     response.locals.sessionId = session.getDataValue('id');
     response.locals.userId = session.getDataValue('usersAuthId');
-
     return next();
   }
 
@@ -102,8 +101,6 @@ export class AuthController {
         email,
         password: passwordHash
       };
-
-      console.log(`new users auth is ${JSON.stringify(newUserAuth)}`);
 
       /* Save the new user auth object in the database */ 
       createdUserAuth = await UsersAuth.create(newUserAuth, { transaction });
