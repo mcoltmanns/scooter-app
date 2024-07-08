@@ -127,16 +127,16 @@ export class MapComponent implements OnInit, OnDestroy{
   public constructor(private mapService: MapService, private router: Router, private ngZone: NgZone, private fb: FormBuilder, private positionService: PositionService, private renderer: Renderer2, private el: ElementRef, private optionService: OptionService, private cdr: ChangeDetectorRef) 
   { //form group for the input on the scooter-filters
     this.scooterFilterForm = this.fb.group({ 
-    minPrice: ['', [this.numberStringValidator(0, 99999)]],
-      maxPrice: ['', [this.numberStringValidator(0, 99999)]],
-      minRange: ['', [this.numberStringValidator(0, 99999)]],
-      maxRange: ['', [this.numberStringValidator(0, 99999)]],
-      minBty: ['', [this.numberStringValidator(0, 100)]],
-      maxBty: ['', [this.numberStringValidator(0, 100)]],
-      minSpeed: ['', [this.numberStringValidator(0, 99999)]],
-      maxSpeed: ['', [this.numberStringValidator(0, 99999)]],
-      minDist: ['', [this.numberStringValidator(0, 100)]],
-      maxDist: ['', [this.numberStringValidator(0, 100)]]
+    minPrice: ['0', [this.numberStringValidator(0, 99999)]],
+      maxPrice: ['20', [this.numberStringValidator(0, 99999)]],
+      minRange: ['0', [this.numberStringValidator(0, 99999)]],
+      maxRange: ['300', [this.numberStringValidator(0, 99999)]],
+      minBty: ['0', [this.numberStringValidator(0, 100)]],
+      maxBty: ['100', [this.numberStringValidator(0, 100)]],
+      minSpeed: ['0', [this.numberStringValidator(0, 99999)]],
+      maxSpeed: ['540', [this.numberStringValidator(0, 99999)]],
+      minDist: ['0', [this.numberStringValidator(0, 100)]],
+      maxDist: ['100', [this.numberStringValidator(0, 100)]]
   }),this.sortings = [
     { name: 'Preis aufsteigend'},
     { name: 'Preis absteigend'},
