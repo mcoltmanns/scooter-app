@@ -82,6 +82,7 @@ export class MapComponent implements OnInit, OnDestroy{
   scooterRange: number[] = [0, 300];
   batteryPercentageRange: number[] = [0, 100];
   speedRange: number[] = [0, 540];
+  distanceRange: number[] = [0,100];
   public  showSlider = true;
   
 
@@ -106,6 +107,8 @@ export class MapComponent implements OnInit, OnDestroy{
   public maxBty = '';
   public minSpeed = '';
   public maxSpeed = '';
+  public minDist = '';
+  public maxDist = '';
   //---------------------------------------------
 
   //Variables for the sorting--------------------
@@ -131,7 +134,9 @@ export class MapComponent implements OnInit, OnDestroy{
       minBty: ['', [this.numberStringValidator(0, 100)]],
       maxBty: ['', [this.numberStringValidator(0, 100)]],
       minSpeed: ['', [this.numberStringValidator(0, 99999)]],
-      maxSpeed: ['', [this.numberStringValidator(0, 99999)]]
+      maxSpeed: ['', [this.numberStringValidator(0, 99999)]],
+      minDist: ['', [this.numberStringValidator(0, 100)]],
+      maxDist: ['', [this.numberStringValidator(0, 100)]]
   }),this.sortings = [
     { name: 'Preis aufsteigend'},
     { name: 'Preis absteigend'},
@@ -510,8 +515,22 @@ export class MapComponent implements OnInit, OnDestroy{
    */
   onSubmit(): void {
     if (this.scooterFilterForm.valid) {
-      //get the values from the form
-      this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
+      this.getValues();
+      this.convertInput();
+      //update the memory values in the filter util file
+      Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed, this.minDist, this.maxDist);
+      //then apply the filters
+      this.filterUpdates();
+      this.toggleFilterView();
+      this.sortFiltered();
+    }
+  }
+
+  /**
+   * get values from form
+   */
+  getValues(): void{
+    this.minPrice = this.scooterFilterForm.get('minPrice')?.value;
       this.maxPrice = this.scooterFilterForm.get('maxPrice')?.value;
       this.minRange = this.scooterFilterForm.get('minRange')?.value;
       this.maxRange = this.scooterFilterForm.get('maxRange')?.value;
@@ -519,20 +538,23 @@ export class MapComponent implements OnInit, OnDestroy{
       this.maxBty = this.scooterFilterForm.get('maxBty')?.value;
       this.minSpeed = this.scooterFilterForm.get('minSpeed')?.value;
       this.maxSpeed = this.scooterFilterForm.get('maxSpeed')?.value;
-      //convert units to default backend units of metric and euro, using inline if to catch empty input fields
-      this.minPrice = (this.minPrice === '') ? '' : String (UnitConverter.convertCurrency(Number (this.minPrice), this.selectedCurrency, '€'));
-      this.maxPrice = (this.maxPrice === '') ? '' : String (UnitConverter.convertCurrency(Number (this.maxPrice), this.selectedCurrency, '€'));
-      this.minRange = (this.minRange === '') ? '' : String (UnitConverter.convertDistance(Number(this.minRange), this.selectedDistance, 'km'));
-      this.maxRange = (this.maxRange === '') ? '' : String (UnitConverter.convertDistance(Number(this.maxRange), this.selectedDistance, 'km'));
-      this.minSpeed = (this.minSpeed === '') ? '' : String (UnitConverter.convertSpeed(Number (this.minSpeed), this.selectedSpeed, 'km/h'));
-      this.maxSpeed = (this.maxSpeed === '') ? '' : String (UnitConverter.convertSpeed(Number (this.maxSpeed), this.selectedSpeed, 'km/h'));
-      //update the memory values in the filter util file
-      Filters.setBounds(this.minPrice, this.maxPrice, this.minRange, this.maxRange, this.minBty, this.maxBty, this.minSpeed, this.maxSpeed);
-      //then apply the filters
-      this.filterUpdates();
-      this.toggleFilterView();
-      this.sortFiltered();
-    }
+      this.minDist = this.scooterFilterForm.get('minDist')?.value;
+      this.maxDist = this.scooterFilterForm.get('maxDist')?.value;
+  }
+
+  /**
+   * unit convert to backend default values
+   */
+  convertInput(): void{
+    //convert units to default backend units of metric and euro, using inline if to catch empty input fields
+    this.minPrice = (this.minPrice === '') ? '' : String (UnitConverter.convertCurrency(Number (this.minPrice), this.selectedCurrency, '€'));
+    this.maxPrice = (this.maxPrice === '') ? '' : String (UnitConverter.convertCurrency(Number (this.maxPrice), this.selectedCurrency, '€'));
+    this.minRange = (this.minRange === '') ? '' : String (UnitConverter.convertDistance(Number(this.minRange), this.selectedDistance, 'km'));
+    this.maxRange = (this.maxRange === '') ? '' : String (UnitConverter.convertDistance(Number(this.maxRange), this.selectedDistance, 'km'));
+    this.minSpeed = (this.minSpeed === '') ? '' : String (UnitConverter.convertSpeed(Number (this.minSpeed), this.selectedSpeed, 'km/h'));
+    this.maxSpeed = (this.maxSpeed === '') ? '' : String (UnitConverter.convertSpeed(Number (this.maxSpeed), this.selectedSpeed, 'km/h'));
+    this.minDist = (this.minDist === '') ? '' : String (UnitConverter.convertDistance(Number(this.minDist), this.selectedDistance, 'km'));
+    this.maxDist = (this.maxDist === '') ? '' : String (UnitConverter.convertDistance(Number(this.maxDist), this.selectedDistance, 'km'));
   }
 
   /**
@@ -544,6 +566,7 @@ export class MapComponent implements OnInit, OnDestroy{
     this.filteredScooters = Filters.filterRange(this.filteredScooters, this.products);
     this.filteredScooters = Filters.filterBattery(this.filteredScooters);
     this.filteredScooters = Filters.filterSpeed(this.filteredScooters, this.products);
+    this.filteredScooters = Filters.filterDistance(this.filteredScooters);
     //add the new selection of scooters to the map
     this.addScootersToMap();
     this.updateUserPosition();
@@ -567,6 +590,8 @@ export class MapComponent implements OnInit, OnDestroy{
     this.maxBty = '';
     this.minSpeed = '';
     this.maxSpeed = '';
+    this.minDist = '';
+    this.maxDist = '';
     this.sortCancel();
   }
   
@@ -863,5 +888,30 @@ export class MapComponent implements OnInit, OnDestroy{
     setTimeout(() => {
       this.showSlider = true;
     }, 0); // Re-enable the slider
+  }
+
+
+  /* update battery user input fields */
+  onDistanceRangeChange():void{
+    this.scooterFilterForm.patchValue({
+      minBty: this.distanceRange[0],
+      maxBty: this.distanceRange[1]
+    });
+  }
+
+  /* update max battery on slider */
+  onMaxDistanceRangeChange():void {
+    this.scooterFilterForm.get('maxDist')?.valueChanges.subscribe(maxDist => {
+      this.distanceRange[1] = maxDist;
+    });
+    this.updateSlider();
+  }
+
+  /* update min battery on slider */
+  onMinDistanceRangeChange():void {
+    this.scooterFilterForm.get('minDist')?.valueChanges.subscribe(minDist => {
+      this.distanceRange[0] = minDist;
+    });
+    this.updateSlider();
   }
 }

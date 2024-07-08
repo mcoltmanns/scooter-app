@@ -107,6 +107,14 @@
                 <p-slider *ngIf="showSlider" [(ngModel)]="speedRange"  [range]="true" [min]="0" [max]="540" [step]="10" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onSpeedRangeChange()"></p-slider>
                 <p>Geschwindigkeitsbereich: {{speedRange[0]}} - {{speedRange[1]}}</p>
               </div>
+              <div class="filter-row">
+                <app-user-input label="min. Distanz" [(text)]="minDist" formControlName="minDist" (input)="autoFormatBty($event, 'minDist')" (ngModelChange)="onMinDistanceRangeChange()"></app-user-input>
+                <app-user-input label="max. Distanz" [(text)]="maxDist" formControlName="maxDist" (input)="autoFormatBty($event, 'maxDist')"(ngModelChange)="onMaxDistanceRangeChange()"></app-user-input>
+              </div>
+              <div class="content-section implementation">
+                <p-slider *ngIf="showSlider" [(ngModel)]="distanceRange"  [range]="true" [min]="0" [max]="100" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onDistanceRangeChange()"></p-slider>
+                <p>Abstand zum Benutzer: {{distanceRange[0]}} - {{distanceRange[1]}}</p>
+              </div>
             </form>
           </div>
         </div>
@@ -174,6 +182,14 @@
             <div class="content-section implementation">
               <p-slider *ngIf="showSlider" [(ngModel)]="speedRange"  [range]="true" [min]="0" [max]="540" [step]="10" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onSpeedRangeChange()"></p-slider>
               <p>Geschwindigkeitsbereich: {{speedRange[0]}} - {{speedRange[1]}}</p>
+            </div>
+            <div class="filter-row">
+              <app-user-input label="min. Distanz" [(text)]="minDist" formControlName="minDist" (input)="autoFormatBty($event, 'minDist')" (ngModelChange)="onMinDistanceRangeChange()"></app-user-input>
+              <app-user-input label="max. Distanz" [(text)]="maxDist" formControlName="maxDist" (input)="autoFormatBty($event, 'maxDist')"(ngModelChange)="onMaxDistanceRangeChange()"></app-user-input>
+            </div>
+            <div class="content-section implementation">
+              <p-slider *ngIf="showSlider" [(ngModel)]="distanceRange"  [range]="true" [min]="0" [max]="100" [step]="1" [ngModelOptions]="{standalone: true}" (onSlideEnd)="onDistanceRangeChange()"></p-slider>
+              <p>Abstand zum Benutzer: {{distanceRange[0]}} - {{distanceRange[1]}}</p>
             </div>
           </form>
         </div>

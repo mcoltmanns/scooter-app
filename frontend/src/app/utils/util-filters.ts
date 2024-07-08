@@ -2,6 +2,7 @@ import { PastRental } from 'src/app/models/rental';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { parse, isAfter, isBefore, isEqual } from 'date-fns';
+import { PositionService } from './position.service';
 
 
 /**
@@ -82,6 +83,8 @@ private static minBattery = '';
 private static maxBattery = '';
 private static minSpeed = '';
 private static maxSpeed = '';
+private static minDist = '';
+private static maxDist = '';
 
 /**
  * this function is to update the stored variables when a new filter is set
@@ -94,7 +97,7 @@ private static maxSpeed = '';
  * @param minSpeed 
  * @param maxSpeed 
  */
-static setBounds(minPrice: string, maxPrice: string, minRange: string, maxRange: string, minBty: string, maxBty: string, minSpeed: string, maxSpeed: string):void{
+static setBounds(minPrice: string, maxPrice: string, minRange: string, maxRange: string, minBty: string, maxBty: string, minSpeed: string, maxSpeed: string, minDist: string, maxDist: string):void{
     this.minPrice = minPrice;
     this.maxPrice = maxPrice;
     this.minRange = minRange;
@@ -103,6 +106,8 @@ static setBounds(minPrice: string, maxPrice: string, minRange: string, maxRange:
     this.maxBattery = maxBty;
     this.minSpeed = minSpeed;
     this.maxSpeed = maxSpeed;
+    this.minDist = minDist;
+    this.maxDist = maxDist;
 }
 
 /**
@@ -117,6 +122,8 @@ static resetBounds():void{
     this.maxBattery = '';
     this.minSpeed = '';
     this.maxSpeed = '';
+    this.minDist = '';
+    this.maxDist = '';
 }
 
 /**
@@ -129,6 +136,7 @@ static onReload(scooters: Scooter[], products: Product[]):Scooter[]{
     this.filteredScooters = this.filterRange(this.filteredScooters,products);
     this.filteredScooters = this.filterBattery(this.filteredScooters);
     this.filteredScooters = this.filterSpeed(this.filteredScooters,products);
+    this.filteredScooters = this.filterDistance(this.filteredScooters);
     return this.filteredScooters;
 }
 
@@ -237,4 +245,23 @@ static onReload(scooters: Scooter[], products: Product[]):Scooter[]{
         });
         return filteredScooters;
     }
+
+
+    static filterDistance(scooters: Scooter[]): Scooter[]{
+        const filteredScooters: Scooter[] = [];
+        //default values in case fields are empty
+        if (this.minDist === ''){
+            this.minDist = '0';
+        }
+        if (this.maxDist === ''){
+            this.maxDist = '10000';
+        }
+        scooters.forEach(scooter => {
+            const distance = PositionService.calculateDist(scooter.coordinates_lat, scooter.coordinates_lng);
+            if ((Number(this.minDist) <= distance) && (distance <= Number(this.maxDist)) && (!(distance === -1))){
+                filteredScooters.push(scooter);
+            }
+        });
+        return filteredScooters;
+    }   
 }

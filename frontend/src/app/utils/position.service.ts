@@ -80,6 +80,23 @@ export class PositionService {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  //static version for other util classes which are static
+  static calculateDist (lat2: number | undefined, lon2: number | undefined): number {
+    if (lat2 === undefined || lon2 === undefined) {
+      return -1;
+    }
+    const currentPos = JSON.parse(localStorage.getItem('user_position') || '{}');
+    const lat1 = currentPos.latitude || 47.663557;
+    const lon1 = currentPos.longitude || 9.175365;
+   
+    const lat = (lat1 + lat2) / 2 * 0.01745;
+
+    const dx  = 111.3 * Math.cos(lat) * (lon1 - lon2);
+    const dy = 111.3 * (lat1 - lat2);
+
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+
   /**
    * This method converts the given distance in the selected unit
    * and returns a string
