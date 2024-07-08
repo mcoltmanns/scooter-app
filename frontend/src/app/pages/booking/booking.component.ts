@@ -23,6 +23,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CheckoutObject } from 'src/app/models/booking';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { InfoModalComponent } from 'src/app/components/info-modal/info-modal.component';
+import { forkJoin } from 'rxjs';
 
 interface SwitchChangeEvent {
   checked: boolean;
@@ -86,6 +87,75 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.processRoutingState(); // Handle the state of the previous page
+
+    // read the last number from the url:
+    const currentPath = window.location.pathname;
+    const parts = currentPath.split('/');
+    const lastPart = parts[parts.length - 1];
+    const scooterId = parseInt(lastPart); // save the last number of URL in scooterId
+
+    this.paymentsStatus = 'Lade Zahlungsmethoden...';
+    forkJoin([
+      this.mapService.getSingleScooterInfo(scooterId),
+      this.mapService.getSingleProductInfo(scooterId),
+      this.optionService.getUserPreferences(),
+      this.paymentService.getAllPaymentMethods()
+    ]).subscribe({
+      next: ([scooter, product, preferences, paymentMethods]) => {
+        /* Proess the scooter information */
+        this.scooter = scooter;
+        console.log('Scooter information:', this.scooter);
+    
+        /* Process the product information */
+        this.product = product;
+        console.log('Product information:', this.product);
+
+        /* Process the user preferences */
+        this.option = preferences;
+        this.selectedSpeed = this.option.speed;
+        this.selectedDistance = this.option.distance;
+        this.selectedCurrency = this.option.currency;
+
+        /* Process the payment methods */
+        this.paymentMethods = paymentMethods.body;
+        this.paymentsStatus = null;
+
+        /* If only one payment method is available, select it by default */
+        if(this.paymentMethods.length === 1) {
+          this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id);
+        }
+        this.loadingPayment = false;
+
+        this.loadingPage = false;
+        this.loadingOptions = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error.message;
+        this.loadingPage = false;
+        this.scooterNotFound = true;
+        this.loadingOptions = false;
+        this.paymentsStatus = 'Fehler beim Laden der Zahlungsmethoden!';
+        this.loadingPayment = false;
+        console.log(err);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    /* Show the toast after the view has been initialized */
+    if(this.showPaymentAddedToast) {
+      this.toastComponentPaymentAdded.showToast();
+      this.showPaymentAddedToast = false; // Reset the state to prevent the toast from showing again
+    }
+  }
+
+  ngOnDestroy(): void {
+    /* Clear timeouts if still running */
+    this.clearTimeouts();
+  }
+
+  processRoutingState(): void {
     /* Handle the state of the previous page */
     const historyState = history.state;
 
@@ -121,90 +191,6 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       delete historyState.originState.path;
     }
     history.replaceState(historyState, '');   // Update the router state
-
-    // read the last number from the url:
-    const currentPath = window.location.pathname;
-    const parts = currentPath.split('/');
-    const lastPart = parts[parts.length - 1];
-    const scooterId = parseInt(lastPart); // save the last number of URL in scooterId
-
-    /* get the scooter information by scooterId*/
-    this.mapService.getSingleScooterInfo(scooterId).subscribe({
-      next: (value) => {
-        this.scooter = value;
-        this.loadingPage = false;
-        console.log('Scooter information:', this.scooter);
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingPage = false;
-        this.scooterNotFound = true;
-        console.log(err);
-      }
-    });
-
-    /* get the product information for the scooter */
-    this.mapService.getSingleProductInfo(scooterId).subscribe({
-      next: (value) => {
-        this.product = value;
-        this.loadingProduct = false;
-        console.log('Product information:', this.product);
-      },
-      error: (err) => {
-        this.errorMessage = err.error.message;
-        this.loadingProduct = false;
-        console.log(err);
-      }
-    });
-
-    /* Get the metrics settings for a user */
-    this.optionService.getUserPreferences().subscribe({
-      next: (value) => {
-        this.option = value;
-        this.selectedSpeed = this.option.speed;
-        this.selectedDistance = this.option.distance;
-        this.selectedCurrency = this.option.currency;
-        this.loadingOptions = false;
-      },
-      error: (err) => {
-        this.errorMessage = err.message;
-        this.loadingOptions = false;
-        console.error(err);
-      }
-    });
-
-    /* Get all payment methods for the user */
-    this.paymentsStatus = 'Lade Zahlungsmethoden...';
-    this.paymentService.getAllPaymentMethods().subscribe({
-        next: (payopt) => {
-            this.paymentMethods = payopt.body;
-            this.paymentsStatus = null;
-
-            /* If only one payment method is available, select it by default */
-            if(this.paymentMethods.length === 1) {
-              this.checkoutForm.controls['radioButtonChoice'].setValue(this.paymentMethods[0].id);
-            }
-            this.loadingPayment = false;
-        },
-        error: (err) => {
-            console.error(err);
-            this.paymentsStatus = 'Fehler beim Laden der Zahlungsmethoden!';
-            this.loadingPayment = false;
-        }
-    });
-  }
-
-  ngAfterViewInit(): void {
-    /* Show the toast after the view has been initialized */
-    if(this.showPaymentAddedToast) {
-      this.toastComponentPaymentAdded.showToast();
-      this.showPaymentAddedToast = false; // Reset the state to prevent the toast from showing again
-    }
-  }
-
-  ngOnDestroy(): void {
-    /* Clear timeouts if still running */
-    this.clearTimeouts();
   }
 
   /* Get Picture from the product list*/
