@@ -12,24 +12,6 @@ export class ScooterController {
         let scooters = [];
         try {
             /* Find all scooters that are not rented and not reserved by someone else (reservation by the user himself is fine) */
-            // scooters = (await Scooter.findAll({
-            //   where: { 
-            //     active_rental_id: null,
-            //     [Op.or]: [
-            //       { reservation_id: null },
-            //       { '$reservation.user_id$': userId }
-            //     ]
-            //   },
-            //   include: [{
-            //     model: Reservation,
-            //     as: 'reservation',
-            //     attributes: ['id', 'user_id']
-            //   }]
-            // })).map((scooterModel) => {
-            //   const scooter = scooterModel.get();
-            //   delete scooter.reservation;
-            //   return scooter;
-            // });
             scooters = (await Scooter.findAll({
               where: { 
                 active_rental_id: null,

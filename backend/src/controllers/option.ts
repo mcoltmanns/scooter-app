@@ -39,7 +39,7 @@ export class OptionController{
 
         // Check whether all required fields are present in the request body
         if (!speed || !distance || !currency) {
-            response.status(400).json({ code: 400, message: 'Speed, distance, and currency are required fields.' });
+            response.status(400).json({ code: 400, message: 'Geschwindigkeit, Distanz, und Währung sind Pflichtfelder.' });
             return;
         }
 
@@ -50,7 +50,7 @@ export class OptionController{
 
             const existingPreferences = await UserPreferences.findOne({ where: { id: userId } });
             if (!existingPreferences) {
-                response.status(404).json({ code: 404, message: 'User preferences nicht gefunden.' });
+                response.status(404).json({ code: 404, message: 'Benutzer-Präferenzen nicht gefunden.' });
                 await transaction.rollback();
                 return;
             }
@@ -63,6 +63,6 @@ export class OptionController{
             console.error(error);
             response.status(500).json({  code: 500, message: 'Die Benutzereinstellungen konnten nicht aktualisiert werden.' });
         }
-        response.status(200).json({ code: 200, message: 'User preferences erfolgreich aktualisiert.' });
+        response.status(200).json({ code: 200, message: 'Benutzer-Präferenzen erfolgreich aktualisiert.' });
     }
 }

@@ -1,6 +1,7 @@
 import { parseString } from 'xml2js';
 import post from 'axios';
 import { BachelorCardData, PaymentService } from '../../interfaces/payment-service.interface';
+import { errorMessages } from '../../static-data/error-messages';
 
 const merchantName = 'ScooterApp';
 
@@ -40,7 +41,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
@@ -84,7 +85,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
@@ -114,7 +115,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });
@@ -144,7 +145,7 @@ class BachelorCard {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(error.response.data, 'error'));
             });

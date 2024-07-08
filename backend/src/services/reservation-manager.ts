@@ -6,6 +6,7 @@ import { Job, scheduleJob } from 'node-schedule';
 import jobManager from './job-manager';
 import { Product } from '../models/product';
 import { RESERVATION_LIFETIME_MS } from '../static-data/global-variables';
+import { errorMessages } from '../static-data/error-messages';
 
 abstract class ReservationManager {
     /* check if a scooter is reserved */
@@ -68,16 +69,16 @@ abstract class ReservationManager {
         try {
             // can't reserve if the scooter isn't real
             const scooter = await Scooter.findByPk(scooterId, { transaction: transaction });
-            if(!scooter) throw new Error('SCOOTER_DOES_NOT_EXIST');
+            if(!scooter) throw new Error(errorMessages.SCOOTER_DOES_NOT_EXIST);
 
             // can't reserve if scooter is reserved or rented
             if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await ReservationManager.getReservationFromScooter(scooterId) !== null) {
-                throw new Error('SCOOTER_UNAVAILABLE');
+                throw new Error(errorMessages.SCOOTER_UNAVAILABLE);
             }
 
             // can't reserve if user already has reservation
             if(await ReservationManager.getReservationFromUser(userId)) {
-                throw new Error('USER_HAS_RESERVATION');
+                throw new Error(errorMessages.USER_HAS_RESERVATION);
             }
 
             // all good?
@@ -108,13 +109,13 @@ abstract class ReservationManager {
             if (!scooter) {
               scooter = await Scooter.findByPk(reservation.getDataValue('scooter_id'), { transaction: transaction });
             }
-            if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
+            if(!scooter) throw new Error(errorMessages.SCOOTER_NOT_FOUND);
 
             /* Check if the reservation still exists in the database. If we don't do this, we might
                end up deleting a reservation from scooters table that has changed in the meantime. */
             const existingReservation = await Reservation.findByPk(reservation.getDataValue('id'), { transaction: transaction });
             if (!existingReservation) {
-              throw new Error('RESERVATION_DOES_NOT_EXIST_ANYMORE');
+              throw new Error(errorMessages.RESERVATION_DOES_NOT_EXIST_ANYMORE);
             }
 
             await reservation.destroy({ transaction: transaction });

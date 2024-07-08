@@ -1,5 +1,6 @@
 import post from 'axios';
 import { HciPalData, PaymentService } from '../../interfaces/payment-service.interface';
+import { errorMessages } from '../../static-data/error-messages';
 
 const staticImplements = <T>() => <U extends T>(constructor: U): U => constructor;
 
@@ -24,7 +25,7 @@ class HciPal {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
@@ -40,7 +41,7 @@ class HciPal {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
@@ -56,7 +57,7 @@ class HciPal {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });
@@ -72,7 +73,7 @@ class HciPal {
             })
             .catch((error) => {
                 if (!error.response || !error.response.data) {
-                  return reject(new Error('NETWORK_ERROR_OR_SERVICE_UNAVAILABLE'));
+                  return reject(new Error(errorMessages.NETWORK_ERROR_OR_SERVICE_UNAVAILABLE));
                 }
                 resolve(this.processResponse(JSON.stringify(error.response.data), 'error'));
             });

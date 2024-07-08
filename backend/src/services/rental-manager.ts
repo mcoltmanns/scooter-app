@@ -9,6 +9,7 @@ import { DYNAMIC_EXTENSION_INTERVAL_MS } from '../static-data/global-variables';
 import { ActiveRentalObject, PastRentalObject } from '../interfaces/rentals.interface';
 import { PaymentService } from '../interfaces/payment-service.interface';
 import { CustomError } from '../utils/customError';
+import { errorMessages } from '../static-data/error-messages';
 
 abstract class RentalManager {
     /* Transform a prepaid ActiveRental object to look like a PastRental object */
@@ -56,7 +57,7 @@ abstract class RentalManager {
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             console.error(`Error fetching past rental for rentalId ${rentalId}:`, error);
-            throw new Error('FETCH_PAST_RENTAL_FAILED');
+            throw new Error(errorMessages.FETCH_PAST_RENTAL_FAILED);
         }
     }
 
@@ -103,7 +104,7 @@ abstract class RentalManager {
         const pastRentals = await PastRental.findAll({ where: { userId: userId }});
 
         if (!activeRentals || !pastRentals) {
-          throw new Error('ERROR_FETCHING_RENTALS');
+          throw new Error(errorMessages.ERROR_FETCHING_RENTALS);
         }
 
         return [activeRentals, pastRentals];
@@ -130,14 +131,14 @@ abstract class RentalManager {
             if (!scooter) {
                 scooter = await Scooter.findByPk(scooterId, { transaction: transaction });
             }
-            if(!scooter) throw new Error('SCOOTER_NOT_FOUND');
+            if(!scooter) throw new Error(errorMessages.SCOOTER_NOT_FOUND);
 
             // can't book if scooter is reserved by someone else or rented
             const scooterReservation = await ReservationManager.getReservationFromScooter(scooterId, transaction);
             const rentals = await RentalManager.getActiveRentalsFromScooter(scooterId, transaction);
             // if(scooter.getDataValue('active_rental_id') !== null || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
             if(rentals.length > 0 || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
-                throw new Error('SCOOTER_UNAVAILABLE');
+                throw new Error(errorMessages.SCOOTER_UNAVAILABLE);
             }
 
             // all good?
@@ -218,7 +219,7 @@ abstract class RentalManager {
               payment.currentAmountPaid = parseFloat((payment.currentAmountPaid - payment.currentAmountLastPaidBlock).toFixed(2));
               console.log('endDynamicRental: Refunded the last paid block of', payment.currentAmountLastPaidBlock, '€.');
             } else {
-              throw new Error('NO_PAYMENT_TOKEN');
+              throw new Error(errorMessages.NO_PAYMENT_TOKEN);
             }
 
             if (paymentOffset > payment.currentAmountLastPaidBlock) {
@@ -337,24 +338,24 @@ abstract class RentalManager {
             *        (in the context of this project) we simply return an error message to the user and print
             *        a statement to the console. */
             console.error('WARNING: Could not save the updated active rental ' + activeRental.getDataValue('id') + ' after payment activity.', correctPaymentStatus.refundedLastBlock ? 'Refunded the last paid block but could not reflect that to our database.' : '', correctPaymentStatus.chargedRemainingAmount ? 'Charged the remaining amount but could not reflect that to our database.' : '', 'The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
-            throw new CustomError('SEVERE_ERROR_ENDING_RENTAL', { rentalId: activeRental.getDataValue('id') });
+            throw new CustomError(errorMessages.SEVERE_ERROR_ENDING_RENTAL, { rentalId: activeRental.getDataValue('id') });
           }
 
           /* If everything worked fine in the try block, at least we were able to save the changes that have something to do with the payment activity to our database.
            * Therefore, we don't have to throw a severe error here, but we can throw a normal error to inform the user that there were problems with the payment activity that
            * will probably be corrected later. */
-          throw new CustomError('ERROR_ENDING_RENTAL', { rentalId: activeRental.getDataValue('id') });
+          throw new CustomError(errorMessages.ERROR_ENDING_RENTAL, { rentalId: activeRental.getDataValue('id') });
         }
 
         /* Handle errors that can occur during correcting paymentOffset values or when the rental was already ended.
          * That are especially errors after payment activities that must be handled by the controller after rolling back the transaction. */
-        if (error.message === 'CHARGE_OFFSET_ROLLBACK_PAYMENT_FAILED' || activeRentalIsEnded) {
+        if (error.message === errorMessages.CHARGE_OFFSET_ROLLBACK_PAYMENT_FAILED || activeRentalIsEnded) {
           console.error('endDynamicRental: Could not correct the payment after the rental', activeRental.getDataValue('id'), 'was already ended.');
           
-          if (error.message === 'CHARGE_OFFSET_ROLLBACK_PAYMENT_FAILED') {
-            throw new CustomError('ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED', { rentalId: activeRental.getDataValue('id'), chargedAmount: error.payload.chargedAmount });
+          if (error.message === errorMessages.CHARGE_OFFSET_ROLLBACK_PAYMENT_FAILED) {
+            throw new CustomError(errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED, { rentalId: activeRental.getDataValue('id'), chargedAmount: error.payload.chargedAmount });
           } else {
-            throw new CustomError('ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED', { rentalId: activeRental.getDataValue('id') });
+            throw new CustomError(errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED, { rentalId: activeRental.getDataValue('id') });
           } 
         }
 
@@ -383,7 +384,7 @@ abstract class RentalManager {
       } catch (error) {
           console.error(error);
           if(!transactionExtern) await transaction.rollback();
-          throw new Error('END_STATIC_RENTAL_FAILED');
+          throw new Error(errorMessages.END_STATIC_RENTAL_FAILED);
       }
     }
 
@@ -452,7 +453,7 @@ abstract class RentalManager {
                     /* Try to pay for the next block */
                     const paymentTransaction = await TransactionManager.doTransaction(rental.getDataValue('paymentMethodId'), rental.getDataValue('userId'), nextBlockPrice, transaction); // try pay for next block
                     if (!paymentTransaction || !paymentTransaction.token || paymentTransaction.token === '') {
-                      throw new Error('PAYMENT_FAILED');
+                      throw new Error(errorMessages.PAYMENT_FAILED);
                     }
 
                     /* Update the active rental in the database */
@@ -574,7 +575,7 @@ abstract class RentalManager {
       } catch (error) {
         console.error('mergeOffsetAmountsOfUser:', error);
         if(!transactionExtern) await transaction.rollback();
-        throw new Error('MERGE_PAYMENT_OFFSETS_FAILED');
+        throw new Error(errorMessages.MERGE_PAYMENT_OFFSETS_FAILED);
       }
     }
 
@@ -620,13 +621,13 @@ abstract class RentalManager {
 
         /* If the sum of the paymentOffset values is not equal to the amount that was charged, throw an error */
         if (checkSum !== 0) {
-          throw new Error('CLEARING_CHECKSUM_WRONG');
+          throw new Error(errorMessages.CLEARING_CHECKSUM_WRONG);
         }
 
         return;
       } catch (error) {
         console.error('clearPaymentOffsetsOfUser:', error);
-        throw new Error('CLEAR_PAYMENT_OFFSETS_FAILED');
+        throw new Error(errorMessages.CLEAR_PAYMENT_OFFSETS_FAILED);
       }
     }
 
@@ -722,16 +723,16 @@ abstract class RentalManager {
                 console.error('chargeUnderpaidOffsetOfUser: Could not reflect the charged amount of', chargedAmount, '€ to the database.');
                 console.error('chargeUnderpaidOffsetOfUser:', error);
                 await rollbackTransaction.rollback();
-                throw new Error('ROLLBACK_PAYMENT_FAILED');
+                throw new Error(errorMessages.ROLLBACK_PAYMENT_FAILED);
               }
             } else {
               console.log('chargeUnderpaidOffsetOfUser: Rolling back failed! Try to propagate the already charged amount of', chargedAmount, '€ to the initiator of the transaction so that he can reflect the already charged amount to the database after rollback.');
-              throw new CustomError('CHARGE_OFFSET_ROLLBACK_PAYMENT_FAILED', { chargedAmount: chargedAmount });
+              throw new CustomError(errorMessages.CHARGE_OFFSET_ROLLBACK_PAYMENT_FAILED, { chargedAmount: chargedAmount });
             }
           }
         }
 
-        throw new Error('CORRECT_UNDERPAID_OFFSETS_FAILED');
+        throw new Error(errorMessages.CORRECT_UNDERPAID_OFFSETS_FAILED);
       }
       
     }
@@ -767,7 +768,7 @@ abstract class RentalManager {
       } catch (error) {
         console.log('correctUnderpaidOffsetsOfUser:', error);
         
-        if (error.message === 'ROLLBACK_PAYMENT_FAILED') {
+        if (error.message === errorMessages.ROLLBACK_PAYMENT_FAILED) {
           /* Note: If the rollback after a payment fails, we have charged the user for something that is
            *       not reflected to our database. So it can happen that we charge the user again for the same.
            *       Normally would try to log this and inform the admin and user (e.g. via E-Mail) at this point,
@@ -783,7 +784,7 @@ abstract class RentalManager {
     }
 
     public static async correctUnderpaidOffsetsOfAllUsers(): Promise<void> {
-      /* Find all userIds with underpaid/overpaid offsets */
+      /* Find all userIds with underpaid/overpaid offsets. */
       const usersWithUnderpaidOffsets = await PastRental.findAll({
         attributes: [
           'userId',
@@ -795,7 +796,7 @@ abstract class RentalManager {
         group: ['userId']
       });
 
-      /* For each found user, exctract the most recenttly used paymentMethodId */
+      /* For each found user, exctract the most recenttly used paymentMethodId. */
       for (const user of usersWithUnderpaidOffsets) {
         const latestRental = await PastRental.findOne({
           where: {
@@ -805,7 +806,7 @@ abstract class RentalManager {
           limit: 1
         });
 
-        /* If the user has such a latest rental, correct the paymentOffset values of the user */
+        /* If the user has such a latest rental, correct the paymentOffset values of the user. */
         if (latestRental) {
           console.log('correctUnderpaidOffsetsOfAllUsers: Correcting paymentOffset value', user.getDataValue('totalPaymentOffset'), 'of user', user.getDataValue('userId'), 'with payment method', latestRental.getDataValue('paymentMethodId') + '.');
           await RentalManager.correctUnderpaidOffsetsOfUser(latestRental.getDataValue('paymentMethodId'), user.getDataValue('userId'));

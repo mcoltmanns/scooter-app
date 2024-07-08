@@ -7,6 +7,7 @@ import { Op } from 'sequelize';
 import { CreateInvoice } from '../utils/createInvoice'; 
 import { UsersAuth } from '../models/user';
 import { UsersData } from '../models/user';
+import { errorMessages } from '../static-data/error-messages';
 
 // manages information about rentals and reservations
 export class BookingsController {
@@ -82,19 +83,19 @@ export class BookingsController {
             response.status(200).json({ code: 200, reservation: reservation });
             return;
         } catch (error) {
-            if(error.message === 'SCOOTER_DOES_NOT_EXIST') {
+            if(error.message === errorMessages.SCOOTER_DOES_NOT_EXIST) {
                 response.status(404).json({ code: 404, message: 'Angegebener Scooter existiert nicht.' });
                 return;
             }
-            if(error.message === 'SCOOTER_UNAVAILABLE'){
+            if(error.message === errorMessages.SCOOTER_UNAVAILABLE) {
                 response.status(401).json({ code: 401, message: 'Scooter ist nicht mehr verfügbar.', scooterAvailable: false });
                 return;
             }
-            if(error.message === 'USER_HAS_RESERVATION') {
+            if(error.message === errorMessages.USER_HAS_RESERVATION) {
                 response.status(401).json({ code: 401, message: 'Es kann nur ein Scooter gleichzeitig reserviert werden.' });
                 return;
             }
-            if(error.message === 'RESERVATION_FAILED') {
+            if(error.message === errorMessages.RESERVATION_FAILED) {  
                 response.status(500).json({ code: 500, message: 'Reservierung konnte nicht angelegt werden.' });
                 return;
             }

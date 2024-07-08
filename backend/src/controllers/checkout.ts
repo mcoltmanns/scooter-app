@@ -7,6 +7,7 @@ import RentalManager from '../services/rental-manager';
 import { TransactionManager } from '../services/payment/transaction-manager';
 import { PaymentService } from '../interfaces/payment-service.interface';
 import { DYNAMIC_EXTENSION_INTERVAL_MS, PREPAID_RENTAL_DISCOUNT } from '../static-data/global-variables';
+import { errorMessages } from '../static-data/error-messages';
 
 interface ProductInstance extends Model {
   price_per_hour: number;
@@ -140,23 +141,23 @@ export class CheckoutController {
       }
 
       /* Handle thrown errors and translate the error messages to a more user-friendly format */
-      if (error.message === 'SCOOTER_UNAVAILABLE') {
+      if (error.message === errorMessages.SCOOTER_UNAVAILABLE) {
         response.status(400).json({code: 400, message: 'Der Scooter ist nicht mehr verfügbar.' });
         return;
       }
-      if (error.message === 'SCOOTER_NOT_FOUND') {
+      if (error.message === errorMessages.SCOOTER_NOT_FOUND) {
         response.status(404).json({code: 404, message: 'Der Scooter existiert nicht.' });
         return;
       }
-      if (error.message === 'PAYMENT_SERVICE_NOT_FOUND') {
+      if (error.message === errorMessages.PAYMENT_SERVICE_NOT_FOUND) {
         response.status(404).json({code: 404, message: 'Der Zahlungsanbieter existiert nicht.' });
         return;
       }
-      if (error.message === 'PAYMENT_METHOD_NOT_FOUND') {
+      if (error.message === errorMessages.PAYMENT_METHOD_NOT_FOUND) {
         response.status(404).json({ code: 404, message: 'Die angegebene Zahlungsmethode existiert nicht.' });
         return;
       }
-      if (error.message === 'PAYMENT_FAILED') {
+      if (error.message === errorMessages.PAYMENT_FAILED) {
         response.status(500).json({ code: 500, message: 'Die Zahlung konnte nicht durchgeführt werden.'});
         return;
       }
@@ -187,7 +188,7 @@ export class CheckoutController {
       /* Fetch the active dynamic rental for the provided rentalId and ensure it belongs to the user */
       activeRental = await RentalManager.getDynamicActiveRentalByRentalIdUserId(rentalId, userId, transaction);
       if (!activeRental) {
-        throw new Error('ACTIVE_RENTAL_NOT_FOUND');
+        throw new Error(errorMessages.ACTIVE_RENTAL_NOT_FOUND);
       }
 
       /* End the rental */
@@ -204,19 +205,19 @@ export class CheckoutController {
       await transaction.rollback(); // Rollback the transaction in case of an error
 
       /* Handle thrown errors and translate the error messages to a more user-friendly format */
-      if (error.message === 'ACTIVE_RENTAL_NOT_FOUND') {
+      if (error.message === errorMessages.ACTIVE_RENTAL_NOT_FOUND) {
         response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
         return;
       }
-      if (error.message === 'ERROR_ENDING_RENTAL') {
+      if (error.message === errorMessages.ERROR_ENDING_RENTAL) {
         response.status(500).json({ code: 500, message: 'Probleme beim Beenden!', hotMessage: 'Beim Beenden der Buchung ist ein Fehler aufgetreten. Wir versuchen, die Buchung zu einem späteren Zeitpunkt erneut zu beenden. Normalerweise entstehen hierdurch keine Mehrkosten. Falls du dennoch Unstimmigkeiten in deiner Abrechnung entdeckst oder die Buchungen auch in den nächsten Tagen noch nicht beendet ist, kontaktiere uns bitte unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
         return;
       }
-      if (error.message === 'SEVERE_ERROR_ENDING_RENTAL') {
+      if (error.message === errorMessages.SEVERE_ERROR_ENDING_RENTAL) {
         response.status(500).json({ code: 500, message: 'Schwerwiegender Fehler!', hotMessage: 'Bei der Beendung der Buchung ist ein schwerwiegender Fehler aufgetreten, bei dem auch Zahlungsunregelmäßigkeiten aufgetreten sein können. Bitte kontaktiere uns unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
         return;
       }
-      if (error.message === 'ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED') {
+      if (error.message === errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED) {
         console.log('endDynamicRental (Controller) after rollback:', activeRental.toJSON());
         try {
           if (error.payload.chargedAmount) {

@@ -4,6 +4,7 @@ import { BachelorCardData, SwpSafeData, HciPalData, PaymentService } from '../..
 import BachelorCard from './bachelorcard';
 import HciPal from './hcipal';
 import SwpSafe from './swpsafe';
+import { errorMessages } from '../../static-data/error-messages';
 
 export class TransactionManager {
     public static async getPaymentService(paymentMethodId: number, userId: number, transaction?: Transaction): Promise<{ paymentService: PaymentService, paymentData: BachelorCardData | SwpSafeData | HciPalData }> {
@@ -12,7 +13,7 @@ export class TransactionManager {
         transaction: transaction || undefined
       });
       if (!paymentMethod) {
-        throw new Error('PAYMENT_METHOD_NOT_FOUND');
+        throw new Error(errorMessages.PAYMENT_METHOD_NOT_FOUND);
       }
       
       let paymentService: PaymentService | null = null;
@@ -32,7 +33,7 @@ export class TransactionManager {
       }
 
       if (!paymentService || !paymentData) {
-        throw new Error('PAYMENT_SERVICE_NOT_FOUND');
+        throw new Error(errorMessages.PAYMENT_SERVICE_NOT_FOUND);
       }
 
       return { paymentService, paymentData };
@@ -53,14 +54,14 @@ export class TransactionManager {
         const { status:validateStatus, message:token } = await paymentService.initTransaction(paymentData, amount);
 
         if (validateStatus !== 200 || !token || token === '') {
-            throw new Error('PAYMENT_FAILED');
+            throw new Error(errorMessages.PAYMENT_FAILED);
         }
 
         /* Commit the payment */
         const commitPaymentResponse = await paymentService.commitTransaction(token);
 
         if (commitPaymentResponse.status !== 200) {
-            throw new Error('PAYMENT_FAILED');
+            throw new Error(errorMessages.PAYMENT_FAILED);
         }
 
         return { token: token, serviceUsed: paymentService };
@@ -69,7 +70,7 @@ export class TransactionManager {
     public static async rollbackTransaction(paymentService: PaymentService, token: string): Promise<{ status: number, message: string }> {
       const rollbackPaymentResponse = await paymentService.rollbackTransaction(token);
       if (rollbackPaymentResponse.status !== 200) {
-        throw new Error('PAYMENT_ROLLBACK_FAILED');
+        throw new Error(errorMessages.PAYMENT_ROLLBACK_FAILED);
       }
       return rollbackPaymentResponse;
     }

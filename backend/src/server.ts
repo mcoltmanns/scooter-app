@@ -11,6 +11,7 @@ import { ActiveRental, Reservation } from './models/rental';
 import ReservationManager from './services/reservation-manager';
 import RentalManager from './services/rental-manager';
 import { DYNAMIC_EXTENSION_INTERVAL_MS } from './static-data/global-variables';
+import { errorMessages } from './static-data/error-messages';
 SourceMap.install();
 
 class Server {
@@ -57,7 +58,7 @@ class Server {
             await RentalManager.endRental(rental.dataValues.id);
           } catch (error) {
             console.error('start: Failed to end rental', rental.dataValues.id + ':', error);
-            if (error.message === 'ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED') {
+            if (error.message === errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED) {
               const currentTime = new Date();
               RentalManager.scheduleRentalCheck(error.payload.rentalId, new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
               console.log('start: Scheduled rental check for rental', error.payload.rentalId, 'at', new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS), 'to try ending the rental again later.');
