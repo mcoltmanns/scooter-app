@@ -200,8 +200,6 @@ export class CheckoutController {
     } catch (error) {
       console.error(error);
 
-      console.log('endDynamicRental (Controller) before rollback:', activeRental.toJSON());
-
       await transaction.rollback(); // Rollback the transaction in case of an error
 
       /* Handle thrown errors and translate the error messages to a more user-friendly format */
@@ -218,7 +216,6 @@ export class CheckoutController {
         return;
       }
       if (error.message === errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED) {
-        console.log('endDynamicRental (Controller) after rollback:', activeRental.toJSON());
         try {
           if (error.payload.chargedAmount) {
             const currentPaymentOffset = parseFloat(parseFloat(activeRental.getDataValue('paymentOffset')).toFixed(2));
@@ -229,7 +226,6 @@ export class CheckoutController {
           const currentTime = new Date();
           RentalManager.scheduleRentalCheck(activeRental.getDataValue('id'), new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
           console.log('endDynamicRental (Controller): Database transaction got rolled back. But could reflect already processed payment activity to the database. Try to end active rental', activeRental.getDataValue('id'), 'again later.');
-          console.log('endDynamicRental (Controller) after saving:', activeRental.toJSON());
           response.status(500).json({ code: 500, message: 'Probleme beim Beenden!', hotMessage: 'Beim Beenden der Buchung ist ein Fehler aufgetreten. Wir versuchen, die Buchung zu einem späteren Zeitpunkt erneut zu beenden. Normalerweise entstehen hierdurch keine Mehrkosten. Falls du dennoch Unstimmigkeiten in deiner Abrechnung entdeckst oder die Buchungen auch in den nächsten Tagen noch nicht beendet ist, kontaktiere uns bitte unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
           return;
         } catch (error) {
