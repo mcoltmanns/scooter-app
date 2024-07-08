@@ -28,6 +28,16 @@ export class UserPosition {
   }
 
   static createUserPositionIcon(): Leaflet.DivIcon {
+    /* Blue Pulse */
+    const primaryColor = '#80d2e0';
+    const highlightColor = '#9af0ff';
+    const borderColor = '#00363d';
+
+    /* Green Pulse */
+    // const primaryColor = '#75db42';
+    // const highlightColor = '#97FB64';
+    // const borderColor = '#123800';
+
     const styleSheet = document.createElement('style');
     styleSheet.innerText = `
     @keyframes pulse-animation-shadow {
@@ -44,42 +54,42 @@ export class UserPosition {
 
     @keyframes pulse-animation-inner1 {
       0% {
-        background-color: #75db42;
+        background-color: ${primaryColor};
       }
       50% {
-        background-color: #75db42;
+        background-color: ${primaryColor};
       }
       51% {
-        background-color: #97FB64;
+        background-color: ${highlightColor};
       }
       100% {
-        background-color: #75db42;
+        background-color: ${primaryColor};
       }
     }
 
     @keyframes pulse-animation-inner2 {
       0% {
-        background-color: #97FB64;
+        background-color: ${highlightColor};
         transform: scale(0);
         opacity: 0;
       }
       50% {
-        background-color: #97FB64;
+        background-color: ${highlightColor};
         transform: scale(1);
         opacity: 1;
       }
       51% {
-        background-color: #97FB64;
+        background-color: ${highlightColor};
         transform: scale(1);
         opacity: 1;
       }
       52% {
-        background-color: #97FB64;
+        background-color: ${highlightColor};
         transform: scale(0);
         opacity: 0;
       }
       100% {
-        background-color: #97FB64;
+        background-color: ${highlightColor};
         transform: scale(0);
         opacity: 0;
       }
@@ -108,7 +118,7 @@ export class UserPosition {
       display: flex;
       align-items: center;
       justify-content: center;
-      background-color: #123800;
+      background-color: ${borderColor};
       width: 25px;
       height: 25px;
       border-radius: 50%;
@@ -116,7 +126,7 @@ export class UserPosition {
     `;
     const userIconPulseStyleInner1 = `
       margin: 1px;
-      background-color: #97FB64;
+      background-color: ${highlightColor};
       width: 23px;
       height: 23px;
       border-radius: 50%;
@@ -124,7 +134,7 @@ export class UserPosition {
       animation: pulse-animation-inner1 3s infinite;
     `;
     const userIconPulseStyleInner2 = `
-      background-color: #75db42;
+      background-color: ${primaryColor};
       width: 23px;
       height: 23px;
       border-radius: 50%;
@@ -139,7 +149,7 @@ export class UserPosition {
       right: 0;
       bottom: 0;
       background-color: transparent;
-      border: 3px solid #123800;
+      border: 3px solid ${borderColor};
       border-radius: 50%;
       box-sizing: border-box;
       margin: auto;
