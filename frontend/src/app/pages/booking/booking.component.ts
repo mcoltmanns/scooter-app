@@ -105,11 +105,11 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       next: ([scooter, product, preferences, paymentMethods]) => {
         /* Proess the scooter information */
         this.scooter = scooter;
-        console.log('Scooter information:', this.scooter);
+        // console.log('Scooter information:', this.scooter);
     
         /* Process the product information */
         this.product = product;
-        console.log('Product information:', this.product);
+        // console.log('Product information:', this.product);
 
         /* Process the user preferences */
         this.option = preferences;

@@ -22,11 +22,13 @@ import { trigger, style, transition, animate } from '@angular/animations';
 export class ConfirmModalComponent {
   @Input() public showModal = false;
   @Input() public showIcon = true;
+  @Input() public iconMode: 'normal' | 'warn' = 'normal';
   @Input() public reverseControls = true;
   @Input() public centerControls = false;
   @Input() public title = 'Bastätigung';
   @Input() public confirmText = 'Ja';
   @Input() public cancelText = 'Nein';
+  @Input() public confirmMode: 'normal' | 'warn' = 'normal';
   @Input() confirm: () => void = () => {
     // This is a default function that does nothing.
     // It will be replaced by a function from the parent component.

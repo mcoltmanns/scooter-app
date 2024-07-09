@@ -36,8 +36,21 @@ export class RentalService{
     }
 
     /* Request to end an active dynamic rental */
-    public postEndRental(data: { rentalId: number }): Observable<ResponseObjEndRental> {
-      return this.http.post<ResponseObjEndRental>('api/rental/end', data);
+    public postEndRental(data: { rentalId: number, userLocation: { latitude: number, longitude: number } | null }): Observable<ResponseObjEndRental> {
+      let reqObj;
+      if (!data.userLocation) {
+        reqObj = {
+          rentalId: data.rentalId,
+        };
+      } else {
+        reqObj = {
+          rentalId: data.rentalId,
+          latitude: data.userLocation.latitude,
+          longitude: data.userLocation.longitude
+        };
+      }
+      console.log(reqObj);
+      return this.http.post<ResponseObjEndRental>('api/rental/end', reqObj);
     }
 
     /* request to the backend to generate an invoice for one specific scooter  */

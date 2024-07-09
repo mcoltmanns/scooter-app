@@ -180,6 +180,12 @@ export class CheckoutController {
   public async endDynamicRental (request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
     const { rentalId } = request.body;
+    let userLocation: { latitude: number, longitude: number } | null = null;
+
+    if (request.body.latitude && request.body.longitude) {
+      userLocation = { latitude: request.body.latitude, longitude: request.body.longitude };
+      console.log('endDynamicRental (Controller): User location provided:', request.body.latitude, request.body.longitude);
+    }
 
     const transaction = await Database.getSequelize().transaction();
 
@@ -189,6 +195,37 @@ export class CheckoutController {
       activeRental = await RentalManager.getDynamicActiveRentalByRentalIdUserId(rentalId, userId, transaction);
       if (!activeRental) {
         throw new Error(errorMessages.ACTIVE_RENTAL_NOT_FOUND);
+      }
+
+      /* Save the user location as new location of the scooter. 
+       * Note: In a real-world scenario, the user location should be double-checked with the scooter location
+       * to ensure that the user is near the scooter or directly only the scooter location should be used
+       * (assuming the scooter has a GPS module). */
+      if (userLocation) {
+        /* Save the user location in the database outside the transaction of the payment/ending procedure to prevent
+         * a rollback in case of an error. Because in case of a payment error or a failure in the endDynamicRental
+         * procedure, we rather want to save the latest location of the scooter in case the user walks away from the
+         * scooter after getting an error message even though the rental was not correctly ended. */
+        const saveLocationTransaction = await Database.getSequelize().transaction();
+        try {
+          console.log('endDynamicRental (Controller): Saving scooter location:', userLocation.latitude, userLocation.longitude, 'for scooter', activeRental.getDataValue('scooterId') + '...');
+          const scooter = await Scooter.findByPk(activeRental.getDataValue('scooterId'), { transaction: saveLocationTransaction });
+          if (!scooter) {
+            throw new Error(errorMessages.SCOOTER_NOT_FOUND);
+          }
+          scooter.setDataValue('coordinates_lat', userLocation.latitude);
+          scooter.setDataValue('coordinates_lng', userLocation.longitude);
+          await scooter.save({ transaction: saveLocationTransaction });
+          await saveLocationTransaction.commit();
+          console.log('endDynamicRental (Controller): Scooter location saved successfully.');
+        } catch (error) {
+          await saveLocationTransaction.rollback();
+          await transaction.rollback();   // Also rollback the main transaction in case of an error because we are returning an error message to the user and the transaction would never be closed otherwise
+          console.error('endDynamicRental (Controller): Saving scooter location failed. Transactions rolled back.');
+          console.error(error);
+          response.status(500).json({ code: 500, message: 'Fehler beim Speichern des Scooter-Standorts.'});
+          return;
+        }
       }
 
       /* End the rental */

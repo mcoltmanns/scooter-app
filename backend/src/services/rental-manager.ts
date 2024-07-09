@@ -61,7 +61,7 @@ abstract class RentalManager {
         }
     }
 
-    /* Get an active rental by rentalId and userId */
+    /* Get an active rental by rentalId and userId, but it locks the row for update */
     public static async getDynamicActiveRentalByRentalIdUserId(rentalId: number, userId: number, transaction?: Transaction): Promise<Model | null> {
       try {
         const activeRental = await ActiveRental.findOne({
@@ -70,7 +70,8 @@ abstract class RentalManager {
             renew: true,
             userId
           },
-          transaction: transaction || undefined
+          transaction: transaction || undefined,
+          lock: true
         });
 
         return activeRental ? activeRental : null;
@@ -432,9 +433,14 @@ abstract class RentalManager {
     public static async checkRental(rentalId: number): Promise<void> {
         console.log(`checking rental ${rentalId}`);
         const transaction = await database.getSequelize().transaction();
+        let paymentToken: string | null = null;
+        let paymentService: PaymentService | null = null;
         try {
             // find the rental we want to check
-            const rental = await ActiveRental.findByPk(rentalId, { transaction: transaction });
+            const rental = await ActiveRental.findByPk(rentalId, { 
+              transaction: transaction,
+              lock: true
+            });
             if(!rental) {
               await transaction.commit();
               return; // do nothing if no rental found
@@ -450,11 +456,15 @@ abstract class RentalManager {
                 const newTotalPrice = parseFloat((parseFloat(rental.getDataValue('total_price')) + nextBlockPrice).toFixed(2));
                 
                 try {
-                    /* Try to pay for the next block */
+                    /* Pay for the next block */
+                    console.log(`checkRental: Charging ${nextBlockPrice} € for the next block of rental ${rentalId}...`);
                     const paymentTransaction = await TransactionManager.doTransaction(rental.getDataValue('paymentMethodId'), rental.getDataValue('userId'), nextBlockPrice, transaction); // try pay for next block
-                    if (!paymentTransaction || !paymentTransaction.token || paymentTransaction.token === '') {
+                    if (!paymentTransaction || !paymentTransaction.token || paymentTransaction.token === '' || !paymentTransaction.serviceUsed) {
                       throw new Error(errorMessages.PAYMENT_FAILED);
                     }
+                    paymentToken = paymentTransaction.token;
+                    paymentService = paymentTransaction.serviceUsed;
+                    console.log(`checkRental: Charged ${nextBlockPrice} €.`);
 
                     /* Update the active rental in the database */
                     rental.setDataValue('nextActionTime', new Date(nextActionTime));
@@ -478,7 +488,28 @@ abstract class RentalManager {
 
             await transaction.commit();
         } catch (error) {
+            console.log('checkRental:', error);
+
+            /* If the rental was ended because of a failed payment, we should not rollback the transaction because that would undo the ending of the rental. */
+            if (error.message === errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED) {
+              await transaction.commit();
+              console.log('checkRental: Rental', rentalId, 'was already ended with possible paymentOffset. Transaction comitted.');
+              return;
+            }
+
             await transaction.rollback();
+            console.log(`checkRental: Rolled back transaction for rental ${rentalId}.`);
+
+            if (paymentService && paymentToken) {
+                console.log(`Rolling back payment for rental ${rentalId}`);
+                try {
+                  await TransactionManager.rollbackTransaction(paymentService, paymentToken);
+                } catch (error) {
+                  console.log('checkRental:', error);
+                  console.error('WARNING: Could not rollback the payment for rental ' + rentalId + ' after payment activity. Please check the database for inconsistencies.');
+                }
+            }
+            
             console.log(`check on rental ${rentalId} failed!\n${error}`);
         }
     }

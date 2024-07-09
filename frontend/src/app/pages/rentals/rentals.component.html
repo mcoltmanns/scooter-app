@@ -1,11 +1,12 @@
-<app-loading-overlay [isLoading]="processingEndReservation"></app-loading-overlay>
+<app-loading-overlay [isLoading]="processingEndRental"></app-loading-overlay>
 
 <app-info-modal [showModal]="hotErrorMessage ? true : false" [close]="onCloseHotError" [title]="errorMessage" [showIcon]="true" cancelText="Schließen" iconMode="warn">
   {{ hotErrorMessage }}
 </app-info-modal>
 
-<app-confirm-modal [showModal]="this.confirmModal.showConfirmModal" [confirm]="onConfirmConfirmModal" [cancel]="onCloseConfirmModal" [reverseControls]="true" title="Buchung beenden">
-  Bist du sicher, dass du die Buchung für den Scooter {{ this.confirmModal.scooterName }} beenden willst?
+<app-confirm-modal [showModal]="this.confirmModal.showConfirmModal" [confirm]="onConfirmConfirmModal" [cancel]="onCloseConfirmModal" [reverseControls]="true" [title]="userLocation ? 'Buchung beenden?' : 'Steht der Scooter wieder am Abholort?'" [iconMode]="userLocation ? 'normal' : 'warn'" [confirmText]="!userLocation ? 'Ja, Buchung beenden' : 'Ja'" [confirmMode]="!userLocation ? 'warn' : 'normal'">
+  <span *ngIf="userLocation">Bist du sicher, dass du die Buchung für den Scooter {{ this.confirmModal.scooterName }} beenden und ihn an deinem aktuellen Standort ({{ userLocation.latitude }}, {{ userLocation.longitude }}) abstellen willst?</span>
+  <span *ngIf="!userLocation">Beende die Buchung nur, wenn du den Scooter wieder an den Abholort zurückgebracht hast. Bitte gib deinen Standort frei, wenn du den Scooter {{ this.confirmModal.scooterName }} lieber an deiner aktuellen Position abstellen willst und versuche es dann erneut.</span>
 </app-confirm-modal>
 
 <app-info-modal [showModal]="infoModal.show" [action]="onNavigateToScooter" [close]="onCloseInfoModal" [title]="infoModal.title" [showIcon]="false" [showActionButton]="infoModal.isActive ? false : true" actionText="Zum Scooter" cancelText="Schließen" [centerControls]="true">

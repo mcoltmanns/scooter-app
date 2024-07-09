@@ -18,6 +18,8 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 import { trigger, transition, style, animate, sequence } from '@angular/animations';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
+import { UserPosition } from 'src/app/utils/userPosition';
+import { PositionService } from 'src/app/utils/position.service';
 
 
 interface InfoModal {
@@ -68,7 +70,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
 
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router, private route: ActivatedRoute) {
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router, private route: ActivatedRoute, private positionService: PositionService) {
     //form group for the booking filter
     this.bookingFilterForm = this.fb.group({
       lower: ['', this.dateValidator],
@@ -89,7 +91,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
   // Variable to control the visibility of the loading spinner
   public isLoading = true;
-  public processingEndReservation = false;
+  public processingEndRental = false;
 
   // Object to track loaded state of images by scooterId
   imageLoaded: { [scooterId: string]: boolean } = {};
@@ -131,6 +133,9 @@ export class RentalsComponent implements OnInit, OnDestroy {
       // Do nothing by default
     }
   };
+
+  // User Location
+  public userLocation: { latitude: number, longitude: number } | null = null;
 
   //variables for the filters----------------------
 
@@ -204,6 +209,29 @@ export class RentalsComponent implements OnInit, OnDestroy {
   // Function to call when an image is loaded
   onImageLoad(scooterId: string): void {
     this.imageLoaded[scooterId] = true;
+  }
+
+  async getUserLatestUserLocation(): Promise<boolean> {
+    /* Set the latest user position so that the we can later send the longitude and latitude to the backend */
+    return UserPosition.setUserPosition(this.positionService).then((result) => {
+      if (result) {
+        console.log('Latitude:', this.positionService.latitude);
+        console.log('Longitude:', this.positionService.longitude);
+        this.userLocation = { latitude: this.positionService.latitude, longitude: this.positionService.longitude };
+        return true;
+      } else {
+        this.userLocation = null;
+        this.errorMessage = 'Standort nicht verfügbar.';
+        this.toastComponentError.showToast();
+        return false;
+      }
+    }).catch((error) => {
+      console.error(error);
+      this.userLocation = null;
+      this.errorMessage = 'Standort nicht verfügbar.';
+      this.toastComponentError.showToast();
+      return false;
+    });
   }
 
   getExactRentalDurationInHours(begin: string, end: string): number {
@@ -566,15 +594,15 @@ export class RentalsComponent implements OnInit, OnDestroy {
     }
 
     /* Show the loading overlay */
-    this.processingEndReservation = true;
+    this.processingEndRental = true;
 
     /* Request to end the dynamic rental */
-    this.rentalService.postEndRental({ rentalId: activeRental.id }).subscribe({
+    this.rentalService.postEndRental({ rentalId: activeRental.id, userLocation: this.userLocation }).subscribe({
       next: (response) => {
         console.log(response);
 
         /* Hide the loading overlay */
-        this.processingEndReservation = false;
+        this.processingEndRental = false;
 
         /* Restore the info modal if it was open before */
         if (this.confirmModal.infoModalWasOpen) {
@@ -595,7 +623,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         console.log(error);
 
         /* Hide the loading overlay */
-        this.processingEndReservation = false;
+        this.processingEndRental = false;
         this.errorMessage = error.error.message;
         this.hotErrorMessage = error.error.hotMessage;
         this.toastComponentError.showToast();
@@ -614,13 +642,17 @@ export class RentalsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onCancelRental(activeRental: ActiveRental | PastRental | null): void {
+  async onCancelRental(activeRental: ActiveRental | PastRental | null): Promise<void> {
     /* Set up and show the confirm modal */
     this.confirmModal.infoModalWasOpen = this.infoModal.show;
     
     if (this.confirmModal.infoModalWasOpen) {
       this.infoModal.show = false;
     }
+
+    this.processingEndRental = true;
+    await this.getUserLatestUserLocation();
+    this.processingEndRental = false;
     
     this.confirmModal.showConfirmModal = true;
 

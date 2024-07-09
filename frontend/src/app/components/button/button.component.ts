@@ -15,6 +15,7 @@ export class ButtonComponent implements AfterViewInit, OnDestroy {
   @Input() public type: 'button' | 'submit' | 'reset' = 'button';
   @Input() public design: 'thin' | '' = '';
   @Input() public color: 'primary' | 'accent' | 'warn' = 'primary';
+  @Input() public background: 'light' | '' = '';
 
   @ViewChild('myButton') myButton!: ElementRef;
 
