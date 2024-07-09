@@ -215,8 +215,6 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Set the latest user position so that the we can later send the longitude and latitude to the backend */
     return UserPosition.setUserPosition(this.positionService).then((result) => {
       if (result) {
-        console.log('Latitude:', this.positionService.latitude);
-        console.log('Longitude:', this.positionService.longitude);
         this.userLocation = { latitude: this.positionService.latitude, longitude: this.positionService.longitude };
         return true;
       } else {
@@ -650,9 +648,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.show = false;
     }
 
-    this.processingEndRental = true;
+    /* Show the loading overlay while waiting for the user's location */
+    this.processingEndRental = true;    // turns on the loading overlay
     await this.getUserLatestUserLocation();
-    this.processingEndRental = false;
+    this.processingEndRental = false;   // turns off the loading overlay
     
     this.confirmModal.showConfirmModal = true;
 

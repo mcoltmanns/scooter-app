@@ -49,7 +49,6 @@ export class RentalService{
           longitude: data.userLocation.longitude
         };
       }
-      console.log(reqObj);
       return this.http.post<ResponseObjEndRental>('api/rental/end', reqObj);
     }
 
