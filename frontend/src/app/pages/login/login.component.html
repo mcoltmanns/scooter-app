@@ -1,3 +1,5 @@
+<app-toast #toastComponentError [showDuration]=7000 type="error">{{errorMessage}}</app-toast>
+
 <!-- Einige (globale) Klassen, wie 'page-container', sind schon in der 'src/styles.css' Datei vorgegeben -->
 <div class="page-container">
   <div class="scrollable-container">
@@ -14,9 +16,7 @@
         <app-user-input label="Passwort" type="password" [(text)]="password" formControlName="password" (blurEvent)="updateErrorMessages()"></app-user-input>
         <div class="error">{{passwordErrorMessage}}</div>
 
-        <div class="bottom">
-          <div style="text-align: center;" class="error">{{errorMessage}}</div>
-  
+        <div class="bottom">  
           <app-button class="login-btn" color="primary" type="submit">
             Login
           </app-button>

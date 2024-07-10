@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, Renderer2, ViewChild, } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -9,15 +9,18 @@ import { UserInputComponent } from 'src/app/components/user-input/user-input.com
 import { PaymentService } from 'src/app/services/payment.service';
 import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/loading-overlay.component';
 import { BachelorcardObj } from 'src/app/models/payment';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 @Component({
     selector: 'app-bachelorcard',
     standalone: true,
     templateUrl: './add-bachelorcard.component.html',
     styleUrl: './add-bachelorcard.component.css',
-    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule, LoadingOverlayComponent]
+    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule, LoadingOverlayComponent, ToastComponent]
 })
 export class AddbachelorcardComponent implements OnInit, OnDestroy {
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
+
   /* Initialize subscriptions for the form value changes */
   private bachelorcardFormValueChangesSubscription?: Subscription;
 
@@ -172,6 +175,7 @@ export class AddbachelorcardComponent implements OnInit, OnDestroy {
       if (!this.errorMessage) {
         this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
       }
+      this.toastComponentError.showToast();
     }
   }
 

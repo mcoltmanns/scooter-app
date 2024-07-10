@@ -55,7 +55,7 @@
 }
 
 .bottom {
-  margin-top: 30px;
+  margin-top: 45px;
   width: 100%;
   min-width: min-content;
   height: 100%;
@@ -110,5 +110,5 @@ app-user-input {
 
 .error {
   width: 100%;
-  color: rgb(226, 27, 27);
+  color: #fa3737;
 }
