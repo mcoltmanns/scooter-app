@@ -244,7 +244,25 @@ export class CheckoutController {
         response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
         return;
       }
+
       if (error.message === errorMessages.ERROR_ENDING_RENTAL) {
+        try {
+          activeRental.setDataValue('total_price', error.payload.targetAmountPaid); 
+          activeRental.setDataValue('paymentOffset', error.payload.paymentOffset); 
+          activeRental.setDataValue('renew', false);  // Set renew to false to prevent the rental from being extended or canceled by user again
+          await activeRental.save(); // Save the updated rental in case the transaction was rolled back, no transaction is used here because the transaction was already rolled back
+          const currentTime = new Date();
+          RentalManager.scheduleRentalCheck(activeRental.getDataValue('id'), new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
+          console.log('endDynamicRental (Controller): Database transaction got rolled back. But could reflect already processed payment activity to the database. Try to end active rental', activeRental.getDataValue('id'), 'again later.');
+        } catch (error) {
+          /* Note: If the rental could not be saved after the payment activity, we have data inconsistency.
+           *        Normally would try to log this and inform the admin at this point, but for simplicity
+           *        (in the context of this project) we simply return an error message to the user and print
+           *        a statement to the console. */
+          console.error('WARNING: Could not save the updated active rental ' + activeRental.getDataValue('id') + ' after payment activity. The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
+          response.status(500).json({ code: 500, message: 'Schwerwiegender Fehler!', hotMessage: 'Bei der Beendung der Buchung ist ein schwerwiegender Fehler aufgetreten, bei dem auch Zahlungsunregelmäßigkeiten aufgetreten sein können. Bitte kontaktiere uns unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
+          return;
+        }
         response.status(500).json({ code: 500, message: 'Probleme beim Beenden!', hotMessage: 'Beim Beenden der Buchung ist ein Fehler aufgetreten. Wir versuchen, die Buchung zu einem späteren Zeitpunkt erneut zu beenden. Normalerweise entstehen hierdurch keine Mehrkosten. Falls du dennoch Unstimmigkeiten in deiner Abrechnung entdeckst oder die Buchungen auch in den nächsten Tagen noch nicht beendet ist, kontaktiere uns bitte unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
         return;
       }

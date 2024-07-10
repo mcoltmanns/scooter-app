@@ -183,6 +183,7 @@ abstract class RentalManager {
         chargedRemainingAmount: false
       };
       let activeRentalIsEnded = false;
+      let payment = null;
       try {
         /* Prepare calculations for correcting the payment. A correction of the payment is often
          * necessary because the user may end the rental before reaching the nextActionTime or
@@ -191,7 +192,7 @@ abstract class RentalManager {
         const nextActionTime = new Date(activeRental.getDataValue('nextActionTime'));
         const lastActionTime = new Date(nextActionTime.getTime() - DYNAMIC_EXTENSION_INTERVAL_MS);  // Calculate the last action time by subtracting the duration of the last piece (i.e. DYNAMIC_EXTENSION_INTERVAL_MS) from the nextActionTime
         const targetPaidDuration = currentTime.getTime() - activeRental.getDataValue('createdAt').getTime();
-        const payment = {
+        payment = {
           currentAmountPaid: parseFloat(activeRental.getDataValue('total_price')), 
           targetAmountPaid: parseFloat((activeRental.getDataValue('price_per_hour') * (targetPaidDuration / (1000 * 60 * 60))).toFixed(2)),  // Convert milliseconds to hours
           currentAmountLastPaidBlock: parseFloat((activeRental.getDataValue('price_per_hour') * ((nextActionTime.getTime() - lastActionTime.getTime()) / (1000 * 60 * 60))).toFixed(2)),  // Convert milliseconds to hours
@@ -215,9 +216,12 @@ abstract class RentalManager {
             if (activeRental.getDataValue('lastPaymentToken') !== 'null') {
               console.log('endDynamicRental: Refunding the last paid block of', payment.currentAmountLastPaidBlock, '€...');
               await TransactionManager.rollbackTransaction(paymentService, activeRental.getDataValue('lastPaymentToken'));
-              correctPaymentStatus.refundedLastBlock = true;  // Update the status
+              
               /* Update the currentAmountPaid to reflect the refunded amount */
               payment.currentAmountPaid = parseFloat((payment.currentAmountPaid - payment.currentAmountLastPaidBlock).toFixed(2));
+
+              correctPaymentStatus.refundedLastBlock = true;  // Update the status
+
               console.log('endDynamicRental: Refunded the last paid block of', payment.currentAmountLastPaidBlock, '€.');
             } else {
               throw new Error(errorMessages.NO_PAYMENT_TOKEN);
@@ -233,12 +237,14 @@ abstract class RentalManager {
               const amountToCharge = parseFloat((payment.targetAmountPaid - payment.currentAmountPaid).toFixed(2));
               if (amountToCharge > 0) {
                 console.log('endDynamicRental: Charging ' + amountToCharge + ' €...');
-                await TransactionManager.doTransaction(activeRental.getDataValue('paymentMethodId'), activeRental.getDataValue('userId'), amountToCharge, transaction, paymentService, paymentData);
 
-                correctPaymentStatus.chargedRemainingAmount = true;  // Update the status
+                await TransactionManager.doTransaction(activeRental.getDataValue('paymentMethodId'), activeRental.getDataValue('userId'), amountToCharge, transaction, paymentService, paymentData);
 
                 /* Update the currentAmountPaid to reflect the just charged amount */
                 payment.currentAmountPaid = parseFloat((payment.currentAmountPaid + amountToCharge).toFixed(2));
+
+                correctPaymentStatus.chargedRemainingAmount = true;  // Update the status
+
                 console.log('endDynamicRental: Charged ' + amountToCharge + ' €.');
               }
             }
@@ -265,10 +271,10 @@ abstract class RentalManager {
 
               await TransactionManager.doTransaction(activeRental.getDataValue('paymentMethodId'), activeRental.getDataValue('userId'), amountToCharge, transaction);
 
-              correctPaymentStatus.chargedRemainingAmount = true;  // Update the status
-
               /* Update the currentAmountPaid to reflect the just charged amount */
               payment.currentAmountPaid = parseFloat((payment.currentAmountPaid + amountToCharge).toFixed(2));
+
+              correctPaymentStatus.chargedRemainingAmount = true;  // Update the status
 
               console.log('endDynamicRental: Charged ' + amountToCharge + ' €.');
             }
@@ -325,27 +331,11 @@ abstract class RentalManager {
         if(!transactionExtern) await transaction.rollback(); // Rollback the transaction in case of an error
 
         if ((correctPaymentStatus.refundedLastBlock || correctPaymentStatus.chargedRemainingAmount) && !activeRentalIsEnded) {
-          try {
-            console.error('endDynamicRental: Rental not ended but payment activity was done. Try to save the rental ' + activeRental.getDataValue('id') + ' to not be renewable anymore and schedule a job to try ending the rental later...');
-            activeRental.setDataValue('renew', false);  // Set renew to false to prevent the rental from being extended or canceled by user again
-            await activeRental.save(); // Save the updated rental in case the transaction was rolled back, no transaction is used here because the transaction was already rolled back
-            console.error('endDynamicRental: Updated the active rental ' + activeRental.getDataValue('id') + ' to not be renewable anymore.');
-            const currentTime = new Date();
-            RentalManager.scheduleRentalCheck(activeRental.getDataValue('id'), new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
-          } catch (error) {
-            console.error(error);
-            /* Note: If the rental could not be saved after the payment activity, we have data inconsistency.
-            *        Normally would try to log this and inform the admin at this point, but for simplicity
-            *        (in the context of this project) we simply return an error message to the user and print
-            *        a statement to the console. */
-            console.error('WARNING: Could not save the updated active rental ' + activeRental.getDataValue('id') + ' after payment activity.', correctPaymentStatus.refundedLastBlock ? 'Refunded the last paid block but could not reflect that to our database.' : '', correctPaymentStatus.chargedRemainingAmount ? 'Charged the remaining amount but could not reflect that to our database.' : '', 'The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
-            throw new CustomError(errorMessages.SEVERE_ERROR_ENDING_RENTAL, { rentalId: activeRental.getDataValue('id') });
-          }
+          throw new CustomError(errorMessages.ERROR_ENDING_RENTAL, { rentalId: activeRental.getDataValue('id'), currentAmountPaid: payment.currentAmountPaid, targetAmountPaid: payment.targetAmountPaid, paymentOffset: payment.paymentOffset });
+        }
 
-          /* If everything worked fine in the try block, at least we were able to save the changes that have something to do with the payment activity to our database.
-           * Therefore, we don't have to throw a severe error here, but we can throw a normal error to inform the user that there were problems with the payment activity that
-           * will probably be corrected later. */
-          throw new CustomError(errorMessages.ERROR_ENDING_RENTAL, { rentalId: activeRental.getDataValue('id') });
+        if ((!correctPaymentStatus.refundedLastBlock && !correctPaymentStatus.chargedRemainingAmount) && !activeRentalIsEnded) {
+          throw new CustomError(errorMessages.ERROR_ENDING_RENTAL, { rentalId: activeRental.getDataValue('id'), currentAmountPaid: payment.currentAmountPaid, targetAmountPaid: payment.targetAmountPaid, paymentOffset: payment.paymentOffset });
         }
 
         /* Handle errors that can occur during correcting paymentOffset values or when the rental was already ended.
@@ -358,6 +348,11 @@ abstract class RentalManager {
           } else {
             throw new CustomError(errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED, { rentalId: activeRental.getDataValue('id') });
           } 
+        }
+
+        /* Handle severe errors that can occur after payment activities and when the rental was already ended. */
+        if (correctPaymentStatus.refundedLastBlock || correctPaymentStatus.chargedRemainingAmount) {
+          throw new Error(errorMessages.SEVERE_ERROR_ENDING_RENTAL);
         }
 
         throw new Error(error.message);
@@ -431,13 +426,14 @@ abstract class RentalManager {
     }
 
     public static async checkRental(rentalId: number): Promise<void> {
-        console.log(`checking rental ${rentalId}`);
+        console.log(`checkRental: checking rental ${rentalId}`);
         const transaction = await database.getSequelize().transaction();
         let paymentToken: string | null = null;
         let paymentService: PaymentService | null = null;
+        let rental;
         try {
             // find the rental we want to check
-            const rental = await ActiveRental.findByPk(rentalId, { 
+            rental = await ActiveRental.findByPk(rentalId, { 
               transaction: transaction,
               lock: true
             });
@@ -447,7 +443,7 @@ abstract class RentalManager {
             }
 
             if(rental.dataValues.renew) { // rental is dynamic and should be renewed
-                console.log(`renewing rental ${rentalId}`);
+                console.log(`checkRental: renewing rental ${rentalId}`);
 
                 /* Prepare calculations to update the database */
                 const lastActionTime = new Date(rental.getDataValue('nextActionTime'));
@@ -455,6 +451,10 @@ abstract class RentalManager {
                 const nextBlockPrice = parseFloat((rental.getDataValue('price_per_hour') * (DYNAMIC_EXTENSION_INTERVAL_MS / (1000 * 60 * 60))).toFixed(2));
                 const newTotalPrice = parseFloat((parseFloat(rental.getDataValue('total_price')) + nextBlockPrice).toFixed(2));
                 
+                const renewStatus = {
+                  nextBlockPaid: false,
+                  rentalUpdated: false
+                };
                 try {
                     /* Pay for the next block */
                     console.log(`checkRental: Charging ${nextBlockPrice} € for the next block of rental ${rentalId}...`);
@@ -464,6 +464,7 @@ abstract class RentalManager {
                     }
                     paymentToken = paymentTransaction.token;
                     paymentService = paymentTransaction.serviceUsed;
+                    renewStatus.nextBlockPaid = true;
                     console.log(`checkRental: Charged ${nextBlockPrice} €.`);
 
                     /* Update the active rental in the database */
@@ -473,16 +474,32 @@ abstract class RentalManager {
 
                     /* Save the changes to the database */
                     await rental.save({ transaction: transaction });
+                    renewStatus.rentalUpdated = true;
 
                     /* Schedule the next check */
                     RentalManager.scheduleRentalCheck(rentalId, new Date(nextActionTime));
                 } catch (error) { // cancel if unable
-                    console.log(`could not extend rental ${rental.dataValues.id} - unable to pay for next block\n${error}`);
+                    console.log(`checkRental: Could not extend rental ${rental.dataValues.id}\n${error}`);
+                    if (!renewStatus.nextBlockPaid && !renewStatus.rentalUpdated) {
+                      console.log('checkRental: Charging the next block of', rentalId, 'failed.');
+                    }
+
+                    if (renewStatus.nextBlockPaid && !renewStatus.rentalUpdated) {
+                      console.log('checkRental: Rolling back payment for rental', rentalId);
+                      try {
+                        await TransactionManager.rollbackTransaction(paymentService, paymentToken);
+                        console.log('checkRental: Rolled back payment for rental', rentalId);
+                      } catch (error) {
+                        console.log('checkRental:', error);
+                        console.error('WARNING: Could not rollback the payment for rental ' + rentalId + ' after payment activity. Please check the database for inconsistencies.');
+                      }
+                    }
+
                     await RentalManager.endRental(rentalId, transaction);
                 }
             }
             else { // rental is prepaid and should be ended
-                console.log(`ending rental ${rentalId}`);
+                console.log(`checkRental: Ending static rental ${rentalId}`);
                 await RentalManager.endRental(rentalId, transaction);
             }
 
@@ -490,27 +507,57 @@ abstract class RentalManager {
         } catch (error) {
             console.log('checkRental:', error);
 
-            /* If the rental was ended because of a failed payment, we should not rollback the transaction because that would undo the ending of the rental. */
-            if (error.message === errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED) {
-              await transaction.commit();
-              console.log('checkRental: Rental', rentalId, 'was already ended with possible paymentOffset. Transaction comitted.');
+            await transaction.rollback();
+            
+            console.log(`checkRental: Rolled back transaction for rental ${rentalId}.`);
+
+            if (error.message === errorMessages.ERROR_ENDING_RENTAL) {
+              try {
+                rental.setDataValue('total_price', error.payload.targetAmountPaid); 
+                rental.setDataValue('paymentOffset', error.payload.paymentOffset); 
+                rental.setDataValue('renew', false);  // Set renew to false to prevent the rental from being extended or canceled by user again
+                await rental.save(); // Save the updated rental in case the transaction was rolled back, no transaction is used here because the transaction was already rolled back
+                const currentTime = new Date();
+                RentalManager.scheduleRentalCheck(rental.getDataValue('id'), new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
+                return;
+              } catch (error) {
+                /* Note: If the rental could not be saved after the payment activity, we have data inconsistency.
+                 *        Normally would try to log this and inform the admin at this point, but for simplicity
+                 *        (in the context of this project) we simply return an error message to the user and print
+                 *        a statement to the console. */
+                console.error('WARNING: Could not save the updated active rental ' + rental.getDataValue('id') + ' after possible payment activity. The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
+                return;
+              }
+            }
+
+            if (error.message === errorMessages.SEVERE_ERROR_ENDING_RENTAL) {
+              console.error('WARNING: Could not save the updated active rental ' + rental.getDataValue('id') + ' after payment activity. The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
               return;
             }
 
-            await transaction.rollback();
-            console.log(`checkRental: Rolled back transaction for rental ${rentalId}.`);
-
-            if (paymentService && paymentToken) {
-                console.log(`Rolling back payment for rental ${rentalId}`);
-                try {
-                  await TransactionManager.rollbackTransaction(paymentService, paymentToken);
-                } catch (error) {
-                  console.log('checkRental:', error);
-                  console.error('WARNING: Could not rollback the payment for rental ' + rentalId + ' after payment activity. Please check the database for inconsistencies.');
+            if (error.message === errorMessages.ERROR_ENDING_RENTAL_ACTIVE_RENTAL_IS_ENDED) {
+              try {
+                if (error.payload.chargedAmount) {
+                  const currentPaymentOffset = parseFloat(parseFloat(rental.getDataValue('paymentOffset')).toFixed(2));
+                  rental.setDataValue('paymentOffset', parseFloat((currentPaymentOffset + error.payload.chargedAmount).toFixed(2)));
                 }
+                rental.setDataValue('renew', false);  // Set renew to false to prevent the rental from being extended or canceled by user again
+                await rental.save(); // Save the updated rental in case the transaction was rolled back, no transaction is used here because the transaction was already rolled back
+                const currentTime = new Date();
+                RentalManager.scheduleRentalCheck(rental.getDataValue('id'), new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
+                console.log('checkRental: Database transaction got rolled back. But could reflect already processed payment activity to the database. Try to end active rental', rental.getDataValue('id'), 'again later.');
+                return;
+              } catch (error) {
+                /* Note: If the rental could not be saved after the payment activity, we have data inconsistency.
+                 *       Normally would try to log this and inform the admin at this point, but for simplicity
+                 *       (in the context of this project) we simply return an error message to the user and print
+                 *       a statement to the console. */
+                console.error('WARNING: Could not save the updated active rental ' + rental.getDataValue('id') + ' after payment activity. The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
+                return;
+              }
             }
             
-            console.log(`check on rental ${rentalId} failed!\n${error}`);
+            console.log(`checkRental: Check on rental ${rentalId} failed!\n${error}`);
         }
     }
 
@@ -685,7 +732,6 @@ abstract class RentalManager {
       let chargedAmount = 0;
 
       try {
-        
         /* Merge the paymentOffset values of the user */
         const amountToCharge = await RentalManager.mergeOffsetAmountsOfUser(userId, transaction);
         
