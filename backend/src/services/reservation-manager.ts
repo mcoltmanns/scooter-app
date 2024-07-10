@@ -2,8 +2,7 @@ import { Model, Transaction } from 'sequelize';
 import { Reservation } from '../models/rental';
 import database from '../database';
 import { Scooter } from '../models/scooter';
-import { Job, scheduleJob } from 'node-schedule';
-import jobManager from './job-manager';
+import { scheduleJob } from 'node-schedule';
 import { Product } from '../models/product';
 import { RESERVATION_LIFETIME_MS } from '../static-data/global-variables';
 import { errorMessages } from '../static-data/error-messages';
@@ -125,7 +124,6 @@ abstract class ReservationManager {
             scooter.setDataValue('reservation_id', null);
             await scooter.save({transaction: transaction});
             if(!transactionExtern) await transaction.commit();
-            jobManager.removeJob(`reservation${reservation.getDataValue('id')}`); // remove yourself when done
         } catch (error) {
             if(!transactionExtern) await transaction.rollback();
             throw new Error(error.message);
@@ -134,7 +132,7 @@ abstract class ReservationManager {
     }
 
     // job id will be 'reservation${reservation.id}'
-    public static scheduleReservationEnding(reservation: Model): Job {
+    public static scheduleReservationEnding(reservation: Model): void {
         const expiration: Date = reservation.getDataValue('endsAt');
 
         /* If the expiration is not in the future, don't schedule a Job */
@@ -144,7 +142,7 @@ abstract class ReservationManager {
         }
 
         console.log(`scheduling reservation ending at ${expiration}`);
-        const j = scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, (async (): Promise<void> => {
+        scheduleJob(`reservation${reservation.getDataValue('id')}`, expiration, (async (): Promise<void> => {
             try {
                 await ReservationManager.endReservation(reservation);
                 console.log('ended reservation');
@@ -152,7 +150,6 @@ abstract class ReservationManager {
                 console.error(`could not end reservation at scheduled time!\n${error}`);
             }
         }));
-        return j;
     }
 }
 
