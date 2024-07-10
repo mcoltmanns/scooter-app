@@ -1,4 +1,4 @@
-import { Rental } from 'src/app/models/rental';
+import { PastRental } from 'src/app/models/rental';
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { parse, isAfter, isBefore, isEqual } from 'date-fns';
@@ -17,8 +17,8 @@ export class Filters {
      * @param rentals list of scooters that where booked by the user in total
      * @returns list of scooters that where booked in the given date frame
      */
-    static filterDate(startAfter: string, endBefore: string, rentals: Rental[]) : Rental[] {
-        const filteredRentals: Rental[] = [];
+    static filterDate(startAfter: string, endBefore: string, rentals: PastRental[]) : PastRental[] {
+        const filteredRentals: PastRental[] = [];
         //if one of the fields was empty use a default value; hardcoding of upper value is risky, but in this case no issue, as the app will
         // not be used beyond this summer
         if(startAfter === '' && endBefore === ''){

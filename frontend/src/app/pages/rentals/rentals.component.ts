@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ActiveRental, PastRental, ProductWithScooterId, Rental } from 'src/app/models/rental';
+import { ActiveRental, PastRental, ProductWithScooterId } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -97,7 +97,6 @@ export class RentalsComponent implements OnInit, OnDestroy {
   imageLoaded: { [scooterId: string]: boolean } = {};
 
   // Variables for storing all rentals and the product information
-  public rentals: Rental[] = [];
   public activeRentals: ActiveRental[] = [];
   public pastRentals: PastRental[] = [];
   public products: ProductWithScooterId[] = [];
@@ -139,7 +138,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
   //variables for the filters----------------------
 
-  public filteredRentals: Rental[] = []; //filtered version of the Rental[]
+  public filteredRentals: PastRental[] = []; //filtered version of the PastRental[]
   
   filterMenuVisible = false;//visibility variable of filter menu
   //filter form input variables
@@ -157,12 +156,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([rentalsResponse, productsResponse, preferencesResponse]) => {
         /* Get all scooter bookings (rentals) for the User from the backend */
-        // this.rentals = rentalsResponse;
-        // this.filteredRentals = rentalsResponse;
-        this.filteredRentals = this.rentals;
         this.activeRentals = rentalsResponse.activeRentals;
         this.pastRentals = rentalsResponse.pastRentals;
         this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
+        this.filteredRentals = this.pastRentals;  // Initially show all past rentals
         // this.loadingDataScooter = false;
 
         /* Get all products for the rentals of the user */
@@ -414,7 +411,8 @@ export class RentalsComponent implements OnInit, OnDestroy {
         createdAt: activeRental.createdAt,
         endedAt: endTimestamp,
         total_price: totalPrice,
-        paymentMethodId: activeRental.paymentMethodId
+        price_per_hour: activeRental.price_per_hour,
+        paymentOffset: '0'
       };
     }
     
@@ -714,7 +712,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.lower = this.bookingFilterForm.get('lower')?.value;
       this.upper = this.bookingFilterForm.get('upper')?.value;
 
-      this.filteredRentals = Filters.filterDate(this.lower.replace('.', '-').replace('.', '-'), this.upper.replace('.', '-').replace('.', '-'), this.rentals);
+      this.filteredRentals = Filters.filterDate(this.lower.replace('.', '-').replace('.', '-'), this.upper.replace('.', '-').replace('.', '-'), this.pastRentals);
       this.toggle();
     } 
     else {
@@ -727,7 +725,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
    * removes upper and lower bound an shows all rentals again
    */
   onCancel(): void {
-    this.filteredRentals = this.rentals;
+    this.filteredRentals = this.pastRentals;
     this.lower='';
     this.upper='';
     this.toggle();

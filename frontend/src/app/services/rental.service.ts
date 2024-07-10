@@ -19,13 +19,6 @@ export class RentalService{
     constructor(private http: HttpClient) {}
 
     /* get booking Information for a user*/
-    /*
-    public getRentalInfo(): Observable<Rental[]> {
-        return this.http.get<Rental[]>('/api/bookScooterHistory');
-    }
-    */
-
-    /* get booking Information for a user*/
     public getRentalInfo(): Observable<RentalsResponse> {
         return this.http.get<RentalsResponse>('/api/bookScooterHistory');
     }

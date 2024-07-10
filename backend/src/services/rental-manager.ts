@@ -1,5 +1,5 @@
 import { Model, Op, Sequelize, Transaction } from 'sequelize';
-import { ActiveRental, PastRental, Rental } from '../models/rental';
+import { ActiveRental, PastRental } from '../models/rental';
 import ReservationManager from './reservation-manager';
 import { Scooter } from '../models/scooter';
 import database from '../database';
@@ -79,11 +79,6 @@ abstract class RentalManager {
         throw new Error(error);
       }
     }
-    
-    // get all rentals associated with a scooter (active and ended)
-    public static async getRentalsFromScooter(scooterId: number): Promise<Model[]> {
-        return await Rental.findAll({ where: { scooter_id: scooterId } });
-    }
 
     public static async getAllRentalsByUserId(userId: number): Promise<{id: number, userId: number, scooterId: number, paymentMethodId: number}[]> {
       const activeRentals = await ActiveRental.findAll({
@@ -101,8 +96,14 @@ abstract class RentalManager {
 
     // get all rentals associated with a user
     public static async getRentalsFromUser(userId: number): Promise<[Model[], Model[]]> {
-        const activeRentals = await ActiveRental.findAll({ where: { userId: userId } });
-        const pastRentals = await PastRental.findAll({ where: { userId: userId }});
+        const activeRentals = await ActiveRental.findAll({ 
+          where: { userId: userId },
+          attributes: ['id', 'nextActionTime', 'renew', 'price_per_hour', 'paymentOffset', 'createdAt', 'userId', 'scooterId']
+        });
+        const pastRentals = await PastRental.findAll({
+          where: { userId: userId },
+          attributes: ['id', 'price_per_hour', 'total_price', 'paymentOffset', 'createdAt', 'endedAt', 'userId', 'scooterId']
+        });
 
         if (!activeRentals || !pastRentals) {
           throw new Error(errorMessages.ERROR_FETCHING_RENTALS);
@@ -137,14 +138,9 @@ abstract class RentalManager {
             // can't book if scooter is reserved by someone else or rented
             const scooterReservation = await ReservationManager.getReservationFromScooter(scooterId, transaction);
             const rentals = await RentalManager.getActiveRentalsFromScooter(scooterId, transaction);
-            // if(scooter.getDataValue('active_rental_id') !== null || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
             if(rentals.length > 0 || (scooterReservation && scooterReservation.dataValues.user_id !== userId)) {
                 throw new Error(errorMessages.SCOOTER_UNAVAILABLE);
             }
-
-            // all good?
-            // start the new rental
-            // rental = await Rental.create({ user_id: userId, scooter_id: scooterId, endedAt: nextCheck }, { transaction: transaction });
 
             /* End the reservation for the user if it exists (even if it's for another scooter) */
             const userReservation = await ReservationManager.getReservationFromUser(userId, transaction);
@@ -157,15 +153,13 @@ abstract class RentalManager {
               }
             }
 
+            // all good?
+            // start the new rental
+
             rental = await ActiveRental.create({ userId: userId, scooterId: scooterId, paymentMethodId: paymentMethodId, lastPaymentToken: paymentToken, nextActionTime: nextCheck, price_per_hour: price_per_hour, total_price: total_price, renew: isDynamic, paymentOffset: paymentOffset }, { transaction: transaction }); // create the entry in the rentals table
-            // scooter.setDataValue('active_rental_id', rental.dataValues.id);
-            // await scooter.save({ transaction: transaction });
 
             RentalManager.scheduleRentalCheck(rental.dataValues.id, nextCheck); // schedule the check
             if(!transactionExtern) await transaction.commit();
-            /* Left here temporarily as reference of the old way using Cron */
-            // Dispatch a job to end the rental when it expires
-            // this.scheduleRentalEnding(rental);
         } catch (error) {
             console.log(`could not start rental!\n${error}`);
             if(!transactionExtern) await transaction.rollback();

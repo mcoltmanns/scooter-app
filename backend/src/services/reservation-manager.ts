@@ -7,6 +7,7 @@ import jobManager from './job-manager';
 import { Product } from '../models/product';
 import { RESERVATION_LIFETIME_MS } from '../static-data/global-variables';
 import { errorMessages } from '../static-data/error-messages';
+import RentalManager from './rental-manager';
 
 abstract class ReservationManager {
     /* check if a scooter is reserved */
@@ -71,13 +72,15 @@ abstract class ReservationManager {
             const scooter = await Scooter.findByPk(scooterId, { transaction: transaction });
             if(!scooter) throw new Error(errorMessages.SCOOTER_DOES_NOT_EXIST);
 
+            const activeRental = await RentalManager.getActiveRentalsFromScooter(scooterId, transaction);
+
             // can't reserve if scooter is reserved or rented
-            if(scooter.getDataValue('active_rental_id') !== null || scooter.getDataValue('reservation_id') !== null || await ReservationManager.getReservationFromScooter(scooterId) !== null) {
+            if(activeRental.length > 0 || scooter.getDataValue('reservation_id') !== null || await ReservationManager.getReservationFromScooter(scooterId, transaction) !== null) {
                 throw new Error(errorMessages.SCOOTER_UNAVAILABLE);
             }
 
             // can't reserve if user already has reservation
-            if(await ReservationManager.getReservationFromUser(userId)) {
+            if(await ReservationManager.getReservationFromUser(userId, transaction)) {
                 throw new Error(errorMessages.USER_HAS_RESERVATION);
             }
 
