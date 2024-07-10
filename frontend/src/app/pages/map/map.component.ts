@@ -601,6 +601,28 @@ export class MapComponent implements OnInit, OnDestroy{
     this.minDist = '';
     this.maxDist = '';
     this.sortCancel();
+
+    this.scooterFilterForm.patchValue({
+      minBty: 0,
+      maxBty: 100,
+      minRange: 0,
+      maxRange: 300,
+      minPrice: 0,
+      maxPrice: 20,
+      minSpeed: 0,
+      maxSpeed: 540,
+      minDist: 0,
+      maxDist: 100
+    });
+      this.priceRange[0] = 0;
+      this.priceRange[1] = 20;
+      this.batteryPercentageRange[0] = 0;
+      this.batteryPercentageRange[1] = 100;
+      this.speedRange[0]= 0;
+      this.speedRange[1]= 540;
+      this.scooterRange[0] = 0;
+      this.scooterRange[1] = 300;
+      this.updateSlider();
   }
   
   /**
@@ -913,8 +935,8 @@ export class MapComponent implements OnInit, OnDestroy{
   /* update battery user input fields */
   onDistanceRangeChange():void{
     this.scooterFilterForm.patchValue({
-      minBty: this.distanceRange[0],
-      maxBty: this.distanceRange[1]
+      minDist: this.distanceRange[0],
+      maxDist: this.distanceRange[1]
     });
   }
 
