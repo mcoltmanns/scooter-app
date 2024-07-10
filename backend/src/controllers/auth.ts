@@ -135,7 +135,7 @@ export class AuthController {
       };
 
       /* Save the new user preferences object in the database */
-      await UserPreferences.create(newUserPreferences);
+      await UserPreferences.create(newUserPreferences, { transaction });
 
 
       // create a new session for this new user
