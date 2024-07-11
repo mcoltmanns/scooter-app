@@ -191,7 +191,7 @@ export class Validator {
   /* Validates the rental id from the frontend request */
   public async validateInvoice(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
-      check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Rental-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Rental-ID.'),
+      check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Buchungs-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Buchungs-ID.'),
       check('selectedCurrency').optional().trim().escape().notEmpty().withMessage('Bitte eine Währung angeben.').bail().isIn(['€', '$']).withMessage('Ungültige Währung.')
     ];
 
@@ -200,7 +200,9 @@ export class Validator {
 
   public async validateEndRental(request: Request, response: Response, next: NextFunction): Promise<void> {
     const checks = [
-      check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Rental-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Rental-ID.')
+      check('rentalId').trim().escape().notEmpty().withMessage('Bitte eine Buchungs-ID angeben.').bail().isInt({min: 0}).withMessage('Ungültige Buchungs-ID.'),
+      check('latitude').optional().trim().escape().notEmpty().withMessage('Bitte einen Breitengrad angeben.').bail().isNumeric().withMessage('Bitte den Breitengrad als Zahl angeben.').bail().isFloat({ min: -90, max: 90 }).withMessage('Der Breitengrad muss zwischen -90 und 90 Grad liegen.'),
+      check('longitude').optional().trim().escape().notEmpty().withMessage('Bitte einen Längengrad angeben.').bail().isNumeric().withMessage('Bitte den Längengrad als Zahl angeben.').bail().isFloat({ min: -180, max: 180 }).withMessage('Der Längengrad muss zwischen -180 und 180 Grad liegen.')
     ];
 
     await Validator.runAllChecks(400, checks, request, response, next);

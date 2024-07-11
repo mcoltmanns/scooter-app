@@ -1,6 +1,6 @@
 import Database from '../database';
 import { DataTypes } from 'sequelize';
-import { ActiveRental, PastRental, Rental, Reservation } from './rental';
+import { ActiveRental, PastRental, Reservation } from './rental';
 
 export const UsersAuth = Database.getSequelize().define('usersAuths', {
   id: {
@@ -91,14 +91,6 @@ UsersSession.belongsTo(UsersAuth, {
     allowNull: false,
   },
 });
-
-UsersAuth.hasOne(Rental, {
-  foreignKey: {
-    name: 'user_id',
-    allowNull: false // rentals must have an associated user
-  },
-});
-// users table doesn't need to track rentals - rentals table does this for us
 
 UsersAuth.hasOne(Reservation, {
   foreignKey: {

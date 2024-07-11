@@ -56,6 +56,10 @@ button.warn {
   border-color: var(--warn-fg);
 }
 
+button.primary.light, button.accent.light, button.warn.light {
+  border-color: var(--accent-fg, #2a1800);
+}
+
 button:disabled {
   background-color: #B4B4B4;
   color: #FFFFFF;

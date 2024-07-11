@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { ActiveRental, PastRental, ProductWithScooterId, Rental } from 'src/app/models/rental';
+import { ActiveRental, PastRental, ProductWithScooterId } from 'src/app/models/rental';
 import { RentalService } from 'src/app/services/rental.service';
 import { MapService } from 'src/app/services/map.service';
 import { CommonModule } from '@angular/common';
@@ -18,6 +18,8 @@ import { LoadingOverlayComponent } from 'src/app/components/loading-overlay/load
 import { trigger, transition, style, animate, sequence } from '@angular/animations';
 import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
+import { UserPosition } from 'src/app/utils/userPosition';
+import { PositionService } from 'src/app/utils/position.service';
 
 
 interface InfoModal {
@@ -28,9 +30,11 @@ interface InfoModal {
   scooterId: number;
   createdAt: string;
   endedAt: string;
-  totalPrice: string;
   renew: boolean;
   isActive: boolean;
+  remainingTime?: string;
+  pastTime?: string;
+  mode: 'past' | 'prepaid' | 'dynamic';
 }
 
 @Component({
@@ -62,13 +66,16 @@ export class RentalsComponent implements OnInit, OnDestroy {
   private animationTimeout: ReturnType<typeof setTimeout> | null = null;
   private waitForAnimationEndTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  /* Variables for controlling intervals */
+  private updateIntervals: Map<number, ReturnType<typeof setInterval>> = new Map();
+
   /* Get references to the toast component */
   @ViewChild('toastComponentError') toastComponentError!: ToastComponent;
 
   /* Initialize the FormGroup instance that manages all input fields and their validators */
   public bookingFilterForm!: FormGroup;
 
-  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router, private route: ActivatedRoute) {
+  public constructor(private rentalService: RentalService, private mapService: MapService, private optionService: OptionService, private fb: FormBuilder, private router: Router, private route: ActivatedRoute, private positionService: PositionService) {
     //form group for the booking filter
     this.bookingFilterForm = this.fb.group({
       lower: ['', this.dateValidator],
@@ -78,6 +85,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Bind Information Modal to this instance */
     this.onNavigateToScooter = this.onNavigateToScooter.bind(this);
     this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
+    this.onClosePaymentOffsetInfoModal = this.onClosePaymentOffsetInfoModal.bind(this);
 
     /* Bind Confirm Modal to this instance */
     this.onConfirmConfirmModal = this.onConfirmConfirmModal.bind(this);
@@ -89,13 +97,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
   // Variable to control the visibility of the loading spinner
   public isLoading = true;
-  public processingEndReservation = false;
+  public processingEndRental = false;
 
   // Object to track loaded state of images by scooterId
   imageLoaded: { [scooterId: string]: boolean } = {};
 
   // Variables for storing all rentals and the product information
-  public rentals: Rental[] = [];
   public activeRentals: ActiveRental[] = [];
   public pastRentals: PastRental[] = [];
   public products: ProductWithScooterId[] = [];
@@ -117,10 +124,14 @@ export class RentalsComponent implements OnInit, OnDestroy {
     scooterId: 0,
     createdAt: '',
     endedAt: '',
-    totalPrice: '',
     renew: false,
-    isActive: false
+    isActive: false,
+    remainingTime: undefined,
+    pastTime: undefined,
+    mode: 'past'
   };
+
+  public showPaymentOffsetInfoModal = false;
 
   /* Confirm modal configuration */
   public confirmModal = {
@@ -132,9 +143,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
     }
   };
 
+  // User Location
+  public userLocation: { latitude: number, longitude: number } | null = null;
+
   //variables for the filters----------------------
 
-  public filteredRentals: PastRental[] = []; //filtered version of the Rental[]
+  public filteredRentals: PastRental[] = []; //filtered version of the PastRental[]
   
   filterMenuVisible = false;//visibility variable of filter menu
   //filter form input variables
@@ -152,12 +166,14 @@ export class RentalsComponent implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([rentalsResponse, productsResponse, preferencesResponse]) => {
         /* Get all scooter bookings (rentals) for the User from the backend */
-        // this.rentals = rentalsResponse;
-        // this.filteredRentals = rentalsResponse;
-        this.filteredRentals = this.pastRentals;
         this.activeRentals = rentalsResponse.activeRentals;
+
+        /* Start the countdown/countups for each active rental */
+        this.initIntervalsForActiveRental();
+
         this.pastRentals = rentalsResponse.pastRentals;
         this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
+        this.filteredRentals = this.pastRentals;  // Initially show all past rentals
         // this.loadingDataScooter = false;
         this.filteredRentals = this.pastRentals; //to see something on the list of past rentals
 
@@ -200,11 +216,103 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Clear timeouts if still running */
     this.clearAnimationTimeout();
     this.clearWaitForAnimationTimeout();
+
+    /* Clear all rental countdown intervals */
+    this.updateIntervals.forEach((interval) => clearInterval(interval));
+
+    /* Clear the Map after clearing all intervals */
+    this.updateIntervals.clear();
   }
 
   // Function to call when an image is loaded
   onImageLoad(scooterId: string): void {
     this.imageLoaded[scooterId] = true;
+  }
+
+  initIntervalsForActiveRental(): void {
+    /* Start the countdown for each preipaid active rental */
+    this.activeRentals.forEach((rental) => {
+      if (!rental.renew) {
+        const now = new Date();
+        const nextActionTime = new Date(rental.nextActionTime);
+        rental.remainingTime = this.rentalDuration(now.toISOString(), nextActionTime.toISOString());
+        this.startCountdownForPrepaidActiveRental(rental);
+      }
+      if (rental.renew) {
+        const now = new Date();
+        rental.pastTime = this.rentalDuration(rental.createdAt, now.toISOString());
+        rental.total_price = this.convertCurrencyUnits((this.getExactRentalDurationInHours(rental.createdAt, now.toString())*this.toNumber(rental.price_per_hour)).toString(), this.selectedCurrency);
+        this.startCountupForDynamicActiveRental(rental);
+      }
+    });
+  }
+
+  /* Function to start a countdown for a prepaid active rental */
+  startCountdownForPrepaidActiveRental(rental: ActiveRental): void {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const nextActionTime = new Date(rental.nextActionTime);
+      const remainingTimeMs = nextActionTime.getTime() - now.getTime();
+      if (remainingTimeMs <= 0) {
+        clearInterval(interval);
+        this.updateIntervals.delete(rental.id);
+        rental.remainingTime = '0m 0s';
+
+        /* Animate moving the active rental to the past rentals */
+        this.moveRentalFromActiveToPast(rental, this.generatePastRentalFromActiveRental(rental));
+      } else {
+        // Update the remaining time in a human-readable format
+        rental.remainingTime = this.rentalDuration(now.toISOString(), nextActionTime.toISOString());
+      }
+    }, 1000); // Update every second
+
+    this.updateIntervals.set(rental.id, interval);
+  }
+
+  /* Function to start a countup for a prepaid active rental */
+  startCountupForDynamicActiveRental(rental: ActiveRental): void {
+    const interval = setInterval(() => {
+      const now = new Date();
+      rental.pastTime = this.rentalDuration(rental.createdAt, now.toISOString());
+      rental.total_price = this.convertCurrencyUnits((this.getExactRentalDurationInHours(rental.createdAt, now.toString())*this.toNumber(rental.price_per_hour)).toString(), this.selectedCurrency);
+    }, 1000); // Update every second
+
+    this.updateIntervals.set(rental.id, interval);
+  }
+
+  generatePastRentalFromActiveRental(activeRental: ActiveRental): PastRental {
+    const targetPaidDuration = (new Date()).getTime() - new Date(activeRental.createdAt).getTime();
+    return {
+      id: activeRental.id,
+      price_per_hour: activeRental.price_per_hour,
+      total_price: (parseFloat(activeRental.price_per_hour) * (targetPaidDuration / (1000 * 60 * 60))).toFixed(2),
+      paymentOffset: activeRental.paymentOffset,
+      createdAt: activeRental.createdAt,
+      endedAt: activeRental.nextActionTime.toString(),
+      userId: activeRental.userId,
+      scooterId: activeRental.scooterId
+    };
+  }
+
+  async getUserLatestUserLocation(): Promise<boolean> {
+    /* Set the latest user position so that the we can later send the longitude and latitude to the backend */
+    return UserPosition.setUserPosition(this.positionService).then((result) => {
+      if (result) {
+        this.userLocation = { latitude: this.positionService.latitude, longitude: this.positionService.longitude };
+        return true;
+      } else {
+        this.userLocation = null;
+        this.errorMessage = 'Standort nicht verfügbar.';
+        this.toastComponentError.showToast();
+        return false;
+      }
+    }).catch((error) => {
+      console.error(error);
+      this.userLocation = null;
+      this.errorMessage = 'Standort nicht verfügbar.';
+      this.toastComponentError.showToast();
+      return false;
+    });
   }
 
   getExactRentalDurationInHours(begin: string, end: string): number {
@@ -221,12 +329,16 @@ export class RentalsComponent implements OnInit, OnDestroy {
     const date2 = new Date(end);
 
     const diffMs = date2.getTime() - date1.getTime();
-    const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+    const diffSecondsTotal = Math.round(diffMs / 1000); // Round to the nearest second
+    const hours = Math.floor(diffSecondsTotal / 3600); // 3600 seconds in an hour
+    const minutes = Math.floor((diffSecondsTotal % 3600) / 60); // Remaining minutes
+    const seconds = diffSecondsTotal % 60; // Remaining seconds, already rounded
 
-    // If the number of hours is less than 10, remove the leading zero
-    const hoursStr = diffHours < 10 ? String(diffHours) : String(diffHours).padStart(2, '0');
-
-    return `${hoursStr}`;
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`; // Return hours and minutes if hours > 0
+    } else {
+      return `${minutes}m ${seconds}s`; // Return minutes and seconds if hours == 0
+    }
   }
 
   /* Get the price for each scooter */
@@ -389,7 +501,8 @@ export class RentalsComponent implements OnInit, OnDestroy {
         createdAt: activeRental.createdAt,
         endedAt: endTimestamp,
         total_price: totalPrice,
-        paymentMethodId: activeRental.paymentMethodId
+        price_per_hour: activeRental.price_per_hour,
+        paymentOffset: '0'
       };
     }
     
@@ -478,8 +591,29 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
       /* Add the past rental to the past rentals array */
       // this.pastRentals.push(newPastRental!);  // Add the new past rental to the end of the past rentals array
-      this.pastRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the past rentals array
+      // this.pastRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the past rentals array
+      this.filteredRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the filtered rentals array
     }, wholeAnimationDuration);
+  }
+
+  hasRemainingTime(rental: PastRental | ActiveRental): rental is ActiveRental {
+    return (rental as ActiveRental).remainingTime !== undefined;
+  }
+
+  hasPastTime(rental: PastRental | ActiveRental): rental is ActiveRental {
+    return (rental as ActiveRental).pastTime !== undefined;
+  }
+
+  getInvoiceDownloadFontSize(): string {
+    if (window.innerWidth < 260) {
+      return '13px';
+    } else {
+      return '16px';
+    }
+  }
+
+  getPaymentOffsetAsFloat(rental: PastRental | ActiveRental): number {
+    return parseFloat(rental.paymentOffset);
   }
 
   setUpAndShowInfoModal(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
@@ -491,10 +625,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.scooterId = rental.scooterId;
       this.infoModal.createdAt = rental.createdAt;
       this.infoModal.endedAt = rental.endedAt;
-      this.infoModal.totalPrice = rental.total_price;
       this.infoModal.isActive = false;
       this.infoModal.renew = false;
       this.infoModal.show = true;
+      this.infoModal.mode = 'past';
+      this.infoModal.remainingTime = undefined;
+      this.infoModal.pastTime = undefined;
     }
     if (type === 'prepaid') {
       rental = rental as ActiveRental;
@@ -504,10 +640,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.scooterId = rental.scooterId;
       this.infoModal.createdAt = rental.createdAt;
       this.infoModal.endedAt = rental.nextActionTime.toString();
-      this.infoModal.totalPrice = rental.price_per_hour;
       this.infoModal.isActive = true;
       this.infoModal.renew = rental.renew;
       this.infoModal.show = true;
+      this.infoModal.mode = 'prepaid';
+      this.infoModal.remainingTime = rental.remainingTime;
+      this.infoModal.pastTime = undefined;
     }
     if (type === 'dynamic') {
       rental = rental as ActiveRental;
@@ -517,10 +655,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.scooterId = rental.scooterId;
       this.infoModal.createdAt = rental.createdAt;
       this.infoModal.endedAt = rental.nextActionTime.toString();
-      this.infoModal.totalPrice = rental.price_per_hour;
       this.infoModal.isActive = true;
       this.infoModal.renew = rental.renew;
       this.infoModal.show = true;
+      this.infoModal.mode = 'dynamic';
+      this.infoModal.remainingTime = undefined;
+      this.infoModal.pastTime = rental.pastTime;
     }
   }
 
@@ -567,15 +707,15 @@ export class RentalsComponent implements OnInit, OnDestroy {
     }
 
     /* Show the loading overlay */
-    this.processingEndReservation = true;
+    this.processingEndRental = true;
 
     /* Request to end the dynamic rental */
-    this.rentalService.postEndRental({ rentalId: activeRental.id }).subscribe({
+    this.rentalService.postEndRental({ rentalId: activeRental.id, userLocation: this.userLocation }).subscribe({
       next: (response) => {
         console.log(response);
 
         /* Hide the loading overlay */
-        this.processingEndReservation = false;
+        this.processingEndRental = false;
 
         /* Restore the info modal if it was open before */
         if (this.confirmModal.infoModalWasOpen) {
@@ -588,6 +728,13 @@ export class RentalsComponent implements OnInit, OnDestroy {
           /* Close the info modal */
           this.onCloseInfoModal();   // Not only hides the info modal but also clears the rental query parameter from the URL
         }
+
+        /* Clear the interval for the ended dynamic rental */
+        const interval = this.updateIntervals.get(activeRental.id);
+        if (interval) {
+          clearInterval(interval);
+          this.updateIntervals.delete(activeRental.id);
+        }
     
         /* Animate moving the active rental to the past rentals */
         this.moveRentalFromActiveToPast(activeRental, response.newPastRental);
@@ -596,7 +743,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         console.log(error);
 
         /* Hide the loading overlay */
-        this.processingEndReservation = false;
+        this.processingEndRental = false;
         this.errorMessage = error.error.message;
         this.hotErrorMessage = error.error.hotMessage;
         this.toastComponentError.showToast();
@@ -615,13 +762,18 @@ export class RentalsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onCancelRental(activeRental: ActiveRental | PastRental | null): void {
+  async onCancelRental(activeRental: ActiveRental | PastRental | null): Promise<void> {
     /* Set up and show the confirm modal */
     this.confirmModal.infoModalWasOpen = this.infoModal.show;
     
     if (this.confirmModal.infoModalWasOpen) {
       this.infoModal.show = false;
     }
+
+    /* Show the loading overlay while waiting for the user's location */
+    this.processingEndRental = true;    // turns on the loading overlay
+    await this.getUserLatestUserLocation();
+    this.processingEndRental = false;   // turns off the loading overlay
     
     this.confirmModal.showConfirmModal = true;
 
@@ -663,6 +815,16 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
     /* Reload the page to fetch the latest data because we don't know what actually happened to the data in case of a hot error */
     window.location.reload();
+  }
+
+  onOpenPaymentOffsetInfoModal(): void {
+    this.infoModal.show = false;
+    this.showPaymentOffsetInfoModal = true;
+  }
+
+  onClosePaymentOffsetInfoModal(): void {
+    this.showPaymentOffsetInfoModal = false;
+    this.infoModal.show = true;
   }
 
   //functionalities for the filters-----------------------------------------------------------------

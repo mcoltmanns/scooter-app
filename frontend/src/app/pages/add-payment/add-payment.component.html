@@ -1,26 +1,32 @@
 <div class="page-container">
     <h1 class="title">Zahlungsmethode hinzufügen</h1>
     <div class="scrollable-container">
-    
-    <div class="text">
-        Zahlungsanbieter wählen:
-    </div>
-    
-    <div class="options">
-        <div class="icon" (click)="onNavigate('bachelorcard')">
-          <img src='../../../assets/payment/bachelorcard.png'>
-        </div>
-        <div class="icon" (click)="onNavigate('hcipal')">
-          <img src='../../../assets/payment/hciPal.png'>
-        </div>
-        <div class="icon" (click)="onNavigate('swpsafe')">
-          <img src='../../../assets/payment/swpsafe.png'>
-        </div>
-    </div>
 
-    <div class="bottom">
-        <app-button color="accent" class="btn" (click)="onCancel()">
-          Abbrechen
-        </app-button>
+      <div class="centered">
+
+        <div class="text">
+            Zahlungsanbieter wählen:
+        </div>
+        
+        <div class="options">
+            <div class="icon" (click)="onNavigate('bachelorcard')">
+              <img src='../../../assets/payment/bachelorcard.png'>
+            </div>
+            <div class="icon" (click)="onNavigate('hcipal')">
+              <img src='../../../assets/payment/hciPal.png'>
+            </div>
+            <div class="icon" (click)="onNavigate('swpsafe')">
+              <img src='../../../assets/payment/swpsafe.png'>
+            </div>
+        </div>
+
+        <div class="bottom">
+            <app-button color="accent" class="btn" (click)="onCancel()">
+              Abbrechen
+            </app-button>
+        </div>
+
       </div>
- </div>
+
+    </div>
+</div>

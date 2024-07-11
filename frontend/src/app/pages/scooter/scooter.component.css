@@ -245,7 +245,10 @@
 
 /* green line */
 hr.solid {
-    border-top: 2px solid #97FB64;
+    /* border-top: 2px solid #97FB64; */
+    border: none;
+    height: 3px;
+    background-color: #aeff85;
 }
 
 /* html description text */

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { Router, RouterLink } from '@angular/router';
@@ -8,15 +8,18 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {User} from 'src/app/models/user';
 import {AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators, ReactiveFormsModule} from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 @Component({
     selector: 'app-profile',
     standalone: true,
     templateUrl: './profile.component.html',
     styleUrl: './profile.component.css',
-    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule]
+    imports: [UserInputComponent, ButtonComponent, RouterLink, BackButtonComponent, ReactiveFormsModule, ToastComponent]
 })
 export class ProfileComponent implements OnInit, OnDestroy{
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
+
   /* Initialize subscriptions for the form value changes */
   private registerFormValueChangesSubscription?: Subscription;
   private password1ValueChangesSubscription?: Subscription;
@@ -252,7 +255,8 @@ export class ProfileComponent implements OnInit, OnDestroy{
       /* Assign the error messages to the respective invalid input fields */
       this.assignErrorMessage(validationErrors);
     } else {
-      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+      this.toastComponentError.showToast();
       console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
     }
   }

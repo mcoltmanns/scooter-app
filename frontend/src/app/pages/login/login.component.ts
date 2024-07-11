@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -10,6 +10,7 @@ import { ButtonComponent } from 'src/app/components/button/button.component';
 import { BookingService } from 'src/app/services/booking.service';
 import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 @Component({
   standalone: true,
@@ -18,11 +19,14 @@ import { PositionService } from 'src/app/utils/position.service';
     ButtonComponent,
     UserInputComponent,
     RouterLink,
+    ToastComponent
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent implements OnInit, OnDestroy {
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
+
   /* Initialize subscriptions for the form value changes */
   private loginFormValueChangesSubscription?: Subscription;
 
@@ -124,8 +128,12 @@ export class LoginComponent implements OnInit, OnDestroy {
 
       /* Assign the error messages to the respective invalid input fields */
       this.assignErrorMessage(validationErrors);
+
+      /* Mark all form fields as touched to display the error messages */
+      this.loginForm.markAllAsTouched();
     } else {
-      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+      this.toastComponentError.showToast();
       console.error(err);
     }
   }

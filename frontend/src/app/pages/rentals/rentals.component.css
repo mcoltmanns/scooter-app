@@ -14,6 +14,7 @@
 .header {
   position: relative;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 20px;
@@ -54,7 +55,10 @@ hr.solid {
   margin-bottom: 40px;
   margin-left: 2px;
   margin-right: 2px;
-  border-top: 2px solid #97FB64;
+  /* border-top: 2px solid #97FB64; */
+  border: none;
+  height: 3px;
+  background-color: #aeff85;
 }
 
 .scrollable-container {
@@ -94,9 +98,77 @@ hr.solid {
   animation: fadeIn 0.25s ease-out;
 }
 
+.scooter-container-dynamic-wrapper {
+  position: relative;
+  padding: 3px;
+  border-radius: 12px;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  animation: fadeIn 0.25s ease-out;
+}
+.scooter-container-dynamic-wrapper:before, .scooter-container-dynamic-wrapper:after {
+  content: '';
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #befec2, #befec2, #befec2,#48fac6, #11d1c6, #69fcc6, 
+    #befec2, #077cc9,#befec2, #befec2);
+  background-size: 400%;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  animation: steam 40s linear infinite;
+}
+.scooter-container-dynamic-wrapper:after {
+  -webkit-filter: blur(10px);
+  filter: blur(10px);
+  transform: translate3d(0, 0, 0);
+  opacity: 0.3;
+}
+
+.scooter-container-static-wrapper {
+  position: relative;
+  padding: 3px;
+  border-radius: 12px;
+  box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  animation: fadeIn 0.25s ease-out;
+}
+.scooter-container-static-wrapper:before, .scooter-container-static-wrapper:after {
+  content: '';
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  border-radius: 12px;
+  background: linear-gradient(45deg, #09a0b0, #09a0b0, #09a0b0,#0e5976, #1c3c6c, #057981, 
+    #09a0b0, #201d50,#09a0b0, #09a0b0);
+  background-size: 400%;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  animation: steam 40s linear infinite;
+}
+.scooter-container-static-wrapper:after {
+  -webkit-filter: blur(10px);
+  filter: blur(10px);
+  transform: translate3d(0, 0, 0);
+  opacity: 0.3;
+}
+
+@keyframes steam {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
 .scooter-container {
-    padding: 15px;
-    border: 2px solid #4a4242;
     border-radius: 10px;
     background-color: #fff;
     display: flex;
@@ -107,6 +179,21 @@ hr.solid {
     min-width: min-content;
     cursor: pointer;
     animation: fadeIn 0.25s ease-out;
+}
+
+.scooter-container-border-normal {
+  padding: 15px;
+  border: 2px solid #4a4242;
+}
+
+.scooter-container-border-dynamic-active {
+  padding: 13px;
+  border: 1px solid #bbf9bf;
+}
+
+.scooter-container-border-static-active {
+  padding: 13px;
+  border: 1px solid #0790a0;
 }
 
 .picture {
@@ -196,6 +283,30 @@ hr.solid {
     white-space: nowrap;
 }
 
+.green-box-dynamic {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    height: 30px;
+    border-radius: 15px;
+    border: 1.5px solid #2a7607;
+    background: var(--Highlights-Stroke, #123800);
+    padding-right: 7px;
+    padding-left: 6px;
+}
+
+.green-box-dynamic p {
+  font-size: 0.8em;
+  font-family: Roboto;
+  color: var(--Highlights, #97FB64);
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .action-button, .action-button-static {
     display: flex;
     justify-content: center;
@@ -240,7 +351,7 @@ hr.solid {
   border: solid 1.5px var(--accent-fg, #2a1800);
 }
 
-@media only screen and (max-width: 490px) {
+@media only screen and (max-width: 530px) {
   .action-button {
     gap: 0px;
     width: 30px;
@@ -255,12 +366,12 @@ hr.solid {
     display: none;
   }
 }
-@media only screen and (max-width: 420px) {
+@media only screen and (max-width: 445px) {
   .scooter-container {
     gap: 15px;
   }
 }
-@media only screen and (max-width: 390px) {
+@media only screen and (max-width: 422px) {
   .scooter-container {
       flex-direction: column;
   }
@@ -274,7 +385,7 @@ hr.solid {
       justify-content: center;
   }
 }
-@media only screen and (max-width: 285px) {
+@media only screen and (max-width: 290px) {
   .text-container {
       gap: 2px;
   }

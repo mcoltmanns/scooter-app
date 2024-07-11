@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
 import { ValidationErrors } from 'src/app/models/validation-errors';
@@ -9,16 +9,19 @@ import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModu
 import { Subscription } from 'rxjs';
 import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
+import { ToastComponent } from 'src/app/components/toast/toast.component';
 
 @Component({
   selector: 'app-registration',
   standalone: true,
-  imports: [ReactiveFormsModule, UserInputComponent, ButtonComponent, RouterLink],
+  imports: [ReactiveFormsModule, UserInputComponent, ButtonComponent, RouterLink, ToastComponent],
   templateUrl: './registration.component.html',
   styleUrl: './registration.component.css'
 })
 
 export class RegistrationComponent implements OnInit, OnDestroy {
+  @ViewChild('toastComponentError') toastComponentError!: ToastComponent; // Get references to the toast component
+
   /* Initialize subscriptions for the form value changes */
   private registerFormValueChangesSubscription?: Subscription;
   private password1ValueChangesSubscription?: Subscription;
@@ -229,7 +232,8 @@ export class RegistrationComponent implements OnInit, OnDestroy {
       /* Assign the error messages to the respective invalid input fields */
       this.assignErrorMessage(validationErrors);
     } else {
-      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+      this.errorMessage = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+      this.toastComponentError.showToast();
       console.error(`Backend returned code ${err.status}, body was: ${JSON.stringify(err.error)}`);
     }
   }
