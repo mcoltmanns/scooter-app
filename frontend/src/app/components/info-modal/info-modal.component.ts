@@ -28,6 +28,7 @@ export class InfoModalComponent {
   @Input() public title = 'Hinweis';
   @Input() public actionText = 'Aktion';
   @Input() public closeText = 'Schließen';
+  @Input() public bigFont = false;
   @Input() action: () => void = () => {
     // This is a default function that does nothing.
     // It will be replaced by a function from the parent component.

@@ -112,10 +112,6 @@ hr.solid {
   left: 0px;
   top: 0px;
   border-radius: 12px;
-  /* background: linear-gradient(45deg, #97fb64, #97fb64, #97fb64,#59963b, #4e8f2d, #71b64f, 
-    #97fb64, #547a42,#97fb64, #97fb64); */
-  /* background: linear-gradient(45deg, #04afa6, #04afa6, #04afa6,#126688, #21447a, #05858e, 
-    #04afa6, #292667,#04afa6, #04afa6); */
   background: linear-gradient(45deg, #befec2, #befec2, #befec2,#48fac6, #11d1c6, #69fcc6, 
     #befec2, #077cc9,#befec2, #befec2);
   background-size: 400%;

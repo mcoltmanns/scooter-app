@@ -30,9 +30,11 @@ interface InfoModal {
   scooterId: number;
   createdAt: string;
   endedAt: string;
-  totalPrice: string;
   renew: boolean;
   isActive: boolean;
+  remainingTime?: string;
+  pastTime?: string;
+  mode: 'past' | 'prepaid' | 'dynamic';
 }
 
 @Component({
@@ -83,6 +85,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Bind Information Modal to this instance */
     this.onNavigateToScooter = this.onNavigateToScooter.bind(this);
     this.onCloseInfoModal = this.onCloseInfoModal.bind(this);
+    this.onClosePaymentOffsetInfoModal = this.onClosePaymentOffsetInfoModal.bind(this);
 
     /* Bind Confirm Modal to this instance */
     this.onConfirmConfirmModal = this.onConfirmConfirmModal.bind(this);
@@ -121,10 +124,14 @@ export class RentalsComponent implements OnInit, OnDestroy {
     scooterId: 0,
     createdAt: '',
     endedAt: '',
-    totalPrice: '',
     renew: false,
-    isActive: false
+    isActive: false,
+    remainingTime: undefined,
+    pastTime: undefined,
+    mode: 'past'
   };
+
+  public showPaymentOffsetInfoModal = false;
 
   /* Confirm modal configuration */
   public confirmModal = {
@@ -583,8 +590,29 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
       /* Add the past rental to the past rentals array */
       // this.pastRentals.push(newPastRental!);  // Add the new past rental to the end of the past rentals array
-      this.pastRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the past rentals array
+      // this.pastRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the past rentals array
+      this.filteredRentals.unshift(newPastRental!);  // Add the new past rental to the beginning of the filtered rentals array
     }, wholeAnimationDuration);
+  }
+
+  hasRemainingTime(rental: PastRental | ActiveRental): rental is ActiveRental {
+    return (rental as ActiveRental).remainingTime !== undefined;
+  }
+
+  hasPastTime(rental: PastRental | ActiveRental): rental is ActiveRental {
+    return (rental as ActiveRental).pastTime !== undefined;
+  }
+
+  getInvoiceDownloadFontSize(): string {
+    if (window.innerWidth < 260) {
+      return '13px';
+    } else {
+      return '16px';
+    }
+  }
+
+  getPaymentOffsetAsFloat(rental: PastRental | ActiveRental): number {
+    return parseFloat(rental.paymentOffset);
   }
 
   setUpAndShowInfoModal(rental: ActiveRental | PastRental, type: 'past' | 'prepaid' | 'dynamic'): void {
@@ -596,10 +624,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.scooterId = rental.scooterId;
       this.infoModal.createdAt = rental.createdAt;
       this.infoModal.endedAt = rental.endedAt;
-      this.infoModal.totalPrice = rental.total_price;
       this.infoModal.isActive = false;
       this.infoModal.renew = false;
       this.infoModal.show = true;
+      this.infoModal.mode = 'past';
+      this.infoModal.remainingTime = undefined;
+      this.infoModal.pastTime = undefined;
     }
     if (type === 'prepaid') {
       rental = rental as ActiveRental;
@@ -609,10 +639,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.scooterId = rental.scooterId;
       this.infoModal.createdAt = rental.createdAt;
       this.infoModal.endedAt = rental.nextActionTime.toString();
-      this.infoModal.totalPrice = rental.price_per_hour;
       this.infoModal.isActive = true;
       this.infoModal.renew = rental.renew;
       this.infoModal.show = true;
+      this.infoModal.mode = 'prepaid';
+      this.infoModal.remainingTime = rental.remainingTime;
+      this.infoModal.pastTime = undefined;
     }
     if (type === 'dynamic') {
       rental = rental as ActiveRental;
@@ -622,10 +654,12 @@ export class RentalsComponent implements OnInit, OnDestroy {
       this.infoModal.scooterId = rental.scooterId;
       this.infoModal.createdAt = rental.createdAt;
       this.infoModal.endedAt = rental.nextActionTime.toString();
-      this.infoModal.totalPrice = rental.price_per_hour;
       this.infoModal.isActive = true;
       this.infoModal.renew = rental.renew;
       this.infoModal.show = true;
+      this.infoModal.mode = 'dynamic';
+      this.infoModal.remainingTime = undefined;
+      this.infoModal.pastTime = rental.pastTime;
     }
   }
 
@@ -780,6 +814,16 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
     /* Reload the page to fetch the latest data because we don't know what actually happened to the data in case of a hot error */
     window.location.reload();
+  }
+
+  onOpenPaymentOffsetInfoModal(): void {
+    this.infoModal.show = false;
+    this.showPaymentOffsetInfoModal = true;
+  }
+
+  onClosePaymentOffsetInfoModal(): void {
+    this.showPaymentOffsetInfoModal = false;
+    this.infoModal.show = true;
   }
 
   //functionalities for the filters-----------------------------------------------------------------
