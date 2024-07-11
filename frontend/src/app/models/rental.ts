@@ -7,6 +7,9 @@ export interface ActiveRental {
     createdAt: string;
     userId: number;
     scooterId: number;
+    remainingTime?: string;
+    pastTime?: string;
+    total_price?: string;
 }
 
 export interface PastRental {

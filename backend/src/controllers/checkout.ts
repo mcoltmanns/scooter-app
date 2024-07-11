@@ -30,8 +30,8 @@ export class CheckoutController {
     if (isDynamic) {
       rentalDuration = DYNAMIC_EXTENSION_INTERVAL_MS;
     } else {
-      // rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
-      rentalDuration = 80000; // For testing/debugging purposes, set the duration to 40 seconds
+      rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      // rentalDuration = 10000; // For testing/debugging purposes, set the duration to 40 seconds
     }
 
     let rental: Model | null = null;
@@ -230,10 +230,17 @@ export class CheckoutController {
 
       /* End the rental */
       const newPastRental = await RentalManager.endRental(rentalId, transaction, activeRental);
+
+      const newPastRentalRes = newPastRental.toJSON();
+      
+      /* Remove paymentMethodId if it is in newPastRentalRes */
+      if (newPastRentalRes.paymentMethodId) {
+        delete newPastRentalRes.paymentMethodId;
+      }
       
       await transaction.commit();
 
-      response.status(200).json({ code: 200, message: 'Die Buchung wurde erfolgreich beendet.', newPastRental: newPastRental.toJSON() });
+      response.status(200).json({ code: 200, message: 'Die Buchung wurde erfolgreich beendet.', newPastRental: newPastRentalRes });
     } catch (error) {
       console.error(error);
 

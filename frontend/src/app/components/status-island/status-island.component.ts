@@ -149,9 +149,6 @@ export class StatusIslandComponent implements OnDestroy, AfterViewChecked {
   ngOnDestroy(): void {
     this.resetTimer();
 
-    console.log(this.countdownExpiredCallback);
-    console.log(this.cancel);
-
     /* Unsubscribe from all subscriptions */
     this.scooterReservedSubscription.unsubscribe();
     this.scooterUnreservedSubscription.unsubscribe();

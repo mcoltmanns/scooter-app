@@ -64,6 +64,9 @@ export class RentalsComponent implements OnInit, OnDestroy {
   private animationTimeout: ReturnType<typeof setTimeout> | null = null;
   private waitForAnimationEndTimeout: ReturnType<typeof setTimeout> | null = null;
 
+  /* Variables for controlling intervals */
+  private updateIntervals: Map<number, ReturnType<typeof setInterval>> = new Map();
+
   /* Get references to the toast component */
   @ViewChild('toastComponentError') toastComponentError!: ToastComponent;
 
@@ -157,6 +160,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
       next: ([rentalsResponse, productsResponse, preferencesResponse]) => {
         /* Get all scooter bookings (rentals) for the User from the backend */
         this.activeRentals = rentalsResponse.activeRentals;
+
+        /* Start the countdown/countups for each active rental */
+        this.initIntervalsForActiveRental();
+
         this.pastRentals = rentalsResponse.pastRentals;
         this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
         this.filteredRentals = this.pastRentals;  // Initially show all past rentals
@@ -201,11 +208,82 @@ export class RentalsComponent implements OnInit, OnDestroy {
     /* Clear timeouts if still running */
     this.clearAnimationTimeout();
     this.clearWaitForAnimationTimeout();
+
+    /* Clear all rental countdown intervals */
+    this.updateIntervals.forEach((interval) => clearInterval(interval));
+
+    /* Clear the Map after clearing all intervals */
+    this.updateIntervals.clear();
   }
 
   // Function to call when an image is loaded
   onImageLoad(scooterId: string): void {
     this.imageLoaded[scooterId] = true;
+  }
+
+  initIntervalsForActiveRental(): void {
+    /* Start the countdown for each preipaid active rental */
+    this.activeRentals.forEach((rental) => {
+      if (!rental.renew) {
+        const now = new Date();
+        const nextActionTime = new Date(rental.nextActionTime);
+        rental.remainingTime = this.rentalDuration(now.toISOString(), nextActionTime.toISOString());
+        this.startCountdownForPrepaidActiveRental(rental);
+      }
+      if (rental.renew) {
+        const now = new Date();
+        rental.pastTime = this.rentalDuration(rental.createdAt, now.toISOString());
+        rental.total_price = this.convertCurrencyUnits((this.getExactRentalDurationInHours(rental.createdAt, now.toString())*this.toNumber(rental.price_per_hour)).toString(), this.selectedCurrency);
+        this.startCountupForDynamicActiveRental(rental);
+      }
+    });
+  }
+
+  /* Function to start a countdown for a prepaid active rental */
+  startCountdownForPrepaidActiveRental(rental: ActiveRental): void {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const nextActionTime = new Date(rental.nextActionTime);
+      const remainingTimeMs = nextActionTime.getTime() - now.getTime();
+      if (remainingTimeMs <= 0) {
+        clearInterval(interval);
+        this.updateIntervals.delete(rental.id);
+        rental.remainingTime = '0m 0s';
+
+        /* Animate moving the active rental to the past rentals */
+        this.moveRentalFromActiveToPast(rental, this.generatePastRentalFromActiveRental(rental));
+      } else {
+        // Update the remaining time in a human-readable format
+        rental.remainingTime = this.rentalDuration(now.toISOString(), nextActionTime.toISOString());
+      }
+    }, 1000); // Update every second
+
+    this.updateIntervals.set(rental.id, interval);
+  }
+
+  /* Function to start a countup for a prepaid active rental */
+  startCountupForDynamicActiveRental(rental: ActiveRental): void {
+    const interval = setInterval(() => {
+      const now = new Date();
+      rental.pastTime = this.rentalDuration(rental.createdAt, now.toISOString());
+      rental.total_price = this.convertCurrencyUnits((this.getExactRentalDurationInHours(rental.createdAt, now.toString())*this.toNumber(rental.price_per_hour)).toString(), this.selectedCurrency);
+    }, 1000); // Update every second
+
+    this.updateIntervals.set(rental.id, interval);
+  }
+
+  generatePastRentalFromActiveRental(activeRental: ActiveRental): PastRental {
+    const targetPaidDuration = (new Date()).getTime() - new Date(activeRental.createdAt).getTime();
+    return {
+      id: activeRental.id,
+      price_per_hour: activeRental.price_per_hour,
+      total_price: (parseFloat(activeRental.price_per_hour) * (targetPaidDuration / (1000 * 60 * 60))).toFixed(2),
+      paymentOffset: activeRental.paymentOffset,
+      createdAt: activeRental.createdAt,
+      endedAt: activeRental.nextActionTime.toString(),
+      userId: activeRental.userId,
+      scooterId: activeRental.scooterId
+    };
   }
 
   async getUserLatestUserLocation(): Promise<boolean> {
@@ -243,12 +321,16 @@ export class RentalsComponent implements OnInit, OnDestroy {
     const date2 = new Date(end);
 
     const diffMs = date2.getTime() - date1.getTime();
-    const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+    const diffSecondsTotal = Math.round(diffMs / 1000); // Round to the nearest second
+    const hours = Math.floor(diffSecondsTotal / 3600); // 3600 seconds in an hour
+    const minutes = Math.floor((diffSecondsTotal % 3600) / 60); // Remaining minutes
+    const seconds = diffSecondsTotal % 60; // Remaining seconds, already rounded
 
-    // If the number of hours is less than 10, remove the leading zero
-    const hoursStr = diffHours < 10 ? String(diffHours) : String(diffHours).padStart(2, '0');
-
-    return `${hoursStr}`;
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`; // Return hours and minutes if hours > 0
+    } else {
+      return `${minutes}m ${seconds}s`; // Return minutes and seconds if hours == 0
+    }
   }
 
   /* Get the price for each scooter */
@@ -610,6 +692,13 @@ export class RentalsComponent implements OnInit, OnDestroy {
         if (this.infoModal.show) {
           /* Close the info modal */
           this.onCloseInfoModal();   // Not only hides the info modal but also clears the rental query parameter from the URL
+        }
+
+        /* Clear the interval for the ended dynamic rental */
+        const interval = this.updateIntervals.get(activeRental.id);
+        if (interval) {
+          clearInterval(interval);
+          this.updateIntervals.delete(activeRental.id);
         }
     
         /* Animate moving the active rental to the past rentals */
