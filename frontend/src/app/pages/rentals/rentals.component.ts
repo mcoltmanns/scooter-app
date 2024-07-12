@@ -9,7 +9,7 @@ import { UnitConverter } from 'src/app/utils/unit-converter';
 import { FilterButtonComponent } from 'src/app/components/filter-button/filter-button.component';
 import { UserInputComponent } from 'src/app/components/user-input/user-input.component';
 import { ButtonComponent } from 'src/app/components/button/button.component';
-import { FormGroup, FormBuilder, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormGroup, FormBuilder, ReactiveFormsModule, FormControl, FormsModule  } from '@angular/forms';
 import { Filters } from 'src/app/utils/util-filters';
 import { InfoModalComponent } from 'src/app/components/info-modal/info-modal.component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,6 +21,7 @@ import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-
 import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
 import { Sorts } from 'src/app/utils/util-sorts';
+import { DropdownModule } from 'primeng/dropdown';
 
 
 interface InfoModal {
@@ -36,6 +37,10 @@ interface InfoModal {
   remainingTime?: string;
   pastTime?: string;
   mode: 'past' | 'prepaid' | 'dynamic';
+}
+
+interface DropDownMenu {
+  name: string;
 }
 
 @Component({
@@ -54,7 +59,7 @@ interface InfoModal {
         ]),
       ]),
     ],
-    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent, ToastComponent, ConfirmModalComponent]
+    imports: [CommonModule, FilterButtonComponent, UserInputComponent, ButtonComponent, ReactiveFormsModule, InfoModalComponent, LoadingOverlayComponent, ToastComponent, ConfirmModalComponent, DropdownModule, FormsModule]
 })
 export class RentalsComponent implements OnInit, OnDestroy {
   /* Access the DOM elements that get animated */
@@ -62,6 +67,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
   @ViewChild('greenBar') greenBar!: ElementRef;
   @ViewChild('activeRentalList') activeRentalList!: ElementRef;
   @ViewChild('pastRentalsTitle') pastRentalsTitle!: ElementRef;
+
+  // Varibles for the drop down menu
+  sortings: DropDownMenu[];
+  selectedSorting: DropDownMenu = { name: ''};
 
   /* Variables to manage the animation timeouts */
   private animationTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -94,6 +103,19 @@ export class RentalsComponent implements OnInit, OnDestroy {
 
     /* Bind Hot Error Modal to this instance */
     this.onCloseHotError = this.onCloseHotError.bind(this);
+
+    this.sortings = [
+      { name: 'Preis aufsteigend'},
+      { name: 'Preis absteigend'},
+      { name: 'Reichweite aufsteigend'},
+      { name: 'Reichweite absteigend'},
+      { name: 'Batteriestand aufsteigend'},
+      { name: 'Batteriestand absteigend'},
+      { name: 'Geschwindigkeit aufsteigend'},
+      { name: 'Geschwindigkeit absteigend'},
+      { name: 'Distanz aufsteigend'},
+      { name: 'Distanz absteigend'}
+    ];
   }
 
   // Variable to control the visibility of the loading spinner
@@ -940,6 +962,10 @@ sortDauer(asc: boolean):void{
 sortPrice(asc: boolean):void{
     this.sortedRentals = this.filteredRentals;
     this.sortedRentals = Sorts.sortPriceR(asc, this.sortedRentals);
+}
+
+onOrderChange(event: { value: { name: string; }; }):void {
+  console.log('Selected city:', event.value);
 }
 
 }

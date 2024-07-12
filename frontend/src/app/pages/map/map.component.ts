@@ -152,7 +152,6 @@ export class MapComponent implements OnInit, OnDestroy{
 
   /* user can choose an ordering method from the drop down bar */
   onOrderChange(event: { value: { name: string; }; }):void {
-    console.log('Selected city:', event.value);
     if(event.value.name === 'Preis aufsteigend'){
       this.sortPrice(true);
     }

@@ -122,6 +122,7 @@
         <div class="info"></div>
         <div class="filter-content">
           <h3 class="o-title">Filter Menü</h3>
+          <p-dropdown [options]="sortings" optionLabel="name" [(ngModel)]="selectedSorting"  placeholder="Sortierung wählen" (onChange)="onOrderChange($event)"></p-dropdown> 
           <div class="form-container">
             <form [formGroup]="bookingFilterForm" (ngSubmit)="onSubmit()">
               <div class="filter-row">
