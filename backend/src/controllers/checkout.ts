@@ -30,8 +30,8 @@ export class CheckoutController {
     if (isDynamic) {
       rentalDuration = DYNAMIC_EXTENSION_INTERVAL_MS;
     } else {
-      // rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
-      rentalDuration = 80000; // For testing/debugging purposes, set the duration to 40 seconds
+      rentalDuration = duration * 60 * 60 * 1000; // Convert hours to milliseconds
+      // rentalDuration = 10000; // For testing/debugging purposes, set the duration to 40 seconds
     }
 
     let rental: Model | null = null;
@@ -180,6 +180,12 @@ export class CheckoutController {
   public async endDynamicRental (request: Request, response: Response): Promise<void> {
     const userId = response.locals.userId;
     const { rentalId } = request.body;
+    let userLocation: { latitude: number, longitude: number } | null = null;
+
+    if (request.body.latitude && request.body.longitude) {
+      userLocation = { latitude: request.body.latitude, longitude: request.body.longitude };
+      console.log('endDynamicRental (Controller): User location provided:', request.body.latitude, request.body.longitude);
+    }
 
     const transaction = await Database.getSequelize().transaction();
 
@@ -191,12 +197,50 @@ export class CheckoutController {
         throw new Error(errorMessages.ACTIVE_RENTAL_NOT_FOUND);
       }
 
+      /* Save the user location as new location of the scooter. 
+       * Note: In a real-world scenario, the user location should be double-checked with the scooter location
+       * to ensure that the user is near the scooter or directly only the scooter location should be used
+       * (assuming the scooter has a GPS module). */
+      if (userLocation) {
+        /* Save the user location in the database outside the transaction of the payment/ending procedure to prevent
+         * a rollback in case of an error. Because in case of a payment error or a failure in the endDynamicRental
+         * procedure, we rather want to save the latest location of the scooter in case the user walks away from the
+         * scooter after getting an error message even though the rental was not correctly ended. */
+        const saveLocationTransaction = await Database.getSequelize().transaction();
+        try {
+          console.log('endDynamicRental (Controller): Saving scooter location:', userLocation.latitude, userLocation.longitude, 'for scooter', activeRental.getDataValue('scooterId') + '...');
+          const scooter = await Scooter.findByPk(activeRental.getDataValue('scooterId'), { transaction: saveLocationTransaction });
+          if (!scooter) {
+            throw new Error(errorMessages.SCOOTER_NOT_FOUND);
+          }
+          scooter.setDataValue('coordinates_lat', userLocation.latitude);
+          scooter.setDataValue('coordinates_lng', userLocation.longitude);
+          await scooter.save({ transaction: saveLocationTransaction });
+          await saveLocationTransaction.commit();
+          console.log('endDynamicRental (Controller): Scooter location saved successfully.');
+        } catch (error) {
+          await saveLocationTransaction.rollback();
+          await transaction.rollback();   // Also rollback the main transaction in case of an error because we are returning an error message to the user and the transaction would never be closed otherwise
+          console.error('endDynamicRental (Controller): Saving scooter location failed. Transactions rolled back.');
+          console.error(error);
+          response.status(500).json({ code: 500, message: 'Fehler beim Speichern des Scooter-Standorts.'});
+          return;
+        }
+      }
+
       /* End the rental */
       const newPastRental = await RentalManager.endRental(rentalId, transaction, activeRental);
+
+      const newPastRentalRes = newPastRental.toJSON();
+      
+      /* Remove paymentMethodId if it is in newPastRentalRes */
+      if (newPastRentalRes.paymentMethodId) {
+        delete newPastRentalRes.paymentMethodId;
+      }
       
       await transaction.commit();
 
-      response.status(200).json({ code: 200, message: 'Die Buchung wurde erfolgreich beendet.', newPastRental: newPastRental.toJSON() });
+      response.status(200).json({ code: 200, message: 'Die Buchung wurde erfolgreich beendet.', newPastRental: newPastRentalRes });
     } catch (error) {
       console.error(error);
 
@@ -207,7 +251,25 @@ export class CheckoutController {
         response.status(404).json({ code: 404, message: 'Buchung nicht gefunden.' });
         return;
       }
+
       if (error.message === errorMessages.ERROR_ENDING_RENTAL) {
+        try {
+          activeRental.setDataValue('total_price', error.payload.targetAmountPaid); 
+          activeRental.setDataValue('paymentOffset', error.payload.paymentOffset); 
+          activeRental.setDataValue('renew', false);  // Set renew to false to prevent the rental from being extended or canceled by user again
+          await activeRental.save(); // Save the updated rental in case the transaction was rolled back, no transaction is used here because the transaction was already rolled back
+          const currentTime = new Date();
+          RentalManager.scheduleRentalCheck(activeRental.getDataValue('id'), new Date(currentTime.getTime() + DYNAMIC_EXTENSION_INTERVAL_MS));  // Schedule a job to try ending the rental later
+          console.log('endDynamicRental (Controller): Database transaction got rolled back. But could reflect already processed payment activity to the database. Try to end active rental', activeRental.getDataValue('id'), 'again later.');
+        } catch (error) {
+          /* Note: If the rental could not be saved after the payment activity, we have data inconsistency.
+           *        Normally would try to log this and inform the admin at this point, but for simplicity
+           *        (in the context of this project) we simply return an error message to the user and print
+           *        a statement to the console. */
+          console.error('WARNING: Could not save the updated active rental ' + activeRental.getDataValue('id') + ' after payment activity. The rental is still active and may trigger payment activities again. Please check the database for inconsistencies.');
+          response.status(500).json({ code: 500, message: 'Schwerwiegender Fehler!', hotMessage: 'Bei der Beendung der Buchung ist ein schwerwiegender Fehler aufgetreten, bei dem auch Zahlungsunregelmäßigkeiten aufgetreten sein können. Bitte kontaktiere uns unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
+          return;
+        }
         response.status(500).json({ code: 500, message: 'Probleme beim Beenden!', hotMessage: 'Beim Beenden der Buchung ist ein Fehler aufgetreten. Wir versuchen, die Buchung zu einem späteren Zeitpunkt erneut zu beenden. Normalerweise entstehen hierdurch keine Mehrkosten. Falls du dennoch Unstimmigkeiten in deiner Abrechnung entdeckst oder die Buchungen auch in den nächsten Tagen noch nicht beendet ist, kontaktiere uns bitte unter Nennung der Buchungs-ID ' + error.payload.rentalId + '.'});
         return;
       }

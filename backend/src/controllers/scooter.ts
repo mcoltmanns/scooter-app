@@ -14,7 +14,6 @@ export class ScooterController {
             /* Find all scooters that are not rented and not reserved by someone else (reservation by the user himself is fine) */
             scooters = (await Scooter.findAll({
               where: { 
-                active_rental_id: null,
                 [Op.or]: [
                   { reservation_id: null },
                   { '$reservation.user_id$': userId }
@@ -55,10 +54,7 @@ export class ScooterController {
 
         const { scooterId } = request.params;
 
-        try {
-            // find the scooter with the matching ID and check if active_rental_id is null
-            // const scooter = await Scooter.findOne({ where: { id: scooterId, active_rental_id: null } });
-            
+        try {            
             const scooter = await Scooter.findByPk(scooterId);
 
             if (!scooter) {
@@ -68,7 +64,7 @@ export class ScooterController {
 
             const activeRental = await ActiveRental.findOne({ where: { scooterId: scooterId } });
 
-            if (scooter.getDataValue('active_rental_id') !== null || activeRental !== null) {
+            if (activeRental !== null) {
               response.status(400).json({ code: 400, message: 'Scooter ist derzeit vermietet.' });
               return;
             }

@@ -22,21 +22,6 @@ export class AuthService{
     return this.loggedIn;
   }
 
-  //check if authenticated
-  // public checkAuth(): Observable<boolean> {
-  //   const authObservable : Observable<boolean> = this.http.get<boolean>('/api/authenticate').pipe(shareReplay());
-  //   authObservable.subscribe({
-  //     next: (value) => {
-  //       this.loggedIn = value;
-  //       this.authChecked = true;
-  //     },
-  //     error: (err) => {
-  //       this.loggedIn = false;
-  //       console.log(err);
-  //     }
-  //   });
-  //   return authObservable;
-  // }
   public checkAuth(): Observable<boolean> {
     return this.http.get<AuthResponse>('/api/authenticate').pipe(
       tap(response => {

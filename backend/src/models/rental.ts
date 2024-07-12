@@ -1,14 +1,6 @@
 import { DataTypes } from 'sequelize';
 import Database from '../database';
 
-export const Rental = Database.getSequelize().define('rentals', {
-    // id is taken care of by sequelize
-    endedAt: { // rentals are only over if endedAt contains a value
-        type: DataTypes.DATE,
-        allowNull: true,
-    },
-}, { updatedAt: false, createdAt: true}); // use createdAt to track when the rental began
-
 // table for rentals currently going on
 export const ActiveRental = Database.getSequelize().define('activeRentals', {
     id: {

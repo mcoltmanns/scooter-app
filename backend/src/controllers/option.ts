@@ -61,6 +61,7 @@ export class OptionController{
 
         } catch (error) {
             console.error(error);
+            await transaction.rollback();
             response.status(500).json({  code: 500, message: 'Die Benutzereinstellungen konnten nicht aktualisiert werden.' });
         }
         response.status(200).json({ code: 200, message: 'Benutzer-Präferenzen erfolgreich aktualisiert.' });

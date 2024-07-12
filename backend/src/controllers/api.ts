@@ -11,12 +11,10 @@
  */
 import { Request, Response } from 'express';
 import { ALL_EMPLOYEES } from '../static-data/employees';
-import jobManager from '../services/job-manager';
 
 export class ApiController {
 
   public getInfo(request: Request, response: Response): void {
-    console.log(jobManager.toString());
     response.status(200);
     response.send('ok');
   }

@@ -62,14 +62,28 @@ export class PaymentController {
     const { name, cardNumber, securityCode, expirationDate } = request.body;
 
     /* Check if this exact bachelorcard is already in the database for that user */
-    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'bachelorcard', data: { name, cardNumber, securityCode, expirationDate }, usersAuthId: userId } });
-    if (existingPaymentMethod) {
-      response.status(400).json({ status: 400, message: 'Diese Bachelorcard ist bereits in Ihrem Konto hinterlegt.' });
+    try {
+      const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'bachelorcard', data: { name, cardNumber, securityCode, expirationDate }, usersAuthId: userId } });
+      if (existingPaymentMethod) {
+        response.status(400).json({ status: 400, message: 'Diese Bachelorcard ist bereits in Ihrem Konto hinterlegt.' });
+        return;
+      }
+    } catch (error) {
+      response.status(500).json({ status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
       return;
     }
 
     /* Check if the bachelorcard account is from germany */
-    const { status:statusCode, message:countryCode } = await BachelorCard.getCountryCode(cardNumber);
+    let statusCode;
+    let countryCode;
+    try {
+      const { status, message } = await BachelorCard.getCountryCode(cardNumber);
+      statusCode = status;
+      countryCode = message;
+    } catch (error) {
+      response.status(502).json({ status: 502, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
+      return;
+    }
 
     /* Check if we got a 'Bad Request' when checking the country code */
     if (statusCode === 400) {
@@ -99,6 +113,21 @@ export class PaymentController {
       return;
     }
 
+    /* WORKAROUND: The payment API does not verify all payment data when checking the country code.
+     * Therefore, we are going to validate 0.00 € where the API will return an error if the payment data is invalid.
+     * Although this is not a clean solution, because it makes it impossible to add a Bachelorcard that currently
+     * has a balance of 0.00 €. */
+    try {
+      const { status } = await BachelorCard.initTransaction({ name, cardNumber, securityCode, expirationDate }, 0);
+      if (status !== 200) {
+        response.status(400).json({ status: 400, message: 'Die BachelorCard wurde abgelehnt. Bitte überprüfe deine Eingaben.' });
+        return;
+      }
+    } catch (error) {
+      response.status(502).json({ status: 502, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
+      return;
+    }
+
     try {
       await PaymentMethod.create({ type: 'bachelorcard', data: { name, cardNumber, securityCode, expirationDate }, usersAuthId: userId });
     } catch (error) {
@@ -117,14 +146,28 @@ export class PaymentController {
     const { accountName, accountPassword } = request.body;
 
     /* Check if this exact HCIPal account is already in the database for that user */
-    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'hcipal', data: { accountName, accountPassword }, usersAuthId: userId } });
-    if (existingPaymentMethod) {
-      response.status(400).json({ status: 400, message: 'Dieser HCIPal-Account ist bereits in Ihrem Konto hinterlegt.' });
+    try {
+      const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'hcipal', data: { accountName, accountPassword }, usersAuthId: userId } });
+      if (existingPaymentMethod) {
+        response.status(400).json({ status: 400, message: 'Dieser HCIPal-Account ist bereits in Ihrem Konto hinterlegt.' });
+        return;
+      }
+    } catch (error) {
+      response.status(500).json({ status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
       return;
     }
 
     /* Check if the HCIPal account is from germany */
-    const { status:statusCode, message:countryCode } = await HciPal.getCountryCode(accountName);
+    let statusCode;
+    let countryCode;
+    try {
+      const { status, message } = await HciPal.getCountryCode(accountName);
+      statusCode = status;
+      countryCode = message;
+    } catch (error) {
+      response.status(502).json({ status: 502, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
+      return;
+    }
 
     /* Check if we got a 'Bad Request' when checking the country code */
     if (statusCode === 400) {
@@ -154,6 +197,21 @@ export class PaymentController {
       return;
     }
 
+    /* WORKAROUND: The payment API does not verify all payment data when checking the country code.
+     * Therefore, we are going to validate 0.00 € where the API will return an error if the payment data is invalid.
+     * Although this is not a clean solution, because it makes it impossible to add a Bachelorcard that currently
+     * has a balance of 0.00 €. */
+    try {
+      const { status } = await HciPal.initTransaction({ accountName, accountPassword }, 0);
+      if (status !== 200) {
+        response.status(400).json({ status: 400, message: 'Der HCIPal-Account wurde abgelehnt. Bitte überprüfe deine Eingaben.' });
+        return;
+      }
+    } catch (error) {
+      response.status(502).json({ status: 502, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
+      return;
+    }
+
     try {
       await PaymentMethod.create({ type: 'hcipal', data: { accountName, accountPassword }, usersAuthId: userId });
     } catch (error) {
@@ -172,14 +230,28 @@ export class PaymentController {
     const { swpCode } = request.body;
 
     /* Check if this exact SWPSafe account is already in the database for that user */
-    const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'swpsafe', data: { swpCode }, usersAuthId: userId } });
-    if (existingPaymentMethod) {
-      response.status(400).json({ status: 400, message: 'Dieser SWPSafe-Account ist bereits in Ihrem Konto hinterlegt.' });
+    try {
+      const existingPaymentMethod = await PaymentMethod.findOne({ where: { type: 'swpsafe', data: { swpCode }, usersAuthId: userId } });
+      if (existingPaymentMethod) {
+        response.status(400).json({ status: 400, message: 'Dieser SWPSafe-Account ist bereits in Ihrem Konto hinterlegt.' });
+        return;
+      }
+    } catch (error) {
+      response.status(500).json({ status: 500, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
       return;
     }
 
     /* Check if the SWPSafe account is from germany */
-    const { status:statusCode, message:countryCode } = await SwpSafe.getCountryCode(swpCode);
+    let statusCode;
+    let countryCode;
+    try {
+      const { status, message } = await SwpSafe.getCountryCode(swpCode);
+      statusCode = status;
+      countryCode = message;
+    } catch (error) {
+      response.status(502).json({ status: 502, message: 'Etwas ist schief gelaufen. Bitte versuchen Sie es später erneut.' });
+      return;
+    }
 
     /* Check if we got a 'Bad Request' when checking the country code */
     if (statusCode === 400) {
@@ -208,6 +280,9 @@ export class PaymentController {
       });
       return;
     }
+
+    /* WORKAROUND: For SWPSafe, the workaround where we validate 0.00 € is not necessary, because SWPSafe only has one field (Code)
+     * that is already validated by the API when checking the country code. */
 
     try {
       await PaymentMethod.create({ type: 'swpsafe', data: { swpCode }, usersAuthId: userId });

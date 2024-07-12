@@ -1,32 +1,26 @@
-// TODO: Deprecated
-export interface Rental {
-    id: number;
-    endedAt: string;
-    createdAt: string;
-    user_id: number;
-    scooter_id: number;
-}
-
 export interface ActiveRental {
     id: number;
     nextActionTime: Date;
     renew: boolean;
     price_per_hour: string;
+    paymentOffset: string;
     createdAt: string;
-    updatedAt: string;
     userId: number;
     scooterId: number;
-    paymentMethodId: number;
+    remainingTime?: string;
+    pastTime?: string;
+    total_price?: string;
 }
 
 export interface PastRental {
     id: number;
+    price_per_hour: string;
     total_price: string;
+    paymentOffset: string;
     createdAt: string;
     endedAt: string;
     userId: number;
     scooterId: number;
-    paymentMethodId: number;
 }
 
 /* interface with products + scooterId for all bookings */

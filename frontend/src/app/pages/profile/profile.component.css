@@ -1,3 +1,16 @@
+.scrollable-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-width: min-content;
+}
+
+.my-form {
+  width: 100%;
+  max-width: 700px;
+}
+
 .highlight {
   font-weight: bold;
 }
@@ -57,12 +70,14 @@ button .icon {
   align-items: center;
   gap: 15px;
   padding: 40px;
-  margin-top: -20px; /* Add an upper spacing */
+  margin-top: 0px; /* Add an upper spacing */
   margin-bottom: 50px;
 }
 
 .profileSave-btn {
   width: 90%;
+  max-width: 300px;
+  min-width: min-content;
 }
 
 .info {
@@ -70,9 +85,11 @@ button .icon {
 }
 
 .error {
-  color: rgb(226, 27, 27);
+  color: #fa3737;
 }
 
 .abort-btn {
   width: 90%;
+  max-width: 300px;
+  min-width: min-content;
 }

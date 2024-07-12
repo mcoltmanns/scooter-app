@@ -6,6 +6,14 @@
   min-width: min-content;
 }
 
+.inline-loading {
+  position: absolute;
+  top: 36vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
 .width-limiter {
   display: flex;
   flex-direction: column;
@@ -291,6 +299,7 @@ app-button {
 /* no Scooter picture  */
 .noScooterpicture {
   width: 100%;
+  max-width: 400px;
 }
 
 .switch-container {
