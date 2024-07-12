@@ -20,6 +20,7 @@ import { ToastComponent } from 'src/app/components/toast/toast.component';
 import { ConfirmModalComponent } from 'src/app/components/confirm-modal/confirm-modal.component';
 import { UserPosition } from 'src/app/utils/userPosition';
 import { PositionService } from 'src/app/utils/position.service';
+import { Sorts } from 'src/app/utils/util-sorts';
 
 
 interface InfoModal {
@@ -146,9 +147,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
   // User Location
   public userLocation: { latitude: number, longitude: number } | null = null;
 
-  //variables for the filters----------------------
+  //variables for the filters/sort----------------------
 
   public filteredRentals: PastRental[] = []; //filtered version of the PastRental[]
+  public sortedRentals: PastRental[] = []; //sorted version of the PastRental[]
   
   filterMenuVisible = false;//visibility variable of filter menu
   //filter form input variables
@@ -174,6 +176,7 @@ export class RentalsComponent implements OnInit, OnDestroy {
         this.pastRentals = rentalsResponse.pastRentals;
         this.pastRentals.sort((a, b) => new Date(b.endedAt).getTime() - new Date(a.endedAt).getTime());  // Sort past rentals by descending end date (most recently ended rental first)
         this.filteredRentals = this.pastRentals;  // Initially show all past rentals
+        this.sortedRentals = this.filteredRentals;
         // this.loadingDataScooter = false;
         // this.filteredRentals = this.pastRentals; //to see something on the list of past rentals
 
@@ -912,4 +915,31 @@ dateValidator(control: FormControl): { [key: string]: Boolean } | null {
     }
     this.bookingFilterForm.controls[controlName].setValue(value, { emitEvent: false });
   }
+
+
+
+
+  
+
+
+//sorting on the past rentals -----------------------------------------------------------------------
+
+//sort by date
+sortDate(asc: boolean):void{
+  this.sortedRentals = this.filteredRentals;
+  this.sortedRentals = Sorts.sortDate(asc, this.sortedRentals);
+}
+
+//sort by duration of the booking
+sortDauer(asc: boolean):void{
+  this.sortedRentals = this.filteredRentals;
+  this.sortedRentals = Sorts.sortDauer(asc, this.sortedRentals);
+}
+
+//sort by the total price of the booking
+sortPrice(asc: boolean):void{
+    this.sortedRentals = this.filteredRentals;
+    this.sortedRentals = Sorts.sortPriceR(asc, this.sortedRentals);
+}
+
 }

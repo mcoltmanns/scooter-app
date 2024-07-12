@@ -1,12 +1,104 @@
 import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { PositionService } from './position.service';
+import { PastRental } from '../models/rental';
+import { Duration, intervalToDuration, isAfter, isBefore, isEqual, min } from 'date-fns';
 
 /**
  * This class provides the sort functionalities for the scooter list
  */
 export class Sorts {
-    //Variables for the sorting-------------------- memory variables for previous filtering
+
+  //methods for sorting on the bookings page------------------------------
+  
+  static sortDate(asc:boolean, rentals: PastRental[]): PastRental[] {
+    rentals = rentals.sort((a,b) => {
+      const dateA = new Date (a.createdAt);
+      const dateB = new Date (b.createdAt);
+      if(asc){//compate ascending
+        if(isBefore(dateA, dateB)){
+          return -1;
+        } else if(isAfter(dateA, dateB)){
+          return 1;
+        }
+        return a.id - b.id; //default sort is by id
+      } else {//compare descending
+        if(isAfter(dateA, dateB)){
+          return -1;
+        } else if(isBefore(dateA, dateB)){
+          return 1;
+        }
+        return a.id-b.id; //default sort is by id
+      }
+    });
+    return rentals;
+  }
+
+  static sortDauer(asc:boolean, rentals: PastRental[]): PastRental[] {
+    rentals = rentals.sort((a,b) => {
+      const dauerA = this.durationToMilliseconds(intervalToDuration({start : new Date (a.createdAt), end : new Date (a.endedAt)}));
+      const dauerB = this.durationToMilliseconds(intervalToDuration({start : new Date (b.createdAt), end: new Date (b.endedAt)}));
+      if(asc){//compate ascending
+        const c = dauerA - dauerB;
+        if (c === 0){
+          return a.id - b.id; //default sort
+        }
+        return c;
+      } else {//compare descending
+        const c = dauerB - dauerA;
+        if (c === 0){
+          return a.id - b.id; //default sort
+        }
+        return c;
+      }
+    });
+    return rentals;
+  }
+
+  //computes duration in ms to compare using number comparators
+  static durationToMilliseconds(duration: Duration): number {
+    const { years = 0, months = 0, days = 0, hours = 0, minutes = 0, seconds = 0 } = duration;
+    const msYears = years * 365 * 24 * 60 * 60 * 1000; // Approximation
+    const msMonths = months * 30 * 24 * 60 * 60 * 1000; // Approximation
+    const msDays = days * 24 * 60 * 60 * 1000;
+    const msHours = hours * 60 * 60 * 1000;
+    const msMinutes = minutes * 60 * 1000;
+    const msSeconds = seconds * 1000;
+  
+    return msYears + msMonths + msDays + msHours + msMinutes + msSeconds;
+  }
+
+  static sortPriceR(asc: boolean, rentals: PastRental[]): PastRental[]{
+    rentals = rentals.sort((a,b) =>{
+      const priceA = Number (a.total_price);
+      const priceB = Number (b.total_price);
+      if(asc){
+        const c = priceA - priceB;
+        if (c === 0){
+          return a.id-b.id; //default sort is by id 
+        }
+        return c;
+      } else {
+        const c = priceB - priceA;
+        if (c === 0){
+          return a.id - b.id; //default is by id
+        }
+        return c;
+      }
+    });
+    return rentals;
+  }
+
+  
+  
+
+
+
+
+
+
+
+    //Variables for the sorting-------------------- memory variables for previous sorting
   //variables that say what is to be filtered by
   private static price = false;
   private static range = false;
