@@ -141,7 +141,7 @@
   <div class="width-limiter">
 
     <div *ngIf="!isLoading; else loading" class="rentals-container">
-      <div *ngIf="(activeRentals.length > 0 || filteredRentals.length > 0); else noRentals">
+      <div *ngIf="(activeRentals.length > 0 || sortedRentals.length > 0); else noRentals">
         <ul #activeRentalList *ngIf="activeRentals.length > 0" style="margin-top: 25px;">
           <li #rentalItem *ngFor="let rental of activeRentals" [attr.data-id]="rental.id">
             <div [ngClass]="[rental.renew ? 'scooter-container-dynamic-wrapper' : 'scooter-container-static-wrapper']">
@@ -208,9 +208,9 @@
 
         <hr #greenBar *ngIf="(activeRentals.length > 0) && (filteredRentals.length > 0)" class="solid animate-in">
 
-        <h2 #pastRentalsTitle *ngIf="filteredRentals.length > 0" [ngClass]="['subtitle', 'animate-in', (activeRentals.length > 0) ? '' : 'top-space']">Beendete Buchungen</h2>
+        <h2 #pastRentalsTitle *ngIf="sortedRentals.length > 0" [ngClass]="['subtitle', 'animate-in', (activeRentals.length > 0) ? '' : 'top-space']">Beendete Buchungen</h2>
         <ul *ngIf="filteredRentals.length > 0">
-          <li *ngFor="let rental of filteredRentals" @itemEnter>
+          <li *ngFor="let rental of sortedRentals" @itemEnter>
             <div class="scooter-container scooter-container-border-normal" (click)="onClickRental(rental.id)">
               <img *ngIf="getPictureByScooterId(rental.scooterId)" (load)="onImageLoad(rental.scooterId.toString())"  [ngClass]="{'picture': true, 'animate-in': imageLoaded[rental.scooterId]}" [src]="getPictureByScooterId(rental.scooterId)" />
               <div class="scooter-details">
