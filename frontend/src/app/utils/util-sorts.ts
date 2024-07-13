@@ -23,10 +23,10 @@ export class Sorts {
         }
         return a.id - b.id; //default sort is by id
       } else {//compare descending
-        if(isAfter(dateA, dateB)){
-          return -1;
-        } else if(isBefore(dateA, dateB)){
+        if(isBefore(dateA, dateB)){
           return 1;
+        } else if(isAfter(dateA, dateB)){
+          return -1;
         }
         return a.id-b.id; //default sort is by id
       }

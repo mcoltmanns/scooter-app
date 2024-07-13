@@ -107,14 +107,10 @@ export class RentalsComponent implements OnInit, OnDestroy {
     this.sortings = [
       { name: 'Preis aufsteigend'},
       { name: 'Preis absteigend'},
-      { name: 'Reichweite aufsteigend'},
-      { name: 'Reichweite absteigend'},
-      { name: 'Batteriestand aufsteigend'},
-      { name: 'Batteriestand absteigend'},
-      { name: 'Geschwindigkeit aufsteigend'},
-      { name: 'Geschwindigkeit absteigend'},
-      { name: 'Distanz aufsteigend'},
-      { name: 'Distanz absteigend'}
+      { name: 'Dauer aufsteigend'},
+      { name: 'Dauer absteigend'},
+      { name: 'Datum aufsteigend'},
+      { name: 'Datum absteigend'}
     ];
   }
 
@@ -966,6 +962,24 @@ sortPrice(asc: boolean):void{
 
 onOrderChange(event: { value: { name: string; }; }):void {
   console.log('Selected city:', event.value);
+  if(event.value.name === 'Preis aufsteigend'){
+    this.sortPrice(true);
+  }
+  if(event.value.name === 'Preis absteigend'){
+    this.sortPrice(false);
+  }
+  if(event.value.name === 'Dauer aufsteigend'){
+    this.sortDauer(true);
+  }
+  if(event.value.name === 'Dauer absteigend'){
+    this.sortDauer(false);
+  }
+  if(event.value.name === 'Datum aufsteigend'){
+    this.sortDate(true);
+  }
+  if(event.value.name === 'Datum absteigend'){
+    this.sortDate(false);
+  }
 }
 
 }
