@@ -2,7 +2,7 @@ import { Scooter } from '../models/scooter';
 import { Product } from '../models/product';
 import { PositionService } from './position.service';
 import { PastRental } from '../models/rental';
-import { Duration, intervalToDuration, isAfter, isBefore, isEqual, min } from 'date-fns';
+import { Duration, intervalToDuration, isAfter, isBefore } from 'date-fns';
 
 /**
  * This class provides the sort functionalities for the scooter list
