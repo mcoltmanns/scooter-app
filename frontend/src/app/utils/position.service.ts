@@ -28,13 +28,13 @@ export class PositionService {
 
   // sets the latitude and saves it to local storage
   setLatitude(latitude: number): void {
-    this.latitude = latitude;
+    this.latitude = 47.68991314276871;
     this.saveToLocalStorage();
   }
 
   // sets the longitude and saves it to local storage
   setLongitude(longitude: number): void {
-    this.longitude = longitude;
+    this.longitude = 9.187139868736269;
     this.saveToLocalStorage();
   }
 
