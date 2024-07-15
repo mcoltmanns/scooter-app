@@ -11,11 +11,11 @@ export class MockModel {
     public initialData: Model[]; // remembers state of the data on initialization
 
     // various mocks for this model
-    public findOneMock: Mock<(findOpts?: FindOptions<any> | undefined) => Model | null>;
-    public findAllMock: Mock<(findOpts?: FindOptions<any> | undefined) => Model[]>;
-    public createMock: Mock<(data: unknown, createOpts?: CreateOptions<any> | undefined) => { getDataValue: (key: string) => string; }>;
-    public destroyMock: Mock<(destroyOpts?: DestroyOptions<any> | undefined) => number>;
-    public saveMock: Mock<(saveOpts?: SaveOptions<any> | undefined) => void>;
+    public findOneMock: Mock<(findOpts?: FindOptions<never> | undefined) => Model | null>;
+    public findAllMock: Mock<(findOpts?: FindOptions<never> | undefined) => Model[]>;
+    public createMock: Mock<(data: unknown, createOpts?: CreateOptions<unknown> | undefined) => { getDataValue: (key: string) => string; }>;
+    public destroyMock: Mock<(destroyOpts?: DestroyOptions<never> | undefined) => number>;
+    public saveMock: Mock<(saveOpts?: SaveOptions<never> | undefined) => void>;
 
     // reference to a mock for the most recent save call on this model
     public mostRecentSaveCall: Mock | undefined;
@@ -31,10 +31,10 @@ export class MockModel {
         this.data.forEach(e => this.initialData.push(Object.assign({}, e)));
 
         // initialize the mocks
-        this.findOneMock = (realModel as any).findOne = jest.fn(((findOpts?: FindOptions) => this.findOne(findOpts)));
-        this.findAllMock = (realModel as any).findAll = jest.fn(((findOpts?: FindOptions) => this.findAll(findOpts)));
-        this.createMock = (realModel as any).create = jest.fn(((data, createOpts?: CreateOptions) => this.create(data as KeyStringMap, createOpts)));
-        this.destroyMock = (realModel as any).destroy = jest.fn(((destroyOpts?: DestroyOptions) => this.destroy(destroyOpts)));
+        this.findOneMock = (realModel.findOne as unknown) = jest.fn(((findOpts?: FindOptions) => this.findOne(findOpts)));
+        this.findAllMock = (realModel.findAll as unknown) = jest.fn(((findOpts?: FindOptions) => this.findAll(findOpts)));
+        this.createMock = (realModel.create as unknown) = jest.fn(((data) => this.create(data as KeyStringMap))); // ignore createOpts in the mock database
+        this.destroyMock = (realModel.destroy as unknown) = jest.fn(((destroyOpts?: DestroyOptions) => this.destroy(destroyOpts)));
     }
 
     // check if 2 objects are shallow equal (have same fields and those fields have same properties)
@@ -75,14 +75,13 @@ export class MockModel {
         });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    public create(data: KeyStringMap, opt?: CreateOptions): Model {
+    public create(data: KeyStringMap): Model {
         //console.log(data);
         const toAdd: KeyStringMap = structuredClone(data); // remember to copy your objects! not copying here causes some really funky and hard to find bugs
         if(!toAdd.id) toAdd.id = (this.data.length).toString(); // not really an optimal solution for assigning ids but it works ok
         const out = this.realModel.build(toAdd);
         this.data.push(out); // too easy to end up with pkey collisions here. but should be ok for testing
-        this.mostRecentSaveCall = (out.save as any) = jest.fn(); // mock save call to this specific instance
+        this.mostRecentSaveCall = (out.save as unknown) = jest.fn(); // mock save call to this specific instance
         return out;
     }
 

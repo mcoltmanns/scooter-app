@@ -48,7 +48,7 @@ let mockUsersSession: MockModel;
 
 // declare spy point for validator (used to check if validator runs or not)
 let validator_runAllChecks: SpiedFunction;
-let register: SpiedFunction<(request: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, response: Response<any, Record<string, any>>) => Promise<void>>;
+let register: SpiedFunction<(request: Request<ParamsDictionary, never, unknown, ParsedQs, Record<string, unknown>>, response: Response<unknown, Record<string, unknown>>) => Promise<void>>;
 
 const mockPwdHash = bcrypt.hashSync(toAdd.password, 10);
 
@@ -63,9 +63,9 @@ describe('auth controller', () => {
             rollback: mockRollback,
             commit: mockCommit
         };
-        mockTransactionCall = (database.getSequelize() as any).transaction = jest.fn().mockReturnValue(mockTransactionInstance);
+        mockTransactionCall = (database.getSequelize().transaction as unknown) = jest.fn().mockReturnValue(mockTransactionInstance);
 
-        validator_runAllChecks = jest.spyOn(Validator as any, 'runAllChecks'); // any is necessary here to spy on a private method
+        validator_runAllChecks = jest.spyOn(Validator as never, 'runAllChecks');
         register = jest.spyOn(AuthController.prototype, 'register'); // watch the registration method
 
         // initalize mock tables
@@ -88,11 +88,11 @@ describe('auth controller', () => {
 
     // positive test case for registration
     it('should add new user and start new session upon registration', async () => {
-        (bcrypt.hashSync as any) = jest.fn().mockReturnValue(mockPwdHash);
+        (bcrypt.hashSync as unknown) = jest.fn().mockReturnValue(mockPwdHash);
         const mockSessionId = uid.sync(24); // generate a mock session token to check against later
-        (uid.sync as any) = jest.fn().mockReturnValue(mockSessionId);
+        (uid.sync as unknown) = jest.fn().mockReturnValue(mockSessionId);
         const then = Date.now();
-        (Date.now as any) = jest.fn().mockReturnValue(then); // fix now to right now
+        (Date.now as unknown) = jest.fn().mockReturnValue(then); // fix now to right now
 
         const response = await request(app)
             .post('/api/register') // ask to register
@@ -144,9 +144,9 @@ describe('auth controller', () => {
     // positive login test case
     it('should start new session on login if no session existed', async () => {
         mockSessionId = uid.sync(24);
-        (uid as any).sync = jest.fn().mockReturnValue(mockSessionId);
+        (uid.sync as unknown) = jest.fn().mockReturnValue(mockSessionId);
         const then = Date.now();
-        (Date as any).now = jest.fn().mockReturnValue(then);
+        (Date.now as unknown) = jest.fn().mockReturnValue(then);
 
         // try to log in with the user we just added
         const response = await request(app)
